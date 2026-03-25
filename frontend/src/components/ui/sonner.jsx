@@ -1,24 +1,21 @@
-import { useTheme } from "next-themes"
 import { Toaster as Sonner, toast } from "sonner"
 
 const Toaster = ({
   ...props
 }) => {
-  const { theme = "system" } = useTheme()
-
   return (
     <Sonner
-      theme={theme}
+      theme="dark"
       className="toaster group"
       toastOptions={{
         classNames: {
           toast:
-            "group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg",
-          description: "group-[.toast]:text-muted-foreground",
+            "group toast group-[.toaster]:bg-[#0A0A12] group-[.toaster]:text-[#F2F2F5] group-[.toaster]:border-[#D4AF37]/20 group-[.toaster]:shadow-lg",
+          description: "group-[.toast]:text-[#A0A0B0]",
           actionButton:
-            "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",
+            "group-[.toast]:bg-[#D4AF37] group-[.toast]:text-[#030305]",
           cancelButton:
-            "group-[.toast]:bg-muted group-[.toast]:text-muted-foreground",
+            "group-[.toast]:bg-[#12121C] group-[.toast]:text-[#A0A0B0]",
         },
       }}
       {...props} />
