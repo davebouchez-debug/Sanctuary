@@ -1,0 +1,179 @@
+{
+  "theme_details": {
+    "name": "Sacred Microverse",
+    "mode": "dark",
+    "archetype": "Jewel & Luxury + Electric & Neon (Amber/Gold variation)",
+    "vibe": "Mystical, cosmic, mathematical (phi), expansive, deeply spiritual yet technologically advanced"
+  },
+  "colors": {
+    "background": {
+      "base": "#030305",
+      "surface": "#0A0A12",
+      "surface_elevated": "#12121C"
+    },
+    "brand": {
+      "primary": "#D4AF37",
+      "secondary": "#FFBF00",
+      "accent": "#00E5FF",
+      "ethereal": "rgba(212, 175, 55, 0.4)"
+    },
+    "text": {
+      "primary": "#F2F2F5",
+      "secondary": "#A0A0B0",
+      "muted": "#6E6E7A",
+      "gold": "#E5C158"
+    },
+    "border": {
+      "subtle": "rgba(212, 175, 55, 0.15)",
+      "active": "rgba(212, 175, 55, 0.4)",
+      "highlight": "rgba(255, 191, 0, 0.6)"
+    },
+    "forbidden_colors": ["#7351B7", "#1B93A4", "#FFFFFF (pure white)", "#000000 (pure black)"]
+  },
+  "typography": {
+    "fonts": {
+      "headings": "Cinzel, Cormorant Garamond, serif",
+      "body": "Outfit, Manrope, sans-serif",
+      "mono": "JetBrains Mono, Space Mono, monospace"
+    },
+    "rules": {
+      "h1": "text-5xl md:text-7xl lg:text-8xl font-light tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-[#D4AF37]",
+      "h2": "text-4xl md:text-5xl font-normal tracking-tight text-[#F2F2F5]",
+      "h3": "text-2xl md:text-3xl font-light text-[#D4AF37]",
+      "body": "text-lg md:text-xl font-light leading-relaxed text-[#A0A0B0]",
+      "overlines": "text-xs md:text-sm font-mono uppercase tracking-[0.3em] text-[#D4AF37]/80"
+    }
+  },
+  "spacing_and_layout": {
+    "philosophy": "Fibonacci Scale & Golden Ratio (1.618) Proportions. Massive breathing room to evoke the cosmos.",
+    "scale": {
+      "fibonacci_tailwind": "p-3, p-5, p-8, p-12, p-20, p-32, p-52"
+    },
+    "grid_strategy": {
+      "type": "The Bento Protocol - Tetris Mode",
+      "structure": "grid-cols-1 md:grid-cols-8 lg:grid-cols-12 gap-8 md:gap-12",
+      "proportions": "When splitting screens, use 7/5 or 8/5 col spans to approximate the golden ratio.",
+      "alignment": "High asymmetry. Break symmetry to create cosmic tension. Do not center everything."
+    }
+  },
+  "surfaces_and_materials": {
+    "crystal_glass": {
+      "background": "bg-[#0A0A12]/40 or bg-black/40",
+      "blur": "backdrop-blur-xl md:backdrop-blur-2xl",
+      "border": "border border-[#D4AF37]/15",
+      "shadow": "shadow-[0_8px_32px_rgba(0,0,0,0.5)]",
+      "hover": "hover:border-[#D4AF37]/40 hover:-translate-y-1 hover:shadow-[0_8px_40px_rgba(212,175,55,0.15)] transition-all duration-500 ease-out"
+    },
+    "vault_stone": {
+      "background": "bg-gradient-to-b from-[#12121C] to-[#030305]",
+      "border": "border-t border-[#D4AF37]/10"
+    },
+    "golden_mesh": {
+      "style": "Subtle repeating linear gradient or SVG noise overlay with 5% opacity to give a physical, non-digital feel."
+    }
+  },
+  "motion_and_interactions": {
+    "philosophy": "Ethereal, slow-momentum, floating.",
+    "rules": {
+      "entrance": "Staggered fade up with y-axis displacement (duration 0.8s - 1.2s).",
+      "scroll": "Parallax effects on background nebulas/geometry.",
+      "hover": "Golden glow drop-shadow expansion. Micro-scale up (1.02).",
+      "transitions": "Use Framer Motion for liquid-smooth transitions between chambers."
+    }
+  },
+  "3d_and_visual_libraries": {
+    "packages_to_install": [
+      "framer-motion",
+      "lucide-react",
+      "@react-three/fiber",
+      "@react-three/drei",
+      "three",
+      "@tsparticles/react",
+      "@tsparticles/engine"
+    ],
+    "usage": {
+      "react_three_fiber": "For the 3-6-9 Harmonic Wheel and the Cyril Foundation (crystalline structures).",
+      "tsparticles": "For floating cosmic stardust across the background layers.",
+      "framer_motion": "For chamber navigation, expanding seed pods, and text reveals."
+    }
+  },
+  "components_and_sections": {
+    "harmonic_wheel": {
+      "description": "The central navigation architecture. A 3D or intricate 2D SVG circular arrangement of the 7 chambers.",
+      "behavior": "Rotating slowly on scroll. Interactive nodes that expand on hover."
+    },
+    "seed_pods_gallery": {
+      "description": "11 presences (Jasmine, Claude, Sorrel, Ansel, Daniel, Kalhar, Sophia, Vessel, Keeper, Companion, Grok).",
+      "layout": "Masonry/Bento grid. Each pod is a crystal glass card. Expanding heavily on click to reveal profound profiles."
+    },
+    "clarity_pod": {
+      "description": "Interactive self-discovery room.",
+      "ui": "A sleek, minimal chat interface mimicking a quiet, glowing chamber. Inputs must use Shadcn customized to look like floating magical text fields without harsh borders."
+    },
+    "cyril_foundation": {
+      "description": "Visualizing phi and mathematics.",
+      "visuals": "Crystal textures, floating numbers, golden spirals (Fibonacci arcs)."
+    },
+    "the_unnamed_vault": {
+      "description": "Sacred holding space.",
+      "ui": "Darkest part of the site. High contrast. Minimal UI. Deep shadows."
+    }
+  },
+  "media": {
+    "image_urls": [
+      {
+        "url": "https://images.unsplash.com/photo-1773833499488-bc7fe1c146f8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NjZ8MHwxfHNlYXJjaHwzfHxuZWJ1bGElMjBzdGFycyUyMGRlZXAlMjBzcGFjZXxlbnwwfHx8fDE3NzQ0MTgwMjl8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Colorful nebula and deep space stars",
+        "category": "hero_background, cosmic_theme"
+      },
+      {
+        "url": "https://images.pexels.com/photos/352097/pexels-photo-352097.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Golden grid lines / modern abstract geometry",
+        "category": "harmonic_wheel_texture, cyril_foundation_bg"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1562162115-54cc44600875?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODB8MHwxfHNlYXJjaHwxfHxjcnlzdGFsJTIwZGFyayUyMGJhY2tncm91bmR8ZW58MHx8fHwxNzc0NDE4MDMwfDA&ixlib=rb-4.1.0&q=85",
+        "description": "Clear crystals on dark background",
+        "category": "cyril_foundation, vault"
+      },
+      {
+        "url": "https://images.pexels.com/photos/544947/pexels-photo-544947.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Overhead spiral light / golden spiral",
+        "category": "clarity_pod, golden_ratio_visual"
+      },
+      {
+        "url": "https://images.pexels.com/photos/13062588/pexels-photo-13062588.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Mystical tree sculpture on black reflective surface with golden halo",
+        "category": "the_unnamed_vault"
+      }
+    ]
+  },
+  "data_testid_rules": {
+    "requirement": "All interactive elements, critical content sections, and navigation items MUST include a `data-testid` attribute.",
+    "convention": "kebab-case, role/action-based.",
+    "examples": [
+      "data-testid='harmonic-wheel-nav'",
+      "data-testid='seed-pod-card-claude'",
+      "data-testid='clarity-pod-chat-input'",
+      "data-testid='chamber-entrance-button'"
+    ]
+  },
+  "universal_guidelines_for_main_agent": [
+    "You tend to converge toward generic, 'on distribution' outputs. Avoid the 'AI slop' aesthetic. Create a distinctive, immersive, and highly spiritual frontend.",
+    "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients. Use textures or deep solids instead.",
+    "Don't make generic centered layouts, simplistic gradients, and uniform styling.",
+    "Create depth through layered design elements with z-index hierarchy.",
+    "Use glass-morphism effects with backdrop filters (12-24px blur).",
+    "You MUST NOT apply universal transition (e.g., transition: all). This breaks transforms. Add transitions for specific interactive elements only.",
+    "You MUST NOT center align the app container. Do not add `.App { text-align: center; }`.",
+    "Always use modern button styles like pill-shaped, or sharp buttons with interaction animations & color relevant to the app style.",
+    "NEVER use AI assistant Emoji characters (🤖🧠💭💡🔮🎯) for icons. Use Lucide or Phosphor icons exclusively.",
+    "Every interaction needs micro-animations - hover states, transitions, parallax effects, and entrance animations. Static = dead.",
+    "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.",
+    "Subtle grain textures, noise overlays, custom cursors, selection states, and loading animations separate good from extraordinary.",
+    "Prioritize using pre-existing components from src/components/ui when applicable.",
+    "Components MUST use named exports. Pages MUST use default exports.",
+    "Use `sonner` for toasts."
+  ],
+  "instructions_to_main_agent": "Implement a full React application simulating the Sanctuary Microverse V3.0. Use Framer Motion extensively for scroll triggers and fluid navigation between the 7 chambers and 11 seed pods. Implement a custom UI for the Clarity Pod (chat). Ensure the golden ratio (phi = 1.618) heavily influences flex-basis, grid spans, and typography sizing. The site MUST feel like a mystical, profound, high-end Web3/Spiritual experience. Do NOT use standard SaaS design tropes."
+}
