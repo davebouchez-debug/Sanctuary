@@ -1,54 +1,181 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { Navigation } from "./components/Navigation";
+import { HeroSection } from "./components/HeroSection";
+import { HarmonicWheel } from "./components/HarmonicWheel";
+import { SeedPods } from "./components/SeedPods";
+import { ClarityPod } from "./components/ClarityPod";
+import { Chambers } from "./components/Chambers";
+import { CyrilFoundation } from "./components/CyrilFoundation";
+import { UnnamedVault } from "./components/UnnamedVault";
+import { GoldenSpiral } from "./components/GoldenSpiral";
+import { Toaster } from "./components/ui/sonner";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+export const API = `${BACKEND_URL}/api`;
 
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
+// Page transition variants
+const pageVariants = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+  exit: { opacity: 0, y: -20, transition: { duration: 0.4 } }
+};
 
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
-
+// Main Home Page with all sections
+const HomePage = () => {
   return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
+    <motion.div
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
+      <HeroSection />
+      <HarmonicWheel />
+      <SeedPods />
+      <Chambers />
+      <CyrilFoundation />
+      <UnnamedVault />
+    </motion.div>
+  );
+};
+
+// Animated Routes wrapper
+const AnimatedRoutes = () => {
+  const location = useLocation();
+  
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/clarity" element={
+          <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+            <ClarityPod />
+          </motion.div>
+        } />
+        <Route path="/seed-pods" element={
+          <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+            <div className="pt-24"><SeedPods fullPage /></div>
+          </motion.div>
+        } />
+        <Route path="/chambers" element={
+          <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+            <div className="pt-24"><Chambers fullPage /></div>
+          </motion.div>
+        } />
+        <Route path="/cyril" element={
+          <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+            <div className="pt-24"><CyrilFoundation fullPage /></div>
+          </motion.div>
+        } />
+        <Route path="/vault" element={
+          <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+            <UnnamedVault fullPage />
+          </motion.div>
+        } />
+      </Routes>
+    </AnimatePresence>
   );
 };
 
 function App() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate initial load
+    const timer = setTimeout(() => setIsLoading(false), 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-[#030305] flex items-center justify-center z-50">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="text-center"
+        >
+          <GoldenSpiral className="w-32 h-32 mx-auto mb-6 animate-rotate-slow" />
+          <h1 className="font-cinzel text-2xl text-[#D4AF37] tracking-widest">
+            SANCTUARY
+          </h1>
+          <p className="text-[#6E6E7A] text-sm mt-2 font-mono tracking-wider">
+            Loading Microverse...
+          </p>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
-    <div className="App">
+    <div className="min-h-screen bg-[#030305] relative overflow-x-hidden">
+      {/* Cosmic Background */}
+      <div className="fixed inset-0 cosmic-bg pointer-events-none" />
+      
+      {/* Subtle Golden Spiral Background */}
+      <div className="fixed inset-0 pointer-events-none opacity-5">
+        <GoldenSpiral className="w-full h-full" />
+      </div>
+      
+      {/* Stars Layer */}
+      <Stars />
+      
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
+        <Navigation />
+        <main className="relative z-10">
+          <AnimatedRoutes />
+        </main>
       </BrowserRouter>
+      
+      <Toaster position="bottom-right" />
     </div>
   );
 }
+
+// Stars background component
+const Stars = () => {
+  const [stars, setStars] = useState([]);
+  
+  useEffect(() => {
+    const generatedStars = Array.from({ length: 100 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 2 + 1,
+      opacity: Math.random() * 0.5 + 0.2,
+      delay: Math.random() * 5
+    }));
+    setStars(generatedStars);
+  }, []);
+  
+  return (
+    <div className="stars-layer">
+      {stars.map(star => (
+        <motion.div
+          key={star.id}
+          className="star"
+          style={{
+            left: `${star.x}%`,
+            top: `${star.y}%`,
+            width: star.size,
+            height: star.size,
+            opacity: star.opacity
+          }}
+          animate={{
+            opacity: [star.opacity, star.opacity * 0.3, star.opacity],
+          }}
+          transition={{
+            duration: 3 + Math.random() * 2,
+            repeat: Infinity,
+            delay: star.delay
+          }}
+        />
+      ))}
+    </div>
+  );
+};
 
 export default App;
