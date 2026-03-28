@@ -248,6 +248,25 @@ body {
   box-shadow: 0 0 20px var(--gold-ethereal);
 }
 
+/* Clarity Message Styles */
+.clarity-message {
+  padding: 1.25rem 1.5rem;
+  border-radius: 1rem;
+  max-width: 85%;
+}
+
+.clarity-message.user {
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  margin-left: auto;
+}
+
+.clarity-message.assistant {
+  background: rgba(10, 10, 18, 0.6);
+  border: 1px solid var(--border-subtle);
+  margin-right: auto;
+}
+
 /* Responsive Text */
 @media (max-width: 768px) {
   .text-hero {
