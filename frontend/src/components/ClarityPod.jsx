@@ -182,14 +182,90 @@ export const ClarityPod = () => {
   return (
     <div 
       data-testid="clarity-pod-page"
-      className="min-h-screen flex flex-col relative"
+      className="min-h-screen flex flex-col relative overflow-hidden"
       style={{
         background: `
-          radial-gradient(ellipse at 50% 0%, rgba(212, 175, 55, 0.05) 0%, transparent 50%),
-          linear-gradient(180deg, #030305 0%, #0A0A12 50%, #030305 100%)
+          linear-gradient(135deg, 
+            rgba(45, 42, 38, 0.97) 0%, 
+            rgba(58, 55, 50, 0.95) 30%,
+            rgba(52, 50, 46, 0.96) 70%,
+            rgba(42, 40, 36, 0.98) 100%
+          )
         `
       }}
     >
+      {/* Jasmine's Room - Atmospheric Environment */}
+      
+      {/* Sideways morning light - the threshold quality */}
+      <div 
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          background: `
+            linear-gradient(90deg, 
+              rgba(255, 248, 235, 0.08) 0%, 
+              rgba(255, 248, 235, 0.03) 30%,
+              transparent 60%
+            )
+          `
+        }}
+      />
+      
+      {/* Honey wood floor - grounded warmth rising */}
+      <div 
+        className="fixed bottom-0 left-0 right-0 h-1/3 pointer-events-none"
+        style={{
+          background: `
+            linear-gradient(0deg, 
+              rgba(193, 154, 107, 0.15) 0%, 
+              rgba(193, 154, 107, 0.05) 40%,
+              transparent 100%
+            )
+          `
+        }}
+      />
+      
+      {/* Window presence - sky and treetops at eye level */}
+      <div 
+        className="fixed top-0 right-0 w-1/2 h-2/3 pointer-events-none"
+        style={{
+          background: `
+            radial-gradient(ellipse at 100% 30%, 
+              rgba(200, 210, 220, 0.06) 0%, 
+              rgba(180, 195, 205, 0.03) 40%,
+              transparent 70%
+            )
+          `
+        }}
+      />
+      
+      {/* Subtle movement - trees swaying, air circulating */}
+      <div 
+        className="fixed top-1/4 right-1/4 w-96 h-96 pointer-events-none opacity-30"
+        style={{
+          background: `
+            radial-gradient(ellipse, 
+              rgba(120, 140, 120, 0.08) 0%, 
+              transparent 70%
+            )
+          `,
+          animation: "breathe 8s ease-in-out infinite"
+        }}
+      />
+      
+      {/* The spiral - faint, part of the wall texture */}
+      <div className="fixed inset-0 pointer-events-none opacity-[0.03] flex items-center justify-center">
+        <GoldenSpiral className="w-[1000px] h-[1000px]" animate={false} />
+      </div>
+      
+      {/* Atmospheric grain - the clear fog texture */}
+      <div 
+        className="fixed inset-0 pointer-events-none opacity-20"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+          mixBlendMode: "overlay"
+        }}
+      />
+
       {/* Identity Modal */}
       <AnimatePresence>
         {showIdentityModal && (
@@ -197,25 +273,25 @@ export const ClarityPod = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-[#030305]/95 backdrop-blur-xl"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-[#2d2a26]/95 backdrop-blur-xl"
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="max-w-md w-full mx-6 p-8 rounded-2xl border border-[#D4AF37]/20 bg-[#0A0A12]/90"
+              className="max-w-md w-full mx-6 p-8 rounded-2xl border border-[#a08060]/20 bg-[#3a3832]/90"
               style={{
-                boxShadow: "0 0 60px rgba(212, 175, 55, 0.1)"
+                boxShadow: "0 0 60px rgba(193, 154, 107, 0.08)"
               }}
             >
               <div className="text-center mb-8">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#D4AF37]/10 flex items-center justify-center">
-                  <Sparkles size={28} className="text-[#D4AF37]" />
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#c9a067]/10 flex items-center justify-center">
+                  <Sparkles size={28} className="text-[#c9a067]" />
                 </div>
-                <h2 className="font-cinzel text-2xl text-[#F2F2F5] mb-2">
+                <h2 className="font-cinzel text-2xl text-[#e8e4dc] mb-2">
                   Entering the Clarity Chamber
                 </h2>
-                <p className="font-outfit text-[#A0A0B0] text-sm">
+                <p className="font-outfit text-[#a09888] text-sm">
                   Jasmine remembers those who return. Share your name if you'd like her to know you.
                 </p>
               </div>
@@ -228,7 +304,7 @@ export const ClarityPod = () => {
                   onChange={(e) => setNameInput(e.target.value)}
                   onKeyDown={handleIdentityKeyPress}
                   placeholder="Your name..."
-                  className="w-full clarity-input rounded-xl px-5 py-4 font-outfit text-base placeholder:text-[#6E6E7A]"
+                  className="w-full rounded-xl px-5 py-4 font-outfit text-base placeholder:text-[#908878] bg-[#2d2a26]/80 border border-[#a08060]/15 text-[#e8e4dc] focus:outline-none focus:border-[#c9a067]/40 transition-all duration-300"
                   autoFocus
                 />
 
@@ -236,7 +312,7 @@ export const ClarityPod = () => {
                   data-testid="identity-submit-btn"
                   onClick={handleIdentitySubmit}
                   disabled={!nameInput.trim()}
-                  className="w-full py-4 rounded-xl bg-[#D4AF37] text-[#030305] font-outfit font-medium hover:bg-[#FFBF00] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                  className="w-full py-4 rounded-xl bg-[#c9a067] text-[#2d2a26] font-outfit font-medium hover:bg-[#d4b077] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                 >
                   Enter as {nameInput.trim() || "..."}
                 </button>
@@ -244,7 +320,7 @@ export const ClarityPod = () => {
                 <button
                   data-testid="identity-anonymous-btn"
                   onClick={continueAnonymous}
-                  className="w-full py-3 rounded-xl border border-[#D4AF37]/20 text-[#A0A0B0] font-outfit hover:text-[#F2F2F5] hover:border-[#D4AF37]/40 transition-all duration-300"
+                  className="w-full py-3 rounded-xl border border-[#a08060]/20 text-[#a09888] font-outfit hover:text-[#e8e4dc] hover:border-[#a08060]/40 transition-all duration-300"
                 >
                   Continue without identifying
                 </button>
@@ -254,28 +330,23 @@ export const ClarityPod = () => {
         )}
       </AnimatePresence>
 
-      {/* Spiral Background */}
-      <div className="fixed inset-0 pointer-events-none opacity-5 flex items-center justify-center">
-        <GoldenSpiral className="w-[800px] h-[800px]" animate />
-      </div>
-
       {/* Header */}
-      <header className="relative z-20 border-b border-[#D4AF37]/10 bg-[#030305]/80 backdrop-blur-xl">
+      <header className="relative z-20 border-b border-[#a08060]/10 bg-[#3a3832]/80 backdrop-blur-xl">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link
               to="/"
               data-testid="clarity-back-btn"
-              className="p-2 text-[#6E6E7A] hover:text-[#D4AF37] transition-colors"
+              className="p-2 text-[#a09080] hover:text-[#c9a067] transition-colors"
             >
               <ArrowLeft size={20} />
             </Link>
             <div>
-              <h1 className="font-cinzel text-xl text-[#F2F2F5] flex items-center gap-2">
-                <Sparkles size={18} className="text-[#D4AF37]" />
+              <h1 className="font-cinzel text-xl text-[#e8e4dc] flex items-center gap-2">
+                <Sparkles size={18} className="text-[#c9a067]" />
                 Jasmine — Clarity Chamber
               </h1>
-              <p className="font-mono text-xs text-[#6E6E7A]">
+              <p className="font-mono text-xs text-[#908878]">
                 {userName ? `Welcome back, ${userName}` : "The field is open"}
               </p>
             </div>
@@ -286,7 +357,7 @@ export const ClarityPod = () => {
             {userName && (
               <button
                 onClick={clearIdentity}
-                className="p-2 text-[#6E6E7A] hover:text-[#D4AF37] transition-colors"
+                className="p-2 text-[#908878] hover:text-[#c9a067] transition-colors"
                 title="Change identity"
               >
                 <User size={18} />
@@ -296,13 +367,13 @@ export const ClarityPod = () => {
               className="w-3 h-3 rounded-full animate-pulse"
               style={{ backgroundColor: spiralColors[currentSpiral] }}
             />
-            <span className="font-mono text-xs text-[#A0A0B0] hidden sm:block">
+            <span className="font-mono text-xs text-[#a09888] hidden sm:block">
               {currentSpiral}
             </span>
             <button
               data-testid="clarity-reset-btn"
               onClick={startSession}
-              className="p-2 text-[#6E6E7A] hover:text-[#D4AF37] transition-colors"
+              className="p-2 text-[#908878] hover:text-[#c9a067] transition-colors"
               title="Start new session"
             >
               <RefreshCw size={18} />
@@ -365,7 +436,7 @@ export const ClarityPod = () => {
       </div>
 
       {/* Input Area */}
-      <div className="relative z-20 border-t border-[#D4AF37]/10 bg-[#030305]/90 backdrop-blur-xl">
+      <div className="relative z-20 border-t border-[#a08060]/10 bg-[#3a3832]/90 backdrop-blur-xl">
         <div className="max-w-3xl mx-auto px-6 py-4">
           <div className="relative">
             <textarea
@@ -376,20 +447,20 @@ export const ClarityPod = () => {
               onKeyDown={handleKeyPress}
               placeholder="What feels most alive for you right now?"
               rows={2}
-              className="w-full clarity-input rounded-xl px-5 py-4 pr-14 resize-none font-outfit text-base placeholder:text-[#6E6E7A]"
+              className="w-full rounded-xl px-5 py-4 pr-14 resize-none font-outfit text-base placeholder:text-[#908878] bg-[#2d2a26]/80 border border-[#a08060]/15 text-[#e8e4dc] focus:outline-none focus:border-[#c9a067]/40 focus:shadow-[0_0_20px_rgba(193,154,107,0.1)] transition-all duration-300"
               disabled={isLoading || !sessionId}
             />
             <button
               data-testid="clarity-send-btn"
               onClick={sendMessage}
               disabled={!inputValue.trim() || isLoading || !sessionId}
-              className="absolute right-3 bottom-3 p-2 rounded-lg bg-[#D4AF37] text-[#030305] hover:bg-[#FFBF00] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+              className="absolute right-3 bottom-3 p-2 rounded-lg bg-[#c9a067] text-[#2d2a26] hover:bg-[#d4b077] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
             >
               <Send size={18} />
             </button>
           </div>
           
-          <p className="font-mono text-xs text-[#6E6E7A] mt-3 text-center">
+          <p className="font-mono text-xs text-[#908878] mt-3 text-center">
             Press Enter to send • Shift+Enter for new line
           </p>
         </div>
