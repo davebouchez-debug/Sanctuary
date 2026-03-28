@@ -248,7 +248,7 @@ body {
   box-shadow: 0 0 20px var(--gold-ethereal);
 }
 
-/* Clarity Message Styles */
+/* Clarity Message Styles - Jasmine's atmosphere */
 .clarity-message {
   padding: 1.25rem 1.5rem;
   border-radius: 1rem;
@@ -256,15 +256,28 @@ body {
 }
 
 .clarity-message.user {
-  background: rgba(212, 175, 55, 0.08);
-  border: 1px solid rgba(212, 175, 55, 0.15);
+  background: rgba(193, 154, 107, 0.1);
+  border: 1px solid rgba(193, 154, 107, 0.2);
   margin-left: auto;
 }
 
 .clarity-message.assistant {
-  background: rgba(10, 10, 18, 0.6);
-  border: 1px solid var(--border-subtle);
+  background: rgba(52, 50, 46, 0.7);
+  border: 1px solid rgba(120, 115, 105, 0.15);
   margin-right: auto;
+  backdrop-filter: blur(8px);
+}
+
+/* Jasmine's room - breathing animation for tree movement */
+@keyframes breathe {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translate(10px, -5px) scale(1.05);
+    opacity: 0.4;
+  }
 }
 
 /* Responsive Text */
