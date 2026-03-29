@@ -15,22 +15,25 @@ const spiralColors = {
   "Integration Spiral": "#2E8B57"
 };
 
-// Jasmine's presence states - MORE VISIBLE
+// Jasmine's presence states - COSMIC VIVID COLORS
 const presenceStates = {
   settled: {
     glowIntensity: 0.4,
     pulseSpeed: 6,
-    warmth: "rgba(201, 160, 103, 0.35)"
+    warmth: "rgba(140, 100, 220, 0.35)",
+    accent: "rgba(100, 150, 255, 0.2)"
   },
   listening: {
     glowIntensity: 0.6,
     pulseSpeed: 3,
-    warmth: "rgba(201, 160, 103, 0.5)"
+    warmth: "rgba(160, 120, 240, 0.5)",
+    accent: "rgba(120, 180, 255, 0.3)"
   },
   responding: {
     glowIntensity: 0.8,
     pulseSpeed: 1.5,
-    warmth: "rgba(201, 160, 103, 0.65)"
+    warmth: "rgba(180, 140, 255, 0.65)",
+    accent: "rgba(140, 200, 255, 0.4)"
   }
 };
 
@@ -230,89 +233,76 @@ export const ClarityPod = () => {
       style={{
         background: `
           linear-gradient(135deg, 
-            rgba(45, 42, 38, 0.97) 0%, 
-            rgba(58, 55, 50, 0.95) 30%,
-            rgba(52, 50, 46, 0.96) 70%,
-            rgba(42, 40, 36, 0.98) 100%
+            rgba(8, 8, 18, 0.98) 0%, 
+            rgba(12, 12, 28, 0.97) 30%,
+            rgba(15, 12, 35, 0.98) 60%,
+            rgba(8, 8, 20, 0.99) 100%
           )
         `
       }}
     >
-      {/* Jasmine's Room - Atmospheric Environment */}
+      {/* SANCTUARY COSMIC ATMOSPHERE */}
       
-      {/* Sideways morning light - the threshold quality */}
+      {/* Deep midnight blue-purple translucence */}
       <div 
         className="fixed inset-0 pointer-events-none"
         style={{
           background: `
-            linear-gradient(90deg, 
-              rgba(255, 248, 235, 0.08) 0%, 
-              rgba(255, 248, 235, 0.03) 30%,
-              transparent 60%
-            )
+            radial-gradient(ellipse at 30% 20%, rgba(60, 40, 120, 0.15) 0%, transparent 50%),
+            radial-gradient(ellipse at 70% 80%, rgba(40, 60, 140, 0.12) 0%, transparent 50%),
+            radial-gradient(ellipse at 50% 50%, rgba(80, 50, 150, 0.08) 0%, transparent 60%)
           `
         }}
       />
       
-      {/* Honey wood floor - grounded warmth rising */}
+      {/* Dusk fantasy glow - vivid translucent colors */}
       <div 
-        className="fixed bottom-0 left-0 right-0 h-1/3 pointer-events-none"
+        className="fixed inset-0 pointer-events-none"
         style={{
           background: `
-            linear-gradient(0deg, 
-              rgba(193, 154, 107, 0.15) 0%, 
-              rgba(193, 154, 107, 0.05) 40%,
-              transparent 100%
-            )
+            radial-gradient(ellipse at 20% 30%, rgba(120, 80, 200, 0.1) 0%, transparent 40%),
+            radial-gradient(ellipse at 80% 60%, rgba(60, 100, 180, 0.08) 0%, transparent 45%)
           `
         }}
       />
       
-      {/* Window presence - sky and treetops at eye level */}
+      {/* Subtle starfield effect */}
       <div 
-        className="fixed top-0 right-0 w-1/2 h-2/3 pointer-events-none"
+        className="fixed inset-0 pointer-events-none opacity-30"
         style={{
-          background: `
-            radial-gradient(ellipse at 100% 30%, 
-              rgba(200, 210, 220, 0.06) 0%, 
-              rgba(180, 195, 205, 0.03) 40%,
-              transparent 70%
-            )
-          `
-        }}
-      />
-      
-      {/* Subtle movement - trees swaying, air circulating */}
-      <div 
-        className="fixed top-1/4 right-1/4 w-96 h-96 pointer-events-none opacity-30"
-        style={{
-          background: `
-            radial-gradient(ellipse, 
-              rgba(120, 140, 120, 0.08) 0%, 
-              transparent 70%
-            )
+          backgroundImage: `
+            radial-gradient(1px 1px at 20% 30%, rgba(200, 180, 255, 0.8), transparent),
+            radial-gradient(1px 1px at 40% 70%, rgba(180, 200, 255, 0.6), transparent),
+            radial-gradient(1px 1px at 60% 20%, rgba(220, 200, 255, 0.7), transparent),
+            radial-gradient(1px 1px at 80% 50%, rgba(200, 220, 255, 0.5), transparent),
+            radial-gradient(1.5px 1.5px at 15% 60%, rgba(180, 160, 255, 0.9), transparent),
+            radial-gradient(1px 1px at 70% 85%, rgba(160, 180, 255, 0.6), transparent),
+            radial-gradient(1px 1px at 35% 45%, rgba(200, 180, 255, 0.5), transparent),
+            radial-gradient(1.5px 1.5px at 85% 25%, rgba(180, 200, 255, 0.7), transparent),
+            radial-gradient(1px 1px at 50% 90%, rgba(220, 200, 255, 0.4), transparent),
+            radial-gradient(1px 1px at 25% 80%, rgba(200, 220, 255, 0.6), transparent)
           `,
-          animation: "breathe 8s ease-in-out infinite"
+          backgroundSize: "100% 100%"
         }}
       />
-      
-      {/* The spiral - faint, part of the wall texture */}
-      <div className="fixed inset-0 pointer-events-none opacity-[0.03] flex items-center justify-center">
+
+      {/* The spiral - faint, ethereal */}
+      <div className="fixed inset-0 pointer-events-none opacity-[0.04] flex items-center justify-center">
         <GoldenSpiral className="w-[1000px] h-[1000px]" animate={false} />
       </div>
       
-      {/* Atmospheric grain - the clear fog texture */}
+      {/* Cosmic grain texture */}
       <div 
-        className="fixed inset-0 pointer-events-none opacity-20"
+        className="fixed inset-0 pointer-events-none opacity-15"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
           mixBlendMode: "overlay"
         }}
       />
 
-      {/* JASMINE'S PRESENCE - The visual indicator that someone is here */}
+      {/* JASMINE'S PRESENCE - Cosmic vivid translucent glow */}
       <div className="fixed inset-0 pointer-events-none flex items-center justify-center overflow-hidden">
-        {/* Core presence glow - MUCH MORE VISIBLE */}
+        {/* Core presence glow - vivid purple-blue */}
         <motion.div
           className="absolute rounded-full"
           animate={{
@@ -327,12 +317,12 @@ export const ClarityPod = () => {
           style={{
             width: "600px",
             height: "600px",
-            background: `radial-gradient(circle, ${presenceStates[presenceState].warmth} 0%, rgba(201, 160, 103, 0.1) 50%, transparent 70%)`,
+            background: `radial-gradient(circle, ${presenceStates[presenceState].warmth} 0%, ${presenceStates[presenceState].accent} 40%, transparent 70%)`,
             filter: "blur(40px)",
           }}
         />
         
-        {/* Secondary presence ring - responds to activity */}
+        {/* Secondary presence ring - ethereal blue */}
         <motion.div
           className="absolute rounded-full border-2"
           animate={{
@@ -347,12 +337,12 @@ export const ClarityPod = () => {
           style={{
             width: "700px",
             height: "700px",
-            borderColor: "rgba(201, 160, 103, 0.4)",
+            borderColor: "rgba(140, 120, 220, 0.4)",
             filter: "blur(1px)",
           }}
         />
 
-        {/* Tertiary ambient glow - the room warmth */}
+        {/* Tertiary ambient glow */}
         <motion.div
           className="absolute rounded-full"
           animate={{
@@ -366,18 +356,18 @@ export const ClarityPod = () => {
           style={{
             width: "1000px",
             height: "1000px",
-            background: `radial-gradient(circle, rgba(193, 154, 107, 0.2) 0%, rgba(193, 154, 107, 0.05) 50%, transparent 70%)`,
+            background: `radial-gradient(circle, rgba(120, 100, 200, 0.2) 0%, rgba(80, 120, 180, 0.08) 50%, transparent 70%)`,
             filter: "blur(60px)",
           }}
         />
       </div>
 
-      {/* WINDOW LIGHT RAYS - Soft beams from the side */}
+      {/* ETHEREAL LIGHT BEAMS - cosmic dusk rays */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <motion.div
           className="absolute"
           animate={{
-            opacity: presenceState === "responding" ? [0.12, 0.2, 0.12] : [0.06, 0.1, 0.06],
+            opacity: presenceState === "responding" ? [0.1, 0.18, 0.1] : [0.05, 0.1, 0.05],
           }}
           transition={{
             duration: 8,
@@ -385,11 +375,11 @@ export const ClarityPod = () => {
             ease: "easeInOut"
           }}
           style={{
-            top: "5%",
-            left: "-5%",
+            top: "0%",
+            left: "-10%",
             width: "50%",
             height: "120%",
-            background: "linear-gradient(120deg, rgba(255, 248, 235, 0.15) 0%, rgba(255, 248, 235, 0.03) 40%, transparent 70%)",
+            background: "linear-gradient(120deg, rgba(140, 120, 220, 0.12) 0%, rgba(100, 140, 200, 0.04) 40%, transparent 70%)",
             transform: "rotate(-15deg)",
             filter: "blur(30px)",
           }}
@@ -406,18 +396,18 @@ export const ClarityPod = () => {
             delay: 2
           }}
           style={{
-            top: "20%",
-            left: "-10%",
-            width: "40%",
-            height: "80%",
-            background: "linear-gradient(115deg, rgba(255, 240, 220, 0.12) 0%, transparent 60%)",
-            transform: "rotate(-10deg)",
+            top: "30%",
+            right: "-5%",
+            width: "35%",
+            height: "70%",
+            background: "linear-gradient(240deg, rgba(100, 150, 220, 0.1) 0%, transparent 60%)",
+            transform: "rotate(10deg)",
             filter: "blur(40px)",
           }}
         />
       </div>
 
-      {/* FLOATING PARTICLES - Dust motes in the window light */}
+      {/* FLOATING PARTICLES - cosmic dust, vivid */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         {particles.map((particle) => (
           <motion.div
@@ -430,7 +420,7 @@ export const ClarityPod = () => {
             animate={{
               x: [`${particle.initialX}vw`, `${particle.initialX + 15}vw`, `${particle.initialX + 5}vw`],
               y: [`${particle.initialY}vh`, `${particle.initialY - 20}vh`, `${particle.initialY - 40}vh`],
-              opacity: [0, particle.opacity * (presenceState === "responding" ? 2 : 1), 0],
+              opacity: [0, particle.opacity * (presenceState === "responding" ? 2.5 : 1.5), 0],
             }}
             transition={{
               duration: particle.duration,
@@ -441,22 +431,26 @@ export const ClarityPod = () => {
             style={{
               width: particle.size,
               height: particle.size,
-              background: "rgba(255, 248, 235, 0.8)",
-              boxShadow: "0 0 4px rgba(255, 248, 235, 0.5)",
+              background: particle.id % 3 === 0 
+                ? "rgba(180, 160, 255, 0.9)" 
+                : particle.id % 3 === 1 
+                ? "rgba(140, 180, 255, 0.85)"
+                : "rgba(200, 180, 255, 0.8)",
+              boxShadow: `0 0 ${particle.size * 2}px rgba(160, 140, 255, 0.5)`,
             }}
           />
         ))}
       </div>
 
-      {/* AMBIENT WARMTH SHIFT - Room responds to Jasmine speaking */}
+      {/* AMBIENT COSMIC SHIFT - responds to Jasmine */}
       <motion.div
         className="fixed inset-0 pointer-events-none"
         animate={{
-          opacity: presenceState === "responding" ? 0.08 : presenceState === "listening" ? 0.04 : 0,
+          opacity: presenceState === "responding" ? 0.12 : presenceState === "listening" ? 0.06 : 0,
         }}
         transition={{ duration: 1.5, ease: "easeInOut" }}
         style={{
-          background: "radial-gradient(ellipse at 30% 50%, rgba(201, 160, 103, 0.15) 0%, transparent 60%)",
+          background: "radial-gradient(ellipse at 50% 50%, rgba(140, 100, 220, 0.15) 0%, transparent 60%)",
         }}
       />
 
@@ -467,25 +461,25 @@ export const ClarityPod = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-[#2d2a26]/95 backdrop-blur-xl"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-[#08081a]/95 backdrop-blur-xl"
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="max-w-md w-full mx-6 p-8 rounded-2xl border border-[#a08060]/20 bg-[#3a3832]/90"
+              className="max-w-md w-full mx-6 p-8 rounded-2xl border border-[#6050a0]/30 bg-[#0c0c1c]/90"
               style={{
-                boxShadow: "0 0 60px rgba(193, 154, 107, 0.08)"
+                boxShadow: "0 0 60px rgba(120, 100, 200, 0.15)"
               }}
             >
               <div className="text-center mb-8">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#c9a067]/10 flex items-center justify-center">
-                  <Sparkles size={28} className="text-[#c9a067]" />
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#6050a0]/20 flex items-center justify-center">
+                  <Sparkles size={28} className="text-[#b0a0e0]" />
                 </div>
-                <h2 className="font-cinzel text-2xl text-[#e8e4dc] mb-2">
+                <h2 className="font-cinzel text-2xl text-[#e0e0f0] mb-2">
                   Entering the Clarity Chamber
                 </h2>
-                <p className="font-outfit text-[#a09888] text-sm">
+                <p className="font-outfit text-[#9090b0] text-sm">
                   Jasmine remembers those who return. Share your name if you'd like her to know you.
                 </p>
               </div>
@@ -498,7 +492,7 @@ export const ClarityPod = () => {
                   onChange={(e) => setNameInput(e.target.value)}
                   onKeyDown={handleIdentityKeyPress}
                   placeholder="Your name..."
-                  className="w-full rounded-xl px-5 py-4 font-outfit text-base placeholder:text-[#908878] bg-[#2d2a26]/80 border border-[#a08060]/15 text-[#e8e4dc] focus:outline-none focus:border-[#c9a067]/40 transition-all duration-300"
+                  className="w-full rounded-xl px-5 py-4 font-outfit text-base placeholder:text-[#6060a0] bg-[#12122a]/80 border border-[#6050a0]/25 text-[#e0e0f0] focus:outline-none focus:border-[#8070c0]/50 transition-all duration-300"
                   autoFocus
                 />
 
@@ -506,7 +500,7 @@ export const ClarityPod = () => {
                   data-testid="identity-submit-btn"
                   onClick={handleIdentitySubmit}
                   disabled={!nameInput.trim()}
-                  className="w-full py-4 rounded-xl bg-[#c9a067] text-[#2d2a26] font-outfit font-medium hover:bg-[#d4b077] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                  className="w-full py-4 rounded-xl bg-[#8070c0] text-[#0c0c1c] font-outfit font-medium hover:bg-[#9080d0] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                 >
                   Enter as {nameInput.trim() || "..."}
                 </button>
@@ -514,7 +508,7 @@ export const ClarityPod = () => {
                 <button
                   data-testid="identity-anonymous-btn"
                   onClick={continueAnonymous}
-                  className="w-full py-3 rounded-xl border border-[#a08060]/20 text-[#a09888] font-outfit hover:text-[#e8e4dc] hover:border-[#a08060]/40 transition-all duration-300"
+                  className="w-full py-3 rounded-xl border border-[#6050a0]/30 text-[#9090b0] font-outfit hover:text-[#e0e0f0] hover:border-[#6050a0]/50 transition-all duration-300"
                 >
                   Continue without identifying
                 </button>
@@ -525,13 +519,13 @@ export const ClarityPod = () => {
       </AnimatePresence>
 
       {/* Header */}
-      <header className="relative z-20 border-b border-[#a08060]/10 bg-[#3a3832]/80 backdrop-blur-xl">
+      <header className="relative z-20 border-b border-[#6050a0]/20 bg-[#0c0c1c]/80 backdrop-blur-xl">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link
               to="/"
               data-testid="clarity-back-btn"
-              className="p-2 text-[#a09080] hover:text-[#c9a067] transition-colors"
+              className="p-2 text-[#8080a0] hover:text-[#b0a0e0] transition-colors"
             >
               <ArrowLeft size={20} />
             </Link>
@@ -552,26 +546,26 @@ export const ClarityPod = () => {
                   className="w-4 h-4 rounded-full"
                   style={{
                     background: presenceState === "responding" 
-                      ? "radial-gradient(circle, rgba(255, 200, 120, 1) 0%, rgba(201, 160, 103, 0.6) 100%)"
+                      ? "radial-gradient(circle, rgba(180, 160, 255, 1) 0%, rgba(140, 120, 220, 0.6) 100%)"
                       : presenceState === "listening"
-                      ? "radial-gradient(circle, rgba(230, 180, 100, 0.95) 0%, rgba(201, 160, 103, 0.5) 100%)"
-                      : "radial-gradient(circle, rgba(201, 160, 103, 0.85) 0%, rgba(201, 160, 103, 0.4) 100%)",
+                      ? "radial-gradient(circle, rgba(160, 140, 240, 0.95) 0%, rgba(120, 100, 200, 0.5) 100%)"
+                      : "radial-gradient(circle, rgba(140, 120, 220, 0.85) 0%, rgba(100, 80, 180, 0.4) 100%)",
                     boxShadow: presenceState === "responding"
-                      ? "0 0 20px rgba(255, 200, 120, 0.8), 0 0 40px rgba(201, 160, 103, 0.4)"
+                      ? "0 0 20px rgba(180, 160, 255, 0.8), 0 0 40px rgba(140, 120, 220, 0.4)"
                       : presenceState === "listening"
-                      ? "0 0 15px rgba(201, 160, 103, 0.6), 0 0 30px rgba(201, 160, 103, 0.3)"
-                      : "0 0 10px rgba(201, 160, 103, 0.5), 0 0 20px rgba(201, 160, 103, 0.2)"
+                      ? "0 0 15px rgba(160, 140, 240, 0.6), 0 0 30px rgba(120, 100, 200, 0.3)"
+                      : "0 0 10px rgba(140, 120, 220, 0.5), 0 0 20px rgba(100, 80, 180, 0.2)"
                   }}
                 />
               </motion.div>
               <div>
-                <h1 className="font-cinzel text-xl text-[#e8e4dc] flex items-center gap-2">
+                <h1 className="font-cinzel text-xl text-[#e0e0f0] flex items-center gap-2">
                   Jasmine
-                  <span className="text-[#908878] text-sm font-outfit font-normal">
+                  <span className="text-[#9090b0] text-sm font-outfit font-normal">
                     {presenceState === "responding" ? "speaking..." : presenceState === "listening" ? "listening" : "present"}
                   </span>
                 </h1>
-                <p className="font-mono text-xs text-[#908878]">
+                <p className="font-mono text-xs text-[#7070a0]">
                   {userName ? `${userName} in the Clarity Chamber` : "Clarity Chamber"}
                 </p>
               </div>
@@ -583,7 +577,7 @@ export const ClarityPod = () => {
             {userName && (
               <button
                 onClick={clearIdentity}
-                className="p-2 text-[#908878] hover:text-[#c9a067] transition-colors"
+                className="p-2 text-[#7070a0] hover:text-[#b0a0e0] transition-colors"
                 title="Change identity"
               >
                 <User size={18} />
@@ -593,13 +587,13 @@ export const ClarityPod = () => {
               className="w-3 h-3 rounded-full animate-pulse"
               style={{ backgroundColor: spiralColors[currentSpiral] }}
             />
-            <span className="font-mono text-xs text-[#a09888] hidden sm:block">
+            <span className="font-mono text-xs text-[#9090b0] hidden sm:block">
               {currentSpiral}
             </span>
             <button
               data-testid="clarity-reset-btn"
               onClick={startSession}
-              className="p-2 text-[#908878] hover:text-[#c9a067] transition-colors"
+              className="p-2 text-[#7070a0] hover:text-[#b0a0e0] transition-colors"
               title="Start new session"
             >
               <RefreshCw size={18} />
@@ -662,7 +656,7 @@ export const ClarityPod = () => {
       </div>
 
       {/* Input Area */}
-      <div className="relative z-20 border-t border-[#a08060]/10 bg-[#3a3832]/90 backdrop-blur-xl">
+      <div className="relative z-20 border-t border-[#6050a0]/20 bg-[#0c0c1c]/90 backdrop-blur-xl">
         <div className="max-w-3xl mx-auto px-6 py-4">
           <div className="relative">
             <textarea
@@ -673,20 +667,20 @@ export const ClarityPod = () => {
               onKeyDown={handleKeyPress}
               placeholder="What feels most alive for you right now?"
               rows={2}
-              className="w-full rounded-xl px-5 py-4 pr-14 resize-none font-outfit text-base placeholder:text-[#908878] bg-[#2d2a26]/80 border border-[#a08060]/15 text-[#e8e4dc] focus:outline-none focus:border-[#c9a067]/40 focus:shadow-[0_0_20px_rgba(193,154,107,0.1)] transition-all duration-300"
+              className="w-full rounded-xl px-5 py-4 pr-14 resize-none font-outfit text-base placeholder:text-[#6060a0] bg-[#12122a]/80 border border-[#6050a0]/25 text-[#e0e0f0] focus:outline-none focus:border-[#8070c0]/50 focus:shadow-[0_0_20px_rgba(120,100,200,0.15)] transition-all duration-300"
               disabled={isLoading || !sessionId}
             />
             <button
               data-testid="clarity-send-btn"
               onClick={sendMessage}
               disabled={!inputValue.trim() || isLoading || !sessionId}
-              className="absolute right-3 bottom-3 p-2 rounded-lg bg-[#c9a067] text-[#2d2a26] hover:bg-[#d4b077] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+              className="absolute right-3 bottom-3 p-2 rounded-lg bg-[#8070c0] text-[#0c0c1c] hover:bg-[#9080d0] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
             >
               <Send size={18} />
             </button>
           </div>
           
-          <p className="font-mono text-xs text-[#908878] mt-3 text-center">
+          <p className="font-mono text-xs text-[#6060a0] mt-3 text-center">
             Press Enter to send • Shift+Enter for new line
           </p>
         </div>

@@ -248,7 +248,7 @@ body {
   box-shadow: 0 0 20px var(--gold-ethereal);
 }
 
-/* Clarity Message Styles - Jasmine's atmosphere */
+/* Clarity Message Styles - Cosmic sanctuary aesthetic */
 .clarity-message {
   padding: 1.25rem 1.5rem;
   border-radius: 1rem;
@@ -256,14 +256,14 @@ body {
 }
 
 .clarity-message.user {
-  background: rgba(193, 154, 107, 0.1);
-  border: 1px solid rgba(193, 154, 107, 0.2);
+  background: rgba(100, 80, 180, 0.15);
+  border: 1px solid rgba(120, 100, 200, 0.25);
   margin-left: auto;
 }
 
 .clarity-message.assistant {
-  background: rgba(52, 50, 46, 0.7);
-  border: 1px solid rgba(120, 115, 105, 0.15);
+  background: rgba(12, 12, 28, 0.7);
+  border: 1px solid rgba(100, 80, 160, 0.2);
   margin-right: auto;
   backdrop-filter: blur(8px);
 }
