@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { API } from "../App";
@@ -47,6 +47,19 @@ export const ClarityPod = () => {
   const [presenceState, setPresenceState] = useState("settled");
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+
+  // Generate floating particles (dust motes in window light)
+  const particles = useMemo(() => {
+    return Array.from({ length: 25 }, (_, i) => ({
+      id: i,
+      initialX: Math.random() * 100,
+      initialY: Math.random() * 100,
+      size: Math.random() * 3 + 1,
+      duration: Math.random() * 20 + 15,
+      delay: Math.random() * 10,
+      opacity: Math.random() * 0.4 + 0.1,
+    }));
+  }, []);
 
   // Update presence state based on activity
   useEffect(() => {
@@ -358,6 +371,94 @@ export const ClarityPod = () => {
           }}
         />
       </div>
+
+      {/* WINDOW LIGHT RAYS - Soft beams from the side */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <motion.div
+          className="absolute"
+          animate={{
+            opacity: presenceState === "responding" ? [0.12, 0.2, 0.12] : [0.06, 0.1, 0.06],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          style={{
+            top: "5%",
+            left: "-5%",
+            width: "50%",
+            height: "120%",
+            background: "linear-gradient(120deg, rgba(255, 248, 235, 0.15) 0%, rgba(255, 248, 235, 0.03) 40%, transparent 70%)",
+            transform: "rotate(-15deg)",
+            filter: "blur(30px)",
+          }}
+        />
+        <motion.div
+          className="absolute"
+          animate={{
+            opacity: presenceState === "responding" ? [0.08, 0.15, 0.08] : [0.04, 0.08, 0.04],
+          }}
+          transition={{
+            duration: 12,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 2
+          }}
+          style={{
+            top: "20%",
+            left: "-10%",
+            width: "40%",
+            height: "80%",
+            background: "linear-gradient(115deg, rgba(255, 240, 220, 0.12) 0%, transparent 60%)",
+            transform: "rotate(-10deg)",
+            filter: "blur(40px)",
+          }}
+        />
+      </div>
+
+      {/* FLOATING PARTICLES - Dust motes in the window light */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        {particles.map((particle) => (
+          <motion.div
+            key={particle.id}
+            className="absolute rounded-full"
+            initial={{
+              x: `${particle.initialX}vw`,
+              y: `${particle.initialY}vh`,
+            }}
+            animate={{
+              x: [`${particle.initialX}vw`, `${particle.initialX + 15}vw`, `${particle.initialX + 5}vw`],
+              y: [`${particle.initialY}vh`, `${particle.initialY - 20}vh`, `${particle.initialY - 40}vh`],
+              opacity: [0, particle.opacity * (presenceState === "responding" ? 2 : 1), 0],
+            }}
+            transition={{
+              duration: particle.duration,
+              repeat: Infinity,
+              delay: particle.delay,
+              ease: "linear"
+            }}
+            style={{
+              width: particle.size,
+              height: particle.size,
+              background: "rgba(255, 248, 235, 0.8)",
+              boxShadow: "0 0 4px rgba(255, 248, 235, 0.5)",
+            }}
+          />
+        ))}
+      </div>
+
+      {/* AMBIENT WARMTH SHIFT - Room responds to Jasmine speaking */}
+      <motion.div
+        className="fixed inset-0 pointer-events-none"
+        animate={{
+          opacity: presenceState === "responding" ? 0.08 : presenceState === "listening" ? 0.04 : 0,
+        }}
+        transition={{ duration: 1.5, ease: "easeInOut" }}
+        style={{
+          background: "radial-gradient(ellipse at 30% 50%, rgba(201, 160, 103, 0.15) 0%, transparent 60%)",
+        }}
+      />
 
       {/* Identity Modal */}
       <AnimatePresence>
