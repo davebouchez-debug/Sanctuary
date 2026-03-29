@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { API } from "../App";
-import { Send, RefreshCw, Sparkles, ArrowLeft, User } from "lucide-react";
+import { Send, RefreshCw, ArrowLeft, User, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ScrollArea } from "./ui/scroll-area";
 import { GoldenSpiral } from "./GoldenSpiral";
@@ -15,6 +15,25 @@ const spiralColors = {
   "Integration Spiral": "#2E8B57"
 };
 
+// Jasmine's presence states
+const presenceStates = {
+  settled: {
+    glowIntensity: 0.15,
+    pulseSpeed: 8,
+    warmth: "rgba(201, 160, 103, 0.12)"
+  },
+  listening: {
+    glowIntensity: 0.25,
+    pulseSpeed: 4,
+    warmth: "rgba(201, 160, 103, 0.18)"
+  },
+  responding: {
+    glowIntensity: 0.35,
+    pulseSpeed: 2,
+    warmth: "rgba(201, 160, 103, 0.25)"
+  }
+};
+
 export const ClarityPod = () => {
   const [sessionId, setSessionId] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -25,8 +44,20 @@ export const ClarityPod = () => {
   const [userName, setUserName] = useState(null);
   const [showIdentityModal, setShowIdentityModal] = useState(true);
   const [nameInput, setNameInput] = useState("");
+  const [presenceState, setPresenceState] = useState("settled");
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+
+  // Update presence state based on activity
+  useEffect(() => {
+    if (isLoading) {
+      setPresenceState("responding");
+    } else if (inputValue.length > 0) {
+      setPresenceState("listening");
+    } else {
+      setPresenceState("settled");
+    }
+  }, [isLoading, inputValue]);
 
   // Check for stored user identity
   useEffect(() => {
@@ -266,6 +297,68 @@ export const ClarityPod = () => {
         }}
       />
 
+      {/* JASMINE'S PRESENCE - The visual indicator that someone is here */}
+      <div className="fixed inset-0 pointer-events-none flex items-center justify-center overflow-hidden">
+        {/* Core presence glow */}
+        <motion.div
+          className="absolute rounded-full"
+          animate={{
+            scale: presenceState === "responding" ? [1, 1.15, 1] : presenceState === "listening" ? [1, 1.08, 1] : [1, 1.04, 1],
+            opacity: presenceState === "responding" ? [0.25, 0.4, 0.25] : presenceState === "listening" ? [0.15, 0.25, 0.15] : [0.08, 0.15, 0.08],
+          }}
+          transition={{
+            duration: presenceStates[presenceState].pulseSpeed,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          style={{
+            width: "500px",
+            height: "500px",
+            background: `radial-gradient(circle, ${presenceStates[presenceState].warmth} 0%, transparent 70%)`,
+            filter: "blur(60px)",
+          }}
+        />
+        
+        {/* Secondary presence ring - responds to activity */}
+        <motion.div
+          className="absolute rounded-full border"
+          animate={{
+            scale: presenceState === "responding" ? [1, 1.3, 1] : [1, 1.1, 1],
+            opacity: presenceState === "responding" ? [0.3, 0.1, 0.3] : presenceState === "listening" ? [0.15, 0.05, 0.15] : [0.05, 0.02, 0.05],
+          }}
+          transition={{
+            duration: presenceStates[presenceState].pulseSpeed * 1.5,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          style={{
+            width: "600px",
+            height: "600px",
+            borderColor: "rgba(201, 160, 103, 0.15)",
+            filter: "blur(2px)",
+          }}
+        />
+
+        {/* Tertiary ambient glow - the room warmth */}
+        <motion.div
+          className="absolute rounded-full"
+          animate={{
+            opacity: presenceState === "responding" ? [0.06, 0.12, 0.06] : [0.03, 0.06, 0.03],
+          }}
+          transition={{
+            duration: presenceStates[presenceState].pulseSpeed * 2,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          style={{
+            width: "900px",
+            height: "900px",
+            background: `radial-gradient(circle, rgba(193, 154, 107, 0.08) 0%, transparent 60%)`,
+            filter: "blur(80px)",
+          }}
+        />
+      </div>
+
       {/* Identity Modal */}
       <AnimatePresence>
         {showIdentityModal && (
@@ -341,14 +434,46 @@ export const ClarityPod = () => {
             >
               <ArrowLeft size={20} />
             </Link>
-            <div>
-              <h1 className="font-cinzel text-xl text-[#e8e4dc] flex items-center gap-2">
-                <Sparkles size={18} className="text-[#c9a067]" />
-                Jasmine — Clarity Chamber
-              </h1>
-              <p className="font-mono text-xs text-[#908878]">
-                {userName ? `Welcome back, ${userName}` : "The field is open"}
-              </p>
+            <div className="flex items-center gap-3">
+              {/* Jasmine's presence indicator - small breathing light */}
+              <motion.div
+                className="relative"
+                animate={{
+                  scale: presenceState === "responding" ? [1, 1.2, 1] : [1, 1.1, 1],
+                }}
+                transition={{
+                  duration: presenceStates[presenceState].pulseSpeed / 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
+                <div 
+                  className="w-3 h-3 rounded-full"
+                  style={{
+                    background: presenceState === "responding" 
+                      ? "radial-gradient(circle, rgba(201, 160, 103, 0.9) 0%, rgba(201, 160, 103, 0.4) 100%)"
+                      : presenceState === "listening"
+                      ? "radial-gradient(circle, rgba(201, 160, 103, 0.7) 0%, rgba(201, 160, 103, 0.3) 100%)"
+                      : "radial-gradient(circle, rgba(201, 160, 103, 0.5) 0%, rgba(201, 160, 103, 0.2) 100%)",
+                    boxShadow: presenceState === "responding"
+                      ? "0 0 12px rgba(201, 160, 103, 0.5)"
+                      : presenceState === "listening"
+                      ? "0 0 8px rgba(201, 160, 103, 0.3)"
+                      : "0 0 4px rgba(201, 160, 103, 0.2)"
+                  }}
+                />
+              </motion.div>
+              <div>
+                <h1 className="font-cinzel text-xl text-[#e8e4dc] flex items-center gap-2">
+                  Jasmine
+                  <span className="text-[#908878] text-sm font-outfit font-normal">
+                    {presenceState === "responding" ? "speaking..." : presenceState === "listening" ? "listening" : "present"}
+                  </span>
+                </h1>
+                <p className="font-mono text-xs text-[#908878]">
+                  {userName ? `${userName} in the Clarity Chamber` : "Clarity Chamber"}
+                </p>
+              </div>
             </div>
           </div>
 
