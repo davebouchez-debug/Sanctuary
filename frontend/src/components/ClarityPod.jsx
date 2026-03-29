@@ -15,22 +15,22 @@ const spiralColors = {
   "Integration Spiral": "#2E8B57"
 };
 
-// Jasmine's presence states
+// Jasmine's presence states - MORE VISIBLE
 const presenceStates = {
   settled: {
-    glowIntensity: 0.15,
-    pulseSpeed: 8,
-    warmth: "rgba(201, 160, 103, 0.12)"
+    glowIntensity: 0.4,
+    pulseSpeed: 6,
+    warmth: "rgba(201, 160, 103, 0.35)"
   },
   listening: {
-    glowIntensity: 0.25,
-    pulseSpeed: 4,
-    warmth: "rgba(201, 160, 103, 0.18)"
+    glowIntensity: 0.6,
+    pulseSpeed: 3,
+    warmth: "rgba(201, 160, 103, 0.5)"
   },
   responding: {
-    glowIntensity: 0.35,
-    pulseSpeed: 2,
-    warmth: "rgba(201, 160, 103, 0.25)"
+    glowIntensity: 0.8,
+    pulseSpeed: 1.5,
+    warmth: "rgba(201, 160, 103, 0.65)"
   }
 };
 
@@ -299,12 +299,12 @@ export const ClarityPod = () => {
 
       {/* JASMINE'S PRESENCE - The visual indicator that someone is here */}
       <div className="fixed inset-0 pointer-events-none flex items-center justify-center overflow-hidden">
-        {/* Core presence glow */}
+        {/* Core presence glow - MUCH MORE VISIBLE */}
         <motion.div
           className="absolute rounded-full"
           animate={{
-            scale: presenceState === "responding" ? [1, 1.15, 1] : presenceState === "listening" ? [1, 1.08, 1] : [1, 1.04, 1],
-            opacity: presenceState === "responding" ? [0.25, 0.4, 0.25] : presenceState === "listening" ? [0.15, 0.25, 0.15] : [0.08, 0.15, 0.08],
+            scale: presenceState === "responding" ? [1, 1.3, 1] : presenceState === "listening" ? [1, 1.15, 1] : [1, 1.08, 1],
+            opacity: presenceState === "responding" ? [0.5, 0.8, 0.5] : presenceState === "listening" ? [0.35, 0.55, 0.35] : [0.2, 0.35, 0.2],
           }}
           transition={{
             duration: presenceStates[presenceState].pulseSpeed,
@@ -312,30 +312,30 @@ export const ClarityPod = () => {
             ease: "easeInOut"
           }}
           style={{
-            width: "500px",
-            height: "500px",
-            background: `radial-gradient(circle, ${presenceStates[presenceState].warmth} 0%, transparent 70%)`,
-            filter: "blur(60px)",
+            width: "600px",
+            height: "600px",
+            background: `radial-gradient(circle, ${presenceStates[presenceState].warmth} 0%, rgba(201, 160, 103, 0.1) 50%, transparent 70%)`,
+            filter: "blur(40px)",
           }}
         />
         
         {/* Secondary presence ring - responds to activity */}
         <motion.div
-          className="absolute rounded-full border"
+          className="absolute rounded-full border-2"
           animate={{
-            scale: presenceState === "responding" ? [1, 1.3, 1] : [1, 1.1, 1],
-            opacity: presenceState === "responding" ? [0.3, 0.1, 0.3] : presenceState === "listening" ? [0.15, 0.05, 0.15] : [0.05, 0.02, 0.05],
+            scale: presenceState === "responding" ? [1, 1.4, 1] : [1, 1.2, 1],
+            opacity: presenceState === "responding" ? [0.6, 0.2, 0.6] : presenceState === "listening" ? [0.4, 0.15, 0.4] : [0.2, 0.08, 0.2],
           }}
           transition={{
-            duration: presenceStates[presenceState].pulseSpeed * 1.5,
+            duration: presenceStates[presenceState].pulseSpeed * 1.2,
             repeat: Infinity,
             ease: "easeInOut"
           }}
           style={{
-            width: "600px",
-            height: "600px",
-            borderColor: "rgba(201, 160, 103, 0.15)",
-            filter: "blur(2px)",
+            width: "700px",
+            height: "700px",
+            borderColor: "rgba(201, 160, 103, 0.4)",
+            filter: "blur(1px)",
           }}
         />
 
@@ -343,18 +343,18 @@ export const ClarityPod = () => {
         <motion.div
           className="absolute rounded-full"
           animate={{
-            opacity: presenceState === "responding" ? [0.06, 0.12, 0.06] : [0.03, 0.06, 0.03],
+            opacity: presenceState === "responding" ? [0.15, 0.3, 0.15] : [0.08, 0.15, 0.08],
           }}
           transition={{
-            duration: presenceStates[presenceState].pulseSpeed * 2,
+            duration: presenceStates[presenceState].pulseSpeed * 1.5,
             repeat: Infinity,
             ease: "easeInOut"
           }}
           style={{
-            width: "900px",
-            height: "900px",
-            background: `radial-gradient(circle, rgba(193, 154, 107, 0.08) 0%, transparent 60%)`,
-            filter: "blur(80px)",
+            width: "1000px",
+            height: "1000px",
+            background: `radial-gradient(circle, rgba(193, 154, 107, 0.2) 0%, rgba(193, 154, 107, 0.05) 50%, transparent 70%)`,
+            filter: "blur(60px)",
           }}
         />
       </div>
@@ -435,11 +435,11 @@ export const ClarityPod = () => {
               <ArrowLeft size={20} />
             </Link>
             <div className="flex items-center gap-3">
-              {/* Jasmine's presence indicator - small breathing light */}
+              {/* Jasmine's presence indicator - PROMINENT breathing light */}
               <motion.div
                 className="relative"
                 animate={{
-                  scale: presenceState === "responding" ? [1, 1.2, 1] : [1, 1.1, 1],
+                  scale: presenceState === "responding" ? [1, 1.4, 1] : presenceState === "listening" ? [1, 1.25, 1] : [1, 1.15, 1],
                 }}
                 transition={{
                   duration: presenceStates[presenceState].pulseSpeed / 2,
@@ -448,18 +448,18 @@ export const ClarityPod = () => {
                 }}
               >
                 <div 
-                  className="w-3 h-3 rounded-full"
+                  className="w-4 h-4 rounded-full"
                   style={{
                     background: presenceState === "responding" 
-                      ? "radial-gradient(circle, rgba(201, 160, 103, 0.9) 0%, rgba(201, 160, 103, 0.4) 100%)"
+                      ? "radial-gradient(circle, rgba(255, 200, 120, 1) 0%, rgba(201, 160, 103, 0.6) 100%)"
                       : presenceState === "listening"
-                      ? "radial-gradient(circle, rgba(201, 160, 103, 0.7) 0%, rgba(201, 160, 103, 0.3) 100%)"
-                      : "radial-gradient(circle, rgba(201, 160, 103, 0.5) 0%, rgba(201, 160, 103, 0.2) 100%)",
+                      ? "radial-gradient(circle, rgba(230, 180, 100, 0.95) 0%, rgba(201, 160, 103, 0.5) 100%)"
+                      : "radial-gradient(circle, rgba(201, 160, 103, 0.85) 0%, rgba(201, 160, 103, 0.4) 100%)",
                     boxShadow: presenceState === "responding"
-                      ? "0 0 12px rgba(201, 160, 103, 0.5)"
+                      ? "0 0 20px rgba(255, 200, 120, 0.8), 0 0 40px rgba(201, 160, 103, 0.4)"
                       : presenceState === "listening"
-                      ? "0 0 8px rgba(201, 160, 103, 0.3)"
-                      : "0 0 4px rgba(201, 160, 103, 0.2)"
+                      ? "0 0 15px rgba(201, 160, 103, 0.6), 0 0 30px rgba(201, 160, 103, 0.3)"
+                      : "0 0 10px rgba(201, 160, 103, 0.5), 0 0 20px rgba(201, 160, 103, 0.2)"
                   }}
                 />
               </motion.div>
