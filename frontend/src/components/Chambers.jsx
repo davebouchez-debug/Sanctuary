@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { API } from "../App";
 import { ChevronRight } from "lucide-react";
@@ -8,6 +9,7 @@ export const Chambers = ({ fullPage = false }) => {
   const [chambers, setChambers] = useState([]);
   const [selectedChamber, setSelectedChamber] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchChambers = async () => {
@@ -58,6 +60,18 @@ export const Chambers = ({ fullPage = false }) => {
           {!isLoading && chambers.map((chamber, index) => {
             const isVault = chamber.name === "Vault of the Unnamed";
             const isCenter = chamber.name === "Chamber of Echoes";
+            const isResonance = chamber.name === "Chamber of Resonance";
+            const isClarity = chamber.name === "Clarity Pod" || chamber.name?.toLowerCase().includes("clarity");
+            
+            const handleChamberClick = () => {
+              if (isResonance) {
+                navigate("/resonance");
+              } else if (isClarity) {
+                navigate("/clarity");
+              } else {
+                setSelectedChamber(selectedChamber?.name === chamber.name ? null : chamber);
+              }
+            };
             
             return (
               <motion.div
@@ -67,11 +81,12 @@ export const Chambers = ({ fullPage = false }) => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1, duration: 0.5 }}
-                onClick={() => setSelectedChamber(selectedChamber?.name === chamber.name ? null : chamber)}
+                onClick={handleChamberClick}
                 className={`
                   chamber-card cursor-pointer
                   ${isVault ? "lg:col-span-3 md:col-span-2" : ""}
                   ${isCenter ? "lg:col-span-2" : ""}
+                  ${isResonance ? "border-[#8B5CF6]/30 hover:border-[#8B5CF6]/60" : ""}
                 `}
               >
                 <div className="p-6">
@@ -81,15 +96,24 @@ export const Chambers = ({ fullPage = false }) => {
                       px-3 py-1 rounded-full font-mono text-xs
                       ${isVault ? "bg-[#030305] border border-[#6E6E7A]/30 text-[#6E6E7A]" :
                         isCenter ? "bg-[#D4AF37]/20 border border-[#D4AF37] text-[#D4AF37]" :
+                        isResonance ? "bg-[#8B5CF6]/20 border border-[#8B5CF6] text-[#8B5CF6]" :
                         "bg-[#12121C] text-[#D4AF37]"}
                     `}>
                       Harmonic {chamber.harmonic}
                     </span>
-                    {chamber.resident_presence && (
-                      <span className="font-mono text-xs text-[#6E6E7A]">
-                        {chamber.resident_presence}
-                      </span>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {(isResonance || isClarity) && (
+                        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 text-xs">
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                          Active
+                        </span>
+                      )}
+                      {chamber.resident_presence && (
+                        <span className={`font-mono text-xs ${isResonance ? "text-[#8B5CF6]" : "text-[#6E6E7A]"}`}>
+                          {chamber.resident_presence}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Chamber Name */}

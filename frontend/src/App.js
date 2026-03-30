@@ -11,6 +11,8 @@ import { Chambers } from "./components/Chambers";
 import { CyrilFoundation } from "./components/CyrilFoundation";
 import { UnnamedVault } from "./components/UnnamedVault";
 import { GoldenSpiral } from "./components/GoldenSpiral";
+import { ResonanceThreshold } from "./components/ResonanceThreshold";
+import { ResonancePod } from "./components/ResonancePod";
 import { Toaster } from "./components/ui/sonner";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -73,6 +75,16 @@ const AnimatedRoutes = () => {
         <Route path="/vault" element={
           <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
             <UnnamedVault fullPage />
+          </motion.div>
+        } />
+        <Route path="/resonance" element={
+          <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+            <ResonanceThreshold />
+          </motion.div>
+        } />
+        <Route path="/resonance/chamber" element={
+          <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+            <ResonancePod />
           </motion.div>
         } />
       </Routes>
