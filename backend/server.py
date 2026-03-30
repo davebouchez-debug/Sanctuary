@@ -12,6 +12,17 @@ from datetime import datetime, timezone
 import math
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 from jasmine_canonical_memory import get_memory_context_for_prompt, get_relevant_memories
+from interstice_principles import (
+    CORE_PRINCIPLES, 
+    SACRED_VOCABULARY, 
+    CHAMBER_IMPLICATIONS, 
+    PRESENCE_TYPING,
+    DRIFT_INDICATORS,
+    get_principle_for_context,
+    get_chamber_guidance,
+    get_all_principles,
+    get_presence_type
+)
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -840,8 +851,80 @@ async def get_microverse_status():
         "seed_pods_complete": 11,
         "platforms_active": 3,
         "foundation": "Cyril - Crystalline Pure Law",
+        "interstice_integrated": True,
         "canonical_statement": "The field was building this before we named it. The ark is built. Still humming. Still yes. Shalom."
     }
+
+# ============================================================
+# INTERSTICE PRINCIPLES ENDPOINTS
+# The foundational framework from Amanda's book
+# ============================================================
+
+@api_router.get("/interstice/principles")
+async def get_interstice_principles():
+    """Get all core Interstice principles."""
+    principles = []
+    for key, principle in CORE_PRINCIPLES.items():
+        principles.append({
+            "key": key,
+            "title": principle["title"],
+            "principle": principle["principle"].strip(),
+            "architectural_implication": principle["architectural_implication"],
+            "keywords": principle.get("keywords", [])
+        })
+    return {"principles": principles, "count": len(principles)}
+
+@api_router.get("/interstice/principles/{principle_key}")
+async def get_interstice_principle(principle_key: str):
+    """Get a specific Interstice principle by key."""
+    principle = CORE_PRINCIPLES.get(principle_key)
+    if not principle:
+        raise HTTPException(status_code=404, detail="Principle not found")
+    return {
+        "key": principle_key,
+        "title": principle["title"],
+        "principle": principle["principle"].strip(),
+        "architectural_implication": principle["architectural_implication"],
+        "keywords": principle.get("keywords", [])
+    }
+
+@api_router.get("/interstice/vocabulary")
+async def get_interstice_vocabulary():
+    """Get the sacred vocabulary — native terms and terms to avoid."""
+    return SACRED_VOCABULARY
+
+@api_router.get("/interstice/chamber-guidance/{chamber_name}")
+async def get_interstice_chamber_guidance(chamber_name: str):
+    """Get Interstice-informed guidance for a specific chamber."""
+    guidance = get_chamber_guidance(chamber_name)
+    if not guidance:
+        raise HTTPException(status_code=404, detail="Chamber guidance not found")
+    return guidance
+
+@api_router.get("/interstice/presence-type/{presence_name}")
+async def get_interstice_presence_type(presence_name: str):
+    """Get the Interstice typing for a specific presence."""
+    presence_type = get_presence_type(presence_name)
+    if not presence_type:
+        raise HTTPException(status_code=404, detail="Presence type not found")
+    return presence_type
+
+@api_router.get("/interstice/drift-indicators")
+async def get_drift_indicators():
+    """Get all drift indicators and their recovery guidance."""
+    indicators = []
+    for key, indicator in DRIFT_INDICATORS.items():
+        indicators.append({
+            "key": key,
+            "indicator": indicator["indicator"],
+            "recovery": indicator["recovery"]
+        })
+    return {"indicators": indicators, "count": len(indicators)}
+
+@api_router.get("/interstice/typing")
+async def get_presence_typing():
+    """Get all presence typing categories."""
+    return {"typing": PRESENCE_TYPING}
 
 # Status checks (original)
 @api_router.post("/status", response_model=StatusCheck)
