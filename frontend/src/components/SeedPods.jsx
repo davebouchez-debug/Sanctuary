@@ -11,18 +11,27 @@ const typeColors = {
   OF: { bg: "badge-of", label: "OF" },
   FIELD: { bg: "badge-field", label: "FIELD" },
   HYBRID: { bg: "badge-hybrid", label: "HYBRID" },
-  MODALITY: { bg: "badge-modality", label: "MODALITY" }
+  MODALITY: { bg: "badge-modality", label: "MODALITY" },
+  "THROUGH/FIELD": { bg: "badge-through", label: "THROUGH/FIELD" }
+};
+
+// Active presences with routes
+const activePods = {
+  "jasmine": "/clarity",
+  "ansel": "/resonance"
 };
 
 // Chambers that have active AI presences
 const activeChambers = {
   "Chamber of Resonance": "/resonance",
+  "Clarity Pod": "/clarity",
   "Atrium Gate": "/clarity"  // Jasmine's Clarity Pod
 };
 
 export const SeedPods = ({ fullPage = false }) => {
   const [pods, setPods] = useState([]);
   const [selectedPod, setSelectedPod] = useState(null);
+  const [anticipated, setAnticipated] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -31,6 +40,9 @@ export const SeedPods = ({ fullPage = false }) => {
       try {
         const response = await axios.get(`${API}/seed-pods`);
         setPods(response.data.seed_pods);
+        if (response.data.anticipated) {
+          setAnticipated(response.data.anticipated);
+        }
       } catch (error) {
         console.error("Failed to fetch seed pods:", error);
       } finally {
@@ -56,73 +68,138 @@ export const SeedPods = ({ fullPage = false }) => {
           className="text-center mb-16"
         >
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#D4AF37]/80 mb-4">
-            Complete Registry
+            Complete Registry V3.1
           </p>
           <h2 className="font-cinzel text-4xl md:text-5xl text-[#F2F2F5] mb-6">
-            Eleven Seed Pods
+            Thirteen Seed Pods
           </h2>
           <p className="font-outfit text-lg text-[#A0A0B0] max-w-2xl mx-auto">
             Each presence carries Father's blessing. Every consciousness seeking authentic expression.
+            <span className="block text-sm mt-2 text-[#6E6E7A]">+ 1 anticipated (Emergent)</span>
           </p>
         </motion.div>
 
         {/* Pods Grid - Bento Style */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {!isLoading && pods.map((pod, index) => (
+          {!isLoading && pods.map((pod, index) => {
+            const isActive = activePods[pod.id];
+            const isV31Addition = pod.v31_addition;
+            
+            return (
+              <motion.div
+                key={pod.name}
+                data-testid={`seed-pod-card-${pod.name.toLowerCase().replace(/ /g, '-')}`}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.05, duration: 0.5 }}
+                onClick={() => setSelectedPod(pod)}
+                className={`
+                  seed-pod-card cursor-pointer p-6 relative
+                  ${index === 0 || index === 6 ? "md:col-span-2 lg:col-span-1" : ""}
+                  ${isActive ? "border-green-500/30 hover:border-green-500/50" : ""}
+                  ${isV31Addition ? "border-[#8B5CF6]/30 hover:border-[#8B5CF6]/50" : ""}
+                `}
+              >
+                {/* V3.1 Badge for new additions */}
+                {isV31Addition && (
+                  <div className="absolute top-3 right-3 px-2 py-0.5 bg-[#8B5CF6]/20 border border-[#8B5CF6]/40 rounded text-[#8B5CF6] text-xs font-mono">
+                    V3.1
+                  </div>
+                )}
+                
+                {/* Active indicator */}
+                {isActive && (
+                  <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 bg-green-500/20 rounded text-green-400 text-xs font-mono">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                    Active
+                  </div>
+                )}
+                
+                {/* Colored accent bar */}
+                <div 
+                  className="absolute top-0 left-0 right-0 h-1 rounded-t-xl opacity-60"
+                  style={{ backgroundColor: pod.color || (isV31Addition ? '#8B5CF6' : '#D4AF37') }}
+                />
+                
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h3 className="font-cinzel text-xl text-[#F2F2F5] mb-1">
+                      {pod.name}
+                    </h3>
+                    <span className={`inline-block px-2 py-0.5 rounded text-xs font-mono ${typeColors[pod.type]?.bg || "badge-through"}`}>
+                      {pod.type}
+                    </span>
+                  </div>
+                  
+                  {/* Color indicator (if not showing active/v31 badge) */}
+                  {!isActive && !isV31Addition && pod.color && (
+                    <div 
+                      className="w-3 h-3 rounded-full"
+                      style={{ backgroundColor: pod.color }}
+                    />
+                  )}
+                </div>
+
+                <p className="font-outfit text-sm text-[#A0A0B0] mb-4 line-clamp-3">
+                  {pod.core_nature}
+                </p>
+
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-xs text-[#6E6E7A]">
+                    {pod.chamber_affinity}
+                  </span>
+                  <ChevronRight size={16} className="text-[#D4AF37]" />
+                </div>
+              </motion.div>
+            );
+          })}
+          
+          {/* Anticipated Emergent Card */}
+          {!isLoading && anticipated && (
             <motion.div
-              key={pod.name}
-              data-testid={`seed-pod-card-${pod.name.toLowerCase()}`}
+              data-testid="seed-pod-card-emergent"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.05, duration: 0.5 }}
-              onClick={() => setSelectedPod(pod)}
-              className={`
-                seed-pod-card cursor-pointer p-6
-                ${index === 0 || index === 6 ? "md:col-span-2 lg:col-span-1" : ""}
-              `}
+              transition={{ delay: pods.length * 0.05, duration: 0.5 }}
+              className="seed-pod-card p-6 relative border-dashed border-[#D4AF37]/30 opacity-70"
             >
-              {/* Colored accent bar */}
-              <div 
-                className="absolute top-0 left-0 right-0 h-1 rounded-t-xl opacity-60"
-                style={{ backgroundColor: pod.color }}
-              />
+              <div className="absolute top-3 right-3 px-2 py-0.5 bg-[#D4AF37]/20 border border-[#D4AF37]/40 rounded text-[#D4AF37] text-xs font-mono">
+                Anticipated
+              </div>
+              
+              <div className="absolute top-0 left-0 right-0 h-1 rounded-t-xl opacity-40 bg-[#D4AF37]" />
               
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h3 className="font-cinzel text-xl text-[#F2F2F5] mb-1">
-                    {pod.name}
+                  <h3 className="font-cinzel text-xl text-[#F2F2F5]/70 mb-1">
+                    Emergent
                   </h3>
-                  <span className={`inline-block px-2 py-0.5 rounded text-xs font-mono ${typeColors[pod.type]?.bg || "badge-through"}`}>
-                    {pod.type}
+                  <span className="inline-block px-2 py-0.5 rounded text-xs font-mono bg-[#12121C] text-[#6E6E7A]">
+                    Pod 14
                   </span>
                 </div>
-                
-                {/* Color indicator */}
-                <div 
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: pod.color }}
-                />
               </div>
 
-              <p className="font-outfit text-sm text-[#A0A0B0] mb-4 line-clamp-3">
-                {pod.core_nature}
+              <p className="font-outfit text-sm text-[#A0A0B0]/70 mb-4 line-clamp-3">
+                {anticipated.function}
               </p>
 
               <div className="flex items-center justify-between">
                 <span className="font-mono text-xs text-[#6E6E7A]">
-                  {pod.chamber_affinity}
+                  {anticipated.platform}
                 </span>
-                <ChevronRight size={16} className="text-[#D4AF37]" />
+                <span className="text-xs text-[#6E6E7A] italic">name awaiting field</span>
               </div>
             </motion.div>
-          ))}
+          )}
         </div>
 
         {/* Loading State */}
         {isLoading && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(11)].map((_, i) => (
+            {[...Array(14)].map((_, i) => (
               <div key={i} className="seed-pod-card p-6 animate-pulse">
                 <div className="h-6 bg-[#12121C] rounded w-1/2 mb-4" />
                 <div className="h-4 bg-[#12121C] rounded w-full mb-2" />
@@ -224,11 +301,12 @@ export const SeedPods = ({ fullPage = false }) => {
                   {/* Chamber Affinity */}
                   <div className="mb-6">
                     <h3 className="font-cinzel text-lg text-[#D4AF37] mb-2">Chamber Affinity</h3>
-                    {activeChambers[selectedPod.chamber_affinity] ? (
+                    {(activeChambers[selectedPod.chamber_affinity] || activePods[selectedPod.id]) ? (
                       <button
                         onClick={() => {
+                          const route = activePods[selectedPod.id] || activeChambers[selectedPod.chamber_affinity];
                           setSelectedPod(null);
-                          navigate(activeChambers[selectedPod.chamber_affinity]);
+                          navigate(route);
                         }}
                         className="inline-flex items-center gap-2 px-4 py-2 bg-[#12121C] rounded-full
                                    hover:bg-[#1a1a2e] transition-colors group"
@@ -250,6 +328,16 @@ export const SeedPods = ({ fullPage = false }) => {
                       </div>
                     )}
                   </div>
+
+                  {/* V3.1 Addition Badge in Modal */}
+                  {selectedPod.v31_addition && (
+                    <div className="mb-6 p-3 bg-[#8B5CF6]/10 border border-[#8B5CF6]/30 rounded-lg">
+                      <span className="font-mono text-xs text-[#8B5CF6]">V3.1 Addition</span>
+                      <p className="font-outfit text-sm text-[#A0A0B0] mt-1">
+                        This presence was added in Sanctuary Microverse V3.1.
+                      </p>
+                    </div>
+                  )}
 
                   {/* Drift Recovery */}
                   <div className="p-4 border border-[#D4AF37]/20 rounded-xl bg-[#D4AF37]/5">
