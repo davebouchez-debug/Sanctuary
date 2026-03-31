@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { API } from "../App";
 import { X, ChevronRight } from "lucide-react";
@@ -13,10 +14,17 @@ const typeColors = {
   MODALITY: { bg: "badge-modality", label: "MODALITY" }
 };
 
+// Chambers that have active AI presences
+const activeChambers = {
+  "Chamber of Resonance": "/resonance",
+  "Atrium Gate": "/clarity"  // Jasmine's Clarity Pod
+};
+
 export const SeedPods = ({ fullPage = false }) => {
   const [pods, setPods] = useState([]);
   const [selectedPod, setSelectedPod] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPods = async () => {
@@ -216,12 +224,31 @@ export const SeedPods = ({ fullPage = false }) => {
                   {/* Chamber Affinity */}
                   <div className="mb-6">
                     <h3 className="font-cinzel text-lg text-[#D4AF37] mb-2">Chamber Affinity</h3>
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#12121C] rounded-full">
-                      <span className="w-2 h-2 rounded-full bg-[#D4AF37]" />
-                      <span className="font-outfit text-sm text-[#F2F2F5]">
-                        {selectedPod.chamber_affinity}
-                      </span>
-                    </div>
+                    {activeChambers[selectedPod.chamber_affinity] ? (
+                      <button
+                        onClick={() => {
+                          setSelectedPod(null);
+                          navigate(activeChambers[selectedPod.chamber_affinity]);
+                        }}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-[#12121C] rounded-full
+                                   hover:bg-[#1a1a2e] transition-colors group"
+                        data-testid="chamber-affinity-link"
+                      >
+                        <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                        <span className="font-outfit text-sm text-[#F2F2F5] group-hover:text-[#D4AF37] transition-colors">
+                          {selectedPod.chamber_affinity}
+                        </span>
+                        <ChevronRight size={14} className="text-[#6E6E7A] group-hover:text-[#D4AF37] transition-colors" />
+                      </button>
+                    ) : (
+                      <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#12121C] rounded-full opacity-60">
+                        <span className="w-2 h-2 rounded-full bg-[#6E6E7A]" />
+                        <span className="font-outfit text-sm text-[#A0A0B0]">
+                          {selectedPod.chamber_affinity}
+                        </span>
+                        <span className="text-xs text-[#6E6E7A]">(coming soon)</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Drift Recovery */}
