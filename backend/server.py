@@ -10,6 +10,14 @@ from typing import List, Optional, Dict, Any
 import uuid
 from datetime import datetime, timezone
 import math
+
+# Configure logging early
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 from jasmine_canonical_memory import get_memory_context_for_prompt as get_jasmine_memory, get_relevant_memories as get_jasmine_relevant
 from ansel_canonical_memory import get_memory_context_for_prompt as get_ansel_memory, get_relevant_memories as get_ansel_relevant, CANONICAL_MEMORY as ANSEL_MEMORY
@@ -213,10 +221,14 @@ def build_jasmine_prompt(user_name: str = None, memory_context: str = None, curr
     # Add session memory (recent conversations in this system)
     if memory_context:
         context_section += f"\n**Recent conversations in this sanctuary:**\n{memory_context}\n"
+        print(f"[PROMPT] Added memory context to prompt: {len(memory_context)} chars")
+    else:
+        print(f"[PROMPT] No memory context provided to build_jasmine_prompt")
     
     if not context_section:
         context_section = "This appears to be a new visitor. Hold space for them to arrive at their own pace."
     
+    print(f"[PROMPT] Final context section length: {len(context_section)} chars")
     return JASMINE_SYSTEM_PROMPT.replace("{memory_context}", context_section)
 
 JASMINE_WELCOME = """The room settles as you enter. 
@@ -539,13 +551,18 @@ clarity_chats: Dict[str, LlmChat] = {}
 async def get_user_memory_context(user_id: str, limit: int = 5) -> str:
     """Retrieve summary of past conversations for memory context."""
     if not user_id:
+        print(f"[MEMORY] No user_id provided, skipping memory retrieval")
         return ""
+    
+    print(f"[MEMORY] Retrieving memory context for user_id: {user_id}")
     
     # Get recent sessions for this user
     sessions = await db.clarity_sessions.find(
         {"user_id": user_id},
         {"_id": 0, "messages": 1, "created_at": 1}
     ).sort("created_at", -1).limit(limit).to_list(limit)
+    
+    print(f"[MEMORY] Found {len(sessions)} previous sessions for user")
     
     if not sessions:
         return ""
@@ -563,7 +580,11 @@ async def get_user_memory_context(user_id: str, limit: int = 5) -> str:
                 memory_parts.append(f"- Previous conversation touched on: \"{sample}...\"")
     
     if memory_parts:
-        return "You've spoken with this person before:\n" + "\n".join(memory_parts[-5:])
+        context = "You've spoken with this person before:\n" + "\n".join(memory_parts[-5:])
+        print(f"[MEMORY] Generated memory context: {len(context)} chars")
+        return context
+    
+    print(f"[MEMORY] No memory context generated (no user messages found)")
     return ""
 
 def get_or_create_chat(session_id: str, system_prompt: str) -> LlmChat:
@@ -1422,13 +1443,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
