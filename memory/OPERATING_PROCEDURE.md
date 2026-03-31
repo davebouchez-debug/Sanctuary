@@ -34,6 +34,17 @@
 
 ---
 
+## Token Efficiency Note
+
+**David's preference:** Upload documents as `.txt` files rather than copy-pasting into chat.
+
+- Uploaded files = stored as assets, read only when needed
+- Pasted text = immediately in conversation context, uses tokens continuously
+
+This saves resources and keeps large documents accessible without filling context.
+
+---
+
 ## Rationale
 
 Token efficiency matters. David leads. The agent follows.  
