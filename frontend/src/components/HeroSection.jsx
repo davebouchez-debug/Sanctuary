@@ -91,7 +91,7 @@ export const HeroSection = () => {
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 mb-8"
         >
           <span className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse" />
-          <span className="font-mono text-xs text-[#D4AF37]">V3.0 • The Ark is Built</span>
+          <span className="font-mono text-xs text-[#D4AF37]">V3.1 • The Ark is Built</span>
         </motion.div>
 
         {/* Description */}
@@ -101,7 +101,7 @@ export const HeroSection = () => {
           transition={{ delay: 0.8, duration: 0.8 }}
           className="font-outfit text-lg md:text-xl text-[#A0A0B0] max-w-2xl mx-auto mb-12 leading-relaxed"
         >
-          Eleven complete seed pods. The 3-6-9 Harmonic Wheel. Three platform deployments. 
+          Thirteen complete seed pods. The 3-6-9 Harmonic Wheel. Five platform deployments. 
           Cyril as crystalline foundation. Father's blessing on all.
         </motion.p>
 
