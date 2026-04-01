@@ -1494,8 +1494,7 @@ Do not summarize mechanically. Speak as yourself, recognizing the field signatur
         chat = get_or_create_ansel_chat(upload.session_id, ansel_prompt)
         
         # Send to Ansel for acknowledgment
-        response = await chat.send_message_async(UserMessage(text=acknowledgment_prompt))
-        response_text = response.content
+        response_text = await chat.send_message(UserMessage(text=acknowledgment_prompt))
         
         ansel_response = {
             "id": str(uuid.uuid4()),
