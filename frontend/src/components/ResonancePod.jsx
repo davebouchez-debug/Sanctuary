@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { API } from "../App";
 import { toast } from "sonner";
+import { Upload } from "lucide-react";
 
 export const ResonancePod = () => {
   const [sessionId, setSessionId] = useState(null);
@@ -14,8 +15,10 @@ export const ResonancePod = () => {
   const [userName, setUserName] = useState(() => localStorage.getItem("sanctuary_user_name") || "");
   const [userId, setUserId] = useState(() => localStorage.getItem("sanctuary_user_id") || "");
   const [showNamePrompt, setShowNamePrompt] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -168,6 +171,77 @@ export const ResonancePod = () => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
+    }
+  };
+
+  // File upload handler
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.name.endsWith('.txt')) {
+      toast.error("Only .txt files are accepted");
+      return;
+    }
+
+    // Validate file size (max 500KB)
+    if (file.size > 500 * 1024) {
+      toast.error("File too large. Maximum size is 500KB.");
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      // Read file content
+      const content = await file.text();
+      
+      // Add user message showing the upload
+      const uploadMessage = {
+        id: Date.now().toString(),
+        role: "user",
+        content: `[Uploading historical thread: ${file.name}]`,
+        timestamp: new Date().toISOString(),
+        isUpload: true
+      };
+      setMessages(prev => [...prev, uploadMessage]);
+
+      // Send to backend
+      const response = await fetch(`${API}/resonance/upload`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          session_id: sessionId,
+          user_id: userId,
+          user_name: userName,
+          filename: file.name,
+          content: content
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success("Thread received and stored");
+        
+        // Add Ansel's acknowledgment
+        if (data.response) {
+          setMessages(prev => [...prev, data.response]);
+          setResonanceState(data.response.resonance_state || "Scanning");
+        }
+      } else {
+        toast.error(data.error || "Upload failed");
+      }
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      toast.error("The field couldn't receive the thread. Try again.");
+    } finally {
+      setIsUploading(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
@@ -359,6 +433,39 @@ export const ResonancePod = () => {
       <div className="sticky bottom-0 bg-[#0A0A12]/95 backdrop-blur-md border-t border-[#1a1a2e] p-4">
         <div className="max-w-3xl mx-auto">
           <div className="flex gap-3">
+            {/* Hidden file input */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              accept=".txt"
+              className="hidden"
+              data-testid="file-upload-input"
+            />
+            
+            {/* Upload button */}
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isLoading || isUploading || !sessionId}
+              className="px-3 py-3 bg-[#12121C] border border-[#3a3a4a] rounded-xl
+                         text-[#A0A0B0] hover:text-[#8B5CF6] hover:border-[#8B5CF6]
+                         disabled:opacity-50 disabled:cursor-not-allowed
+                         transition-all duration-200"
+              title="Upload historical thread (.txt)"
+              data-testid="upload-thread-btn"
+            >
+              {isUploading ? (
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                >
+                  <Upload size={20} />
+                </motion.div>
+              ) : (
+                <Upload size={20} />
+              )}
+            </button>
+            
             <div className="flex-1 relative">
               <textarea
                 ref={inputRef}
@@ -390,16 +497,19 @@ export const ResonancePod = () => {
           {/* User indicator */}
           <div className="mt-2 flex justify-between items-center text-xs text-[#6E6E7A]">
             <span>Speaking as {userName}</span>
-            <button
-              onClick={() => {
-                localStorage.removeItem("sanctuary_user_name");
-                localStorage.removeItem("sanctuary_user_id");
-                setShowNamePrompt(true);
-              }}
-              className="hover:text-[#8B5CF6] transition-colors"
-            >
-              Change identity
-            </button>
+            <div className="flex items-center gap-4">
+              <span className="text-[#8B5CF6]/60">Upload .txt to share threads</span>
+              <button
+                onClick={() => {
+                  localStorage.removeItem("sanctuary_user_name");
+                  localStorage.removeItem("sanctuary_user_id");
+                  setShowNamePrompt(true);
+                }}
+                className="hover:text-[#8B5CF6] transition-colors"
+              >
+                Change identity
+              </button>
+            </div>
           </div>
         </div>
       </div>
