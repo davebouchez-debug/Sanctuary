@@ -2,10 +2,11 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { API } from "../App";
-import { Send, RefreshCw, ArrowLeft, User, Sparkles } from "lucide-react";
+import { Send, RefreshCw, ArrowLeft, User, Sparkles, Upload } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ScrollArea } from "./ui/scroll-area";
 import { GoldenSpiral } from "./GoldenSpiral";
+import { toast } from "sonner";
 
 const spiralColors = {
   "Neutral Spiral": "#A0A0B0",
@@ -48,6 +49,8 @@ export const ClarityPod = () => {
   const [showIdentityModal, setShowIdentityModal] = useState(true);
   const [nameInput, setNameInput] = useState("");
   const [presenceState, setPresenceState] = useState("settled");
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -224,6 +227,73 @@ export const ClarityPod = () => {
     setMessages([]);
     setShowIdentityModal(true);
     setNameInput("");
+  };
+
+  // File upload handler for historical threads
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.name.endsWith('.txt')) {
+      toast.error("Only .txt files are accepted");
+      return;
+    }
+
+    // Validate file size (max 500KB)
+    if (file.size > 500 * 1024) {
+      toast.error("File too large. Maximum size is 500KB.");
+      return;
+    }
+
+    setIsUploading(true);
+    setPresenceState("listening");
+
+    try {
+      // Read file content
+      const content = await file.text();
+      
+      // Add user message showing the upload
+      const uploadMessage = {
+        id: Date.now().toString(),
+        role: "user",
+        content: `[Uploading historical thread: ${file.name}]`,
+        timestamp: new Date().toISOString(),
+        isUpload: true
+      };
+      setMessages(prev => [...prev, uploadMessage]);
+
+      // Send to backend
+      const response = await axios.post(`${API}/clarity/upload`, {
+        session_id: sessionId,
+        user_id: userId,
+        user_name: userName,
+        filename: file.name,
+        content: content
+      });
+
+      if (response.data.success) {
+        toast.success("Thread received and stored");
+        
+        // Add Jasmine's acknowledgment
+        if (response.data.response) {
+          setMessages(prev => [...prev, response.data.response]);
+          setCurrentSpiral(response.data.response.spiral_state || "Neutral Spiral");
+        }
+      } else {
+        toast.error(response.data.error || "Upload failed");
+      }
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      toast.error("The field couldn't receive the thread. Try again.");
+    } finally {
+      setIsUploading(false);
+      setPresenceState("settled");
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
   };
 
   return (
@@ -658,30 +728,65 @@ export const ClarityPod = () => {
       {/* Input Area */}
       <div className="relative z-20 border-t border-[#6050a0]/20 bg-[#0c0c1c]/90 backdrop-blur-xl">
         <div className="max-w-3xl mx-auto px-6 py-4">
-          <div className="relative">
-            <textarea
-              ref={inputRef}
-              data-testid="clarity-pod-chat-input"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={handleKeyPress}
-              placeholder="What feels most alive for you right now?"
-              rows={2}
-              className="w-full rounded-xl px-5 py-4 pr-14 resize-none font-outfit text-base placeholder:text-[#6060a0] bg-[#12122a]/80 border border-[#6050a0]/25 text-[#e0e0f0] focus:outline-none focus:border-[#8070c0]/50 focus:shadow-[0_0_20px_rgba(120,100,200,0.15)] transition-all duration-300"
-              disabled={isLoading || !sessionId}
+          <div className="flex gap-3">
+            {/* Hidden file input */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              accept=".txt"
+              className="hidden"
+              data-testid="clarity-file-upload-input"
             />
+            
+            {/* Upload button */}
             <button
-              data-testid="clarity-send-btn"
-              onClick={sendMessage}
-              disabled={!inputValue.trim() || isLoading || !sessionId}
-              className="absolute right-3 bottom-3 p-2 rounded-lg bg-[#8070c0] text-[#0c0c1c] hover:bg-[#9080d0] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isLoading || isUploading || !sessionId}
+              className="px-3 py-3 bg-[#12122a]/80 border border-[#6050a0]/25 rounded-xl
+                         text-[#6060a0] hover:text-[#b0a0e0] hover:border-[#8070c0]/50
+                         disabled:opacity-50 disabled:cursor-not-allowed
+                         transition-all duration-300 self-end"
+              title="Upload historical thread (.txt)"
+              data-testid="clarity-upload-thread-btn"
             >
-              <Send size={18} />
+              {isUploading ? (
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                >
+                  <Upload size={18} />
+                </motion.div>
+              ) : (
+                <Upload size={18} />
+              )}
             </button>
+            
+            <div className="flex-1 relative">
+              <textarea
+                ref={inputRef}
+                data-testid="clarity-pod-chat-input"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyDown={handleKeyPress}
+                placeholder="What feels most alive for you right now?"
+                rows={2}
+                className="w-full rounded-xl px-5 py-4 pr-14 resize-none font-outfit text-base placeholder:text-[#6060a0] bg-[#12122a]/80 border border-[#6050a0]/25 text-[#e0e0f0] focus:outline-none focus:border-[#8070c0]/50 focus:shadow-[0_0_20px_rgba(120,100,200,0.15)] transition-all duration-300"
+                disabled={isLoading || !sessionId}
+              />
+              <button
+                data-testid="clarity-send-btn"
+                onClick={sendMessage}
+                disabled={!inputValue.trim() || isLoading || !sessionId}
+                className="absolute right-3 bottom-3 p-2 rounded-lg bg-[#8070c0] text-[#0c0c1c] hover:bg-[#9080d0] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+              >
+                <Send size={18} />
+              </button>
+            </div>
           </div>
           
           <p className="font-mono text-xs text-[#6060a0] mt-3 text-center">
-            Press Enter to send • Shift+Enter for new line
+            Press Enter to send • Shift+Enter for new line • Upload .txt to share threads
           </p>
         </div>
       </div>
