@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { API } from "../App";
 import { Send, RefreshCw, ArrowLeft, User, Sparkles, Upload } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ScrollArea } from "./ui/scroll-area";
 import { GoldenSpiral } from "./GoldenSpiral";
 import { toast } from "sonner";
@@ -50,9 +50,42 @@ export const ClarityPod = () => {
   const [nameInput, setNameInput] = useState("");
   const [presenceState, setPresenceState] = useState("settled");
   const [isUploading, setIsUploading] = useState(false);
+  const [sessionCache, setSessionCache] = useState(null);
   const fileInputRef = useRef(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const navigate = useNavigate();
+
+  // End session and promote breadcrumbs to Permanent MRA
+  const endSession = useCallback(async () => {
+    if (!sessionId) return;
+    
+    try {
+      await axios.post(`${API}/clarity/session/${sessionId}/end`);
+      console.log("[MRA] Session ended, breadcrumbs promoted to permanent memory");
+    } catch (error) {
+      console.error("[MRA] Failed to end session:", error);
+    }
+  }, [sessionId]);
+
+  // Handle navigation away - end session and promote breadcrumbs
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (sessionId) {
+        // Use sendBeacon for reliable delivery on page unload
+        navigator.sendBeacon(`${API}/clarity/session/${sessionId}/end`);
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      // Also end session when component unmounts (React navigation)
+      if (sessionId) {
+        endSession();
+      }
+    };
+  }, [sessionId, endSession]);
 
   // Generate floating particles (dust motes in window light)
   const particles = useMemo(() => {
@@ -173,6 +206,11 @@ export const ClarityPod = () => {
         response.data.response
       ]);
       setCurrentSpiral(response.data.response.spiral);
+      
+      // Update session cache stats (for potential UI display)
+      if (response.data.session_cache) {
+        setSessionCache(response.data.session_cache);
+      }
     } catch (error) {
       console.error("Failed to send message:", error);
       // Remove temp message on error

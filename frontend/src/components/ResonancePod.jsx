@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { API } from "../App";
@@ -16,10 +16,42 @@ export const ResonancePod = () => {
   const [userId, setUserId] = useState(() => localStorage.getItem("sanctuary_user_id") || "");
   const [showNamePrompt, setShowNamePrompt] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [sessionCache, setSessionCache] = useState(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
+
+  // End session and promote breadcrumbs to Permanent MRA
+  const endSession = useCallback(async () => {
+    if (!sessionId) return;
+    
+    try {
+      await fetch(`${API}/resonance/session/${sessionId}/end`, { method: "POST" });
+      console.log("[MRA] Session ended, breadcrumbs promoted to permanent memory");
+    } catch (error) {
+      console.error("[MRA] Failed to end session:", error);
+    }
+  }, [sessionId]);
+
+  // Handle navigation away - end session and promote breadcrumbs
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (sessionId) {
+        // Use sendBeacon for reliable delivery on page unload
+        navigator.sendBeacon(`${API}/resonance/session/${sessionId}/end`);
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      // Also end session when component unmounts (React navigation)
+      if (sessionId) {
+        endSession();
+      }
+    };
+  }, [sessionId, endSession]);
 
   useEffect(() => {
     // Check if we have a stored user
@@ -148,6 +180,11 @@ export const ResonancePod = () => {
       if (data.response) {
         setMessages(prev => [...prev, data.response]);
         setResonanceState(data.response.resonance_state || "Threshold");
+      }
+      
+      // Update session cache stats (for potential UI display)
+      if (data.session_cache) {
+        setSessionCache(data.session_cache);
       }
     } catch (error) {
       console.error("Error sending message:", error);

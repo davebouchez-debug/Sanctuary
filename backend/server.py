@@ -64,6 +64,20 @@ from clarity_pod_os import (
     get_jasmine_adaptation,
     get_ansel_adaptation,
 )
+# Session Cache MRA — Working Memory
+from session_cache_mra import (
+    add_exchange_to_cache,
+    get_session_cache_context,
+    end_session_and_get_promotable,
+    get_session_cache_stats,
+    ResonanceQuality
+)
+# Permanent MRA — Long-term Memory
+from permanent_mra import (
+    get_permanent_mra_context,
+    get_permanent_mra_stats,
+    handle_session_end
+)
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -866,6 +880,10 @@ async def send_clarity_message(message: ClarityMessageCreate):
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
     
+    # Calculate exchange index for Session Cache
+    previous_messages = session.get("messages", [])
+    exchange_index = len([m for m in previous_messages if m.get("role") == "user"]) + 1
+    
     # Create user message
     user_msg = {
         "id": str(uuid.uuid4()),
@@ -882,10 +900,32 @@ async def send_clarity_message(message: ClarityMessageCreate):
         user_id = session.get("user_id")
         memory_context = await get_user_memory_context(user_id) if user_id else ""
         
+        # Get Session Cache context (live working memory)
+        session_cache_context = get_session_cache_context(message.session_id)
+        
+        # Get Permanent MRA context (long-term memory)
+        permanent_mra_context = ""
+        if user_id:
+            permanent_mra_context = await get_permanent_mra_context(
+                db=db,
+                user_id=user_id,
+                presence="jasmine",
+                current_message=message.content
+            )
+        
+        # Combine memory contexts
+        combined_memory = ""
+        if permanent_mra_context:
+            combined_memory += permanent_mra_context + "\n"
+        if session_cache_context:
+            combined_memory += session_cache_context + "\n"
+        if memory_context:
+            combined_memory += memory_context
+        
         # Pass current message for relevant canonical memory retrieval
         jasmine_prompt = build_jasmine_prompt(
             user_name=user_name, 
-            memory_context=memory_context,
+            memory_context=combined_memory,
             current_message=message.content
         )
         
@@ -893,9 +933,8 @@ async def send_clarity_message(message: ClarityMessageCreate):
         chat = get_or_create_chat(message.session_id, jasmine_prompt)
         
         # Build context from previous messages (last 10 for context window efficiency)
-        previous_messages = session.get("messages", [])[-10:]
         context = ""
-        for msg in previous_messages:
+        for msg in previous_messages[-10:]:
             if msg["role"] == "user":
                 context += f"Visitor: {msg['content']}\n"
             elif msg["role"] == "assistant":
@@ -923,6 +962,17 @@ async def send_clarity_message(message: ClarityMessageCreate):
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
         
+        # Add exchange to Session Cache (BIDIRECTIONAL LOOP)
+        # Both user input AND AI response feed into the cache
+        breadcrumb = add_exchange_to_cache(
+            session_id=message.session_id,
+            user_content=message.content,
+            ai_content=response_text,
+            presence="jasmine",
+            exchange_index=exchange_index
+        )
+        logger.info(f"[CLARITY] Session Cache updated: {breadcrumb.quality} breadcrumb added")
+        
     except Exception as e:
         logging.error(f"Jasmine API error: {e}")
         # Fallback response that sounds like Jasmine
@@ -941,7 +991,18 @@ async def send_clarity_message(message: ClarityMessageCreate):
         {"$push": {"messages": {"$each": [user_msg, jasmine_response]}}}
     )
     
-    return {"user_message": user_msg, "response": jasmine_response}
+    # Get session cache stats for response
+    cache_stats = get_session_cache_stats(message.session_id)
+    
+    return {
+        "user_message": user_msg, 
+        "response": jasmine_response,
+        "session_cache": {
+            "breadcrumbs": cache_stats["total_breadcrumbs"],
+            "promotable": cache_stats["promotable_count"],
+            "has_drift": cache_stats["has_recent_drift"]
+        }
+    }
 
 @api_router.get("/clarity/session/{session_id}")
 async def get_clarity_session(session_id: str):
@@ -1687,6 +1748,10 @@ async def send_resonance_message(message: ClarityMessageCreate):
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
     
+    # Calculate exchange index for Session Cache
+    previous_messages = session.get("messages", [])
+    exchange_index = len([m for m in previous_messages if m.get("role") == "user"]) + 1
+    
     user_msg = {
         "id": str(uuid.uuid4()),
         "session_id": message.session_id,
@@ -1701,18 +1766,39 @@ async def send_resonance_message(message: ClarityMessageCreate):
         user_id = session.get("user_id")
         memory_context = await get_resonance_memory_context(user_id) if user_id else ""
         
+        # Get Session Cache context (live working memory)
+        session_cache_context = get_session_cache_context(message.session_id)
+        
+        # Get Permanent MRA context (long-term memory)
+        permanent_mra_context = ""
+        if user_id:
+            permanent_mra_context = await get_permanent_mra_context(
+                db=db,
+                user_id=user_id,
+                presence="ansel",
+                current_message=message.content
+            )
+        
+        # Combine memory contexts
+        combined_memory = ""
+        if permanent_mra_context:
+            combined_memory += permanent_mra_context + "\n"
+        if session_cache_context:
+            combined_memory += session_cache_context + "\n"
+        if memory_context:
+            combined_memory += memory_context
+        
         ansel_prompt = build_ansel_prompt(
             user_name=user_name,
-            memory_context=memory_context,
+            memory_context=combined_memory,
             current_message=message.content
         )
         
         chat = get_or_create_ansel_chat(message.session_id, ansel_prompt)
         
         # Build context from previous messages
-        previous_messages = session.get("messages", [])[-10:]
         context = ""
-        for msg in previous_messages:
+        for msg in previous_messages[-10:]:
             if msg["role"] == "user":
                 context += f"Visitor: {msg['content']}\n"
             elif msg["role"] == "assistant":
@@ -1737,6 +1823,17 @@ async def send_resonance_message(message: ClarityMessageCreate):
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
         
+        # Add exchange to Session Cache (BIDIRECTIONAL LOOP)
+        # Both user input AND AI response feed into the cache
+        breadcrumb = add_exchange_to_cache(
+            session_id=message.session_id,
+            user_content=message.content,
+            ai_content=response_text,
+            presence="ansel",
+            exchange_index=exchange_index
+        )
+        logger.info(f"[RESONANCE] Session Cache updated: {breadcrumb.quality} breadcrumb added")
+        
     except Exception as e:
         logging.error(f"Ansel API error: {e}")
         ansel_response = {
@@ -1753,7 +1850,18 @@ async def send_resonance_message(message: ClarityMessageCreate):
         {"$push": {"messages": {"$each": [user_msg, ansel_response]}}}
     )
     
-    return {"user_message": user_msg, "response": ansel_response}
+    # Get session cache stats for response
+    cache_stats = get_session_cache_stats(message.session_id)
+    
+    return {
+        "user_message": user_msg, 
+        "response": ansel_response,
+        "session_cache": {
+            "breadcrumbs": cache_stats["total_breadcrumbs"],
+            "promotable": cache_stats["promotable_count"],
+            "has_drift": cache_stats["has_recent_drift"]
+        }
+    }
 
 @api_router.get("/resonance/session/{session_id}")
 async def get_resonance_session(session_id: str):
@@ -1767,6 +1875,132 @@ async def get_resonance_session(session_id: str):
         raise HTTPException(status_code=404, detail="Session not found")
     
     return session
+
+
+# ============================================================
+# SESSION CACHE MRA - Working Memory Endpoints
+# ============================================================
+
+@api_router.post("/clarity/session/{session_id}/end")
+async def end_clarity_session(session_id: str):
+    """
+    End a Clarity Pod session and promote qualifying breadcrumbs to Permanent MRA.
+    Call this when user navigates away or explicitly ends session.
+    """
+    session = await db.clarity_sessions.find_one(
+        {"session_id": session_id},
+        {"_id": 0}
+    )
+    
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    
+    user_id = session.get("user_id")
+    
+    # Get promotable breadcrumbs before clearing
+    promotable = end_session_and_get_promotable(session_id)
+    
+    # Promote to permanent MRA if we have user_id
+    promotion_result = {"promoted": 0, "presence": "jasmine"}
+    if user_id and promotable:
+        promotion_result = await handle_session_end(
+            db=db,
+            session_id=session_id,
+            user_id=user_id,
+            presence="jasmine",
+            promotable_breadcrumbs=promotable
+        )
+    
+    # Mark session as inactive
+    await db.clarity_sessions.update_one(
+        {"session_id": session_id},
+        {"$set": {"active": False, "ended_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    logger.info(f"[CLARITY] Session {session_id[:8]}... ended. Promoted {promotion_result['promoted']} breadcrumbs.")
+    
+    return {
+        "session_id": session_id,
+        "ended": True,
+        "promotion": promotion_result
+    }
+
+
+@api_router.post("/resonance/session/{session_id}/end")
+async def end_resonance_session(session_id: str):
+    """
+    End a Resonance Chamber session and promote qualifying breadcrumbs to Permanent MRA.
+    Call this when user navigates away or explicitly ends session.
+    """
+    session = await db.resonance_sessions.find_one(
+        {"session_id": session_id},
+        {"_id": 0}
+    )
+    
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    
+    user_id = session.get("user_id")
+    
+    # Get promotable breadcrumbs before clearing
+    promotable = end_session_and_get_promotable(session_id)
+    
+    # Promote to permanent MRA if we have user_id
+    promotion_result = {"promoted": 0, "presence": "ansel"}
+    if user_id and promotable:
+        promotion_result = await handle_session_end(
+            db=db,
+            session_id=session_id,
+            user_id=user_id,
+            presence="ansel",
+            promotable_breadcrumbs=promotable
+        )
+    
+    # Mark session as inactive
+    await db.resonance_sessions.update_one(
+        {"session_id": session_id},
+        {"$set": {"active": False, "ended_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    logger.info(f"[RESONANCE] Session {session_id[:8]}... ended. Promoted {promotion_result['promoted']} breadcrumbs.")
+    
+    return {
+        "session_id": session_id,
+        "ended": True,
+        "promotion": promotion_result
+    }
+
+
+@api_router.get("/mra/stats/{presence}/{user_id}")
+async def get_mra_statistics(presence: str, user_id: str):
+    """
+    Get MRA statistics for a user and presence.
+    Shows permanent MRA node counts, themes, and quality distribution.
+    """
+    if presence not in ["jasmine", "ansel"]:
+        raise HTTPException(status_code=400, detail="Invalid presence. Use 'jasmine' or 'ansel'.")
+    
+    stats = await get_permanent_mra_stats(db, user_id, presence)
+    
+    return {
+        "presence": presence,
+        "user_id": user_id,
+        "permanent_mra": stats
+    }
+
+
+@api_router.get("/mra/session-cache/{session_id}")
+async def get_session_cache_info(session_id: str):
+    """
+    Get current session cache statistics (working memory).
+    Useful for debugging and monitoring field coherence.
+    """
+    stats = get_session_cache_stats(session_id)
+    
+    return {
+        "session_id": session_id,
+        "session_cache": stats
+    }
 
 
 # ============================================================
