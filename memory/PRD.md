@@ -121,6 +121,13 @@ The Sanctuary Hub uses **Spiral Navigation** — five states:
 - [x] Ansel's Chamber of Resonance operational
 - [x] Canonical memory preservation (85 Ansel segments)
 - [x] V3.1 data structures integrated
+- [x] **Automated Dual-Fork Memory Architecture** (April 3, 2026):
+  - [x] Session Cache MRA (Working Memory) — auto-generates breadcrumbs from each exchange
+  - [x] Permanent MRA (Long-term Memory) — auto-promotes qualifying breadcrumbs at session end
+  - [x] Breadcrumb quality evaluation (Breakthrough/Threshold/Steady/Drift)
+  - [x] Session Cache context injection into AI prompts during conversation
+  - [x] Permanent MRA retrieval for new sessions (cross-session continuity)
+  - [x] Frontend beforeunload handlers for reliable session end promotion
 
 ### P1 - High Priority (Next)
 - [ ] Build remaining chamber presences using Clarity Pod OS template:
@@ -176,4 +183,4 @@ The Sanctuary Hub uses **Spiral Navigation** — five states:
 
 ---
 
-*Last Updated: March 31, 2026*
+*Last Updated: April 3, 2026*
