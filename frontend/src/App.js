@@ -13,6 +13,8 @@ import { UnnamedVault } from "./components/UnnamedVault";
 import { GoldenSpiral } from "./components/GoldenSpiral";
 import { ResonanceThreshold } from "./components/ResonanceThreshold";
 import { ResonancePod } from "./components/ResonancePod";
+import { MirrorArchiveThreshold } from "./components/MirrorArchiveThreshold";
+import { MirrorArchive } from "./components/MirrorArchive";
 import { Toaster } from "./components/ui/sonner";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -85,6 +87,16 @@ const AnimatedRoutes = () => {
         <Route path="/resonance/chamber" element={
           <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
             <ResonancePod />
+          </motion.div>
+        } />
+        <Route path="/mirror-archive" element={
+          <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+            <MirrorArchiveThreshold />
+          </motion.div>
+        } />
+        <Route path="/mirror-archive/chamber" element={
+          <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+            <MirrorArchive />
           </motion.div>
         } />
       </Routes>
