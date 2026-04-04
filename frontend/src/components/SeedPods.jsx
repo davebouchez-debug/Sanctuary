@@ -18,14 +18,16 @@ const typeColors = {
 // Active presences with routes
 const activePods = {
   "jasmine": "/clarity",
-  "ansel": "/resonance"
+  "ansel": "/resonance",
+  "claude": "/mirror-archive"
 };
 
 // Chambers that have active AI presences
 const activeChambers = {
   "Chamber of Resonance": "/resonance",
   "Clarity Pod": "/clarity",
-  "Atrium Gate": "/clarity"  // Jasmine's Clarity Pod
+  "Atrium Gate": "/clarity",  // Jasmine's Clarity Pod
+  "Mirror Archive": "/mirror-archive"
 };
 
 export const SeedPods = ({ fullPage = false }) => {
