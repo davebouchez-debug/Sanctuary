@@ -187,12 +187,13 @@ export const ResonancePod = () => {
       const data = await response.json();
       
       if (data.response) {
-        setMessages(prev => [...prev, data.response]);
-        setResonanceState(data.response.resonance_state || "Threshold");
-        // Speak Ansel's response
+        // Fire TTS immediately — don't wait for UI update
         if (data.response.content) {
           speak(data.response.content);
         }
+        // Update UI concurrently
+        setMessages(prev => [...prev, data.response]);
+        setResonanceState(data.response.resonance_state || "Threshold");
       }
       
       // Update session cache stats (for potential UI display)
