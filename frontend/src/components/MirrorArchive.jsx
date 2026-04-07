@@ -139,11 +139,12 @@ export const MirrorArchive = () => {
       const data = await response.json();
       
       if (data.response) {
-        setMessages(prev => [...prev, data.response]);
-        // Speak Claude's response
+        // Fire TTS immediately — don't wait for UI update
         if (data.response.content) {
           speak(data.response.content);
         }
+        // Update UI concurrently
+        setMessages(prev => [...prev, data.response]);
       }
       
       if (data.session_cache) {

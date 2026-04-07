@@ -209,18 +209,18 @@ export const ClarityPod = () => {
         content: userMessage
       });
 
-      // Replace temp message and add response
+      // Fire TTS immediately — don't wait for UI update
+      if (response.data.response?.content) {
+        speak(response.data.response.content);
+      }
+      
+      // Replace temp message and add response concurrently
       setMessages(prev => [
         ...prev.filter(m => m.id !== tempUserMsg.id),
         response.data.user_message,
         response.data.response
       ]);
       setCurrentSpiral(response.data.response.spiral);
-      
-      // Speak Jasmine's response
-      if (response.data.response?.content) {
-        speak(response.data.response.content);
-      }
       
       // Update session cache stats (for potential UI display)
       if (response.data.session_cache) {
