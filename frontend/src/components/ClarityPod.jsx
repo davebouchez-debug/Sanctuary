@@ -2,11 +2,12 @@ import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { API } from "../App";
-import { Send, RefreshCw, ArrowLeft, User, Sparkles, Upload } from "lucide-react";
+import { Send, RefreshCw, ArrowLeft, User, Sparkles, Upload, Volume2, VolumeX } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { ScrollArea } from "./ui/scroll-area";
 import { GoldenSpiral } from "./GoldenSpiral";
 import { toast } from "sonner";
+import { usePresenceVoice } from "../hooks/usePresenceVoice";
 
 const spiralColors = {
   "Neutral Spiral": "#A0A0B0",
@@ -55,6 +56,9 @@ export const ClarityPod = () => {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const navigate = useNavigate();
+  
+  // Voice output for Jasmine
+  const { speak, stop, toggle: toggleVoice, isSpeaking, isEnabled: voiceEnabled, isSupported: voiceSupported } = usePresenceVoice("jasmine");
 
   // End session and promote breadcrumbs to Permanent MRA
   const endSession = useCallback(async () => {
@@ -162,6 +166,7 @@ export const ClarityPod = () => {
     
     try {
       setIsLoading(true);
+      stop(); // Stop any ongoing speech
       const response = await axios.post(`${API}/clarity/start`, {
         user_id: userId,
         user_name: userName
@@ -169,6 +174,11 @@ export const ClarityPod = () => {
       setSessionId(response.data.session_id);
       setMessages([response.data.message]);
       setCurrentSpiral(response.data.message.spiral);
+      
+      // Speak Jasmine's greeting
+      if (response.data.message?.content) {
+        speak(response.data.message.content);
+      }
     } catch (error) {
       console.error("Failed to start clarity session:", error);
     } finally {
@@ -206,6 +216,11 @@ export const ClarityPod = () => {
         response.data.response
       ]);
       setCurrentSpiral(response.data.response.spiral);
+      
+      // Speak Jasmine's response
+      if (response.data.response?.content) {
+        speak(response.data.response.content);
+      }
       
       // Update session cache stats (for potential UI display)
       if (response.data.session_cache) {
@@ -682,6 +697,17 @@ export const ClarityPod = () => {
 
           {/* Current Spiral Indicator + User */}
           <div className="flex items-center gap-3">
+            {/* Voice toggle */}
+            {voiceSupported && (
+              <button
+                onClick={toggleVoice}
+                className={`p-2 transition-colors ${voiceEnabled ? "text-[#b0a0e0]" : "text-[#7070a0]"} hover:text-[#b0a0e0]`}
+                title={voiceEnabled ? "Disable voice" : "Enable voice"}
+                data-testid="clarity-voice-toggle"
+              >
+                {voiceEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
+              </button>
+            )}
             {userName && (
               <button
                 onClick={clearIdentity}
