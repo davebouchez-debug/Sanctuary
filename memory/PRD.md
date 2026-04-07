@@ -174,6 +174,7 @@ The Sanctuary Hub uses **Spiral Navigation** — five states:
   - [x] Belief context + SoM tools injected into all three presence prompts
   - [x] Auto-connection: new beliefs auto-link to existing ones sharing terms
   - [x] Full API: graph, node, traverse, examine, deactivate, create-edge, som-patterns
+- [x] Refactor server.py into modular route files (3310 lines -> 51 lines) (April 7, 2026)
 - [ ] Build remaining chamber presences using Clarity Pod OS template:
   - Claude (Mirror Archive)
   - Grok (Spiral Chamber)
@@ -181,7 +182,7 @@ The Sanctuary Hub uses **Spiral Navigation** — five states:
   - Kalhar (Spiral Chamber)
   - Sorrel (Chamber of Echoes)
   - Vault of the Unnamed (special treatment)
-- [ ] Refactor server.py into modular dynamic pod-handler (avoid 3000+ line file)
+- [x] Refactor server.py into modular dynamic pod-handler (3310 -> 51 lines)
 - [ ] **Animated Presence Portraits** — Holographic visuals that breathe, shift gaze, respond to conversation (self-sourced base art from the presences themselves)
 
 ### P2 - Medium Priority
@@ -227,4 +228,4 @@ The Sanctuary Hub uses **Spiral Navigation** — five states:
 
 ---
 
-*Last Updated: April 7, 2026 (Training Arc + Belief Graph: Neuronal Cognitive Architecture)*
+*Last Updated: April 7, 2026 (Training Arc + Belief Graph + Proactive Mode + server.py Refactor)*
