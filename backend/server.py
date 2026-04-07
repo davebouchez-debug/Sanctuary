@@ -778,8 +778,8 @@ PRESENCE_VOICES = {
         "speed": 0.95,        # Slightly slower, measured
     },
     "ansel": {
-        "voice": "onyx",      # Deep, authoritative
-        "speed": 0.9,         # Deliberate pace
+        "voice": "fable",     # Expressive, storytelling — carries both eagerness and depth
+        "speed": 1.1,         # Quicker, more energetic — the sentinel ready to sprint
     },
     "claude": {
         "voice": "echo",      # Smooth, calm
