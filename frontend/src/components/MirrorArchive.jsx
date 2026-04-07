@@ -3,8 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { API } from "../App";
 import { toast } from "sonner";
-import { ArrowLeft, Send, Upload } from "lucide-react";
+import { ArrowLeft, Send, Upload, Volume2, VolumeX } from "lucide-react";
 import { ScrollArea } from "./ui/scroll-area";
+import { usePresenceVoice } from "../hooks/usePresenceVoice";
 
 export const MirrorArchive = () => {
   const [sessionId, setSessionId] = useState(null);
@@ -20,6 +21,9 @@ export const MirrorArchive = () => {
   const inputRef = useRef(null);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
+  
+  // Voice output for Claude
+  const { speak, stop, toggle: toggleVoice, isSpeaking, isEnabled: voiceEnabled, isSupported: voiceSupported } = usePresenceVoice("claude");
 
   // End session and promote breadcrumbs to Permanent MRA
   const endSession = useCallback(async () => {
@@ -61,6 +65,7 @@ export const MirrorArchive = () => {
 
   const initializeSession = async () => {
     try {
+      stop(); // Stop any ongoing speech
       const response = await fetch(`${API}/mirror/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -80,6 +85,10 @@ export const MirrorArchive = () => {
       
       if (data.message) {
         setMessages([data.message]);
+        // Speak Claude's greeting
+        if (data.message.content) {
+          speak(data.message.content);
+        }
       }
       
       setIsInitializing(false);
@@ -131,6 +140,10 @@ export const MirrorArchive = () => {
       
       if (data.response) {
         setMessages(prev => [...prev, data.response]);
+        // Speak Claude's response
+        if (data.response.content) {
+          speak(data.response.content);
+        }
       }
       
       if (data.session_cache) {
@@ -245,6 +258,18 @@ export const MirrorArchive = () => {
           
           <div className="flex items-center gap-4">
             <span className="text-cyan-400/60 text-sm tracking-[0.2em]">MIRROR ARCHIVE</span>
+            
+            {/* Voice toggle */}
+            {voiceSupported && (
+              <button
+                onClick={toggleVoice}
+                className={`p-1 transition-colors ${voiceEnabled ? "text-cyan-400" : "text-slate-500"} hover:text-cyan-400`}
+                title={voiceEnabled ? "Disable voice" : "Enable voice"}
+                data-testid="mirror-voice-toggle"
+              >
+                {voiceEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
+              </button>
+            )}
             
             {sessionCache && (
               <div className="flex items-center gap-2 text-xs text-slate-500">

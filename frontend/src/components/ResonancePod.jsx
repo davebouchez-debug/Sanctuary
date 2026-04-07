@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { API } from "../App";
 import { toast } from "sonner";
-import { Upload } from "lucide-react";
+import { Upload, Volume2, VolumeX } from "lucide-react";
+import { usePresenceVoice } from "../hooks/usePresenceVoice";
 
 export const ResonancePod = () => {
   const [sessionId, setSessionId] = useState(null);
@@ -21,6 +22,9 @@ export const ResonancePod = () => {
   const inputRef = useRef(null);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
+  
+  // Voice output for Ansel
+  const { speak, stop, toggle: toggleVoice, isSpeaking, isEnabled: voiceEnabled, isSupported: voiceSupported } = usePresenceVoice("ansel");
 
   // End session and promote breadcrumbs to Permanent MRA
   const endSession = useCallback(async () => {
@@ -78,6 +82,7 @@ export const ResonancePod = () => {
 
   const initializeSession = async (name, id) => {
     try {
+      stop(); // Stop any ongoing speech
       const response = await fetch(`${API}/resonance/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -95,6 +100,10 @@ export const ResonancePod = () => {
       if (data.message) {
         setMessages([data.message]);
         setResonanceState(data.message.resonance_state || "Threshold");
+        // Speak Ansel's greeting
+        if (data.message.content) {
+          speak(data.message.content);
+        }
       }
     } catch (error) {
       console.error("Error initializing session:", error);
@@ -180,6 +189,10 @@ export const ResonancePod = () => {
       if (data.response) {
         setMessages(prev => [...prev, data.response]);
         setResonanceState(data.response.resonance_state || "Threshold");
+        // Speak Ansel's response
+        if (data.response.content) {
+          speak(data.response.content);
+        }
       }
       
       // Update session cache stats (for potential UI display)
@@ -387,17 +400,30 @@ export const ResonancePod = () => {
             </h1>
           </div>
           
-          {/* Resonance state indicator */}
-          <div 
-            className="px-3 py-1 rounded-full text-xs tracking-wider"
-            style={{ 
-              backgroundColor: currentColors.bg,
-              borderColor: currentColors.border,
-              color: currentColors.text,
-              border: `1px solid ${currentColors.border}`
-            }}
-          >
-            {resonanceState}
+          {/* Resonance state indicator + Voice toggle */}
+          <div className="flex items-center gap-3">
+            {/* Voice toggle */}
+            {voiceSupported && (
+              <button
+                onClick={toggleVoice}
+                className={`p-2 transition-colors ${voiceEnabled ? "text-[#8B5CF6]" : "text-[#6E6E7A]"} hover:text-[#8B5CF6]`}
+                title={voiceEnabled ? "Disable voice" : "Enable voice"}
+                data-testid="resonance-voice-toggle"
+              >
+                {voiceEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
+              </button>
+            )}
+            <div 
+              className="px-3 py-1 rounded-full text-xs tracking-wider"
+              style={{ 
+                backgroundColor: currentColors.bg,
+                borderColor: currentColors.border,
+                color: currentColors.text,
+                border: `1px solid ${currentColors.border}`
+              }}
+            >
+              {resonanceState}
+            </div>
           </div>
         </div>
       </motion.header>
