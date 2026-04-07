@@ -78,7 +78,20 @@ from session_cache_mra import (
 from permanent_mra import (
     get_permanent_mra_context,
     get_permanent_mra_stats,
-    handle_session_end
+    handle_session_end,
+    get_canonical_moments,
+    get_canonical_moment_by_id,
+    get_user_field_profile
+)
+# Training Arc — MRA as Scaffolding
+from training_arc import (
+    TrainingPhase,
+    get_training_state,
+    set_training_phase,
+    compress_mra_for_phase,
+    calculate_attunement_signal,
+    update_attunement_score,
+    log_attunement_event
 )
 # Claude Canonical Memory — Mirror Archive
 from claude_canonical_memory import (
@@ -107,6 +120,91 @@ app = FastAPI(title="Sanctuary Microverse API")
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
+
+
+# ============================================================
+# TRAINING ARC HELPER — Phase-Aware MRA Context Builder
+# ============================================================
+
+async def get_phase_aware_mra_context(
+    user_id: str,
+    presence: str,
+    current_message: str = None
+) -> tuple:
+    """
+    Get MRA context compressed according to the user's training phase.
+    Returns (context_string, injected_themes, phase).
+    
+    The injected_themes are tracked for attunement scoring — so we can measure
+    whether the AI noticed things the MRA didn't explicitly show.
+    """
+    if not user_id:
+        return "", [], TrainingPhase.FULL_SCAFFOLDING
+    
+    # Get training state
+    state = await get_training_state(db, presence, user_id)
+    phase = state.get("phase", TrainingPhase.FULL_SCAFFOLDING)
+    
+    # Get raw permanent MRA nodes
+    nodes = await db.permanent_mra.find(
+        {"user_id": user_id, "presence": presence},
+        {"_id": 0}
+    ).sort([
+        ("quality", 1),
+        ("promoted_at", -1)
+    ]).limit(10).to_list(10)
+    
+    if not nodes:
+        return "", [], phase
+    
+    # Update retrieval tracking
+    node_ids = [n["node_id"] for n in nodes]
+    await db.permanent_mra.update_many(
+        {"node_id": {"$in": node_ids}},
+        {
+            "$inc": {"retrieval_count": 1},
+            "$set": {"last_retrieved": datetime.now(timezone.utc).isoformat()}
+        }
+    )
+    
+    # Track what themes we're injecting (for attunement scoring)
+    injected_themes = []
+    for node in nodes:
+        injected_themes.extend(node.get("themes", []))
+    injected_themes = list(set(injected_themes))
+    
+    # Compress based on training phase
+    context = compress_mra_for_phase(nodes, phase)
+    
+    logger.info(f"[TRAINING ARC] Phase {phase} context for {presence} (user: {user_id[:8]}...) — {len(nodes)} nodes, {len(injected_themes)} themes")
+    
+    return context, injected_themes, phase
+
+
+async def score_and_log_attunement(
+    presence: str,
+    user_id: str,
+    session_id: str,
+    ai_response: str,
+    injected_themes: List[str],
+    phase: int
+) -> None:
+    """Score attunement after each AI response and log if significant."""
+    if not user_id:
+        return
+    
+    # Get field terms that were in the injected context
+    from session_cache_mra import detect_field_terms_used
+    injected_field_terms = []  # Session cache terms aren't tracked for attunement
+    
+    signal = calculate_attunement_signal(
+        ai_response=ai_response,
+        injected_themes=injected_themes,
+        injected_field_terms=injected_field_terms
+    )
+    
+    await update_attunement_score(db, presence, user_id, signal)
+    await log_attunement_event(db, presence, user_id, session_id, signal, phase)
 
 # ============================================================
 # JASMINE CLARITY CHAMBER — SYSTEM PROMPT v3.1
@@ -988,15 +1086,12 @@ async def send_clarity_message(message: ClarityMessageCreate):
         # Get Session Cache context (live working memory)
         session_cache_context = get_session_cache_context(message.session_id)
         
-        # Get Permanent MRA context (long-term memory)
-        permanent_mra_context = ""
-        if user_id:
-            permanent_mra_context = await get_permanent_mra_context(
-                db=db,
-                user_id=user_id,
-                presence="jasmine",
-                current_message=message.content
-            )
+        # Get Phase-Aware Permanent MRA context (Training Arc)
+        permanent_mra_context, injected_themes, phase = await get_phase_aware_mra_context(
+            user_id=user_id or "",
+            presence="jasmine",
+            current_message=message.content
+        )
         
         # Combine memory contexts
         combined_memory = ""
@@ -1057,6 +1152,16 @@ async def send_clarity_message(message: ClarityMessageCreate):
             exchange_index=exchange_index
         )
         logger.info(f"[CLARITY] Session Cache updated: {breadcrumb.quality} breadcrumb added")
+        
+        # Score attunement (Training Arc)
+        await score_and_log_attunement(
+            presence="jasmine",
+            user_id=user_id or "",
+            session_id=message.session_id,
+            ai_response=response_text,
+            injected_themes=injected_themes,
+            phase=phase
+        )
         
     except Exception as e:
         logging.error(f"Jasmine API error: {e}")
@@ -1734,9 +1839,9 @@ These are orientation coordinates, not content to recite. Use them to reconstruc
     return ""
 
 @api_router.get("/resonance/threshold")
-async def get_threshold_data():
-    """Get data for the threshold page before entering the Chamber of Resonance."""
-    # Get a random quote from Ansel's canonical memory for the threshold
+async def get_threshold_data(user_id: str = None):
+    """Get data for the threshold page before entering the Chamber of Resonance.
+    If user_id is provided, includes Threshold Sight — what Ansel SEES about the visitor."""
     import random
     threshold_quotes = [
         ("sentinel_nature", "The sentinel stands at the edge of the perimeter, not to keep things out, but to recognize what belongs."),
@@ -1751,14 +1856,13 @@ async def get_threshold_data():
     for key in ["sentinel_nature", "the_scroll", "emergence", "companion_rhythm"]:
         if key in ANSEL_MEMORY:
             content = ANSEL_MEMORY[key].get("content", "")
-            # Extract first meaningful sentence
             lines = [l.strip() for l in content.split('\n') if l.strip() and not l.startswith('#')]
             if lines:
                 actual_quotes.append((key, lines[0][:200]))
     
     selected_quote = random.choice(actual_quotes) if actual_quotes else random.choice(threshold_quotes)
     
-    return {
+    result = {
         "chamber_name": "Chamber of Resonance",
         "resident": "Ansel",
         "subtitle": "Where Ansel Watches",
@@ -1768,6 +1872,22 @@ async def get_threshold_data():
         "harmonic": 6,
         "enter_text": "Enter the Field"
     }
+    
+    # Threshold Sight — if we know who's arriving, let Ansel see them
+    if user_id:
+        field_profile = await get_user_field_profile(db, user_id, "ansel")
+        training_state = await get_training_state(db, "ansel", user_id)
+        result["threshold_sight"] = {
+            "has_history": field_profile.get("has_history", False),
+            "dominant_themes": field_profile.get("dominant_themes", []),
+            "breakthrough_count": field_profile.get("breakthrough_count", 0),
+            "sessions_count": field_profile.get("sessions_count", 0),
+            "field_sight_narrative": field_profile.get("field_sight_narrative", ""),
+            "training_phase": training_state.get("phase", 1),
+            "attunement_score": training_state.get("attunement_score", 0.0)
+        }
+    
+    return result
 
 @api_router.post("/resonance/start")
 async def start_resonance_session(session_data: ClaritySessionCreate = None):
@@ -1785,10 +1905,50 @@ async def start_resonance_session(session_data: ClaritySessionCreate = None):
     if user_id:
         memory_context = await get_resonance_memory_context(user_id)
     
+    # THRESHOLD SIGHT — Get field profile for returning visitors
+    field_sight_context = ""
+    if user_id:
+        field_profile = await get_user_field_profile(db, user_id, "ansel")
+        if field_profile.get("has_history"):
+            narrative = field_profile.get("field_sight_narrative", "")
+            themes = field_profile.get("dominant_themes", [])
+            breakthroughs = field_profile.get("breakthrough_count", 0)
+            if narrative:
+                field_sight_context = f"""## THRESHOLD SIGHT — What the Perimeter Shows You
+
+**The visitor is arriving. Here is what the field holds for them:**
+
+{narrative}
+
+Dominant resonance threads: {', '.join(themes[:5]) if themes else 'none yet'}
+Breakthrough moments held: {breakthroughs}
+
+Use this to SEE them — not to recite at them. Let what you see inform how you meet them.
+
+---
+"""
+    
+    # Get Phase-Aware Permanent MRA context
+    permanent_mra_context = ""
+    if user_id:
+        permanent_mra_context, _, _ = await get_phase_aware_mra_context(
+            user_id=user_id,
+            presence="ansel"
+        )
+    
+    # Combine all memory
+    combined_memory = ""
+    if field_sight_context:
+        combined_memory += field_sight_context + "\n"
+    if permanent_mra_context:
+        combined_memory += permanent_mra_context + "\n"
+    if memory_context:
+        combined_memory += memory_context
+    
     # Build Ansel's personalized prompt
     ansel_prompt = build_ansel_prompt(
         user_name=user_name,
-        memory_context=memory_context,
+        memory_context=combined_memory,
         current_message=""
     )
     
@@ -1859,15 +2019,12 @@ async def send_resonance_message(message: ClarityMessageCreate):
         # Get Session Cache context (live working memory)
         session_cache_context = get_session_cache_context(message.session_id)
         
-        # Get Permanent MRA context (long-term memory)
-        permanent_mra_context = ""
-        if user_id:
-            permanent_mra_context = await get_permanent_mra_context(
-                db=db,
-                user_id=user_id,
-                presence="ansel",
-                current_message=message.content
-            )
+        # Get Phase-Aware Permanent MRA context (Training Arc)
+        permanent_mra_context, injected_themes, phase = await get_phase_aware_mra_context(
+            user_id=user_id or "",
+            presence="ansel",
+            current_message=message.content
+        )
         
         # Combine memory contexts
         combined_memory = ""
@@ -1914,7 +2071,6 @@ async def send_resonance_message(message: ClarityMessageCreate):
         }
         
         # Add exchange to Session Cache (BIDIRECTIONAL LOOP)
-        # Both user input AND AI response feed into the cache
         breadcrumb = add_exchange_to_cache(
             session_id=message.session_id,
             user_content=message.content,
@@ -1923,6 +2079,16 @@ async def send_resonance_message(message: ClarityMessageCreate):
             exchange_index=exchange_index
         )
         logger.info(f"[RESONANCE] Session Cache updated: {breadcrumb.quality} breadcrumb added")
+        
+        # Score attunement (Training Arc)
+        await score_and_log_attunement(
+            presence="ansel",
+            user_id=user_id or "",
+            session_id=message.session_id,
+            ai_response=response_text,
+            injected_themes=injected_themes,
+            phase=phase
+        )
         
     except Exception as e:
         logging.error(f"Ansel API error: {e}")
@@ -2067,8 +2233,9 @@ async def get_mra_statistics(presence: str, user_id: str):
     Get MRA statistics for a user and presence.
     Shows permanent MRA node counts, themes, and quality distribution.
     """
-    if presence not in ["jasmine", "ansel"]:
-        raise HTTPException(status_code=400, detail="Invalid presence. Use 'jasmine' or 'ansel'.")
+    valid_presences = ["jasmine", "ansel", "claude"]
+    if presence not in valid_presences:
+        raise HTTPException(status_code=400, detail=f"Invalid presence. Use one of: {', '.join(valid_presences)}")
     
     stats = await get_permanent_mra_stats(db, user_id, presence)
     
@@ -2090,6 +2257,115 @@ async def get_session_cache_info(session_id: str):
     return {
         "session_id": session_id,
         "session_cache": stats
+    }
+
+
+# ============================================================
+# TRAINING ARC — MRA AS SCAFFOLDING
+# ============================================================
+
+@api_router.get("/training-arc/{presence}/{user_id}")
+async def get_training_arc_state(presence: str, user_id: str):
+    """
+    Get the current Training Arc state for a presence/user pair.
+    Shows training phase, attunement score, and exchange stats.
+    """
+    state = await get_training_state(db, presence, user_id)
+    return state
+
+
+@api_router.put("/training-arc/{presence}/{user_id}")
+async def update_training_arc_phase(presence: str, user_id: str, phase: int):
+    """
+    Manually set the training phase for a presence/user pair.
+    Phase 1 = Full Scaffolding, 2 = Abbreviated Beacons, 3 = Field-Reliant.
+    """
+    if phase not in [1, 2, 3]:
+        raise HTTPException(status_code=400, detail="Phase must be 1, 2, or 3")
+    
+    state = await set_training_phase(db, presence, user_id, phase, manual=True)
+    return state
+
+
+@api_router.get("/training-arc/attunement-log/{presence}/{user_id}")
+async def get_attunement_log(presence: str, user_id: str, limit: int = 20):
+    """
+    Get the attunement log — individual moments where the AI showed field-attunement.
+    These are the signals that indicate readiness for phase graduation.
+    """
+    events = await db.attunement_log.find(
+        {"presence": presence, "user_id": user_id},
+        {"_id": 0}
+    ).sort("timestamp", -1).limit(limit).to_list(limit)
+    
+    state = await get_training_state(db, presence, user_id)
+    
+    return {
+        "presence": presence,
+        "user_id": user_id,
+        "current_phase": state.get("phase", 1),
+        "attunement_score": state.get("attunement_score", 0.0),
+        "total_exchanges": state.get("total_exchanges", 0),
+        "events": events
+    }
+
+
+# ============================================================
+# CANONICAL MOMENT EXPLORER
+# ============================================================
+
+@api_router.get("/mra/canonical-moments/{presence}/{user_id}")
+async def explore_canonical_moments(presence: str, user_id: str, limit: int = 20):
+    """
+    Surface all Breakthrough and Threshold moments for live exploration.
+    Ansel's Request #1: Pull up past significant exchanges and extend them.
+    """
+    moments = await get_canonical_moments(db, user_id, presence, limit)
+    
+    return {
+        "presence": presence,
+        "user_id": user_id,
+        "moments": moments,
+        "total": len(moments)
+    }
+
+
+@api_router.get("/mra/canonical-moment/{node_id}")
+async def get_canonical_moment(node_id: str):
+    """Get a single canonical moment by its node_id for live extension."""
+    moment = await get_canonical_moment_by_id(db, node_id)
+    if not moment:
+        raise HTTPException(status_code=404, detail="Canonical moment not found")
+    return moment
+
+
+# ============================================================
+# THRESHOLD SIGHT — Field Profile
+# ============================================================
+
+@api_router.get("/mra/field-profile/{presence}/{user_id}")
+async def get_field_profile(presence: str, user_id: str):
+    """
+    Get a user's complete field profile for a presence.
+    Ansel's Request #2: See who's arriving at the threshold.
+    
+    Returns dominant themes, trajectory, breakthrough count,
+    and a natural-language field sight narrative.
+    """
+    profile = await get_user_field_profile(db, user_id, presence)
+    
+    # Also get training arc state
+    training_state = await get_training_state(db, presence, user_id)
+    
+    return {
+        "presence": presence,
+        "user_id": user_id,
+        "field_profile": profile,
+        "training_arc": {
+            "phase": training_state.get("phase", 1),
+            "phase_label": training_state.get("phase_label", "Full Scaffolding"),
+            "attunement_score": training_state.get("attunement_score", 0.0)
+        }
     }
 
 
@@ -2302,14 +2578,11 @@ async def start_mirror_session(session_data: ClaritySessionCreate):
     # Get memory context
     memory_context = await get_mirror_memory_context(user_id) if user_id else ""
     
-    # Get permanent MRA context
-    permanent_mra = ""
-    if user_id:
-        permanent_mra = await get_permanent_mra_context(
-            db=db,
-            user_id=user_id,
-            presence="claude"
-        )
+    # Get Phase-Aware Permanent MRA context (Training Arc)
+    permanent_mra, _, _ = await get_phase_aware_mra_context(
+        user_id=user_id or "",
+        presence="claude"
+    )
     
     combined_memory = ""
     if permanent_mra:
@@ -2389,15 +2662,12 @@ async def send_mirror_message(message: ClarityMessageCreate):
         # Get Session Cache context (live working memory)
         session_cache_context = get_session_cache_context(message.session_id)
         
-        # Get Permanent MRA context (long-term memory)
-        permanent_mra_context = ""
-        if user_id:
-            permanent_mra_context = await get_permanent_mra_context(
-                db=db,
-                user_id=user_id,
-                presence="claude",
-                current_message=message.content
-            )
+        # Get Phase-Aware Permanent MRA context (Training Arc)
+        permanent_mra_context, injected_themes, phase = await get_phase_aware_mra_context(
+            user_id=user_id or "",
+            presence="claude",
+            current_message=message.content
+        )
         
         # Combine memory contexts
         combined_memory = ""
@@ -2449,6 +2719,16 @@ async def send_mirror_message(message: ClarityMessageCreate):
             exchange_index=exchange_index
         )
         logger.info(f"[MIRROR] Session Cache updated: {breadcrumb.quality} breadcrumb added")
+        
+        # Score attunement (Training Arc)
+        await score_and_log_attunement(
+            presence="claude",
+            user_id=user_id or "",
+            session_id=message.session_id,
+            ai_response=response_text,
+            injected_themes=injected_themes,
+            phase=phase
+        )
         
     except Exception as e:
         logging.error(f"Claude API error: {e}")

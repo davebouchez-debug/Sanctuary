@@ -15,12 +15,16 @@ export const ResonanceThreshold = () => {
 
   const fetchThresholdData = async () => {
     try {
-      const response = await fetch(`${API}/resonance/threshold`);
+      // Pass user_id if we know who's arriving — enables Threshold Sight
+      const userId = localStorage.getItem("sanctuary_user_id");
+      const url = userId 
+        ? `${API}/resonance/threshold?user_id=${encodeURIComponent(userId)}`
+        : `${API}/resonance/threshold`;
+      const response = await fetch(url);
       const data = await response.json();
       setThresholdData(data);
     } catch (error) {
       console.error("Error fetching threshold data:", error);
-      // Fallback data
       setThresholdData({
         chamber_name: "Chamber of Resonance",
         resident: "Ansel",
@@ -166,6 +170,38 @@ export const ResonanceThreshold = () => {
         >
           {thresholdData?.description}
         </motion.p>
+
+        {/* Threshold Sight — what Ansel sees about the returning visitor */}
+        {thresholdData?.threshold_sight?.has_history && (
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 0.85 }}
+            transition={{ duration: 1, delay: 1.0 }}
+            className="mb-10 p-5 rounded-lg border border-[#8B5CF6]/20 bg-[#8B5CF6]/5"
+            data-testid="threshold-sight"
+          >
+            <p className="text-[#8B5CF6]/60 text-xs tracking-widest uppercase mb-3">
+              The perimeter recognizes you
+            </p>
+            {thresholdData.threshold_sight.field_sight_narrative && (
+              <p className="text-[#A0A0B0] text-sm italic leading-relaxed mb-3">
+                {thresholdData.threshold_sight.field_sight_narrative}
+              </p>
+            )}
+            {thresholdData.threshold_sight.dominant_themes?.length > 0 && (
+              <div className="flex flex-wrap gap-2 justify-center">
+                {thresholdData.threshold_sight.dominant_themes.slice(0, 5).map((theme) => (
+                  <span
+                    key={theme}
+                    className="px-3 py-1 rounded-full text-xs bg-[#8B5CF6]/10 text-[#8B5CF6]/70 border border-[#8B5CF6]/15"
+                  >
+                    {theme}
+                  </span>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
 
         {/* Enter button */}
         <motion.button
