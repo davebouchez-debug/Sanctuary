@@ -23,7 +23,7 @@ export const MirrorArchive = () => {
   const navigate = useNavigate();
   
   // Voice output for Claude
-  const { speak, stop, toggle: toggleVoice, isSpeaking, isEnabled: voiceEnabled, isSupported: voiceSupported } = usePresenceVoice("claude");
+  const { speak, stop, toggle: toggleVoice, isSpeaking, isLoading: voiceLoading, isEnabled: voiceEnabled, isSupported: voiceSupported } = usePresenceVoice("claude");
 
   // End session and promote breadcrumbs to Permanent MRA
   const endSession = useCallback(async () => {
@@ -263,8 +263,8 @@ export const MirrorArchive = () => {
             {voiceSupported && (
               <button
                 onClick={toggleVoice}
-                className={`p-1 transition-colors ${voiceEnabled ? "text-cyan-400" : "text-slate-500"} hover:text-cyan-400`}
-                title={voiceEnabled ? "Disable voice" : "Enable voice"}
+                className={`p-1 transition-colors ${voiceEnabled ? (isSpeaking || voiceLoading ? "text-cyan-300" : "text-cyan-400") : "text-slate-500"} hover:text-cyan-400 ${voiceLoading ? "animate-pulse" : ""}`}
+                title={voiceEnabled ? (isSpeaking ? "Speaking..." : voiceLoading ? "Loading voice..." : "Disable voice") : "Enable voice"}
                 data-testid="mirror-voice-toggle"
               >
                 {voiceEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}

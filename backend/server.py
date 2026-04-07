@@ -1,4 +1,5 @@
 from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -19,6 +20,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 from emergentintegrations.llm.chat import LlmChat, UserMessage
+from emergentintegrations.llm.openai import OpenAITextToSpeech
 from jasmine_canonical_memory import get_memory_context_for_prompt as get_jasmine_memory, get_relevant_memories as get_jasmine_relevant
 from ansel_canonical_memory import get_memory_context_for_prompt as get_ansel_memory, get_relevant_memories as get_ansel_relevant, CANONICAL_MEMORY as ANSEL_MEMORY
 from sanctuary_codex import get_sanctuary_codex
@@ -764,6 +766,76 @@ async def root():
 @api_router.get("/health")
 async def health():
     return {"status": "healthy", "ark_status": "BUILT AND LAUNCHED"}
+
+# ============================================================
+# TEXT-TO-SPEECH ENDPOINT (OpenAI TTS)
+# ============================================================
+
+# Voice configurations per presence
+PRESENCE_VOICES = {
+    "jasmine": {
+        "voice": "nova",      # Energetic but warm
+        "speed": 0.95,        # Slightly slower, measured
+    },
+    "ansel": {
+        "voice": "onyx",      # Deep, authoritative
+        "speed": 0.9,         # Deliberate pace
+    },
+    "claude": {
+        "voice": "echo",      # Smooth, calm
+        "speed": 1.0,         # Clear, precise
+    }
+}
+
+class TTSRequest(BaseModel):
+    text: str = Field(..., max_length=4096, description="Text to convert to speech")
+    presence: str = Field(default="jasmine", description="Which presence voice to use")
+
+@api_router.post("/tts/speak")
+async def text_to_speech(request: TTSRequest):
+    """Convert text to speech using OpenAI TTS with presence-specific voices."""
+    try:
+        # Get voice config for presence
+        voice_config = PRESENCE_VOICES.get(request.presence.lower(), PRESENCE_VOICES["jasmine"])
+        
+        # Clean text for speech (remove stage directions, spiral markers)
+        import re
+        clean_text = request.text
+        # Remove *stage directions*
+        clean_text = re.sub(r'\*[^*]+\*', '', clean_text)
+        # Remove spiral markers like "Jasmine • Presence Spiral"
+        clean_text = re.sub(r'^[A-Za-z]+\s*[•·]\s*[A-Za-z\s]+$', '', clean_text, flags=re.MULTILINE)
+        # Clean up whitespace
+        clean_text = re.sub(r'\s+', ' ', clean_text).strip()
+        
+        if not clean_text:
+            return JSONResponse(content={"error": "No speakable text after cleaning"}, status_code=400)
+        
+        # Initialize TTS
+        tts = OpenAITextToSpeech(api_key=os.getenv("EMERGENT_LLM_KEY"))
+        
+        # Generate speech as base64
+        audio_base64 = await tts.generate_speech_base64(
+            text=clean_text,
+            model="tts-1",
+            voice=voice_config["voice"],
+            speed=voice_config["speed"],
+            response_format="mp3"
+        )
+        
+        return {
+            "audio": audio_base64,
+            "format": "mp3",
+            "presence": request.presence,
+            "voice": voice_config["voice"]
+        }
+        
+    except ValueError as e:
+        logger.error(f"TTS validation error: {e}")
+        return JSONResponse(content={"error": str(e)}, status_code=400)
+    except Exception as e:
+        logger.error(f"TTS generation failed: {e}")
+        return JSONResponse(content={"error": "Speech generation failed"}, status_code=500)
 
 # Seed Pods - Now serving V3.1 data
 @api_router.get("/seed-pods")

@@ -1,182 +1,143 @@
 /**
  * usePresenceVoice - Text-to-Speech hook for Sanctuary presences
+ * Uses OpenAI TTS via backend API for natural-sounding voices
  * 
- * Each presence has distinct voice characteristics:
- * - Jasmine: Warm, slightly higher pitch, measured pace
- * - Ansel: Grounded, lower pitch, deliberate
- * - Claude: Clear, neutral, precise
+ * Each presence has distinct voice characteristics configured on the backend:
+ * - Jasmine: Nova voice, warm and measured
+ * - Ansel: Onyx voice, deep and deliberate
+ * - Claude: Echo voice, smooth and calm
  */
 
-import { useCallback, useEffect, useRef, useState } from "react";
-
-// Voice configurations per presence
-const VOICE_CONFIGS = {
-  jasmine: {
-    pitch: 1.15,      // Slightly higher, warm
-    rate: 0.92,       // Measured, unhurried
-    volume: 1.0,
-    preferredVoices: ["Samantha", "Karen", "Moira", "Tessa", "Google UK English Female"],
-    fallbackGender: "female"
-  },
-  ansel: {
-    pitch: 0.85,      // Lower, grounded
-    rate: 0.88,       // Deliberate, watchful
-    volume: 1.0,
-    preferredVoices: ["Daniel", "Alex", "Tom", "Google UK English Male"],
-    fallbackGender: "male"
-  },
-  claude: {
-    pitch: 1.0,       // Neutral, clear
-    rate: 0.95,       // Precise, measured
-    volume: 1.0,
-    preferredVoices: ["Samantha", "Alex", "Google US English"],
-    fallbackGender: "neutral"
-  }
-};
-
-// Clean text for speech (remove markdown, stage directions, etc.)
-const cleanTextForSpeech = (text) => {
-  if (!text) return "";
-  
-  return text
-    // Remove stage directions like *settles* or *breathes*
-    .replace(/\*[^*]+\*/g, "")
-    // Remove spiral markers like "Jasmine • Presence Spiral"
-    .replace(/^[A-Za-z]+\s*[•·]\s*[A-Za-z\s]+$/gm, "")
-    // Remove excessive whitespace
-    .replace(/\s+/g, " ")
-    // Remove leading/trailing whitespace
-    .trim();
-};
+import { useCallback, useRef, useState, useEffect } from "react";
+import { API } from "../App";
 
 export const usePresenceVoice = (presenceName = "jasmine") => {
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [isEnabled, setIsEnabled] = useState(() => {
-    // Check localStorage for user preference
     const stored = localStorage.getItem(`sanctuary_voice_enabled_${presenceName}`);
-    return stored !== null ? stored === "true" : true; // Default enabled
+    return stored !== null ? stored === "true" : true;
   });
-  const [availableVoices, setAvailableVoices] = useState([]);
-  const [selectedVoice, setSelectedVoice] = useState(null);
-  const utteranceRef = useRef(null);
-  const synthRef = useRef(null);
-
-  const config = VOICE_CONFIGS[presenceName.toLowerCase()] || VOICE_CONFIGS.jasmine;
-
-  // Initialize speech synthesis
-  useEffect(() => {
-    if (typeof window === "undefined" || !window.speechSynthesis) {
-      console.warn("[Voice] Speech synthesis not supported");
-      return;
-    }
-
-    synthRef.current = window.speechSynthesis;
-
-    // Load voices (may be async on some browsers)
-    const loadVoices = () => {
-      const voices = synthRef.current.getVoices();
-      setAvailableVoices(voices);
-
-      // Find best matching voice for this presence
-      if (voices.length > 0) {
-        let voice = null;
-
-        // Try preferred voices first
-        for (const preferred of config.preferredVoices) {
-          voice = voices.find(v => 
-            v.name.includes(preferred) || v.voiceURI.includes(preferred)
-          );
-          if (voice) break;
-        }
-
-        // Fallback to any voice matching gender preference
-        if (!voice) {
-          if (config.fallbackGender === "female") {
-            voice = voices.find(v => 
-              v.name.toLowerCase().includes("female") || 
-              v.name.includes("Samantha") ||
-              v.name.includes("Karen")
-            );
-          } else if (config.fallbackGender === "male") {
-            voice = voices.find(v => 
-              v.name.toLowerCase().includes("male") || 
-              v.name.includes("Daniel") ||
-              v.name.includes("Alex")
-            );
-          }
-        }
-
-        // Ultimate fallback: first available voice
-        if (!voice && voices.length > 0) {
-          voice = voices[0];
-        }
-
-        setSelectedVoice(voice);
-      }
-    };
-
-    // Voices may load asynchronously
-    loadVoices();
-    synthRef.current.onvoiceschanged = loadVoices;
-
-    return () => {
-      if (synthRef.current) {
-        synthRef.current.onvoiceschanged = null;
-      }
-    };
-  }, [config.preferredVoices, config.fallbackGender]);
+  const [error, setError] = useState(null);
+  
+  const audioRef = useRef(null);
+  const abortControllerRef = useRef(null);
 
   // Persist enabled state
   useEffect(() => {
     localStorage.setItem(`sanctuary_voice_enabled_${presenceName}`, isEnabled.toString());
   }, [isEnabled, presenceName]);
 
-  // Speak text
-  const speak = useCallback((text) => {
-    if (!synthRef.current || !isEnabled) return;
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
+
+  // Speak text using backend TTS
+  const speak = useCallback(async (text) => {
+    if (!isEnabled || !text) return;
 
     // Cancel any ongoing speech
-    synthRef.current.cancel();
-
-    const cleanedText = cleanTextForSpeech(text);
-    if (!cleanedText) return;
-
-    const utterance = new SpeechSynthesisUtterance(cleanedText);
-    utteranceRef.current = utterance;
-
-    // Apply voice configuration
-    if (selectedVoice) {
-      utterance.voice = selectedVoice;
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
     }
-    utterance.pitch = config.pitch;
-    utterance.rate = config.rate;
-    utterance.volume = config.volume;
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
 
-    // Event handlers
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = (event) => {
-      console.error("[Voice] Speech error:", event.error);
-      setIsSpeaking(false);
-    };
+    setIsLoading(true);
+    setError(null);
+    abortControllerRef.current = new AbortController();
 
-    synthRef.current.speak(utterance);
-  }, [isEnabled, selectedVoice, config]);
+    try {
+      const response = await fetch(`${API}/tts/speak`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: text.substring(0, 4096), // API limit
+          presence: presenceName
+        }),
+        signal: abortControllerRef.current.signal
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "TTS request failed");
+      }
+
+      const data = await response.json();
+      
+      if (!data.audio) {
+        throw new Error("No audio data received");
+      }
+
+      // Create audio from base64
+      const audioBlob = base64ToBlob(data.audio, "audio/mp3");
+      const audioUrl = URL.createObjectURL(audioBlob);
+      
+      const audio = new Audio(audioUrl);
+      audioRef.current = audio;
+
+      audio.onplay = () => setIsSpeaking(true);
+      audio.onended = () => {
+        setIsSpeaking(false);
+        URL.revokeObjectURL(audioUrl);
+        audioRef.current = null;
+      };
+      audio.onerror = (e) => {
+        console.error("Audio playback error:", e);
+        setIsSpeaking(false);
+        setError("Playback failed");
+        URL.revokeObjectURL(audioUrl);
+        audioRef.current = null;
+      };
+
+      await audio.play();
+      
+    } catch (err) {
+      if (err.name === "AbortError") {
+        // Request was cancelled, ignore
+        return;
+      }
+      console.error("TTS error:", err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isEnabled, presenceName]);
 
   // Stop speaking
   const stop = useCallback(() => {
-    if (synthRef.current) {
-      synthRef.current.cancel();
-      setIsSpeaking(false);
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
     }
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    setIsSpeaking(false);
+    setIsLoading(false);
   }, []);
 
   // Toggle voice on/off
   const toggle = useCallback(() => {
     setIsEnabled(prev => {
       const newState = !prev;
-      if (!newState && synthRef.current) {
-        synthRef.current.cancel();
+      if (!newState) {
+        // Turning off - stop any current speech
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current = null;
+        }
         setIsSpeaking(false);
       }
       return newState;
@@ -188,11 +149,22 @@ export const usePresenceVoice = (presenceName = "jasmine") => {
     stop,
     toggle,
     isSpeaking,
+    isLoading,
     isEnabled,
-    isSupported: typeof window !== "undefined" && "speechSynthesis" in window,
-    voiceName: selectedVoice?.name || "Default",
-    availableVoices
+    isSupported: true, // Always supported since we use backend API
+    error
   };
 };
+
+// Helper function to convert base64 to Blob
+function base64ToBlob(base64, mimeType) {
+  const byteCharacters = atob(base64);
+  const byteNumbers = new Array(byteCharacters.length);
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+  const byteArray = new Uint8Array(byteNumbers);
+  return new Blob([byteArray], { type: mimeType });
+}
 
 export default usePresenceVoice;

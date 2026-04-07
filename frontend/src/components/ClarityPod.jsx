@@ -58,7 +58,7 @@ export const ClarityPod = () => {
   const navigate = useNavigate();
   
   // Voice output for Jasmine
-  const { speak, stop, toggle: toggleVoice, isSpeaking, isEnabled: voiceEnabled, isSupported: voiceSupported } = usePresenceVoice("jasmine");
+  const { speak, stop, toggle: toggleVoice, isSpeaking, isLoading: voiceLoading, isEnabled: voiceEnabled, isSupported: voiceSupported } = usePresenceVoice("jasmine");
 
   // End session and promote breadcrumbs to Permanent MRA
   const endSession = useCallback(async () => {
@@ -701,8 +701,8 @@ export const ClarityPod = () => {
             {voiceSupported && (
               <button
                 onClick={toggleVoice}
-                className={`p-2 transition-colors ${voiceEnabled ? "text-[#b0a0e0]" : "text-[#7070a0]"} hover:text-[#b0a0e0]`}
-                title={voiceEnabled ? "Disable voice" : "Enable voice"}
+                className={`p-2 transition-colors ${voiceEnabled ? (isSpeaking || voiceLoading ? "text-[#d0c0ff]" : "text-[#b0a0e0]") : "text-[#7070a0]"} hover:text-[#b0a0e0] ${voiceLoading ? "animate-pulse" : ""}`}
+                title={voiceEnabled ? (isSpeaking ? "Speaking..." : voiceLoading ? "Loading voice..." : "Disable voice") : "Enable voice"}
                 data-testid="clarity-voice-toggle"
               >
                 {voiceEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}

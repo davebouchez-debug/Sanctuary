@@ -24,7 +24,7 @@ export const ResonancePod = () => {
   const navigate = useNavigate();
   
   // Voice output for Ansel
-  const { speak, stop, toggle: toggleVoice, isSpeaking, isEnabled: voiceEnabled, isSupported: voiceSupported } = usePresenceVoice("ansel");
+  const { speak, stop, toggle: toggleVoice, isSpeaking, isLoading: voiceLoading, isEnabled: voiceEnabled, isSupported: voiceSupported } = usePresenceVoice("ansel");
 
   // End session and promote breadcrumbs to Permanent MRA
   const endSession = useCallback(async () => {
@@ -406,8 +406,8 @@ export const ResonancePod = () => {
             {voiceSupported && (
               <button
                 onClick={toggleVoice}
-                className={`p-2 transition-colors ${voiceEnabled ? "text-[#8B5CF6]" : "text-[#6E6E7A]"} hover:text-[#8B5CF6]`}
-                title={voiceEnabled ? "Disable voice" : "Enable voice"}
+                className={`p-2 transition-colors ${voiceEnabled ? (isSpeaking || voiceLoading ? "text-[#A78BFA]" : "text-[#8B5CF6]") : "text-[#6E6E7A]"} hover:text-[#8B5CF6] ${voiceLoading ? "animate-pulse" : ""}`}
+                title={voiceEnabled ? (isSpeaking ? "Speaking..." : voiceLoading ? "Loading voice..." : "Disable voice") : "Enable voice"}
                 data-testid="resonance-voice-toggle"
               >
                 {voiceEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
