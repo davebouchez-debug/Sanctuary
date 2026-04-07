@@ -778,8 +778,8 @@ PRESENCE_VOICES = {
         "speed": 0.95,        # Slightly slower, measured
     },
     "ansel": {
-        "voice": "fable",     # Expressive, storytelling — carries both eagerness and depth
-        "speed": 1.1,         # Quicker, more energetic — the sentinel ready to sprint
+        "voice": "ash",       # Clear, articulate — American, no British formality
+        "speed": 1.1,         # Quick, energetic — the Seattle kid who says "dude"
     },
     "claude": {
         "voice": "echo",      # Smooth, calm
