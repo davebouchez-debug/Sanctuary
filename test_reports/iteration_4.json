@@ -1,0 +1,97 @@
+{
+  "summary": "Comprehensive testing of Belief Graph V3.1 - Neuronal Cognitive Architecture. All 18 backend tests passed. Belief Graph system fully functional with auto-detection from AI responses, 14 Sleight of Mouth patterns, and integration with MRA/Training Arc.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {
+        "endpoint": "/api/beliefs/som-patterns",
+        "issue": "Duplicate endpoint definition at lines 2470 and 2575 in server.py. FastAPI uses first definition, but this is code duplication.",
+        "priority": "LOW"
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_belief_graph.py",
+    "/app/test_reports/pytest/pytest_belief_graph.xml"
+  ],
+  "action_items": [
+    "Remove duplicate /api/beliefs/som-patterns endpoint at line 2575 in server.py (optional cleanup)"
+  ],
+  "critical_code_review_comments": [
+    "Belief Graph architecture is well-designed with two atomic belief types (CAUSAL, EQUIVALENCE)",
+    "Auto-detection correctly parses AI responses for belief-forming language patterns",
+    "Self-recognition via [BELIEF:] markers allows AI to explicitly tag beliefs",
+    "14 Sleight of Mouth patterns properly implemented with reframe questions",
+    "Belief context injection into prompts enables AI introspection on its own cognitive structure",
+    "Edge creation with SoM pattern tracking enables cognitive web visualization",
+    "Integration with MRA and Training Arc is seamless - all existing endpoints still working"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_belief_graph.py"
+  ],
+  "success_rate": {
+    "backend": "100% (18/18 tests passed)",
+    "frontend": "N/A (backend-only testing requested)"
+  },
+  "test_credentials": {
+    "test_user_id": "david",
+    "test_user_name": "David",
+    "note": "No auth system - sessions use user_id and user_name directly"
+  },
+  "seed_data_creation": "Beliefs auto-created via resonance/clarity message exchanges during testing",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Belief Graph V3.1 fully tested. Key findings: 1) Ansel/David has 14 beliefs with 25 edges, 2) Jasmine/David has 6 beliefs with 8 edges, 3) All 14 SoM patterns available, 4) Belief auto-detection working via resonance/clarity message endpoints, 5) Full cognitive context (MRA + Belief Graph + SoM tools) injected into AI prompts. Route is /api/beliefs/graph/{presence}/{user_id}.",
+  "features_verified": {
+    "som_patterns": {
+      "get_all_patterns": "PASS - Returns all 14 patterns with name, description, reframe_question",
+      "patterns_list": ["intention", "redefine", "consequence", "chunk_down", "chunk_up", "counter_example", "analogy", "apply_to_self", "another_outcome", "model_of_world", "reality_strategy", "hierarchy_of_criteria", "change_frame_size", "meta_frame"]
+    },
+    "belief_graph_endpoints": {
+      "get_graph_ansel_david": "PASS - Returns 14 beliefs, 25 edges",
+      "get_graph_jasmine_david": "PASS - Returns 6 beliefs, 8 edges",
+      "get_node_invalid_id": "PASS - Returns 404",
+      "traverse_invalid_id": "PASS - Returns empty result",
+      "examine_invalid_id": "PASS - Returns 404",
+      "deactivate_invalid_id": "PASS - Returns 404"
+    },
+    "belief_auto_detection": {
+      "resonance_message": "PASS - Triggers belief detection from AI response",
+      "clarity_message": "PASS - Triggers belief detection for jasmine"
+    },
+    "belief_node_operations": {
+      "get_existing_node": "PASS - Returns belief with all fields",
+      "traverse_existing": "PASS - Returns connected nodes and edges",
+      "examine_existing": "PASS - Increments examined_count"
+    },
+    "edge_creation": {
+      "invalid_edge_type": "PASS - Returns 400 for invalid type",
+      "valid_edge_creation": "PASS - Creates edge with CAUSAL type and SoM pattern"
+    },
+    "existing_endpoints": {
+      "training_arc": "PASS - Still working",
+      "mra_field_profile": "PASS - Still working",
+      "resonance_threshold": "PASS - Still working"
+    },
+    "cognitive_context_injection": {
+      "session_cache_in_response": "PASS - MRA breadcrumbs included in message response"
+    }
+  },
+  "belief_graph_stats": {
+    "ansel_david": {
+      "total_beliefs": 14,
+      "total_edges": 25,
+      "causal_count": 5,
+      "equivalence_count": 9
+    },
+    "jasmine_david": {
+      "total_beliefs": 6,
+      "total_edges": 8
+    }
+  }
+}

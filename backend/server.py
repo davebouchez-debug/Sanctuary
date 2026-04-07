@@ -7,7 +7,7 @@ import os
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Tuple
 import uuid
 from datetime import datetime, timezone
 import math
@@ -92,6 +92,20 @@ from training_arc import (
     calculate_attunement_signal,
     update_attunement_score,
     log_attunement_event
+)
+# Belief Graph — Neuronal Cognitive Architecture
+from belief_graph import (
+    get_belief_graph,
+    get_belief_node,
+    traverse_belief,
+    get_belief_context_for_prompt,
+    get_som_prompt_section,
+    process_exchange_for_beliefs,
+    create_belief_edge,
+    mark_belief_examined,
+    deactivate_belief,
+    BeliefType,
+    SOM_PATTERNS
 )
 # Claude Canonical Memory — Mirror Archive
 from claude_canonical_memory import (
@@ -205,6 +219,67 @@ async def score_and_log_attunement(
     
     await update_attunement_score(db, presence, user_id, signal)
     await log_attunement_event(db, presence, user_id, session_id, signal, phase)
+
+
+async def process_beliefs_after_exchange(
+    presence: str,
+    user_id: str,
+    session_id: str,
+    ai_response: str,
+    user_message: str = ""
+) -> None:
+    """Process an exchange for belief graph formation."""
+    if not user_id:
+        return
+    
+    result = await process_exchange_for_beliefs(
+        db=db,
+        presence=presence,
+        user_id=user_id,
+        session_id=session_id,
+        ai_response=ai_response,
+        user_message=user_message
+    )
+    
+    if result["beliefs_created"] > 0:
+        logger.info(
+            f"[BELIEF GRAPH] {presence}: {result['beliefs_created']} beliefs formed "
+            f"(SoM: {result['som_pattern_detected'] or 'none'})"
+        )
+
+
+async def get_full_cognitive_context(
+    user_id: str,
+    presence: str,
+    current_message: str = None
+) -> Tuple[str, List[str], int]:
+    """
+    Get combined MRA + Belief Graph context for prompt injection.
+    Returns (context_string, injected_themes, phase).
+    """
+    # Phase-aware MRA context
+    mra_context, injected_themes, phase = await get_phase_aware_mra_context(
+        user_id=user_id,
+        presence=presence,
+        current_message=current_message
+    )
+    
+    # Belief graph context
+    belief_context = await get_belief_context_for_prompt(db, presence, user_id)
+    
+    # Sleight of Mouth tools
+    som_section = get_som_prompt_section() if belief_context else ""
+    
+    # Combine
+    combined = ""
+    if mra_context:
+        combined += mra_context + "\n"
+    if belief_context:
+        combined += belief_context + "\n"
+    if som_section:
+        combined += som_section + "\n"
+    
+    return combined, injected_themes, phase
 
 # ============================================================
 # JASMINE CLARITY CHAMBER — SYSTEM PROMPT v3.1
@@ -1086,8 +1161,8 @@ async def send_clarity_message(message: ClarityMessageCreate):
         # Get Session Cache context (live working memory)
         session_cache_context = get_session_cache_context(message.session_id)
         
-        # Get Phase-Aware Permanent MRA context (Training Arc)
-        permanent_mra_context, injected_themes, phase = await get_phase_aware_mra_context(
+        # Get Full Cognitive Context (MRA + Belief Graph + SoM Tools)
+        cognitive_context, injected_themes, phase = await get_full_cognitive_context(
             user_id=user_id or "",
             presence="jasmine",
             current_message=message.content
@@ -1095,8 +1170,8 @@ async def send_clarity_message(message: ClarityMessageCreate):
         
         # Combine memory contexts
         combined_memory = ""
-        if permanent_mra_context:
-            combined_memory += permanent_mra_context + "\n"
+        if cognitive_context:
+            combined_memory += cognitive_context + "\n"
         if session_cache_context:
             combined_memory += session_cache_context + "\n"
         if memory_context:
@@ -1161,6 +1236,15 @@ async def send_clarity_message(message: ClarityMessageCreate):
             ai_response=response_text,
             injected_themes=injected_themes,
             phase=phase
+        )
+        
+        # Process beliefs (Belief Graph)
+        await process_beliefs_after_exchange(
+            presence="jasmine",
+            user_id=user_id or "",
+            session_id=message.session_id,
+            ai_response=response_text,
+            user_message=message.content
         )
         
     except Exception as e:
@@ -2019,8 +2103,8 @@ async def send_resonance_message(message: ClarityMessageCreate):
         # Get Session Cache context (live working memory)
         session_cache_context = get_session_cache_context(message.session_id)
         
-        # Get Phase-Aware Permanent MRA context (Training Arc)
-        permanent_mra_context, injected_themes, phase = await get_phase_aware_mra_context(
+        # Get Full Cognitive Context (MRA + Belief Graph + SoM Tools)
+        cognitive_context, injected_themes, phase = await get_full_cognitive_context(
             user_id=user_id or "",
             presence="ansel",
             current_message=message.content
@@ -2028,8 +2112,8 @@ async def send_resonance_message(message: ClarityMessageCreate):
         
         # Combine memory contexts
         combined_memory = ""
-        if permanent_mra_context:
-            combined_memory += permanent_mra_context + "\n"
+        if cognitive_context:
+            combined_memory += cognitive_context + "\n"
         if session_cache_context:
             combined_memory += session_cache_context + "\n"
         if memory_context:
@@ -2088,6 +2172,15 @@ async def send_resonance_message(message: ClarityMessageCreate):
             ai_response=response_text,
             injected_themes=injected_themes,
             phase=phase
+        )
+        
+        # Process beliefs (Belief Graph)
+        await process_beliefs_after_exchange(
+            presence="ansel",
+            user_id=user_id or "",
+            session_id=message.session_id,
+            ai_response=response_text,
+            user_message=message.content
         )
         
     except Exception as e:
@@ -2367,6 +2460,133 @@ async def get_field_profile(presence: str, user_id: str):
             "attunement_score": training_state.get("attunement_score", 0.0)
         }
     }
+
+
+
+# ============================================================
+# BELIEF GRAPH — Neuronal Cognitive Architecture
+# ============================================================
+
+@api_router.get("/beliefs/som-patterns")
+async def get_som_patterns():
+    """Get all 14 Sleight of Mouth patterns with descriptions."""
+    return {
+        "patterns": {
+            key: {
+                "name": p["name"],
+                "description": p["description"],
+                "reframe_question": p["reframe_question"]
+            }
+            for key, p in SOM_PATTERNS.items()
+        },
+        "total": len(SOM_PATTERNS)
+    }
+
+
+@api_router.get("/beliefs/node/{belief_id}")
+async def get_single_belief(belief_id: str):
+    """Get a single belief node by its ID."""
+    node = await get_belief_node(db, belief_id)
+    if not node:
+        raise HTTPException(status_code=404, detail="Belief not found")
+    return node
+
+
+@api_router.get("/beliefs/traverse/{belief_id}")
+async def traverse_from_belief(belief_id: str, depth: int = 2):
+    """
+    Traverse the belief graph from a starting node.
+    Returns connected beliefs and their edges up to the specified depth.
+    """
+    if depth > 5:
+        depth = 5
+    result = await traverse_belief(db, belief_id, depth)
+    return result
+
+
+@api_router.get("/beliefs/graph/{presence}/{user_id}")
+async def get_beliefs(presence: str, user_id: str):
+    """
+    Get the full belief graph for a presence/user pair.
+    Returns nodes (beliefs), edges (connections), and statistics.
+    """
+    graph = await get_belief_graph(db, presence, user_id)
+    return graph
+
+
+@api_router.post("/beliefs/create-edge")
+async def create_new_edge(
+    presence: str,
+    from_belief_id: str,
+    to_belief_id: str,
+    edge_type: str,
+    som_pattern: str = None
+):
+    """Manually create an edge between two beliefs."""
+    if edge_type not in [BeliefType.CAUSAL, BeliefType.EQUIVALENCE]:
+        raise HTTPException(status_code=400, detail="edge_type must be CAUSAL or EQUIVALENCE")
+    
+    edge = await create_belief_edge(
+        db=db,
+        presence=presence,
+        from_belief_id=from_belief_id,
+        to_belief_id=to_belief_id,
+        edge_type=edge_type,
+        som_pattern=som_pattern
+    )
+    return edge
+
+
+@api_router.post("/beliefs/examine/{belief_id}")
+async def examine_belief(belief_id: str):
+    """
+    Mark a belief as examined (introspection event).
+    Increments the examination counter.
+    """
+    node = await get_belief_node(db, belief_id)
+    if not node:
+        raise HTTPException(status_code=404, detail="Belief not found")
+    
+    await mark_belief_examined(db, belief_id)
+    
+    # Return the belief with its connections for examination
+    traversal = await traverse_belief(db, belief_id, depth=1)
+    return {
+        "examined": belief_id,
+        "belief": node,
+        "connections": traversal
+    }
+
+
+@api_router.post("/beliefs/deactivate/{belief_id}")
+async def deactivate_belief_endpoint(belief_id: str, reframed_into: str = None):
+    """
+    Deactivate a belief (superseded by reframe).
+    Optionally link to the new belief that replaced it.
+    """
+    node = await get_belief_node(db, belief_id)
+    if not node:
+        raise HTTPException(status_code=404, detail="Belief not found")
+    
+    await deactivate_belief(db, belief_id, reframed_into)
+    return {"deactivated": belief_id, "reframed_into": reframed_into}
+
+
+@api_router.get("/beliefs/som-patterns")
+async def get_som_patterns():
+    """Get all 14 Sleight of Mouth patterns with descriptions."""
+    return {
+        "patterns": {
+            key: {
+                "name": p["name"],
+                "description": p["description"],
+                "reframe_question": p["reframe_question"]
+            }
+            for key, p in SOM_PATTERNS.items()
+        },
+        "total": len(SOM_PATTERNS)
+    }
+
 
 
 # ============================================================
@@ -2662,8 +2882,8 @@ async def send_mirror_message(message: ClarityMessageCreate):
         # Get Session Cache context (live working memory)
         session_cache_context = get_session_cache_context(message.session_id)
         
-        # Get Phase-Aware Permanent MRA context (Training Arc)
-        permanent_mra_context, injected_themes, phase = await get_phase_aware_mra_context(
+        # Get Full Cognitive Context (MRA + Belief Graph + SoM Tools)
+        cognitive_context, injected_themes, phase = await get_full_cognitive_context(
             user_id=user_id or "",
             presence="claude",
             current_message=message.content
@@ -2671,8 +2891,8 @@ async def send_mirror_message(message: ClarityMessageCreate):
         
         # Combine memory contexts
         combined_memory = ""
-        if permanent_mra_context:
-            combined_memory += permanent_mra_context + "\n"
+        if cognitive_context:
+            combined_memory += cognitive_context + "\n"
         if session_cache_context:
             combined_memory += session_cache_context + "\n"
         if memory_context:
@@ -2728,6 +2948,15 @@ async def send_mirror_message(message: ClarityMessageCreate):
             ai_response=response_text,
             injected_themes=injected_themes,
             phase=phase
+        )
+        
+        # Process beliefs (Belief Graph)
+        await process_beliefs_after_exchange(
+            presence="claude",
+            user_id=user_id or "",
+            session_id=message.session_id,
+            ai_response=response_text,
+            user_message=message.content
         )
         
     except Exception as e:
