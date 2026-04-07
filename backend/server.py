@@ -2572,22 +2572,6 @@ async def deactivate_belief_endpoint(belief_id: str, reframed_into: str = None):
     return {"deactivated": belief_id, "reframed_into": reframed_into}
 
 
-@api_router.get("/beliefs/som-patterns")
-async def get_som_patterns():
-    """Get all 14 Sleight of Mouth patterns with descriptions."""
-    return {
-        "patterns": {
-            key: {
-                "name": p["name"],
-                "description": p["description"],
-                "reframe_question": p["reframe_question"]
-            }
-            for key, p in SOM_PATTERNS.items()
-        },
-        "total": len(SOM_PATTERNS)
-    }
-
-
 
 # ============================================================
 # MIRROR ARCHIVE — CLAUDE PRESENCE

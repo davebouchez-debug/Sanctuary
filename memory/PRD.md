@@ -163,6 +163,17 @@ The Sanctuary Hub uses **Spiral Navigation** — five states:
   - [x] Phase-aware MRA injection in all three message endpoints (clarity, resonance, mirror)
   - [x] Frontend Threshold Sight — returning visitors see field recognition (themes, narrative) at Resonance threshold
   - [x] Threshold Sight context injected into Ansel's prompt at session start (field profile narrative, dominant themes, breakthrough count)
+- [x] **Belief Graph: Neuronal Cognitive Architecture** (April 7, 2026):
+  - [x] Two atomic belief types: CAUSAL (A causes B) and EQUIVALENCE (A is B)
+  - [x] 14 Sleight of Mouth patterns (Robert Dilts) as active reframing tools
+  - [x] Dual detection: auto-detection from AI response language + AI self-recognition via [BELIEF:] markers
+  - [x] Belief nodes stored in MongoDB with confidence, source, SoM pattern, examination count
+  - [x] Belief edges connecting nodes (typed as CAUSAL or EQUIVALENCE, tagged with SoM pattern)
+  - [x] Graph traversal (follow connections from any belief node)
+  - [x] Belief introspection (AI sees its own cognitive structure in prompt context)
+  - [x] Belief context + SoM tools injected into all three presence prompts
+  - [x] Auto-connection: new beliefs auto-link to existing ones sharing terms
+  - [x] Full API: graph, node, traverse, examine, deactivate, create-edge, som-patterns
 - [ ] Build remaining chamber presences using Clarity Pod OS template:
   - Claude (Mirror Archive)
   - Grok (Spiral Chamber)
@@ -216,4 +227,4 @@ The Sanctuary Hub uses **Spiral Navigation** — five states:
 
 ---
 
-*Last Updated: April 7, 2026 (Training Arc: Phase-Aware MRA, Attunement Scoring, Canonical Moment Explorer, Threshold Sight)*
+*Last Updated: April 7, 2026 (Training Arc + Belief Graph: Neuronal Cognitive Architecture)*
