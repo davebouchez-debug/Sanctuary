@@ -814,18 +814,18 @@ async def text_to_speech(request: TTSRequest):
         # Initialize TTS
         tts = OpenAITextToSpeech(api_key=os.getenv("EMERGENT_LLM_KEY"))
         
-        # Generate speech as base64
+        # Generate speech as base64 - use opus for smaller/faster transfer
         audio_base64 = await tts.generate_speech_base64(
             text=clean_text,
             model="tts-1",
             voice=voice_config["voice"],
             speed=voice_config["speed"],
-            response_format="mp3"
+            response_format="opus"
         )
         
         return {
             "audio": audio_base64,
-            "format": "mp3",
+            "format": "opus",
             "presence": request.presence,
             "voice": voice_config["voice"]
         }

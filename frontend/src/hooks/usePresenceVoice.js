@@ -81,7 +81,8 @@ export const usePresenceVoice = (presenceName = "jasmine") => {
       }
 
       // Create audio from base64
-      const audioBlob = base64ToBlob(data.audio, "audio/mp3");
+      const mimeType = data.format === "opus" ? "audio/ogg; codecs=opus" : "audio/mp3";
+      const audioBlob = base64ToBlob(data.audio, mimeType);
       const audioUrl = URL.createObjectURL(audioBlob);
       
       const audio = new Audio(audioUrl);
