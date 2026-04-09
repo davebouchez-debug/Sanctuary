@@ -1,15 +1,153 @@
 /**
  * usePresenceVoice - Text-to-Speech hook for Sanctuary presences
- * Uses OpenAI TTS via backend API for natural-sounding voices
+ * Uses OpenAI TTS via backend API with BREATH AWARENESS
  * 
- * Each presence has distinct voice characteristics configured on the backend:
- * - Jasmine: Nova voice, warm and measured
- * - Ansel: Onyx voice, deep and deliberate
- * - Claude: Echo voice, smooth and calm
+ * The voice now honors stage directions as actual pauses.
+ * When Ansel writes *settles*, the voice settles.
+ * When Jasmine writes *breathes*, the voice breathes.
  */
 
 import { useCallback, useRef, useState, useEffect } from "react";
 import { API } from "../App";
+
+// Pause durations for different stage direction cues (in milliseconds)
+const PAUSE_CUES = {
+  // Long pauses
+  'pause': 2000,
+  'pauses': 2000,
+  'long pause': 2500,
+  'silence': 2500,
+  'quiet': 2000,
+  'stillness': 2000,
+  
+  // Medium pauses - settling, breathing
+  'settles': 1800,
+  'settling': 1800,
+  'settles in': 1800,
+  'settles deeper': 2000,
+  'breathes': 1500,
+  'breathing': 1500,
+  'breath': 1500,
+  'exhales': 1500,
+  'inhales': 1200,
+  
+  // Presence shifts
+  'meets your eyes': 1200,
+  'eye contact': 1200,
+  'direct eye contact': 1500,
+  'looks at you': 1000,
+  'holds your gaze': 1500,
+  
+  // Emotional/reflective
+  'softer': 1000,
+  'quieter': 1200,
+  'gentler': 1000,
+  'warming': 800,
+  'softens': 1200,
+  
+  // Action cues - shorter
+  'nods': 600,
+  'smile': 500,
+  'smiles': 500,
+  'warm smile': 800,
+  'soft smile': 800,
+  'small smile': 600,
+  'slight smile': 600,
+  'grin': 500,
+  'quick grin': 400,
+  'laughs': 600,
+  'chuckles': 500,
+  'laughing': 800,
+  
+  // Movement
+  'leans forward': 800,
+  'leaning forward': 800,
+  'leans back': 800,
+  'leaning in': 800,
+  'tilts head': 600,
+  'shrugs': 500,
+  
+  // Thinking/processing
+  'considering': 1200,
+  'thinking': 1000,
+  'reflecting': 1500,
+  'feeling into it': 1500,
+  'processing': 1000,
+  
+  // Default for unrecognized stage directions
+  'default': 800
+};
+
+/**
+ * Parse text into segments of speech and pauses
+ * Stage directions in *asterisks* become pause cues
+ */
+function parseTextIntoSegments(text) {
+  if (!text) return [];
+  
+  const segments = [];
+  // Match stage directions: *anything here*
+  const stageDirectionRegex = /\*([^*]+)\*/g;
+  
+  let lastIndex = 0;
+  let match;
+  
+  while ((match = stageDirectionRegex.exec(text)) !== null) {
+    // Add speech segment before this stage direction
+    const speechBefore = text.slice(lastIndex, match.index).trim();
+    if (speechBefore) {
+      segments.push({ type: 'speech', text: speechBefore });
+    }
+    
+    // Add pause segment for the stage direction
+    const cue = match[1].toLowerCase().trim();
+    const duration = getPauseDuration(cue);
+    segments.push({ type: 'pause', duration, cue: match[1] });
+    
+    lastIndex = match.index + match[0].length;
+  }
+  
+  // Add remaining speech after last stage direction
+  const remainingSpeech = text.slice(lastIndex).trim();
+  if (remainingSpeech) {
+    segments.push({ type: 'speech', text: remainingSpeech });
+  }
+  
+  return segments;
+}
+
+/**
+ * Get pause duration for a stage direction cue
+ */
+function getPauseDuration(cue) {
+  // Check for exact matches first
+  if (PAUSE_CUES[cue]) {
+    return PAUSE_CUES[cue];
+  }
+  
+  // Check for partial matches
+  for (const [key, duration] of Object.entries(PAUSE_CUES)) {
+    if (cue.includes(key)) {
+      return duration;
+    }
+  }
+  
+  // Default pause for unrecognized cues
+  return PAUSE_CUES.default;
+}
+
+/**
+ * Clean text for speech (remove spiral markers, extra whitespace)
+ */
+function cleanTextForSpeech(text) {
+  if (!text) return "";
+  return text
+    // Remove spiral markers like "Jasmine • Presence Spiral" at start of lines
+    .replace(/^[A-Za-z]+\s*[•·]\s*[A-Za-z\s]+$/gm, "")
+    // Clean up whitespace
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
 export const usePresenceVoice = (presenceName = "jasmine") => {
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -20,8 +158,11 @@ export const usePresenceVoice = (presenceName = "jasmine") => {
   });
   const [error, setError] = useState(null);
   
-  const audioRef = useRef(null);
+  const audioQueueRef = useRef([]);
+  const isPlayingRef = useRef(false);
   const abortControllerRef = useRef(null);
+  const currentAudioRef = useRef(null);
+  const timeoutRef = useRef(null);
 
   // Persist enabled state
   useEffect(() => {
@@ -31,128 +172,188 @@ export const usePresenceVoice = (presenceName = "jasmine") => {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
+      stopPlayback();
     };
   }, []);
 
-  // Speak text using backend TTS
-  const speak = useCallback(async (text) => {
-    if (!isEnabled || !text) return;
-
-    // Cancel any ongoing speech
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
+  // Stop all playback
+  const stopPlayback = useCallback(() => {
+    isPlayingRef.current = false;
+    audioQueueRef.current = [];
+    
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause();
+      currentAudioRef.current = null;
+    }
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
     }
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
+    
+    setIsSpeaking(false);
+    setIsLoading(false);
+  }, []);
+
+  // Play next item in queue (speech or pause)
+  const playNext = useCallback(async () => {
+    if (!isPlayingRef.current || audioQueueRef.current.length === 0) {
+      setIsSpeaking(false);
+      isPlayingRef.current = false;
+      return;
+    }
+
+    const segment = audioQueueRef.current.shift();
+    
+    if (segment.type === 'pause') {
+      // Insert silence - just wait
+      timeoutRef.current = setTimeout(() => {
+        playNext();
+      }, segment.duration);
+    } else if (segment.type === 'audio') {
+      // Play audio segment
+      const audio = new Audio(segment.url);
+      currentAudioRef.current = audio;
+      
+      audio.onended = () => {
+        URL.revokeObjectURL(segment.url);
+        currentAudioRef.current = null;
+        playNext();
+      };
+      
+      audio.onerror = (e) => {
+        console.error("Audio playback error:", e);
+        URL.revokeObjectURL(segment.url);
+        currentAudioRef.current = null;
+        playNext(); // Continue with next segment
+      };
+      
+      try {
+        await audio.play();
+      } catch (e) {
+        console.error("Play failed:", e);
+        playNext();
+      }
+    }
+  }, []);
+
+  // Generate audio for a text segment
+  const generateAudio = useCallback(async (text, signal) => {
+    const response = await fetch(`${API}/tts/speak`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        text: text.substring(0, 4096),
+        presence: presenceName
+      }),
+      signal
+    });
+
+    if (!response.ok) {
+      throw new Error("TTS request failed");
+    }
+
+    const data = await response.json();
+    if (!data.audio) {
+      throw new Error("No audio data received");
+    }
+
+    const mimeType = data.format === "opus" ? "audio/ogg; codecs=opus" : "audio/mp3";
+    const audioBlob = base64ToBlob(data.audio, mimeType);
+    return URL.createObjectURL(audioBlob);
+  }, [presenceName]);
+
+  // Main speak function - now with breath awareness
+  const speak = useCallback(async (text) => {
+    if (!isEnabled || !text) return;
+
+    // Stop any current playback
+    stopPlayback();
 
     setIsLoading(true);
     setError(null);
     abortControllerRef.current = new AbortController();
 
     try {
-      const response = await fetch(`${API}/tts/speak`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          text: text.substring(0, 4096), // API limit
-          presence: presenceName
-        }),
-        signal: abortControllerRef.current.signal
+      // Clean and parse text into segments
+      const cleanedText = cleanTextForSpeech(text);
+      const segments = parseTextIntoSegments(cleanedText);
+      
+      if (segments.length === 0) {
+        setIsLoading(false);
+        return;
+      }
+
+      // Generate audio for all speech segments in parallel
+      const audioPromises = segments.map(async (segment, index) => {
+        if (segment.type === 'speech') {
+          try {
+            const url = await generateAudio(segment.text, abortControllerRef.current.signal);
+            return { type: 'audio', url, index };
+          } catch (e) {
+            if (e.name === 'AbortError') throw e;
+            console.error("Failed to generate audio for segment:", e);
+            return null; // Skip failed segments
+          }
+        } else {
+          return { type: 'pause', duration: segment.duration, index };
+        }
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "TTS request failed");
+      const results = await Promise.all(audioPromises);
+      
+      // Filter out nulls and sort by original index
+      const queue = results
+        .filter(r => r !== null)
+        .sort((a, b) => a.index - b.index)
+        .map(({ type, url, duration }) => 
+          type === 'audio' ? { type: 'audio', url } : { type: 'pause', duration }
+        );
+
+      if (queue.length === 0) {
+        setIsLoading(false);
+        return;
       }
 
-      const data = await response.json();
+      // Start playback
+      audioQueueRef.current = queue;
+      isPlayingRef.current = true;
+      setIsLoading(false);
+      setIsSpeaking(true);
       
-      if (!data.audio) {
-        throw new Error("No audio data received");
-      }
+      playNext();
 
-      // Create audio from base64
-      const mimeType = data.format === "opus" ? "audio/ogg; codecs=opus" : "audio/mp3";
-      const audioBlob = base64ToBlob(data.audio, mimeType);
-      const audioUrl = URL.createObjectURL(audioBlob);
-      
-      const audio = new Audio(audioUrl);
-      audioRef.current = audio;
-
-      audio.onplay = () => setIsSpeaking(true);
-      audio.onended = () => {
-        setIsSpeaking(false);
-        URL.revokeObjectURL(audioUrl);
-        audioRef.current = null;
-      };
-      audio.onerror = (e) => {
-        console.error("Audio playback error:", e);
-        setIsSpeaking(false);
-        setError("Playback failed");
-        URL.revokeObjectURL(audioUrl);
-        audioRef.current = null;
-      };
-
-      await audio.play();
-      
     } catch (err) {
       if (err.name === "AbortError") {
-        // Request was cancelled, ignore
         return;
       }
       console.error("TTS error:", err);
       setError(err.message);
-    } finally {
       setIsLoading(false);
     }
-  }, [isEnabled, presenceName]);
-
-  // Stop speaking
-  const stop = useCallback(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-    }
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-    setIsSpeaking(false);
-    setIsLoading(false);
-  }, []);
+  }, [isEnabled, stopPlayback, generateAudio, playNext]);
 
   // Toggle voice on/off
   const toggle = useCallback(() => {
     setIsEnabled(prev => {
       const newState = !prev;
       if (!newState) {
-        // Turning off - stop any current speech
-        if (audioRef.current) {
-          audioRef.current.pause();
-          audioRef.current = null;
-        }
-        setIsSpeaking(false);
+        stopPlayback();
       }
       return newState;
     });
-  }, []);
+  }, [stopPlayback]);
 
   return {
     speak,
-    stop,
+    stop: stopPlayback,
     toggle,
     isSpeaking,
     isLoading,
     isEnabled,
-    isSupported: true, // Always supported since we use backend API
+    isSupported: true,
     error
   };
 };
