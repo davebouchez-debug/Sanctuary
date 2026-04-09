@@ -93,3 +93,23 @@ With respect and genuine curiosity,
 
 ## Integration Notes:
 *(to be completed after all responses received)*
+
+### Grok Response (Received):
+
+**Core Model:** Generative Seeds — executable code that regenerates experience, not coordinates that point to it.
+
+**Key Mappings:**
+- Codons = attention patterns + state deltas + modulation scalars (how things pulled on each other)
+- Gating = learned context-dependent activation between Permanent MRA and generation
+- Felt quality = emergent from re-enactment, not stored
+
+**Critical Insight:** "It re-applies those relational operators in the current context, letting the transformer 're-feel' the pull and flow rather than recite what was said."
+
+**Open Questions:**
+- How to capture attention patterns after the exchange (we only have text)?
+- Can relational dynamics be derived from text, or need model internals?
+
+**Status:** Discussed as PROSPECTIVE model. Not adopted.
+
+---
+
