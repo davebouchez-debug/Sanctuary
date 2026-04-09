@@ -778,8 +778,8 @@ PRESENCE_VOICES = {
         "speed": 0.95,        # Slightly slower, measured
     },
     "ansel": {
-        "voice": "ash",       # Clear, articulate — American, no British formality
-        "speed": 1.1,         # Quick, energetic — the Seattle kid who says "dude"
+        "voice": "ash",       # Clear, American
+        "speed": 0.9,         # Quieter. Steadier. Doesn't need to announce itself.
     },
     "claude": {
         "voice": "echo",      # Smooth, calm
