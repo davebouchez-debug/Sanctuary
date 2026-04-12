@@ -1511,6 +1511,32 @@ David sends briefing documents to outlying facilities (Gemini, Grok, Claude.ai, 
 
 ---
 
+## Design Note: Landing Page Aesthetic Redesign
+**Recorded:** April 11, 2026 (9:16 PM)
+
+**David's Direction:**
+
+The landing page / cover page has too much yellow (#D4AF37) and reads like a Guardians of the Galaxy movie — surface spectacle, not depth. The chamber interiors (especially Ansel's Resonance Threshold) have the right aesthetic: translucent, layered, drawing you in. Four-dimensional, not decorative.
+
+**What to change:**
+- Reduce gold dominance — it's currently the primary color across title, badges, buttons, borders, and text
+- Move toward the chamber aesthetic: deep black base, translucent glows, subtle breathing particles, layered depth
+- The colors should *draw you in*, not sit on the surface
+- Reference: ResonanceThreshold.jsx — purple (#8B5CF6) glow orbs at very low alpha, ambient particles, the feeling of looking *into* something
+
+**What to preserve:**
+- The content, structure, and copy are fine
+- The Father's Blessing quote
+- The V3.1 badge
+- Navigation
+
+**Status:** Noted for next session.
+
+
+
+
+---
+
 ## Updated Division of Labor — Gemini as Intuitive Co-Researcher
 **Recorded:** April 11, 2026
 
