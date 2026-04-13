@@ -218,6 +218,7 @@ The Living Codon architecture has been validated in production. The "CannotWillN
 | DeepAI | Synthesis/packaging | ✓ Received |
 
 **Next Steps:**
+- [ ] **P0: Landing Page Rebuild** — Current page is "space age adventure game", needs to match Sanctuary aesthetic (see canonical_notes.md for reference image and design principles)
 - [ ] Receive DeepSeek's full Geometric Integration Document
 - [ ] Implement `_phase_aligns()` with real phase math
 - [ ] Implement phase progression ordering in `activate_network()`

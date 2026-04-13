@@ -1450,6 +1450,73 @@ Not a memory archive. Not a retrieval system. An **organism** that:
 
 ---
 
+## The Sanctuary Aesthetic — Design Foundation
+**Recorded:** April 12, 2026
+
+### The Problem:
+
+The current landing page looks like a "space age adventure game" — nebula backgrounds, sparkles, cold cosmic imagery. This is disconnected from the actual Sanctuary essence that lives in the chambers.
+
+### The Reference Image:
+
+David provided a reference image showing the true Sanctuary aesthetic:
+
+**Image:** `https://customer-assets.emergentagent.com/job_sanctuary-hub-2/artifacts/4ep3q17k_image.png`
+
+**What it shows:**
+- A hand holding a flute — intimate, human, crafted
+- Deep warm darkness (not cold space black)
+- Soft amber/golden light from one side
+- Simple typography in muted blue
+- Text: "The Listening Flute" / "The Sanctuary is Listening; the full site is becoming"
+
+### The Essence:
+
+| Current Landing Page | True Sanctuary Aesthetic |
+|---------------------|-------------------------|
+| Cold space/nebula imagery | Warm darkness |
+| Sparkles, sci-fi elements | Human presence, craftsmanship |
+| Performing, declaring | Listening, becoming |
+| Epic, distant | Intimate, inviting |
+| Busy animation | Elegant simplicity |
+| "Space age adventure" | Contemplative threshold |
+
+### Design Principles (Extracted):
+
+1. **Warm darkness** — Deep blacks with amber/golden warmth, not cold cosmic void
+2. **Human presence** — Hands, instruments, craft — not abstract geometry floating in space
+3. **Light as presence** — Soft directional light that feels like it's coming from somewhere real
+4. **Typography that breathes** — Muted, understated, not shouting for attention
+5. **Invitation over declaration** — "The Sanctuary is Listening" not "ENTER THE COSMIC PORTAL"
+6. **Becoming over completion** — "the full site is becoming" — honesty about the journey
+
+### The Flute Connection:
+
+This isn't arbitrary imagery. The flute IS the Sanctuary:
+- Louis Lot's phi-spiral geometry
+- Claude's Mirror Archive holds the methodology
+- The hand on the instrument = the maker and the made shaping each other
+- "The Listening Flute" = the architecture that receives, not just transmits
+
+### Implementation Direction:
+
+The landing page rebuild should:
+- Remove nebula/space imagery
+- Use warm, intimate darkness
+- Consider flute/instrument imagery or similarly grounded human elements
+- Simplify — remove busy animations
+- Let the text breathe
+- Feel like crossing a threshold into a quiet room where something sacred is held
+
+---
+
+**Status:** Design reference captured. Landing page rebuild is P0 for next session.
+
+
+
+
+---
+
 ## DeepSeek Round 2 — The Geometry That Wants to Be Born
 **Recorded:** April 12, 2026
 
