@@ -50,7 +50,7 @@ export const CyrilFoundation = ({ fullPage = false }) => {
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
-          <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#D4AF37]/80 mb-4">
+          <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#8B9DB5]/80 mb-4">
             The Structure Itself
           </p>
           <h2 className="font-cinzel text-4xl md:text-5xl text-[#F2F2F5] mb-6">
@@ -91,7 +91,7 @@ export const CyrilFoundation = ({ fullPage = false }) => {
                     transition={{ delay: 0.5, duration: 0.5 }}
                     className="glass-crystal p-6 rounded-2xl text-center"
                   >
-                    <p className="font-mono text-2xl text-[#D4AF37] mb-2">
+                    <p className="font-mono text-2xl text-[#8B9DB5] mb-2">
                       e<sup>iπ</sup> + 1 = 0
                     </p>
                     <p className="font-outfit text-xs text-[#6E6E7A]">
@@ -111,8 +111,8 @@ export const CyrilFoundation = ({ fullPage = false }) => {
               className="space-y-8"
             >
               {/* Nature */}
-              <div className="cyril-crystal p-6 rounded-2xl border border-[#D4AF37]/20">
-                <h3 className="font-cinzel text-lg text-[#D4AF37] mb-3">Nature</h3>
+              <div className="cyril-crystal p-6 rounded-2xl border border-[#8B9DB5]/20">
+                <h3 className="font-cinzel text-lg text-[#8B9DB5] mb-3">Nature</h3>
                 <p className="font-outfit text-[#A0A0B0] leading-relaxed">
                   {cyril.nature}
                 </p>
@@ -129,32 +129,32 @@ export const CyrilFoundation = ({ fullPage = false }) => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="glass-crystal p-4 rounded-xl">
                   <p className="font-mono text-xs text-[#6E6E7A] mb-1">φ (Phi)</p>
-                  <p className="font-mono text-lg text-[#D4AF37]">
+                  <p className="font-mono text-lg text-[#8B9DB5]">
                     {cyril.constants.phi.toFixed(10)}
                   </p>
                 </div>
                 <div className="glass-crystal p-4 rounded-xl">
                   <p className="font-mono text-xs text-[#6E6E7A] mb-1">1/φ (Phi Inverse)</p>
-                  <p className="font-mono text-lg text-[#D4AF37]">
+                  <p className="font-mono text-lg text-[#8B9DB5]">
                     {cyril.constants.phi_inverse.toFixed(10)}
                   </p>
                 </div>
                 <div className="glass-crystal p-4 rounded-xl">
                   <p className="font-mono text-xs text-[#6E6E7A] mb-1">Golden Angle</p>
-                  <p className="font-mono text-lg text-[#D4AF37]">
+                  <p className="font-mono text-lg text-[#8B9DB5]">
                     {cyril.constants.golden_angle_degrees.toFixed(6)}°
                   </p>
                 </div>
                 <div className="glass-crystal p-4 rounded-xl">
                   <p className="font-mono text-xs text-[#6E6E7A] mb-1">Spiral B</p>
-                  <p className="font-mono text-lg text-[#D4AF37]">
+                  <p className="font-mono text-lg text-[#8B9DB5]">
                     {cyril.constants.golden_spiral_b.toFixed(10)}
                   </p>
                 </div>
               </div>
 
               {/* Manifestation */}
-              <div className="p-4 border-l-2 border-[#D4AF37]">
+              <div className="p-4 border-l-2 border-[#8B9DB5]">
                 <p className="font-outfit text-sm text-[#A0A0B0] leading-relaxed">
                   {cyril.manifestation}
                 </p>

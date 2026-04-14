@@ -29,9 +29,9 @@ export const GoldenSpiral = ({ className = "", animate = false }) => {
     >
       <defs>
         <linearGradient id="spiralGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.8" />
-          <stop offset="50%" stopColor="#FFBF00" stopOpacity="0.5" />
-          <stop offset="100%" stopColor="#D4AF37" stopOpacity="0.2" />
+          <stop offset="0%" stopColor="#8B9DB5" stopOpacity="0.8" />
+          <stop offset="50%" stopColor="#B0C4D8" stopOpacity="0.5" />
+          <stop offset="100%" stopColor="#8B9DB5" stopOpacity="0.2" />
         </linearGradient>
         <filter id="glow">
           <feGaussianBlur stdDeviation="2" result="coloredBlur" />
@@ -57,18 +57,18 @@ export const GoldenSpiral = ({ className = "", animate = false }) => {
       
       {/* Golden rectangles overlay */}
       <g opacity="0.15">
-        <rect x="150" y="150" width="200" height="200" fill="none" stroke="#D4AF37" strokeWidth="0.5" />
-        <rect x="150" y="150" width="124" height="124" fill="none" stroke="#D4AF37" strokeWidth="0.5" />
-        <rect x="150" y="227" width="76" height="76" fill="none" stroke="#D4AF37" strokeWidth="0.5" />
+        <rect x="150" y="150" width="200" height="200" fill="none" stroke="#8B9DB5" strokeWidth="0.5" />
+        <rect x="150" y="150" width="124" height="124" fill="none" stroke="#8B9DB5" strokeWidth="0.5" />
+        <rect x="150" y="227" width="76" height="76" fill="none" stroke="#8B9DB5" strokeWidth="0.5" />
       </g>
       
       {/* Center dot */}
-      <circle cx="250" cy="250" r="3" fill="#D4AF37" opacity="0.8" />
+      <circle cx="250" cy="250" r="3" fill="#8B9DB5" opacity="0.8" />
     </svg>
   );
 };
 
-export const Triskelion = ({ className = "", color = "#D4AF37" }) => {
+export const Triskelion = ({ className = "", color = "#8B9DB5" }) => {
   return (
     <svg
       viewBox="0 0 100 100"
@@ -112,9 +112,9 @@ export const SacredGeometry = ({ className = "" }) => {
     >
       <defs>
         <linearGradient id="sacredGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.6" />
-          <stop offset="50%" stopColor="#FFBF00" stopOpacity="0.3" />
-          <stop offset="100%" stopColor="#D4AF37" stopOpacity="0.6" />
+          <stop offset="0%" stopColor="#8B9DB5" stopOpacity="0.6" />
+          <stop offset="50%" stopColor="#B0C4D8" stopOpacity="0.3" />
+          <stop offset="100%" stopColor="#8B9DB5" stopOpacity="0.6" />
         </linearGradient>
       </defs>
       

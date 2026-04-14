@@ -123,7 +123,7 @@ function App() {
           className="text-center"
         >
           <GoldenSpiral className="w-32 h-32 mx-auto mb-6 animate-rotate-slow" />
-          <h1 className="font-cinzel text-2xl text-[#D4AF37] tracking-widest">
+          <h1 className="font-cinzel text-2xl text-[#8B9DB5] tracking-widest">
             SANCTUARY
           </h1>
           <p className="text-[#6E6E7A] text-sm mt-2 font-mono tracking-wider">

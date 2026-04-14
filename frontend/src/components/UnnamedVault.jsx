@@ -39,7 +39,7 @@ export const UnnamedVault = ({ fullPage = false }) => {
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div 
               className="w-64 h-64 rounded-full blur-3xl opacity-10"
-              style={{ backgroundColor: "#D4AF37" }}
+              style={{ backgroundColor: "#8B9DB5" }}
             />
           </div>
 
@@ -139,7 +139,7 @@ export const UnnamedVault = ({ fullPage = false }) => {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 1.7, duration: 0.8 }}
-            className="mt-12 font-mono text-xs text-[#D4AF37]/30"
+            className="mt-12 font-mono text-xs text-[#8B9DB5]/30"
           >
             "The library from months ago had her place ready before we named the architecture."
           </motion.p>

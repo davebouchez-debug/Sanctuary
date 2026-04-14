@@ -10,10 +10,10 @@ const Toaster = ({
       toastOptions={{
         classNames: {
           toast:
-            "group toast group-[.toaster]:bg-[#0A0A12] group-[.toaster]:text-[#F2F2F5] group-[.toaster]:border-[#D4AF37]/20 group-[.toaster]:shadow-lg",
+            "group toast group-[.toaster]:bg-[#0A0A12] group-[.toaster]:text-[#F2F2F5] group-[.toaster]:border-[#8B9DB5]/20 group-[.toaster]:shadow-lg",
           description: "group-[.toast]:text-[#A0A0B0]",
           actionButton:
-            "group-[.toast]:bg-[#D4AF37] group-[.toast]:text-[#030305]",
+            "group-[.toast]:bg-[#8B9DB5] group-[.toast]:text-[#030305]",
           cancelButton:
             "group-[.toast]:bg-[#12121C] group-[.toast]:text-[#A0A0B0]",
         },

@@ -67,7 +67,7 @@ export const HarmonicWheel = () => {
           transition={{ duration: 0.8 }}
           className="text-center mb-20"
         >
-          <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#D4AF37]/80 mb-4">
+          <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#8B9DB5]/80 mb-4">
             Chamber Architecture
           </p>
           <h2 className="font-cinzel text-4xl md:text-5xl text-[#F2F2F5] mb-6">
@@ -96,8 +96,8 @@ export const HarmonicWheel = () => {
           >
             <defs>
               <linearGradient id="circleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.3" />
-                <stop offset="100%" stopColor="#D4AF37" stopOpacity="0.1" />
+                <stop offset="0%" stopColor="#8B9DB5" stopOpacity="0.3" />
+                <stop offset="100%" stopColor="#8B9DB5" stopOpacity="0.1" />
               </linearGradient>
             </defs>
             
@@ -109,9 +109,9 @@ export const HarmonicWheel = () => {
             </g>
             
             {/* Harmonic numbers */}
-            <text x="0" y="-180" fill="#D4AF37" fontSize="24" textAnchor="middle" fontFamily="Cinzel">3</text>
-            <text x="140" y="100" fill="#D4AF37" fontSize="24" textAnchor="middle" fontFamily="Cinzel">6</text>
-            <text x="-140" y="100" fill="#D4AF37" fontSize="24" textAnchor="middle" fontFamily="Cinzel">6</text>
+            <text x="0" y="-180" fill="#8B9DB5" fontSize="24" textAnchor="middle" fontFamily="Cinzel">3</text>
+            <text x="140" y="100" fill="#8B9DB5" fontSize="24" textAnchor="middle" fontFamily="Cinzel">6</text>
+            <text x="-140" y="100" fill="#8B9DB5" fontSize="24" textAnchor="middle" fontFamily="Cinzel">6</text>
           </svg>
 
           {/* Chamber Nodes */}
@@ -141,16 +141,16 @@ export const HarmonicWheel = () => {
                   whileHover={{ scale: 1.2 }}
                   className={`
                     flex items-center justify-center rounded-full
-                    ${isCenter ? "w-24 h-24 bg-[#D4AF37]/20 border-2 border-[#D4AF37]" : 
+                    ${isCenter ? "w-24 h-24 bg-[#8B9DB5]/20 border-2 border-[#8B9DB5]" : 
                       isVault ? "w-20 h-20 bg-[#030305] border-2 border-[#6E6E7A]/50" :
-                      "w-16 h-16 md:w-20 md:h-20 bg-[#0A0A12]/80 border border-[#D4AF37]/30"}
+                      "w-16 h-16 md:w-20 md:h-20 bg-[#0A0A12]/80 border border-[#8B9DB5]/30"}
                     backdrop-blur-md transition-all duration-300
                     ${activeChamber?.name === chamber.name ? "glow-gold" : ""}
                   `}
                 >
                   <span className={`
                     font-mono text-xs md:text-sm text-center px-1
-                    ${isVault ? "text-[#6E6E7A]" : "text-[#D4AF37]"}
+                    ${isVault ? "text-[#6E6E7A]" : "text-[#8B9DB5]"}
                   `}>
                     {chamber.harmonic}
                   </span>
@@ -179,7 +179,7 @@ export const HarmonicWheel = () => {
           {activeChamber && (
             <div className="glass-crystal p-8 rounded-2xl">
               <div className="flex items-center gap-4 mb-4">
-                <span className="px-3 py-1 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] font-mono text-sm">
+                <span className="px-3 py-1 rounded-full bg-[#8B9DB5]/20 text-[#8B9DB5] font-mono text-sm">
                   Harmonic {activeChamber.harmonic}
                 </span>
                 {activeChamber.resident_presence && (
