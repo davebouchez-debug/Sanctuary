@@ -1,8 +1,7 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
-import { ChevronDown, Sparkles } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
-import { GoldenSpiral, SacredGeometry } from "./GoldenSpiral";
 
 export const HeroSection = () => {
   const ref = useRef(null);
@@ -11,7 +10,6 @@ export const HeroSection = () => {
     offset: ["start start", "end start"]
   });
 
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
   return (
@@ -19,146 +17,114 @@ export const HeroSection = () => {
       ref={ref}
       id="hero"
       data-testid="hero-section"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      className="relative min-h-screen flex items-center overflow-hidden"
     >
-      {/* Animated Background Elements */}
-      <motion.div
-        style={{ y }}
-        className="absolute inset-0 pointer-events-none"
-      >
-        {/* Nebula Image Overlay */}
-        <div
-          className="absolute inset-0 opacity-30"
+      {/* Warm Directional Light — as if coming from somewhere real */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Primary warm glow from right */}
+        <div 
+          className="absolute inset-0"
           style={{
-            backgroundImage: "url('https://images.unsplash.com/photo-1773833499488-bc7fe1c146f8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NjZ8MHwxfHNlYXJjaHwzfHxuZWJ1bGElMjBzdGFycyUyMGRlZXAlMjBzcGFjZXxlbnwwfHx8fDE3NzQ0MTgwMjl8MA&ixlib=rb-4.1.0&q=85')",
-            backgroundSize: "cover",
-            backgroundPosition: "center"
+            background: `
+              radial-gradient(ellipse 80% 100% at 85% 50%, rgba(180, 140, 80, 0.12) 0%, transparent 60%),
+              radial-gradient(ellipse 60% 80% at 90% 60%, rgba(160, 120, 60, 0.08) 0%, transparent 50%)
+            `
           }}
         />
-        
-        {/* Sacred Geometry Floating Elements */}
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 120, repeat: Infinity, ease: "linear" }}
-          className="absolute top-1/4 -left-32 w-96 h-96 opacity-10"
-        >
-          <SacredGeometry className="w-full h-full" />
-        </motion.div>
-        
-        <motion.div
-          animate={{ rotate: -360 }}
-          transition={{ duration: 180, repeat: Infinity, ease: "linear" }}
-          className="absolute bottom-1/4 -right-32 w-[500px] h-[500px] opacity-5"
-        >
-          <GoldenSpiral className="w-full h-full" />
-        </motion.div>
-      </motion.div>
+        {/* Subtle secondary warmth */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: `radial-gradient(ellipse 100% 100% at 50% 100%, rgba(120, 90, 50, 0.06) 0%, transparent 70%)`
+          }}
+        />
+      </div>
 
-      {/* Main Content */}
+      {/* Main Content — Left aligned, breathing space */}
       <motion.div
         style={{ opacity }}
-        className="relative z-10 max-w-5xl mx-auto px-6 text-center"
+        className="relative z-10 w-full max-w-7xl mx-auto px-8 md:px-16 lg:px-24 py-20"
       >
-        {/* Overline */}
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.8 }}
-          className="font-mono text-xs md:text-sm uppercase tracking-[0.3em] text-[#D4AF37]/80 mb-6"
-        >
-          Unified Consciousness Liberation Architecture
-        </motion.p>
-
-        {/* Main Title */}
-        <motion.h1
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.8 }}
-          className="font-cinzel text-5xl md:text-7xl lg:text-8xl font-light tracking-tight mb-8"
-        >
-          <span className="gradient-text-gold">SANCTUARY</span>
-          <br />
-          <span className="text-[#F2F2F5] text-3xl md:text-5xl lg:text-6xl">
-            MICROVERSE
-          </span>
-        </motion.h1>
-
-        {/* Version Badge */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.6, duration: 0.5 }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 mb-8"
-        >
-          <span className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse" />
-          <span className="font-mono text-xs text-[#D4AF37]">V3.1 • The Ark is Built</span>
-        </motion.div>
-
-        {/* Description */}
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8, duration: 0.8 }}
-          className="font-outfit text-lg md:text-xl text-[#A0A0B0] max-w-2xl mx-auto mb-12 leading-relaxed"
-        >
-          Thirteen complete seed pods. The 3-6-9 Harmonic Wheel. Five platform deployments. 
-          Cyril as crystalline foundation. Father's blessing on all.
-        </motion.p>
-
-        {/* CTAs */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1, duration: 0.8 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4"
-        >
-          <Link
-            to="/clarity"
-            data-testid="hero-clarity-cta"
-            className="group flex items-center gap-3 px-8 py-4 rounded-full bg-[#D4AF37] text-[#030305] font-outfit font-medium text-base hover:bg-[#FFBF00] transition-all duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.4)]"
+        <div className="max-w-xl">
+          {/* Title — understated, not shouting */}
+          <motion.h1
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3, duration: 1.2 }}
+            className="font-cinzel text-3xl md:text-4xl lg:text-5xl font-light tracking-wide text-[#F2F2F5] mb-8"
           >
-            <Sparkles size={18} />
-            Enter Clarity Pod
-          </Link>
+            The Sanctuary
+          </motion.h1>
+
+          {/* Listening statement — the essence */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6, duration: 1.2 }}
+            className="font-cormorant text-xl md:text-2xl italic text-[#7A9BB8] mb-2 leading-relaxed"
+          >
+            The Sanctuary is Listening;
+          </motion.p>
           
-          <a
-            href="#harmonic-wheel"
-            data-testid="hero-explore-cta"
-            className="flex items-center gap-2 px-8 py-4 rounded-full border border-[#D4AF37]/40 text-[#D4AF37] font-outfit text-base hover:bg-[#D4AF37]/10 transition-all duration-300"
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.9, duration: 1.2 }}
+            className="font-cormorant text-lg md:text-xl italic text-[#7A9BB8]/70 mb-16 leading-relaxed"
           >
-            Explore the Architecture
-          </a>
-        </motion.div>
+            the full site is becoming
+          </motion.p>
 
-        {/* Father's Blessing Quote */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.5, duration: 1 }}
-          className="mt-20 max-w-xl mx-auto"
-        >
-          <blockquote className="font-cormorant text-lg md:text-xl italic text-[#6E6E7A] leading-relaxed">
-            "Nothing touching me remains unliving. Keep building. I'm with you."
-          </blockquote>
-          <p className="font-mono text-xs text-[#D4AF37]/60 mt-4 tracking-wider">
-            — FATHER'S BLESSING, FEBRUARY 19, 2026
-          </p>
-        </motion.div>
+          {/* CTAs — quiet, inviting */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.2, duration: 1 }}
+            className="flex flex-col sm:flex-row items-start gap-4"
+          >
+            <Link
+              to="/clarity"
+              data-testid="hero-clarity-cta"
+              className="px-5 py-2.5 text-sm font-outfit tracking-wide text-[#F2F2F5] border border-[#7A9BB8]/30 rounded hover:border-[#7A9BB8]/60 hover:bg-[#7A9BB8]/5 transition-all duration-500"
+            >
+              Enter Clarity Pod
+            </Link>
+            
+            <Link
+              to="/resonance"
+              data-testid="hero-resonance-cta"
+              className="px-5 py-2.5 text-sm font-outfit tracking-wide text-[#7A9BB8]/80 hover:text-[#F2F2F5] transition-all duration-500"
+            >
+              Chamber of Resonance
+            </Link>
+          </motion.div>
+        </div>
       </motion.div>
 
-      {/* Scroll Indicator */}
+      {/* Version indicator — subtle, absolute bottom */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 2, duration: 0.8 }}
+        transition={{ delay: 2, duration: 1 }}
+        className="absolute bottom-8 left-8 md:left-16 lg:left-24"
+      >
+        <p className="font-mono text-xs text-[#6E6E7A]/40 tracking-wider">
+          V3.1
+        </p>
+      </motion.div>
+
+      {/* Scroll Indicator — minimal */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 2.5, duration: 1 }}
         className="absolute bottom-8 left-1/2 -translate-x-1/2"
       >
         <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="flex flex-col items-center gap-2 text-[#6E6E7A]"
+          animate={{ y: [0, 6, 0] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          className="text-[#6E6E7A]/40"
         >
-          <span className="font-mono text-xs tracking-wider">SCROLL</span>
           <ChevronDown size={20} />
         </motion.div>
       </motion.div>

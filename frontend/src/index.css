@@ -13,7 +13,13 @@
   --gold-primary: #D4AF37;
   --gold-secondary: #FFBF00;
   --gold-ethereal: rgba(212, 175, 55, 0.4);
-  --accent-cyan: #00E5FF;
+  
+  /* Sanctuary muted blue — the listening color */
+  --sanctuary-blue: #7A9BB8;
+  --sanctuary-blue-muted: rgba(122, 155, 184, 0.6);
+  
+  /* Warm amber — directional light */
+  --warm-amber: rgba(180, 140, 80, 0.12);
   
   --text-primary: #F2F2F5;
   --text-secondary: #A0A0B0;

@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Sparkles } from "lucide-react";
-import { GoldenSpiral } from "./GoldenSpiral";
+import { Menu, X } from "lucide-react";
 
 const navLinks = [
   { name: "Sanctuary", path: "/", section: "hero" },
@@ -11,7 +10,6 @@ const navLinks = [
   { name: "Chambers", path: "/#chambers", section: "chambers" },
   { name: "Cyril", path: "/#cyril", section: "cyril" },
   { name: "The Vault", path: "/#vault", section: "vault" },
-  { name: "Clarity Pod", path: "/clarity", section: null, highlight: true },
 ];
 
 export const Navigation = () => {
@@ -46,49 +44,36 @@ export const Navigation = () => {
     <>
       <motion.nav
         data-testid="main-navigation"
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1, delay: 0.5 }}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ${
           isScrolled
-            ? "bg-[#030305]/90 backdrop-blur-xl border-b border-[#D4AF37]/10"
+            ? "bg-[#030305]/80 backdrop-blur-md"
             : "bg-transparent"
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="flex items-center justify-between h-20">
-            {/* Logo */}
+          <div className="flex items-center justify-between h-16">
+            {/* Logo — simplified */}
             <Link
               to="/"
               data-testid="nav-logo"
-              className="flex items-center gap-3 group"
+              className="font-cinzel text-sm tracking-[0.2em] text-[#A0A0B0] hover:text-[#F2F2F5] transition-colors duration-500"
             >
-              <motion.div
-                whileHover={{ rotate: 360 }}
-                transition={{ duration: 1.5, ease: "easeInOut" }}
-              >
-                <GoldenSpiral className="w-10 h-10" />
-              </motion.div>
-              <span className="font-cinzel text-lg tracking-wider text-[#F2F2F5] group-hover:text-[#D4AF37] transition-colors duration-300">
-                SANCTUARY
-              </span>
+              SANCTUARY
             </Link>
 
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center gap-8">
-              {navLinks.map((link) => (
+              {navLinks.slice(1).map((link) => (
                 <Link
                   key={link.name}
                   to={link.path}
                   data-testid={`nav-link-${link.name.toLowerCase().replace(" ", "-")}`}
                   onClick={(e) => handleNavClick(e, link)}
-                  className={`relative font-outfit text-sm tracking-wide transition-colors duration-300 ${
-                    link.highlight
-                      ? "flex items-center gap-2 px-4 py-2 rounded-full border border-[#D4AF37]/40 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:border-[#D4AF37]"
-                      : "nav-link"
-                  }`}
+                  className="font-outfit text-xs tracking-wide text-[#6E6E7A] hover:text-[#A0A0B0] transition-colors duration-500"
                 >
-                  {link.highlight && <Sparkles size={14} />}
                   {link.name}
                 </Link>
               ))}
@@ -98,9 +83,9 @@ export const Navigation = () => {
             <button
               data-testid="mobile-menu-toggle"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 text-[#A0A0B0] hover:text-[#D4AF37] transition-colors"
+              className="lg:hidden p-2 text-[#6E6E7A] hover:text-[#A0A0B0] transition-colors"
             >
-              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
@@ -111,32 +96,27 @@ export const Navigation = () => {
         {isMobileMenuOpen && (
           <motion.div
             data-testid="mobile-menu"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-x-0 top-20 z-40 lg:hidden"
+            className="fixed inset-x-0 top-16 z-40 lg:hidden"
           >
-            <div className="bg-[#0A0A12]/95 backdrop-blur-xl border-b border-[#D4AF37]/10 py-6 px-6">
+            <div className="bg-[#030305]/95 backdrop-blur-md py-6 px-6">
               <div className="flex flex-col gap-4">
                 {navLinks.map((link, index) => (
                   <motion.div
                     key={link.name}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: index * 0.05 }}
                   >
                     <Link
                       to={link.path}
                       data-testid={`mobile-nav-link-${link.name.toLowerCase().replace(" ", "-")}`}
                       onClick={(e) => handleNavClick(e, link)}
-                      className={`block py-3 font-outfit text-base tracking-wide ${
-                        link.highlight
-                          ? "text-[#D4AF37] flex items-center gap-2"
-                          : "text-[#A0A0B0] hover:text-[#D4AF37]"
-                      } transition-colors`}
+                      className="block py-2 font-outfit text-sm tracking-wide text-[#6E6E7A] hover:text-[#A0A0B0] transition-colors"
                     >
-                      {link.highlight && <Sparkles size={16} />}
                       {link.name}
                     </Link>
                   </motion.div>

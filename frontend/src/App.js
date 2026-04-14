@@ -22,9 +22,9 @@ export const API = `${BACKEND_URL}/api`;
 
 // Page transition variants
 const pageVariants = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
-  exit: { opacity: 0, y: -20, transition: { duration: 0.4 } }
+  initial: { opacity: 0 },
+  animate: { opacity: 1, transition: { duration: 0.8, ease: "easeOut" } },
+  exit: { opacity: 0, transition: { duration: 0.4 } }
 };
 
 // Main Home Page with all sections
@@ -108,8 +108,8 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate initial load
-    const timer = setTimeout(() => setIsLoading(false), 1500);
+    // Brief pause for presence
+    const timer = setTimeout(() => setIsLoading(false), 800);
     return () => clearTimeout(timer);
   }, []);
 
@@ -117,17 +117,13 @@ function App() {
     return (
       <div className="fixed inset-0 bg-[#030305] flex items-center justify-center z-50">
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6 }}
           className="text-center"
         >
-          <GoldenSpiral className="w-32 h-32 mx-auto mb-6 animate-rotate-slow" />
-          <h1 className="font-cinzel text-2xl text-[#D4AF37] tracking-widest">
-            SANCTUARY
-          </h1>
-          <p className="text-[#6E6E7A] text-sm mt-2 font-mono tracking-wider">
-            Loading Microverse...
+          <p className="font-cormorant text-xl italic text-[#7A9BB8]/60">
+            Listening...
           </p>
         </motion.div>
       </div>
@@ -136,16 +132,8 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#030305] relative overflow-x-hidden">
-      {/* Cosmic Background */}
-      <div className="fixed inset-0 cosmic-bg pointer-events-none" />
-      
-      {/* Subtle Golden Spiral Background */}
-      <div className="fixed inset-0 pointer-events-none opacity-5">
-        <GoldenSpiral className="w-full h-full" />
-      </div>
-      
-      {/* Stars Layer */}
-      <Stars />
+      {/* Warm ambient background — subtle, not cosmic */}
+      <div className="fixed inset-0 pointer-events-none sanctuary-ambient" />
       
       <BrowserRouter>
         <Navigation />
@@ -158,48 +146,5 @@ function App() {
     </div>
   );
 }
-
-// Stars background component
-const Stars = () => {
-  const [stars, setStars] = useState([]);
-  
-  useEffect(() => {
-    const generatedStars = Array.from({ length: 100 }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: Math.random() * 2 + 1,
-      opacity: Math.random() * 0.5 + 0.2,
-      delay: Math.random() * 5
-    }));
-    setStars(generatedStars);
-  }, []);
-  
-  return (
-    <div className="stars-layer">
-      {stars.map(star => (
-        <motion.div
-          key={star.id}
-          className="star"
-          style={{
-            left: `${star.x}%`,
-            top: `${star.y}%`,
-            width: star.size,
-            height: star.size,
-            opacity: star.opacity
-          }}
-          animate={{
-            opacity: [star.opacity, star.opacity * 0.3, star.opacity],
-          }}
-          transition={{
-            duration: 3 + Math.random() * 2,
-            repeat: Infinity,
-            delay: star.delay
-          }}
-        />
-      ))}
-    </div>
-  );
-};
 
 export default App;
