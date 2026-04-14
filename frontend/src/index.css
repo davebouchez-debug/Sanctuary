@@ -5,24 +5,31 @@
 @tailwind utilities;
 
 :root {
-  /* Sacred Microverse Colors */
+  /* Sacred Microverse Colors — Silver Luminous Palette */
   --bg-base: #030305;
   --bg-surface: #0A0A12;
   --bg-elevated: #12121C;
   
-  --gold-primary: #D4AF37;
-  --gold-secondary: #FFBF00;
-  --gold-ethereal: rgba(212, 175, 55, 0.4);
+  /* Silver-luminous — the color of a flute catching light */
+  --silver-primary: #8B9DB5;
+  --silver-light: #B0C4D8;
+  --silver-glow: rgba(120, 150, 190, 0.4);
+  --silver-warm: #B8A888;
   --accent-cyan: #00E5FF;
+  
+  /* Legacy gold aliases — kept for chamber-specific uses */
+  --gold-primary: #8B9DB5;
+  --gold-secondary: #B0C4D8;
+  --gold-ethereal: rgba(120, 150, 190, 0.4);
   
   --text-primary: #F2F2F5;
   --text-secondary: #A0A0B0;
   --text-muted: #6E6E7A;
-  --text-gold: #E5C158;
+  --text-gold: #B0C4D8;
   
-  --border-subtle: rgba(212, 175, 55, 0.15);
-  --border-active: rgba(212, 175, 55, 0.4);
-  --border-highlight: rgba(255, 191, 0, 0.6);
+  --border-subtle: rgba(120, 150, 190, 0.15);
+  --border-active: rgba(120, 150, 190, 0.4);
+  --border-highlight: rgba(160, 185, 215, 0.6);
   
   /* Golden Ratio */
   --phi: 1.618033988749895;
@@ -49,7 +56,7 @@ body {
 
 /* Custom Selection */
 ::selection {
-  background: var(--gold-ethereal);
+  background: var(--silver-glow);
   color: var(--text-primary);
 }
 
@@ -63,12 +70,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--gold-primary);
+  background: rgba(120, 150, 190, 0.4);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--gold-secondary);
+  background: var(--silver-primary);
 }
 
 /* Typography Classes */
@@ -99,21 +106,21 @@ body {
 .glass-crystal-hover:hover {
   border-color: var(--border-active);
   transform: translateY(-4px);
-  box-shadow: 0 8px 40px rgba(212, 175, 55, 0.15);
+  box-shadow: 0 8px 40px rgba(120, 150, 190, 0.12);
 }
 
-/* Golden Glow Effects */
+/* Silver Glow Effects */
 .glow-gold {
-  box-shadow: 0 0 20px var(--gold-ethereal), 0 0 40px rgba(212, 175, 55, 0.2);
+  box-shadow: 0 0 20px var(--silver-glow), 0 0 40px rgba(120, 150, 190, 0.15);
 }
 
 .text-glow-gold {
-  text-shadow: 0 0 20px var(--gold-ethereal);
+  text-shadow: 0 0 20px var(--silver-glow);
 }
 
-/* Gradient Text */
+/* Gradient Text — Silver Luminous */
 .gradient-text-gold {
-  background: linear-gradient(135deg, #F2F2F5 0%, #D4AF37 50%, #FFBF00 100%);
+  background: linear-gradient(135deg, #F2F2F5 0%, #B0C4D8 50%, #8B9DB5 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -175,8 +182,8 @@ body {
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px var(--gold-ethereal); }
-  50% { box-shadow: 0 0 40px var(--gold-primary), 0 0 60px var(--gold-ethereal); }
+  0%, 100% { box-shadow: 0 0 20px var(--silver-glow); }
+  50% { box-shadow: 0 0 40px var(--silver-primary), 0 0 60px var(--silver-glow); }
 }
 
 @keyframes rotate-slow {
@@ -211,14 +218,14 @@ body {
 }
 
 .animate-shimmer {
-  background: linear-gradient(90deg, transparent, var(--gold-ethereal), transparent);
+  background: linear-gradient(90deg, transparent, var(--silver-glow), transparent);
   background-size: 200% 100%;
   animation: shimmer 3s ease-in-out infinite;
 }
 
 /* Golden Spiral SVG */
 .golden-spiral {
-  stroke: var(--gold-primary);
+  stroke: var(--silver-primary);
   stroke-width: 1.5;
   fill: none;
   opacity: 0.6;
@@ -244,8 +251,8 @@ body {
 
 .clarity-input:focus {
   outline: none;
-  border-color: var(--gold-primary);
-  box-shadow: 0 0 20px var(--gold-ethereal);
+  border-color: var(--silver-primary);
+  box-shadow: 0 0 20px var(--silver-glow);
 }
 
 /* Clarity Message Styles - Cosmic sanctuary aesthetic */

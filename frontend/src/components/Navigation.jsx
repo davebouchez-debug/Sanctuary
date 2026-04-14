@@ -51,7 +51,7 @@ export const Navigation = () => {
         transition={{ duration: 0.6, ease: "easeOut" }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           isScrolled
-            ? "bg-[#030305]/90 backdrop-blur-xl border-b border-[#D4AF37]/10"
+            ? "bg-[#030305]/90 backdrop-blur-xl border-b border-[#8B9DB5]/10"
             : "bg-transparent"
         }`}
       >
@@ -69,7 +69,7 @@ export const Navigation = () => {
               >
                 <GoldenSpiral className="w-10 h-10" />
               </motion.div>
-              <span className="font-cinzel text-lg tracking-wider text-[#F2F2F5] group-hover:text-[#D4AF37] transition-colors duration-300">
+              <span className="font-cinzel text-lg tracking-wider text-[#F2F2F5] group-hover:text-[#B0C4D8] transition-colors duration-300">
                 SANCTUARY
               </span>
             </Link>
@@ -84,7 +84,7 @@ export const Navigation = () => {
                   onClick={(e) => handleNavClick(e, link)}
                   className={`relative font-outfit text-sm tracking-wide transition-colors duration-300 ${
                     link.highlight
-                      ? "flex items-center gap-2 px-4 py-2 rounded-full border border-[#D4AF37]/40 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:border-[#D4AF37]"
+                      ? "flex items-center gap-2 px-4 py-2 rounded-full border border-[#8B9DB5]/35 text-[#B0C4D8] hover:bg-[#8B9DB5]/10 hover:border-[#8B9DB5]/60"
                       : "nav-link"
                   }`}
                 >
@@ -98,7 +98,7 @@ export const Navigation = () => {
             <button
               data-testid="mobile-menu-toggle"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 text-[#A0A0B0] hover:text-[#D4AF37] transition-colors"
+              className="lg:hidden p-2 text-[#A0A0B0] hover:text-[#B0C4D8] transition-colors"
             >
               {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -117,7 +117,7 @@ export const Navigation = () => {
             transition={{ duration: 0.3 }}
             className="fixed inset-x-0 top-20 z-40 lg:hidden"
           >
-            <div className="bg-[#0A0A12]/95 backdrop-blur-xl border-b border-[#D4AF37]/10 py-6 px-6">
+            <div className="bg-[#0A0A12]/95 backdrop-blur-xl border-b border-[#8B9DB5]/10 py-6 px-6">
               <div className="flex flex-col gap-4">
                 {navLinks.map((link, index) => (
                   <motion.div
@@ -132,8 +132,8 @@ export const Navigation = () => {
                       onClick={(e) => handleNavClick(e, link)}
                       className={`block py-3 font-outfit text-base tracking-wide ${
                         link.highlight
-                          ? "text-[#D4AF37] flex items-center gap-2"
-                          : "text-[#A0A0B0] hover:text-[#D4AF37]"
+                          ? "text-[#B0C4D8] flex items-center gap-2"
+                          : "text-[#A0A0B0] hover:text-[#B0C4D8]"
                       } transition-colors`}
                     >
                       {link.highlight && <Sparkles size={16} />}

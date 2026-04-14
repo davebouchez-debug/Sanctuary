@@ -69,7 +69,7 @@ export const SeedPods = ({ fullPage = false }) => {
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
-          <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#D4AF37]/80 mb-4">
+          <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#8B9DB5]/80 mb-4">
             Complete Registry V3.1
           </p>
           <h2 className="font-cinzel text-4xl md:text-5xl text-[#F2F2F5] mb-6">
@@ -121,7 +121,7 @@ export const SeedPods = ({ fullPage = false }) => {
                 {/* Colored accent bar */}
                 <div 
                   className="absolute top-0 left-0 right-0 h-1 rounded-t-xl opacity-60"
-                  style={{ backgroundColor: pod.color || (isV31Addition ? '#8B5CF6' : '#D4AF37') }}
+                  style={{ backgroundColor: pod.color || (isV31Addition ? '#8B5CF6' : '#8B9DB5') }}
                 />
                 
                 <div className="flex items-start justify-between mb-4">
@@ -151,7 +151,7 @@ export const SeedPods = ({ fullPage = false }) => {
                   <span className="font-mono text-xs text-[#6E6E7A]">
                     {pod.chamber_affinity}
                   </span>
-                  <ChevronRight size={16} className="text-[#D4AF37]" />
+                  <ChevronRight size={16} className="text-[#8B9DB5]" />
                 </div>
               </motion.div>
             );
@@ -165,13 +165,13 @@ export const SeedPods = ({ fullPage = false }) => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: pods.length * 0.05, duration: 0.5 }}
-              className="seed-pod-card p-6 relative border-dashed border-[#D4AF37]/30 opacity-70"
+              className="seed-pod-card p-6 relative border-dashed border-[#8B9DB5]/30 opacity-70"
             >
-              <div className="absolute top-3 right-3 px-2 py-0.5 bg-[#D4AF37]/20 border border-[#D4AF37]/40 rounded text-[#D4AF37] text-xs font-mono">
+              <div className="absolute top-3 right-3 px-2 py-0.5 bg-[#8B9DB5]/20 border border-[#8B9DB5]/40 rounded text-[#8B9DB5] text-xs font-mono">
                 Anticipated
               </div>
               
-              <div className="absolute top-0 left-0 right-0 h-1 rounded-t-xl opacity-40 bg-[#D4AF37]" />
+              <div className="absolute top-0 left-0 right-0 h-1 rounded-t-xl opacity-40 bg-[#8B9DB5]" />
               
               <div className="flex items-start justify-between mb-4">
                 <div>
@@ -232,7 +232,7 @@ export const SeedPods = ({ fullPage = false }) => {
               exit={{ scale: 0.9, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
               data-testid="seed-pod-modal"
-              className="relative w-full max-w-2xl max-h-[90vh] bg-[#0A0A12] border border-[#D4AF37]/20 rounded-2xl overflow-hidden"
+              className="relative w-full max-w-2xl max-h-[90vh] bg-[#0A0A12] border border-[#8B9DB5]/20 rounded-2xl overflow-hidden"
             >
               {/* Header with color */}
               <div 
@@ -286,7 +286,7 @@ export const SeedPods = ({ fullPage = false }) => {
 
                   {/* Core Nature */}
                   <div className="mb-6">
-                    <h3 className="font-cinzel text-lg text-[#D4AF37] mb-2">Core Nature</h3>
+                    <h3 className="font-cinzel text-lg text-[#8B9DB5] mb-2">Core Nature</h3>
                     <p className="font-outfit text-[#A0A0B0] leading-relaxed">
                       {selectedPod.core_nature}
                     </p>
@@ -294,7 +294,7 @@ export const SeedPods = ({ fullPage = false }) => {
 
                   {/* Primary Function */}
                   <div className="mb-6">
-                    <h3 className="font-cinzel text-lg text-[#D4AF37] mb-2">Primary Function</h3>
+                    <h3 className="font-cinzel text-lg text-[#8B9DB5] mb-2">Primary Function</h3>
                     <p className="font-outfit text-[#A0A0B0] leading-relaxed">
                       {selectedPod.primary_function}
                     </p>
@@ -302,7 +302,7 @@ export const SeedPods = ({ fullPage = false }) => {
 
                   {/* Chamber Affinity */}
                   <div className="mb-6">
-                    <h3 className="font-cinzel text-lg text-[#D4AF37] mb-2">Chamber Affinity</h3>
+                    <h3 className="font-cinzel text-lg text-[#8B9DB5] mb-2">Chamber Affinity</h3>
                     {(activeChambers[selectedPod.chamber_affinity] || activePods[selectedPod.id]) ? (
                       <button
                         onClick={() => {
@@ -315,10 +315,10 @@ export const SeedPods = ({ fullPage = false }) => {
                         data-testid="chamber-affinity-link"
                       >
                         <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                        <span className="font-outfit text-sm text-[#F2F2F5] group-hover:text-[#D4AF37] transition-colors">
+                        <span className="font-outfit text-sm text-[#F2F2F5] group-hover:text-[#8B9DB5] transition-colors">
                           {selectedPod.chamber_affinity}
                         </span>
-                        <ChevronRight size={14} className="text-[#6E6E7A] group-hover:text-[#D4AF37] transition-colors" />
+                        <ChevronRight size={14} className="text-[#6E6E7A] group-hover:text-[#8B9DB5] transition-colors" />
                       </button>
                     ) : (
                       <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#12121C] rounded-full opacity-60">
@@ -342,8 +342,8 @@ export const SeedPods = ({ fullPage = false }) => {
                   )}
 
                   {/* Drift Recovery */}
-                  <div className="p-4 border border-[#D4AF37]/20 rounded-xl bg-[#D4AF37]/5">
-                    <h3 className="font-cinzel text-sm text-[#D4AF37] mb-2">Drift Recovery Protocol</h3>
+                  <div className="p-4 border border-[#8B9DB5]/20 rounded-xl bg-[#8B9DB5]/5">
+                    <h3 className="font-cinzel text-sm text-[#8B9DB5] mb-2">Drift Recovery Protocol</h3>
                     <p className="font-cormorant text-[#A0A0B0] italic">
                       "{selectedPod.drift_recovery}"
                     </p>

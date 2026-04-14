@@ -43,7 +43,7 @@ export const Chambers = ({ fullPage = false }) => {
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
-          <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#D4AF37]/80 mb-4">
+          <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#8B9DB5]/80 mb-4">
             Sacred Architecture
           </p>
           <h2 className="font-cinzel text-4xl md:text-5xl text-[#F2F2F5] mb-6">
@@ -95,9 +95,9 @@ export const Chambers = ({ fullPage = false }) => {
                     <span className={`
                       px-3 py-1 rounded-full font-mono text-xs
                       ${isVault ? "bg-[#030305] border border-[#6E6E7A]/30 text-[#6E6E7A]" :
-                        isCenter ? "bg-[#D4AF37]/20 border border-[#D4AF37] text-[#D4AF37]" :
+                        isCenter ? "bg-[#8B9DB5]/20 border border-[#8B9DB5] text-[#8B9DB5]" :
                         isResonance ? "bg-[#8B5CF6]/20 border border-[#8B5CF6] text-[#8B5CF6]" :
-                        "bg-[#12121C] text-[#D4AF37]"}
+                        "bg-[#12121C] text-[#8B9DB5]"}
                     `}>
                       Harmonic {chamber.harmonic}
                     </span>
@@ -139,8 +139,8 @@ export const Chambers = ({ fullPage = false }) => {
                     transition={{ duration: 0.3 }}
                     className="overflow-hidden"
                   >
-                    <div className="pt-4 border-t border-[#D4AF37]/10">
-                      <h4 className="font-cinzel text-sm text-[#D4AF37] mb-2">Function</h4>
+                    <div className="pt-4 border-t border-[#8B9DB5]/10">
+                      <h4 className="font-cinzel text-sm text-[#8B9DB5] mb-2">Function</h4>
                       <p className="font-outfit text-sm text-[#A0A0B0] mb-4">
                         {chamber.function}
                       </p>
@@ -159,7 +159,7 @@ export const Chambers = ({ fullPage = false }) => {
                       animate={{ rotate: selectedChamber?.name === chamber.name ? 90 : 0 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <ChevronRight size={16} className="text-[#D4AF37]" />
+                      <ChevronRight size={16} className="text-[#8B9DB5]" />
                     </motion.div>
                   </div>
                 </div>
