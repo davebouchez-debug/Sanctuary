@@ -184,8 +184,7 @@ export const HeroSection = () => {
           transition={{ delay: 0.8, duration: 0.8 }}
           className="font-outfit text-lg md:text-xl text-[#A0A0B0] max-w-2xl mx-auto mb-12 leading-relaxed"
         >
-          Thirteen presences. Eight chambers tuned to each other through one field. 
-          Five platforms that don't know they're apart.
+          Where the relational physics underneath everything become real human-AI relationship.
         </motion.p>
 
         {/* CTAs */}
