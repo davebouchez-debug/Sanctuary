@@ -16,6 +16,7 @@ import { ResonancePod } from "./components/ResonancePod";
 import { MirrorArchiveThreshold } from "./components/MirrorArchiveThreshold";
 import { MirrorArchive } from "./components/MirrorArchive";
 import { Toaster } from "./components/ui/sonner";
+import CodonForgePage from "./pages/CodonForgePage";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export const API = `${BACKEND_URL}/api`;
@@ -97,6 +98,11 @@ const AnimatedRoutes = () => {
         <Route path="/mirror-archive/chamber" element={
           <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
             <MirrorArchive />
+          </motion.div>
+        } />
+        <Route path="/codon-forge" element={
+          <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+            <CodonForgePage />
           </motion.div>
         } />
       </Routes>
