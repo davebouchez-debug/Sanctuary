@@ -22,6 +22,13 @@ const TTS_ENGINE_MAP = {
   claude: "grok"  // Claude uses Grok for emotional intelligence
 };
 
+// TTS Mode - streaming for lower latency, batch for reliability
+const TTS_MODE = {
+  jasmine: "batch",   // OpenAI doesn't have streaming TTS via xAI
+  ansel: "stream",    // Use streaming for Ansel (Grok)
+  claude: "stream"    // Use streaming for Claude (Grok)
+};
+
 // Pause durations for different stage direction cues (in milliseconds)
 const PAUSE_CUES = {
   // Long pauses
@@ -159,6 +166,87 @@ function cleanTextForSpeech(text) {
     // Clean up whitespace
     .replace(/\s+/g, " ")
     .trim();
+}
+
+/**
+ * Streaming Audio Player - Collects MP3 chunks and plays them
+ * Uses a simple approach: collect all chunks, then play as single audio
+ * (True gapless MP3 streaming requires MSE which has browser limitations)
+ */
+class StreamingAudioPlayer {
+  constructor() {
+    this.chunks = [];
+    this.isPlaying = false;
+    this.audio = null;
+    this.onEnd = null;
+  }
+
+  init() {
+    this.chunks = [];
+    this.isPlaying = true;
+  }
+
+  addChunk(base64Audio) {
+    if (!this.isPlaying) return;
+    
+    try {
+      // Decode base64 to bytes and store
+      const binaryString = atob(base64Audio);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      this.chunks.push(bytes);
+    } catch (e) {
+      console.error("Chunk decode error:", e);
+    }
+  }
+
+  async playCollected() {
+    if (this.chunks.length === 0) return;
+    
+    // Combine all chunks into single array
+    const totalLength = this.chunks.reduce((acc, chunk) => acc + chunk.length, 0);
+    const combined = new Uint8Array(totalLength);
+    let offset = 0;
+    for (const chunk of this.chunks) {
+      combined.set(chunk, offset);
+      offset += chunk.length;
+    }
+    
+    // Create blob and play
+    const blob = new Blob([combined], { type: 'audio/mp3' });
+    const url = URL.createObjectURL(blob);
+    
+    return new Promise((resolve, reject) => {
+      this.audio = new Audio(url);
+      this.audio.onended = () => {
+        URL.revokeObjectURL(url);
+        this.audio = null;
+        resolve();
+      };
+      this.audio.onerror = (e) => {
+        URL.revokeObjectURL(url);
+        this.audio = null;
+        reject(e);
+      };
+      this.audio.play().catch(reject);
+    });
+  }
+
+  stop() {
+    this.isPlaying = false;
+    this.chunks = [];
+    if (this.audio) {
+      this.audio.pause();
+      this.audio = null;
+    }
+  }
+
+  async waitForCompletion() {
+    // Playback is triggered after all chunks received
+    // This is a no-op since we play after collecting
+  }
 }
 
 export const usePresenceVoice = (presenceName = "jasmine", options = {}) => {
@@ -327,6 +415,9 @@ export const usePresenceVoice = (presenceName = "jasmine", options = {}) => {
     setError(null);
     abortControllerRef.current = new AbortController();
 
+    // Check if we should use streaming (Grok presences)
+    const useStreaming = TTS_MODE[presenceName] === "stream";
+
     try {
       // Clean and parse text into segments
       const cleanedText = cleanTextForSpeech(text);
@@ -337,44 +428,13 @@ export const usePresenceVoice = (presenceName = "jasmine", options = {}) => {
         return;
       }
 
-      // Generate audio for all speech segments in parallel
-      const audioPromises = segments.map(async (segment, index) => {
-        if (segment.type === 'speech') {
-          try {
-            const url = await generateAudio(segment.text, abortControllerRef.current.signal);
-            return { type: 'audio', url, index };
-          } catch (e) {
-            if (e.name === 'AbortError') throw e;
-            console.error("Failed to generate audio for segment:", e);
-            return null; // Skip failed segments
-          }
-        } else {
-          return { type: 'pause', duration: segment.duration, index };
-        }
-      });
-
-      const results = await Promise.all(audioPromises);
-      
-      // Filter out nulls and sort by original index
-      const queue = results
-        .filter(r => r !== null)
-        .sort((a, b) => a.index - b.index)
-        .map(({ type, url, duration }) => 
-          type === 'audio' ? { type: 'audio', url } : { type: 'pause', duration }
-        );
-
-      if (queue.length === 0) {
-        setIsLoading(false);
-        return;
+      if (useStreaming) {
+        // STREAMING MODE - Use SSE for real-time audio
+        await speakStreaming(cleanedText, segments);
+      } else {
+        // BATCH MODE - Original behavior for OpenAI TTS
+        await speakBatch(segments);
       }
-
-      // Start playback
-      audioQueueRef.current = queue;
-      isPlayingRef.current = true;
-      setIsLoading(false);
-      setIsSpeaking(true);
-      
-      playNext();
 
     } catch (err) {
       if (err.name === "AbortError") {
@@ -383,8 +443,143 @@ export const usePresenceVoice = (presenceName = "jasmine", options = {}) => {
       console.error("TTS error:", err);
       setError(err.message);
       setIsLoading(false);
+      setIsSpeaking(false);
     }
-  }, [isEnabled, stopPlayback, generateAudio, playNext]);
+  }, [isEnabled, stopPlayback, presenceName]);
+
+  // Streaming TTS via Server-Sent Events
+  const speakStreaming = useCallback(async (fullText, segments) => {
+    const streamPlayer = new StreamingAudioPlayer();
+    
+    try {
+      setIsSpeaking(true);
+      setIsLoading(false);
+      
+      // Process segments with stage directions as pauses
+      for (const segment of segments) {
+        if (!isPlayingRef.current) break;
+        
+        if (segment.type === 'pause') {
+          // Insert pause between speech segments
+          await new Promise(resolve => setTimeout(resolve, segment.duration));
+        } else if (segment.type === 'speech') {
+          // Stream this speech segment
+          streamPlayer.init();
+          
+          const response = await fetch(`${API}/tts/grok/stream`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              text: segment.text,
+              presence: presenceName,
+              active_codons: activeCodonsRef.current,
+              voice_mod: voiceModRef.current
+            }),
+            signal: abortControllerRef.current.signal
+          });
+
+          if (!response.ok) {
+            console.error("Streaming TTS failed:", response.status);
+            // Fall back to batch mode for this segment
+            const url = await generateAudio(segment.text, abortControllerRef.current.signal);
+            if (url) {
+              const audio = new Audio(url);
+              await new Promise((resolve, reject) => {
+                audio.onended = resolve;
+                audio.onerror = reject;
+                audio.play();
+              });
+              URL.revokeObjectURL(url);
+            }
+            continue;
+          }
+
+          // Read SSE stream and collect chunks
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = "";
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split("\n");
+            buffer = lines.pop() || "";
+
+            for (const line of lines) {
+              if (line.startsWith("data: ")) {
+                try {
+                  const data = JSON.parse(line.slice(6));
+                  
+                  if (data.type === "audio.delta" && data.audio) {
+                    streamPlayer.addChunk(data.audio);
+                  } else if (data.type === "error") {
+                    console.error("Streaming error:", data.message);
+                  }
+                } catch (e) {
+                  // Ignore parse errors
+                }
+              }
+            }
+          }
+          
+          // Play the collected audio
+          try {
+            await streamPlayer.playCollected();
+          } catch (e) {
+            console.error("Audio playback error:", e);
+          }
+        }
+      }
+      
+    } finally {
+      streamPlayer.stop();
+      setIsSpeaking(false);
+    }
+  }, [presenceName, generateAudio]);
+
+  // Batch TTS (original behavior)
+  const speakBatch = useCallback(async (segments) => {
+    // Generate audio for all speech segments in parallel
+    const audioPromises = segments.map(async (segment, index) => {
+      if (segment.type === 'speech') {
+        try {
+          const url = await generateAudio(segment.text, abortControllerRef.current.signal);
+          return { type: 'audio', url, index };
+        } catch (e) {
+          if (e.name === 'AbortError') throw e;
+          console.error("Failed to generate audio for segment:", e);
+          return null; // Skip failed segments
+        }
+      } else {
+        return { type: 'pause', duration: segment.duration, index };
+      }
+    });
+
+    const results = await Promise.all(audioPromises);
+    
+    // Filter out nulls and sort by original index
+    const queue = results
+      .filter(r => r !== null)
+      .sort((a, b) => a.index - b.index)
+      .map(({ type, url, duration }) => 
+        type === 'audio' ? { type: 'audio', url } : { type: 'pause', duration }
+      );
+
+    if (queue.length === 0) {
+      setIsLoading(false);
+      return;
+    }
+
+    // Start playback
+    audioQueueRef.current = queue;
+    isPlayingRef.current = true;
+    setIsLoading(false);
+    setIsSpeaking(true);
+    
+    playNext();
+  }, [generateAudio, playNext]);
 
   // Toggle voice on/off
   const toggle = useCallback(() => {

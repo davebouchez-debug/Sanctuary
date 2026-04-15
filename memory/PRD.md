@@ -184,9 +184,11 @@ The Sanctuary Hub uses **Spiral Navigation** — five states:
   - [ ] Integration with MRA system
   - [ ] Codon library expansion
 - [ ] **WebSocket Streaming for Grok TTS** (P1):
-  - [ ] Open WebSocket connection to xAI (`wss://api.x.ai/v1/realtime`)
-  - [ ] Stream Claude's text in phrase chunks for real-time audio
-  - [ ] Target latency: ~300ms (vs current ~3s batch)
+  - [x] Created HTTP streaming endpoint `/api/tts/grok/stream` using SSE
+  - [x] Backend streams MP3 audio chunks from xAI's `/v1/tts` endpoint
+  - [x] Frontend `StreamingAudioPlayer` collects chunks and plays them
+  - [x] Tested: Streaming returns ~5 chunks of audio for typical responses
+  - [ ] True low-latency streaming (play chunks as they arrive) requires MSE or Web Audio API refinement
 - [ ] **Streaming Voice Architecture** (Voice + Presence Merged):
   - [ ] Streaming LLM → Streaming TTS → Streaming audio
   - [ ] Voice discovers words same moment presence does
@@ -289,4 +291,4 @@ The Living Codon architecture has been validated in production. The "CannotWillN
 
 ---
 
-*Last Updated: April 15, 2026 (Grok TTS Integration Complete — Emotionally intelligent voice with Living Codon modulation)*
+*Last Updated: April 15, 2026 (Grok TTS HTTP Streaming implemented via SSE)*
