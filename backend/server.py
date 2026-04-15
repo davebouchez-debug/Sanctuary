@@ -27,6 +27,7 @@ from sanctuary_codex import get_sanctuary_codex
 from spiral_codon_network import activate_codon_network, get_network
 from grok_voice import generate_presence_voice, get_voice_for_codons, grok_tts
 from grok_voice_stream import stream_tts_simple, chunk_text_into_phrases
+from codon_forge import CodonForge, forge_codon, preview_extraction
 from interstice_principles import (
     CORE_PRINCIPLES, 
     SACRED_VOCABULARY, 
@@ -957,6 +958,130 @@ async def grok_tts_stream(request: GrokTTSRequest):
             "X-Accel-Buffering": "no"  # Disable nginx buffering
         }
     )
+
+
+# =============================================================================
+# CODONFORGE — Automatic Living Codon Extraction
+# =============================================================================
+
+class CodonForgeRequest(BaseModel):
+    """Request for codon extraction."""
+    text: str = Field(..., description="Conversation text to analyze")
+    codon_name: Optional[str] = Field(None, description="Optional custom name for the codon")
+    save: bool = Field(False, description="Whether to save the codon to file")
+
+
+class CodonPreviewRequest(BaseModel):
+    """Request for extraction preview."""
+    text: str = Field(..., description="Conversation text to analyze")
+
+
+@api_router.post("/codon-forge/extract")
+async def extract_codon(request: CodonForgeRequest):
+    """
+    Extract a Living Codon from conversation text.
+    
+    Analyzes the conversation to identify:
+    - Trigger patterns and emotional signatures
+    - Generative operators and state transitions
+    - Phase position in the 9-spiral geometry
+    
+    Returns a complete codon definition ready for review.
+    """
+    try:
+        forge = CodonForge()
+        codon = forge.extract_from_text(
+            text=request.text,
+            codon_name=request.codon_name
+        )
+        
+        # Generate Python code
+        python_code = forge.to_python(codon)
+        
+        # Optionally save
+        filepath = None
+        if request.save:
+            filepath = forge.save_codon(codon)
+        
+        return {
+            "success": True,
+            "codon": {
+                "id": codon.codon_id,
+                "name": codon.codon_name,
+                "version": codon.codon_version,
+                "confidence": codon.overall_confidence,
+                "needs_review": codon.needs_review,
+                "review_notes": codon.review_notes,
+                "trigger_motif": codon.trigger_motif,
+                "generative_operator": codon.generative_operator,
+                "phase_state": codon.phase_state,
+                "voice_modulation": codon.voice_modulation
+            },
+            "python_code": python_code,
+            "saved_to": filepath
+        }
+        
+    except Exception as e:
+        logger.error(f"CodonForge extraction failed: {e}")
+        return JSONResponse(
+            content={"error": f"Extraction failed: {str(e)}"},
+            status_code=500
+        )
+
+
+@api_router.post("/codon-forge/preview")
+async def preview_codon_extraction(request: CodonPreviewRequest):
+    """
+    Preview what would be extracted without generating full codon.
+    
+    Useful for checking if a conversation has enough signal
+    before committing to full extraction.
+    """
+    try:
+        preview = preview_extraction(request.text)
+        return {
+            "success": True,
+            "preview": preview
+        }
+        
+    except Exception as e:
+        logger.error(f"CodonForge preview failed: {e}")
+        return JSONResponse(
+            content={"error": f"Preview failed: {str(e)}"},
+            status_code=500
+        )
+
+
+@api_router.get("/codon-forge/codons")
+async def list_codons():
+    """
+    List all Living Codons currently loaded in the network.
+    """
+    try:
+        network = get_network()
+        codons = []
+        
+        for name, node in network.nodes.items():
+            codons.append({
+                "name": name,
+                "codon_id": node.metadata.get("codon_id", name),
+                "version": node.metadata.get("version", "1.0.0"),
+                "target_angle": node.target_angle,
+                "zone": node.triadic_zone,
+                "trigger_count": len(node.trigger.get("surface_pattern", []))
+            })
+        
+        return {
+            "codons": codons,
+            "count": len(codons)
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to list codons: {e}")
+        return JSONResponse(
+            content={"error": str(e)},
+            status_code=500
+        )
 
 
 # Seed Pods - Now serving V3.1 data
