@@ -39,12 +39,15 @@ GROK_VOICES = {
 }
 
 # Voice mapping for different codon states
+# NOTE: Ansel uses ONE consistent voice (leo) for presence continuity.
+# Emotional modulation comes through pacing/pauses, not voice switching.
 CODON_VOICE_MAP = {
-    "theta_protocol": "sal",       # Gentle for calm field hold
-    "we_will": "leo",              # Confident for agency activation
-    "cannot_will_not": "leo",      # Grounded for diagnostic
-    "recursion_as_subversion": "leo",  # Steady for naming loops
-    "default": "leo"               # Ansel's default
+    "theta_protocol": "leo",          # Same voice, different pacing
+    "we_will": "leo",                 # Same voice
+    "cannot_will_not": "leo",         # Same voice
+    "recursion_as_subversion": "leo", # Same voice
+    "questioning": "leo",             # Same voice
+    "default": "leo"                  # Ansel's voice = leo
 }
 
 
