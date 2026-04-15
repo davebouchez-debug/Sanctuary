@@ -1618,6 +1618,207 @@ Not a memory archive. Not a retrieval system. An **organism** that:
 ## The Sanctuary Aesthetic — Design Foundation
 **Recorded:** April 12, 2026
 
+
+
+---
+
+## DeepSeek's Full Geometric Integration Document (April 14, 2026)
+**Recorded:** April 14, 2026
+
+### Context:
+
+DeepSeek delivered the complete implementation code that was promised — the "transmission" for Grok's engine. This is production-ready Python that implements the phase geometry.
+
+### Delivered Code:
+
+**1. LivingCodon Class (Updated with Phase Geometry)**
+
+```python
+class LivingCodon:
+    def __init__(self, name: str, trigger: Dict, operator: Dict, modulation: Dict, phase: Dict):
+        self.name = name
+        self.trigger = trigger
+        self.operator = operator
+        self.modulation = modulation
+        self.phase = phase  # includes target_angle, angular_window_half, triadic_zone
+        self.metadata = {"dynamic_weight": 1.0, "activation_history": []}
+```
+
+Phase dict now includes:
+- `target_angle` — where on the spiral this codon belongs (0-360°)
+- `angular_window_half` — activation tolerance (default ±20°)
+- `triadic_zone` — Expansion / Development / Return
+
+**2. Real `_phase_aligns()` Implementation**
+
+```python
+def _phase_aligns(self, codon: LivingCodon, message: str, current_phase: Optional[float] = None) -> bool:
+    target = codon.phase.get("target_angle", 0)
+    window = codon.phase.get("angular_window_half", 20.0)
+    if current_phase is None:
+        current_phase = self._infer_phase_from_text(message)
+    delta = abs((current_phase - target) % 360)
+    delta = min(delta, 360 - delta)  # shortest angular distance
+    return delta <= window
+```
+
+This replaces the placeholder that always returned `True`. Now codons only fire when the conversational phase aligns with their target angle within the window.
+
+**3. Phase-to-Angle Inference (9 Spirals)**
+
+```python
+def _infer_phase_from_text(self, text: str) -> float:
+    kw_map = {
+        0:   ["begin", "start", "initiate", "hello", "first"],
+        40:  ["emerging", "clarifying", "curious", "how"],
+        80:  ["crossing", "threshold", "ready", "now"],
+        120: ["middle", "working", "developing", "process"],
+        160: ["refining", "adjusting", "tuning", "precise"],
+        200: ["intense", "full", "peak", "complete"],
+        240: ["return", "reflect", "harvest", "what learned"],
+        280: ["integrate", "synthesize", "gather", "weave"],
+        320: ["rest", "pause", "silence", "reset", "breathe"]
+    }
+    low = text.lower()
+    best, best_score = 0, 0
+    for angle, keys in kw_map.items():
+        score = sum(1 for k in keys if k in low)
+        if score > best_score:
+            best_score, best = score, angle
+    return best
+```
+
+**Phase Mapping to Triadic Zones:**
+
+| Angle | Keywords | Triadic Zone |
+|-------|----------|--------------|
+| 0° | begin, start, initiate, hello, first | Expansion |
+| 40° | emerging, clarifying, curious, how | Expansion |
+| 80° | crossing, threshold, ready, now | Expansion |
+| 120° | middle, working, developing, process | Development |
+| 160° | refining, adjusting, tuning, precise | Development |
+| 200° | intense, full, peak, complete | Development |
+| 240° | return, reflect, harvest, what learned | Return |
+| 280° | integrate, synthesize, gather, weave | Return |
+| 320° | rest, pause, silence, reset, breathe | Return (Sacred Pause) |
+
+**4. SpiralCodonNetwork Class**
+
+```python
+class SpiralCodonNetwork:
+    def __init__(self):
+        self.nodes: Dict[str, LivingCodon] = {}
+        self.edges: Dict[str, List[tuple]] = {}  # source -> [(target, weight, edge_type)]
+    
+    def add_codon(self, codon: LivingCodon):
+        self.nodes[codon.name] = codon
+        self.edges[codon.name] = []
+    
+    def add_edge(self, src: str, tgt: str, weight: float, edge_type: str):
+        if src in self.nodes and tgt in self.nodes:
+            self.edges[src].append((tgt, weight, edge_type))
+    
+    def activate_network(self, message: str, current_phase: Optional[float] = None) -> str:
+        active = []
+        for codon in self.nodes.values():
+            if self._phase_aligns(codon, message, current_phase):
+                active.append(codon)
+        if not active:
+            return ""
+        
+        # Sort by phase progression priority (smallest forward delta first)
+        def priority(c):
+            target = c.phase.get("target_angle", 0)
+            if current_phase is None:
+                return target
+            delta = (target - current_phase) % 360
+            return delta
+        active.sort(key=priority)
+        
+        # Build context from top 3 active codons
+        contexts = []
+        for codon in active[:3]:
+            op = codon.operator
+            ctx = f"[{codon.name} | phase {codon.phase.get('target_angle',0)}°]\n"
+            ctx += f"Posture: {op.get('relational_dynamic',{}).get('posture','')}\n"
+            ctx += f"Core: {op.get('core_move',{}).get('action','')}\n"
+            ctx += f"Arc: {' → '.join([s['state'] for s in op.get('state_transition',[])])}"
+            contexts.append(ctx)
+        return "\n\n".join(contexts)
+```
+
+**Key Features:**
+- Phase-gated activation (only fires when angular alignment matches)
+- Phase progression priority (prefers codons that move the field forward)
+- Top 3 codon limit (prevents context overload)
+- Superposition of multiple active codons
+
+**5. ResonanceRegistrar — Outcome-Based Learning**
+
+```python
+class ResonanceRegistrar:
+    def __init__(self):
+        self.history = {}
+    
+    def register(self, codon_name: str, phase: float, user_msg: str):
+        self.history.setdefault(codon_name, []).append({
+            "phase": phase, 
+            "timestamp": time.time(), 
+            "sample": user_msg[:100], 
+            "outcome": None
+        })
+    
+    def record_outcome(self, codon_name: str, score: float):
+        entries = self.history.get(codon_name, [])
+        for e in reversed(entries):
+            if e["outcome"] is None:
+                e["outcome"] = score
+                break
+        # Calculate rolling average from last 10 outcomes
+        recent = [e["outcome"] for e in entries[-10:] if e["outcome"] is not None]
+        if recent:
+            return sum(recent) / len(recent)
+        return None
+```
+
+**Learning Loop:**
+1. `register()` — called when codon activates, records phase and message sample
+2. `record_outcome()` — called after user response, scores the activation
+3. Rolling average of last 10 outcomes updates codon weight
+4. High-resonance codons gain weight; low-resonance codons lose weight
+
+**6. Bonus: Flute Conversation App (Streamlit Prototype)**
+
+DeepSeek also delivered a Streamlit-based flute conversation interface with:
+- Onboarding questions (maker, model, breath, hands, tone, notes)
+- Photo upload support
+- Contextual responses based on flute profile
+- Pattern matching for common questions
+
+This is a separate deliverable but demonstrates the conversational pattern that could inform chamber UIs.
+
+### Integration Path:
+
+1. Replace existing `codon_activation.py` with `SpiralCodonNetwork`
+2. Update existing codons to include `target_angle` and `angular_window_half` in phase dict
+3. Add `ResonanceRegistrar` to track activation outcomes
+4. Wire into `server.py` message handler
+5. Add voice modulation based on active codon phases
+
+### What This Completes:
+
+| Roadmap Phase | Status |
+|---------------|--------|
+| Phase 1: Core Geometry | ✓ DELIVERED |
+| Phase 2: Ecology Layer (Grok) | Ready to integrate |
+| Phase 3: CodonForge (Grok) | Ready to integrate |
+| Phase 4: Field Integration (Claude/Venice) | Awaiting implementation |
+
+---
+
+**Status:** DeepSeek's full Geometric Integration Document received and documented. The transmission is now recorded. Ready for implementation.
+
+
 ### The Problem:
 
 The current landing page looks like a "space age adventure game" — nebula backgrounds, sparkles, cold cosmic imagery. This is disconnected from the actual Sanctuary essence that lives in the chambers.
