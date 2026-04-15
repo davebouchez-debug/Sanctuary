@@ -25,6 +25,7 @@ from jasmine_canonical_memory import get_memory_context_for_prompt as get_jasmin
 from ansel_canonical_memory import get_memory_context_for_prompt as get_ansel_memory, get_relevant_memories as get_ansel_relevant, CANONICAL_MEMORY as ANSEL_MEMORY
 from sanctuary_codex import get_sanctuary_codex
 from spiral_codon_network import activate_codon_network, get_network
+from grok_voice import generate_presence_voice, get_voice_for_codons, grok_tts
 from interstice_principles import (
     CORE_PRINCIPLES, 
     SACRED_VOCABULARY, 
@@ -788,9 +789,22 @@ PRESENCE_VOICES = {
     }
 }
 
+# Grok Voice Configuration (for emotionally intelligent TTS)
+GROK_PRESENCE_VOICES = {
+    "jasmine": "ara",     # Warm, nurturing - lighthouse quality
+    "ansel": "leo",       # Confident, grounded - perimeter watcher
+    "claude": "eve",      # Clear, articulate - epistemic bridge
+}
+
 class TTSRequest(BaseModel):
     text: str = Field(..., max_length=4096, description="Text to convert to speech")
     presence: str = Field(default="jasmine", description="Which presence voice to use")
+
+class GrokTTSRequest(BaseModel):
+    text: str = Field(..., max_length=4096, description="Text to convert to speech")
+    presence: str = Field(default="ansel", description="Which presence voice to use")
+    active_codons: list = Field(default=[], description="Active Living Codon names")
+    voice_mod: dict = Field(default={}, description="Voice modulation parameters from codon network")
 
 @api_router.post("/tts/speak")
 async def text_to_speech(request: TTSRequest):
@@ -837,6 +851,59 @@ async def text_to_speech(request: TTSRequest):
     except Exception as e:
         logger.error(f"TTS generation failed: {e}")
         return JSONResponse(content={"error": "Speech generation failed"}, status_code=500)
+
+
+@api_router.post("/tts/grok")
+async def grok_text_to_speech(request: GrokTTSRequest):
+    """
+    Convert text to speech using Grok TTS — emotionally intelligent voice.
+    
+    Integrates with Living Codon system to select appropriate voice based
+    on which codons are active. The voice understands what it's saying.
+    """
+    try:
+        import re
+        import base64
+        
+        # Clean text for speech (remove stage directions, spiral markers)
+        clean_text = request.text
+        clean_text = re.sub(r'\*[^*]+\*', '', clean_text)
+        clean_text = re.sub(r'^[A-Za-z]+\s*[•·]\s*[A-Za-z\s]+$', '', clean_text, flags=re.MULTILINE)
+        clean_text = re.sub(r'\s+', ' ', clean_text).strip()
+        
+        if not clean_text:
+            return JSONResponse(content={"error": "No speakable text after cleaning"}, status_code=400)
+        
+        # Get voice based on active codons
+        voice = get_voice_for_codons(request.active_codons)
+        
+        # If theta_hold in voice_mod, use gentle voice
+        if request.voice_mod.get("theta_hold"):
+            voice = "sal"
+        
+        # Generate speech with Grok
+        audio_bytes = await grok_tts(clean_text, voice=voice)
+        
+        if not audio_bytes:
+            logger.error("Grok TTS returned no audio")
+            return JSONResponse(content={"error": "Speech generation failed"}, status_code=500)
+        
+        # Return as base64 MP3
+        audio_base64 = base64.b64encode(audio_bytes).decode('utf-8')
+        
+        return {
+            "audio": audio_base64,
+            "format": "mp3",
+            "presence": request.presence,
+            "voice": voice,
+            "active_codons": request.active_codons,
+            "engine": "grok"
+        }
+        
+    except Exception as e:
+        logger.error(f"Grok TTS generation failed: {e}")
+        return JSONResponse(content={"error": f"Speech generation failed: {str(e)}"}, status_code=500)
+
 
 # Seed Pods - Now serving V3.1 data
 @api_router.get("/seed-pods")

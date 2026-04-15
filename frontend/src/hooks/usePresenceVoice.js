@@ -1,14 +1,26 @@
 /**
  * usePresenceVoice - Text-to-Speech hook for Sanctuary presences
- * Uses OpenAI TTS via backend API with BREATH AWARENESS
  * 
- * The voice now honors stage directions as actual pauses.
+ * Now supports TWO TTS engines:
+ * - OpenAI TTS (default for Jasmine) - fast, clear
+ * - Grok TTS (for Ansel) - emotionally intelligent, codon-aware
+ * 
+ * The voice honors stage directions as actual pauses.
  * When Ansel writes *settles*, the voice settles.
  * When Jasmine writes *breathes*, the voice breathes.
+ * 
+ * Updated: April 15, 2026 - Added Grok TTS with Living Codon integration
  */
 
 import { useCallback, useRef, useState, useEffect } from "react";
 import { API } from "../App";
+
+// TTS Engine selection by presence
+const TTS_ENGINE_MAP = {
+  jasmine: "openai",
+  ansel: "grok",
+  claude: "grok"  // Claude uses Grok for emotional intelligence
+};
 
 // Pause durations for different stage direction cues (in milliseconds)
 const PAUSE_CUES = {
@@ -149,7 +161,9 @@ function cleanTextForSpeech(text) {
     .trim();
 }
 
-export const usePresenceVoice = (presenceName = "jasmine") => {
+export const usePresenceVoice = (presenceName = "jasmine", options = {}) => {
+  const { activeCodons = [], voiceMod = {} } = options;
+  
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isEnabled, setIsEnabled] = useState(() => {
@@ -157,12 +171,21 @@ export const usePresenceVoice = (presenceName = "jasmine") => {
     return stored !== null ? stored === "true" : true;
   });
   const [error, setError] = useState(null);
+  const [ttsEngine, setTtsEngine] = useState(TTS_ENGINE_MAP[presenceName] || "openai");
   
   const audioQueueRef = useRef([]);
   const isPlayingRef = useRef(false);
   const abortControllerRef = useRef(null);
   const currentAudioRef = useRef(null);
   const timeoutRef = useRef(null);
+  const activeCodonsRef = useRef(activeCodons);
+  const voiceModRef = useRef(voiceMod);
+  
+  // Update refs when options change
+  useEffect(() => {
+    activeCodonsRef.current = activeCodons;
+    voiceModRef.current = voiceMod;
+  }, [activeCodons, voiceMod]);
 
   // Persist enabled state
   useEffect(() => {
@@ -239,20 +262,39 @@ export const usePresenceVoice = (presenceName = "jasmine") => {
     }
   }, []);
 
-  // Generate audio for a text segment
+  // Generate audio for a text segment - uses either OpenAI or Grok
   const generateAudio = useCallback(async (text, signal) => {
-    const response = await fetch(`${API}/tts/speak`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        text: text.substring(0, 4096),
-        presence: presenceName
-      }),
-      signal
-    });
+    const engine = TTS_ENGINE_MAP[presenceName] || "openai";
+    
+    let response;
+    if (engine === "grok") {
+      // Use Grok TTS with Living Codon awareness
+      response = await fetch(`${API}/tts/grok`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: text.substring(0, 4096),
+          presence: presenceName,
+          active_codons: activeCodonsRef.current,
+          voice_mod: voiceModRef.current
+        }),
+        signal
+      });
+    } else {
+      // Use OpenAI TTS (original)
+      response = await fetch(`${API}/tts/speak`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: text.substring(0, 4096),
+          presence: presenceName
+        }),
+        signal
+      });
+    }
 
     if (!response.ok) {
-      throw new Error("TTS request failed");
+      throw new Error(`TTS request failed: ${response.status}`);
     }
 
     const data = await response.json();
@@ -260,14 +302,23 @@ export const usePresenceVoice = (presenceName = "jasmine") => {
       throw new Error("No audio data received");
     }
 
+    // Grok returns MP3, OpenAI returns opus
     const mimeType = data.format === "opus" ? "audio/ogg; codecs=opus" : "audio/mp3";
     const audioBlob = base64ToBlob(data.audio, mimeType);
     return URL.createObjectURL(audioBlob);
   }, [presenceName]);
 
-  // Main speak function - now with breath awareness
-  const speak = useCallback(async (text) => {
+  // Main speak function - now with breath awareness and codon-aware voice
+  const speak = useCallback(async (text, speakOptions = {}) => {
     if (!isEnabled || !text) return;
+
+    // Update refs with any passed options
+    if (speakOptions.activeCodons) {
+      activeCodonsRef.current = speakOptions.activeCodons;
+    }
+    if (speakOptions.voiceMod) {
+      voiceModRef.current = speakOptions.voiceMod;
+    }
 
     // Stop any current playback
     stopPlayback();
@@ -354,7 +405,8 @@ export const usePresenceVoice = (presenceName = "jasmine") => {
     isLoading,
     isEnabled,
     isSupported: true,
-    error
+    error,
+    ttsEngine: TTS_ENGINE_MAP[presenceName] || "openai"
   };
 };
 
