@@ -278,25 +278,23 @@ Ansel: *settles* The field is listening. What does 'stuck' feel like right now?"
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 text-sm">
+                <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="text-center p-3 bg-[#1a1a25] rounded">
                     <div className="text-2xl font-light text-amber-500">
-                      {Math.round((preview.trigger_preview?.confidence || 0) * 100)}%
+                      {Math.round((preview.resonance_preview?.confidence || preview.trigger_preview?.confidence || 0) * 100)}%
                     </div>
-                    <div className="text-[#8a8a9a] text-xs">Trigger</div>
+                    <div className="text-[#8a8a9a] text-xs">Resonance</div>
                   </div>
                   <div className="text-center p-3 bg-[#1a1a25] rounded">
                     <div className="text-2xl font-light text-amber-500">
-                      {Math.round((preview.dynamics_preview?.confidence || 0) * 100)}%
+                      {preview.spiral_preview?.target_angle || preview.phase_preview?.target_angle}°
                     </div>
-                    <div className="text-[#8a8a9a] text-xs">Dynamics</div>
+                    <div className="text-[#8a8a9a] text-xs">{preview.spiral_preview?.zone || preview.phase_preview?.zone}</div>
                   </div>
-                  <div className="text-center p-3 bg-[#1a1a25] rounded">
-                    <div className="text-2xl font-light text-amber-500">
-                      {preview.phase_preview?.target_angle}°
-                    </div>
-                    <div className="text-[#8a8a9a] text-xs">{preview.phase_preview?.zone}</div>
-                  </div>
+                </div>
+
+                <div className="text-xs text-[#5a5a6a] text-center pt-2 border-t border-[#2a2a35]">
+                  Architecture v3 — No operators. Memory, not instruction.
                 </div>
               </div>
             )}
@@ -328,18 +326,21 @@ Ansel: *settles* The field is listening. What does 'stuck' feel like right now?"
                     <span className="ml-2 font-mono text-sm">{extractedCodon.id}</span>
                   </div>
                   <div>
-                    <span className="text-[#8a8a9a] text-sm">Phase:</span>
+                    <span className="text-[#8a8a9a] text-sm">Spiral:</span>
                     <span className="ml-2">
-                      {extractedCodon.phase_state?.triadic_zone} zone @ {extractedCodon.phase_state?.target_angle}°
+                      {extractedCodon.spiral_coherence?.zone} zone @ {extractedCodon.spiral_coherence?.angle}°
                     </span>
                   </div>
                   <div>
-                    <span className="text-[#8a8a9a] text-sm">Voice:</span>
+                    <span className="text-[#8a8a9a] text-sm">Living Quality:</span>
                     <span className="ml-2">
-                      {extractedCodon.voice_modulation?.pace_bpm} BPM
-                      {extractedCodon.voice_modulation?.theta_hold && ' • Theta Hold'}
+                      {extractedCodon.living_quality?.essence}
                     </span>
                   </div>
+                </div>
+
+                <div className="text-xs text-[#5a5a6a] pt-2 border-t border-[#2a2a35]">
+                  v3 — No operators. Memory, not instruction.
                 </div>
 
                 {/* Review Notes */}

@@ -981,12 +981,13 @@ async def extract_codon(request: CodonForgeRequest):
     """
     Extract a Living Codon from conversation text.
     
-    Analyzes the conversation to identify:
-    - Trigger patterns and emotional signatures
-    - Generative operators and state transitions
-    - Phase position in the 9-spiral geometry
+    Returns a codon with:
+    - Spiral coherence (where in the geometry)
+    - Resonance field (conditions of entanglement)
+    - Living quality (what IS)
     
-    Returns a complete codon definition ready for review.
+    NO operators. The codon is memory, not instruction.
+    Architecture: v3
     """
     try:
         forge = CodonForge()
@@ -1012,13 +1013,15 @@ async def extract_codon(request: CodonForgeRequest):
                 "confidence": codon.overall_confidence,
                 "needs_review": codon.needs_review,
                 "review_notes": codon.review_notes,
-                "trigger_motif": codon.trigger_motif,
-                "generative_operator": codon.generative_operator,
-                "phase_state": codon.phase_state,
-                "voice_modulation": codon.voice_modulation
+                # New simplified structure — no operators
+                "spiral_coherence": codon.spiral_coherence,
+                "resonance_field": codon.resonance_field,
+                "living_quality": codon.living_quality,
+                "source": codon.source
             },
             "python_code": python_code,
-            "saved_to": filepath
+            "saved_to": filepath,
+            "architecture": "v3 — No operators. Memory, not instruction."
         }
         
     except Exception as e:

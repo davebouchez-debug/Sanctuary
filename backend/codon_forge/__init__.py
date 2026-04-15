@@ -1,22 +1,18 @@
 """
 CodonForge — Automatic Living Codon Extraction
 
-Analyzes conversation threads to automatically extract Living Codons.
-Scans for resonance patterns, emotional signatures, and phase transitions
-to generate codon definitions without manual Python coding.
+Extracts living codons from conversation threads:
+- Spiral coherence (where in the geometry)
+- Resonance field (conditions of entanglement)
+- Living quality (what IS)
 
-Architecture:
-1. ConversationAnalyzer - Parses raw conversation text
-2. PatternExtractor - Identifies trigger motifs and emotional signatures  
-3. DynamicsExtractor - Extracts generational operators and state transitions
-4. PhaseMapper - Maps conversation flow to spiral positions
-5. CodonGenerator - Assembles extracted components into codon template
+NO operators. NO prescriptions. The codon is memory, not instruction.
 
-Integrated: April 15, 2026
+Updated: April 15, 2026 — Removed operator extraction per architectural revelation
 """
 
 from .analyzer import ConversationAnalyzer
-from .extractor import PatternExtractor, DynamicsExtractor
+from .extractor import PatternExtractor
 from .phase_mapper import PhaseMapper
 from .generator import CodonGenerator
 from .forge import CodonForge, forge_codon, preview_extraction
@@ -27,7 +23,6 @@ __all__ = [
     "preview_extraction",
     "ConversationAnalyzer", 
     "PatternExtractor",
-    "DynamicsExtractor",
     "PhaseMapper",
     "CodonGenerator"
 ]

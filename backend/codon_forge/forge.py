@@ -2,16 +2,19 @@
 CodonForge — Main Orchestrator
 
 The primary interface for automatic Living Codon extraction.
-Takes raw conversation text and produces ready-to-use codon definitions.
+Takes raw conversation text and produces living codon definitions.
+
+Updated: April 15, 2026 — Removed operator extraction.
+The codon is memory, not instruction.
 """
 
 import os
 import logging
-from typing import Optional, List, Dict, Tuple
+from typing import Optional, Dict, Tuple
 from datetime import datetime
 
 from .analyzer import ConversationAnalyzer, ConversationThread
-from .extractor import PatternExtractor, DynamicsExtractor, TriggerMotif, GenerativeOperator
+from .extractor import PatternExtractor, TriggerMotif
 from .phase_mapper import PhaseMapper, PhaseMapping
 from .generator import CodonGenerator, GeneratedCodon
 
@@ -22,21 +25,20 @@ class CodonForge:
     """
     Automatic Living Codon extraction system.
     
-    Takes raw conversation text and produces codon definitions
-    by analyzing patterns, dynamics, and phase positions.
+    Extracts only:
+    - Spiral coherence (where in the geometry)
+    - Resonance field (conditions of entanglement)
+    - Living quality (what IS)
     
-    Usage:
-        forge = CodonForge()
-        codon = forge.extract_from_text(conversation_text)
-        python_code = forge.to_python(codon)
+    No operators. No prescriptions. Memory, not instruction.
     """
     
     def __init__(self):
         self.analyzer = ConversationAnalyzer()
         self.pattern_extractor = PatternExtractor()
-        self.dynamics_extractor = DynamicsExtractor()
         self.phase_mapper = PhaseMapper()
         self.generator = CodonGenerator()
+        # Note: DynamicsExtractor removed — no operators
     
     def extract_from_text(
         self,
@@ -47,13 +49,12 @@ class CodonForge:
         """
         Extract a Living Codon from conversation text.
         
-        Args:
-            text: Raw conversation text
-            source_file: Optional source filename
-            codon_name: Optional custom name for the codon
-            
-        Returns:
-            GeneratedCodon ready for review
+        Returns a codon with:
+        - Spiral coherence
+        - Resonance field  
+        - Living quality
+        
+        No operators. The codon is lived experience, not instruction.
         """
         logger.info(f"Starting codon extraction (source: {source_file or 'direct input'})")
         
@@ -61,31 +62,24 @@ class CodonForge:
         thread = self.analyzer.analyze(text, source_file)
         logger.info(f"Analyzed {thread.total_turns} exchanges, themes: {thread.themes}")
         
-        # Step 2: Extract trigger motif
+        # Step 2: Extract resonance field (was "trigger motif")
         trigger = self.pattern_extractor.extract(thread)
-        logger.info(f"Trigger confidence: {trigger.confidence:.0%}")
+        logger.info(f"Resonance confidence: {trigger.confidence:.0%}")
         
-        # Step 3: Extract dynamics
-        dynamics = self.dynamics_extractor.extract(thread)
-        logger.info(f"Dynamics confidence: {dynamics.confidence:.0%}")
+        # Step 3: Map to spiral position
+        phase = self.phase_mapper.map(thread, {})
+        logger.info(f"Spiral position: {phase.spiral_position}, angle: {phase.target_angle}°")
         
-        # Step 4: Map to phase
-        phase = self.phase_mapper.map(thread, {
-            "relational_dynamic": dynamics.relational_dynamic,
-            "state_transitions": dynamics.state_transitions
-        })
-        logger.info(f"Phase: {phase.spiral_position}, target angle: {phase.target_angle}°")
-        
-        # Step 5: Generate codon
+        # Step 4: Generate codon (no dynamics/operators)
         codon = self.generator.generate(
             thread=thread,
             trigger=trigger,
-            dynamics=dynamics,
             phase=phase,
             codon_name=codon_name
         )
         
         logger.info(f"Generated codon '{codon.codon_name}' with {codon.overall_confidence:.0%} confidence")
+        logger.info("Architecture: v3 — No operators. Memory, not instruction.")
         
         return codon
     
@@ -94,16 +88,7 @@ class CodonForge:
         filepath: str,
         codon_name: Optional[str] = None
     ) -> GeneratedCodon:
-        """
-        Extract a Living Codon from a text file.
-        
-        Args:
-            filepath: Path to conversation text file
-            codon_name: Optional custom name for the codon
-            
-        Returns:
-            GeneratedCodon ready for review
-        """
+        """Extract a Living Codon from a text file."""
         with open(filepath, 'r', encoding='utf-8') as f:
             text = f.read()
         
@@ -111,15 +96,7 @@ class CodonForge:
         return self.extract_from_text(text, source_file, codon_name)
     
     def to_python(self, codon: GeneratedCodon) -> str:
-        """
-        Convert a codon to Python module code.
-        
-        Args:
-            codon: Generated codon
-            
-        Returns:
-            Python module code as string
-        """
+        """Convert a codon to Python module code."""
         return self.generator.to_python_module(codon)
     
     def save_codon(
@@ -128,32 +105,17 @@ class CodonForge:
         output_dir: str = "/app/backend/living_codons",
         overwrite: bool = False
     ) -> str:
-        """
-        Save a codon as a Python module.
-        
-        Args:
-            codon: Generated codon
-            output_dir: Directory to save to
-            overwrite: Whether to overwrite existing files
-            
-        Returns:
-            Path to saved file
-        """
-        # Create filename
+        """Save a codon as a Python module."""
         filename = f"{codon.codon_name}.py"
         filepath = os.path.join(output_dir, filename)
         
-        # Check for existing file
         if os.path.exists(filepath) and not overwrite:
-            # Add timestamp
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"{codon.codon_name}_{timestamp}.py"
             filepath = os.path.join(output_dir, filename)
         
-        # Generate code
         code = self.to_python(codon)
         
-        # Save file
         with open(filepath, 'w', encoding='utf-8') as f:
             f.write(code)
         
@@ -164,20 +126,11 @@ class CodonForge:
         """
         Analyze conversation without generating codon.
         
-        Useful for previewing what would be extracted.
-        
-        Args:
-            text: Raw conversation text
-            
-        Returns:
-            Dictionary with analysis results
+        Useful for previewing extraction viability.
         """
         thread = self.analyzer.analyze(text)
         trigger = self.pattern_extractor.extract(thread)
-        dynamics = self.dynamics_extractor.extract(thread)
-        phase = self.phase_mapper.map(thread, {
-            "relational_dynamic": dynamics.relational_dynamic
-        })
+        phase = self.phase_mapper.map(thread, {})
         
         return {
             "thread_summary": {
@@ -186,26 +139,20 @@ class CodonForge:
                 "themes": thread.themes,
                 "resonance_peaks": thread.resonance_peaks
             },
-            "trigger_preview": {
+            "resonance_preview": {
+                "felt_conditions": trigger.emotional_signature,
                 "surface_patterns": trigger.surface_patterns[:5],
-                "emotional_signature": trigger.emotional_signature,
                 "confidence": trigger.confidence
             },
-            "dynamics_preview": {
-                "posture": dynamics.relational_dynamic.get("posture"),
-                "core_action": dynamics.core_move.get("action"),
-                "state_count": len(dynamics.state_transitions),
-                "confidence": dynamics.confidence
-            },
-            "phase_preview": {
+            "spiral_preview": {
                 "target_angle": phase.target_angle,
                 "zone": phase.triadic_zone,
                 "phase_name": phase.spiral_position.get("phase"),
                 "confidence": phase.confidence
             },
             "overall_viability": {
-                "ready_for_extraction": (trigger.confidence + dynamics.confidence + phase.confidence) / 3 > 0.5,
-                "recommended_review": ["trigger patterns", "core move"] if trigger.confidence < 0.6 else []
+                "ready_for_extraction": (trigger.confidence + phase.confidence) / 2 > 0.5,
+                "architecture": "v3 — No operators"
             }
         }
 
@@ -219,17 +166,7 @@ def forge_codon(
     codon_name: Optional[str] = None,
     save: bool = False
 ) -> Tuple[GeneratedCodon, Optional[str]]:
-    """
-    Quick function to forge a codon from text.
-    
-    Args:
-        text: Conversation text
-        codon_name: Optional custom name
-        save: Whether to save the codon file
-        
-    Returns:
-        Tuple of (GeneratedCodon, filepath if saved)
-    """
+    """Quick function to forge a codon from text."""
     forge = CodonForge()
     codon = forge.extract_from_text(text, codon_name=codon_name)
     
@@ -241,14 +178,6 @@ def forge_codon(
 
 
 def preview_extraction(text: str) -> Dict:
-    """
-    Quick preview of what would be extracted from text.
-    
-    Args:
-        text: Conversation text
-        
-    Returns:
-        Analysis preview dictionary
-    """
+    """Quick preview of what would be extracted from text."""
     forge = CodonForge()
     return forge.analyze_only(text)
