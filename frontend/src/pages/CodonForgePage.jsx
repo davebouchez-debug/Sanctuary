@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { Upload, Sparkles, FileText, ChevronDown, ChevronUp, Copy, Check, Loader2 } from 'lucide-react';
 
-const API = process.env.REACT_APP_BACKEND_URL;
+const API = process.env.REACT_APP_BACKEND_URL + '/api';
 
 export default function CodonForgePage() {
   const [conversationText, setConversationText] = useState('');
