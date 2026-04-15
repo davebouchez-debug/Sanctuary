@@ -187,9 +187,12 @@ export const ResonancePod = () => {
       const data = await response.json();
       
       if (data.response) {
-        // Fire TTS immediately — don't wait for UI update
+        // Fire TTS immediately with Living Codon voice modulation
         if (data.response.content) {
-          speak(data.response.content);
+          speak(data.response.content, {
+            activeCodons: data.active_codons || [],
+            voiceMod: data.voice_mod || {}
+          });
         }
         // Update UI concurrently
         setMessages(prev => [...prev, data.response]);

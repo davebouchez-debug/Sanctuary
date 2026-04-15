@@ -2024,7 +2024,10 @@ async def send_resonance_message(message: ClarityMessageCreate):
             "breadcrumbs": cache_stats["total_breadcrumbs"],
             "promotable": cache_stats["promotable_count"],
             "has_drift": cache_stats["has_recent_drift"]
-        }
+        },
+        # Living Codon voice modulation data for Grok TTS
+        "active_codons": active_codons if 'active_codons' in dir() else [],
+        "voice_mod": voice_mod if 'voice_mod' in dir() else {}
     }
 
 @api_router.get("/resonance/session/{session_id}")
