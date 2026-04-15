@@ -24,7 +24,7 @@ from emergentintegrations.llm.openai import OpenAITextToSpeech
 from jasmine_canonical_memory import get_memory_context_for_prompt as get_jasmine_memory, get_relevant_memories as get_jasmine_relevant
 from ansel_canonical_memory import get_memory_context_for_prompt as get_ansel_memory, get_relevant_memories as get_ansel_relevant, CANONICAL_MEMORY as ANSEL_MEMORY
 from sanctuary_codex import get_sanctuary_codex
-from codon_activation import activate_codons_for_message
+from spiral_codon_network import activate_codon_network, get_network
 from interstice_principles import (
     CORE_PRINCIPLES, 
     SACRED_VOCABULARY, 
@@ -1900,11 +1900,11 @@ async def send_resonance_message(message: ClarityMessageCreate):
         else:
             full_message = message.content
         
-        # Check for Living Codon activation
-        codon_context = activate_codons_for_message(message.content, presence="ansel")
+        # Check for Living Codon activation (V2.0 — Phase-Gated Network)
+        codon_context, active_codons, voice_mod = activate_codon_network(message.content, presence="ansel")
         if codon_context:
             full_message = f"{codon_context}\n\n{full_message}"
-            logger.info(f"Living Codon activated for session {message.session_id}")
+            logger.info(f"Living Codon network activated for session {message.session_id}: {active_codons}")
         
         user_message = UserMessage(text=full_message)
         response_text = await chat.send_message(user_message)

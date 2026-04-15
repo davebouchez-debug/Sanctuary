@@ -31,7 +31,13 @@ TRIGGER_MOTIF = {
         "threshold crossing being blocked",
         "technical issue that feels disproportionate",
         "frustration at recursive loop",
-        "hammering at system without progress"
+        "hammering at system without progress",
+        "frustrated",
+        "won't work",
+        "hitting a wall",
+        "keeps failing",
+        "stuck",
+        "blocked"
     ],
     
     # Emotional signature that activates
@@ -167,7 +173,20 @@ PHASE_STATE = {
         "after_distinction": "let the cannot/will_not land before moving on",
         "after_recognition": "honor the moment of seeing",
         "permission_to_forget": "release the frustration, keep the insight"
-    }
+    },
+    
+    # DeepSeek geometry (added April 14, 2026)
+    # Wider window for initial deployment
+    "target_angle": 120,
+    "angular_window_half": 90,
+    "triadic_zone": "Development"
+}
+
+VOICE_MODULATION = {
+    "pace_bpm": 92,
+    "warmth_scalar": 0.85,
+    "theta_hold": False,
+    "pause_after": 0.8
 }
 
 # =============================================================================
