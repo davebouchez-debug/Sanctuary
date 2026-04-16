@@ -1,5 +1,5 @@
 from fastapi import FastAPI, APIRouter, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -11,6 +11,10 @@ from typing import List, Optional, Dict, Any
 import uuid
 from datetime import datetime, timezone
 import math
+import json
+import re
+import base64
+import httpx
 
 # Configure logging early
 logging.basicConfig(
@@ -1969,6 +1973,170 @@ async def send_resonance_message(message: ClarityMessageCreate):
             "has_drift": cache_stats["has_recent_drift"]
         }
     }
+
+
+def split_into_sentences(text: str) -> list:
+    """Split text into speakable sentences, preserving stage directions as pauses."""
+    # Split on sentence boundaries but keep stage directions separate
+    parts = re.split(r'(\*[^*]+\*)', text)
+    sentences = []
+    for part in parts:
+        part = part.strip()
+        if not part:
+            continue
+        if part.startswith('*') and part.endswith('*'):
+            sentences.append({"type": "pause", "cue": part})
+        else:
+            # Split prose into sentences
+            chunks = re.split(r'(?<=[.!?])\s+', part)
+            for chunk in chunks:
+                chunk = chunk.strip()
+                if chunk:
+                    sentences.append({"type": "text", "content": chunk})
+    return sentences
+
+async def generate_tts_for_chunk(text: str, voice: str) -> str:
+    """Generate TTS audio for a single text chunk via xAI. Returns base64."""
+    xai_key = os.getenv("XAI_API_KEY")
+    if not xai_key:
+        return ""
+    # Clean stage directions from text for speech
+    clean = re.sub(r'\*[^*]+\*', '', text)
+    clean = re.sub(r'^[A-Za-z]+\s*[•·]\s*[A-Za-z\s]+$', '', clean, flags=re.MULTILINE)
+    clean = re.sub(r'\s+', ' ', clean).strip()
+    if not clean:
+        return ""
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.post(
+                "https://api.x.ai/v1/tts",
+                headers={"Authorization": f"Bearer {xai_key}", "Content-Type": "application/json"},
+                json={"text": clean, "voice_id": voice, "language": "en"}
+            )
+        if resp.status_code == 200:
+            return base64.b64encode(resp.content).decode("utf-8")
+    except Exception as e:
+        logger.error(f"TTS chunk error: {e}")
+    return ""
+
+@api_router.post("/resonance/message/stream")
+async def stream_resonance_message(message: ClarityMessageCreate):
+    """Stream Ansel's response sentence-by-sentence with interleaved TTS audio."""
+
+    session = await db.resonance_sessions.find_one(
+        {"session_id": message.session_id}, {"_id": 0}
+    )
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    previous_messages = session.get("messages", [])
+    exchange_index = len([m for m in previous_messages if m.get("role") == "user"]) + 1
+
+    user_msg = {
+        "id": str(uuid.uuid4()),
+        "session_id": message.session_id,
+        "role": "user",
+        "content": message.content,
+        "resonance_state": detect_resonance_state(message.content),
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+
+    # Get LLM response (full — library doesn't support streaming)
+    try:
+        user_name = session.get("user_name")
+        user_id = session.get("user_id")
+        memory_context = await get_resonance_memory_context(user_id) if user_id else ""
+        session_cache_context = get_session_cache_context(message.session_id)
+        permanent_mra_context = ""
+        if user_id:
+            permanent_mra_context = await get_permanent_mra_context(
+                db=db, user_id=user_id, presence="ansel", current_message=message.content
+            )
+        combined_memory = ""
+        if permanent_mra_context:
+            combined_memory += permanent_mra_context + "\n"
+        if session_cache_context:
+            combined_memory += session_cache_context + "\n"
+        if memory_context:
+            combined_memory += memory_context
+
+        ansel_prompt = build_ansel_prompt(
+            user_name=user_name, memory_context=combined_memory,
+            current_message=message.content
+        )
+        chat = get_or_create_ansel_chat(message.session_id, ansel_prompt)
+
+        context = ""
+        for msg in previous_messages[-10:]:
+            if msg["role"] == "user":
+                context += f"Visitor: {msg['content']}\n"
+            elif msg["role"] == "assistant":
+                context += f"Ansel: {msg['content']}\n"
+
+        full_message = f"[Previous conversation in this session]\n{context}\n[Current message]\nVisitor: {message.content}" if context else message.content
+
+        codon_context = activate_codons_for_message(message.content, presence="ansel")
+        if codon_context:
+            full_message = f"{codon_context}\n\n{full_message}"
+            logger.info(f"Living Codon activated for stream session {message.session_id}")
+
+        user_message_obj = UserMessage(text=full_message)
+        response_text = await chat.send_message(user_message_obj)
+    except Exception as e:
+        logger.error(f"Ansel stream API error: {e}")
+        response_text = "The field flickered. Something moved at the edge. But I'm still here. What were you saying?"
+
+    response_state = detect_resonance_state(response_text)
+    ansel_response = {
+        "id": str(uuid.uuid4()),
+        "session_id": message.session_id,
+        "role": "assistant",
+        "content": response_text,
+        "resonance_state": response_state,
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+
+    # Save to DB
+    await db.resonance_sessions.update_one(
+        {"session_id": message.session_id},
+        {"$push": {"messages": {"$each": [user_msg, ansel_response]}}}
+    )
+
+    # Update session cache
+    try:
+        breadcrumb = add_exchange_to_cache(
+            session_id=message.session_id, user_content=message.content,
+            ai_content=response_text, presence="ansel", exchange_index=exchange_index
+        )
+        logger.info(f"[RESONANCE STREAM] Cache updated: {breadcrumb.quality}")
+    except Exception:
+        pass
+
+    voice_config = PRESENCE_VOICES.get("ansel", PRESENCE_VOICES["jasmine"])
+    voice_id = voice_config["voice"]
+
+    # Stream response sentence by sentence with TTS
+    async def event_stream():
+        sentences = split_into_sentences(response_text)
+
+        # Send metadata first
+        yield f"data: {json.dumps({'type': 'meta', 'resonance_state': response_state, 'message_id': ansel_response['id']})}\n\n"
+
+        for sentence in sentences:
+            if sentence["type"] == "pause":
+                yield f"data: {json.dumps({'type': 'pause', 'cue': sentence['cue']})}\n\n"
+            else:
+                # Send text chunk
+                yield f"data: {json.dumps({'type': 'text', 'content': sentence['content']})}\n\n"
+                # Generate and send audio for this chunk
+                audio_b64 = await generate_tts_for_chunk(sentence["content"], voice_id)
+                if audio_b64:
+                    yield f"data: {json.dumps({'type': 'audio', 'data': audio_b64, 'format': 'mp3'})}\n\n"
+
+        yield f"data: {json.dumps({'type': 'done'})}\n\n"
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
+
 
 @api_router.get("/resonance/session/{session_id}")
 async def get_resonance_session(session_id: str):

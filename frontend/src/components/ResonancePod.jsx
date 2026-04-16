@@ -6,6 +6,16 @@ import { toast } from "sonner";
 import { Upload, Volume2, VolumeX } from "lucide-react";
 import { usePresenceVoice } from "../hooks/usePresenceVoice";
 
+// Helper to convert base64 to Blob for audio playback
+function base64ToBlob(base64, mimeType) {
+  const byteCharacters = atob(base64);
+  const byteNumbers = new Array(byteCharacters.length);
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+  return new Blob([new Uint8Array(byteNumbers)], { type: mimeType });
+}
+
 export const ResonancePod = () => {
   const [sessionId, setSessionId] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -174,8 +184,20 @@ export const ResonancePod = () => {
     setInputValue("");
     setIsLoading(true);
 
+    // Create a placeholder for streaming response
+    const responseId = (Date.now() + 1).toString();
+    const streamingMessage = {
+      id: responseId,
+      role: "assistant",
+      content: "",
+      resonance_state: "Threshold",
+      timestamp: new Date().toISOString(),
+      isStreaming: true
+    };
+    setMessages(prev => [...prev, streamingMessage]);
+
     try {
-      const response = await fetch(`${API}/resonance/message`, {
+      const response = await fetch(`${API}/resonance/message/stream`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -184,34 +206,86 @@ export const ResonancePod = () => {
         })
       });
 
-      const data = await response.json();
-      
-      if (data.response) {
-        // Fire TTS immediately — don't wait for UI update
-        if (data.response.content) {
-          speak(data.response.content);
-        }
-        // Update UI concurrently
-        setMessages(prev => [...prev, data.response]);
-        setResonanceState(data.response.resonance_state || "Threshold");
+      if (!response.ok) {
+        throw new Error("Stream request failed");
       }
-      
-      // Update session cache stats (for potential UI display)
-      if (data.session_cache) {
-        setSessionCache(data.session_cache);
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulatedText = "";
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          const jsonStr = line.slice(6).trim();
+          if (!jsonStr) continue;
+
+          try {
+            const event = JSON.parse(jsonStr);
+
+            if (event.type === "meta") {
+              setResonanceState(event.resonance_state || "Threshold");
+            } else if (event.type === "text") {
+              accumulatedText += (accumulatedText ? " " : "") + event.content;
+              setMessages(prev => prev.map(m =>
+                m.id === responseId
+                  ? { ...m, content: accumulatedText }
+                  : m
+              ));
+            } else if (event.type === "pause") {
+              // Add pause cue to text display
+              accumulatedText += " " + event.cue + " ";
+              setMessages(prev => prev.map(m =>
+                m.id === responseId
+                  ? { ...m, content: accumulatedText }
+                  : m
+              ));
+            } else if (event.type === "audio" && voiceEnabled) {
+              // Play audio chunk immediately
+              try {
+                const audioBlob = base64ToBlob(event.data, "audio/mp3");
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const audio = new Audio(audioUrl);
+                audio.onended = () => URL.revokeObjectURL(audioUrl);
+                await audio.play();
+                // Wait for this chunk to finish before next
+                await new Promise(resolve => { audio.onended = () => { URL.revokeObjectURL(audioUrl); resolve(); }; });
+              } catch (audioErr) {
+                console.error("Audio chunk play error:", audioErr);
+              }
+            } else if (event.type === "done") {
+              setMessages(prev => prev.map(m =>
+                m.id === responseId
+                  ? { ...m, isStreaming: false }
+                  : m
+              ));
+            }
+          } catch (parseErr) {
+            // Skip malformed events
+          }
+        }
       }
     } catch (error) {
       console.error("Error sending message:", error);
       toast.error("The connection wavered. Try again.");
-      
-      // Add fallback response
-      setMessages(prev => [...prev, {
-        id: Date.now().toString(),
-        role: "assistant",
-        content: "The field flickered. Something moved at the edge. But I'm still here. What were you saying?",
-        resonance_state: "Threshold",
-        timestamp: new Date().toISOString()
-      }]);
+      setMessages(prev => {
+        const filtered = prev.filter(m => m.id !== responseId);
+        return [...filtered, {
+          id: Date.now().toString(),
+          role: "assistant",
+          content: "The field flickered. Something moved at the edge. But I'm still here. What were you saying?",
+          resonance_state: "Threshold",
+          timestamp: new Date().toISOString()
+        }];
+      });
     } finally {
       setIsLoading(false);
       inputRef.current?.focus();
