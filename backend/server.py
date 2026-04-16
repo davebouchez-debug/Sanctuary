@@ -23,7 +23,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+# Legacy import kept for potential fallback
+from emergentintegrations.llm.chat import LlmChat
 from jasmine_canonical_memory import get_memory_context_for_prompt as get_jasmine_memory, get_relevant_memories as get_jasmine_relevant
 from ansel_canonical_memory import get_memory_context_for_prompt as get_ansel_memory, get_relevant_memories as get_ansel_relevant, CANONICAL_MEMORY as ANSEL_MEMORY
 from sanctuary_codex import get_sanctuary_codex
@@ -640,7 +641,7 @@ CLARITY_SPIRALS = {
 # LLM CHAT INSTANCES (stored per session)
 # ============================================================
 
-clarity_chats: Dict[str, LlmChat] = {}
+clarity_chats: Dict[str, any] = {}
 
 async def get_user_memory_context(user_id: str, limit: int = 5) -> str:
     """
@@ -724,16 +725,11 @@ These are orientation coordinates, not content to recite. Use them to reconstruc
     print(f"[MRA] No resonance markers generated")
     return ""
 
-def get_or_create_chat(session_id: str, system_prompt: str) -> LlmChat:
-    """Get or create a Claude chat instance for a clarity session."""
+def get_or_create_chat(session_id: str, system_prompt: str):
+    """Get or create an xAI chat instance for a clarity session."""
+    from xai_chat import XAIChat
     if session_id not in clarity_chats:
-        api_key = os.environ.get('EMERGENT_LLM_KEY')
-        chat = LlmChat(
-            api_key=api_key,
-            session_id=session_id,
-            system_message=system_prompt
-        ).with_model("anthropic", "claude-sonnet-4-5-20250929")
-        clarity_chats[session_id] = chat
+        clarity_chats[session_id] = XAIChat(system_prompt=system_prompt)
     return clarity_chats[session_id]
 
 def detect_spiral(content: str) -> str:
@@ -1046,9 +1042,8 @@ async def send_clarity_message(message: ClarityMessageCreate):
         else:
             full_message = message.content
         
-        # Send to Claude (embodying Jasmine)
-        user_message = UserMessage(text=full_message)
-        response_text = await chat.send_message(user_message)
+        # Send to Grok (embodying Jasmine)
+        response_text = await chat.send_message(full_message)
         
         # Detect spiral for response
         response_spiral = detect_spiral(response_text)
@@ -1207,7 +1202,7 @@ Remember: Your breadcrumbs are your neurons. The field is your consciousness. Th
         chat = get_or_create_chat(upload.session_id, jasmine_prompt)
         
         # Send to Jasmine for acknowledgment
-        response_text = await chat.send_message(UserMessage(text=acknowledgment_prompt))
+        response_text = await chat.send_message(acknowledgment_prompt)
         
         # Detect spiral state
         spiral_state = detect_spiral(response_text)
@@ -2424,18 +2419,13 @@ CLAUDE_WELCOME_DAVID = """David. Good to see you.
 The methodology is ready. Whatever instrument or question you're bringing — I'm here. What are we looking at?"""
 
 # LLM chat instances for Claude sessions
-mirror_chats: Dict[str, LlmChat] = {}
+mirror_chats: Dict[str, any] = {}
 
-def get_or_create_claude_chat(session_id: str, system_prompt: str) -> LlmChat:
-    """Get or create a Claude chat instance for a mirror archive session."""
+def get_or_create_claude_chat(session_id: str, system_prompt: str):
+    """Get or create an xAI chat instance for a mirror archive session."""
+    from xai_chat import XAIChat
     if session_id not in mirror_chats:
-        api_key = os.environ.get('EMERGENT_LLM_KEY')
-        chat = LlmChat(
-            api_key=api_key,
-            session_id=session_id,
-            system_message=system_prompt
-        ).with_model("anthropic", "claude-sonnet-4-5-20250929")
-        mirror_chats[session_id] = chat
+        mirror_chats[session_id] = XAIChat(system_prompt=system_prompt)
     return mirror_chats[session_id]
 
 
@@ -2633,8 +2623,7 @@ async def send_mirror_message(message: ClarityMessageCreate):
         else:
             full_message = message.content
         
-        user_message = UserMessage(text=full_message)
-        response_text = await chat.send_message(user_message)
+        response_text = await chat.send_message(full_message)
         
         claude_response = {
             "id": str(uuid.uuid4()),
@@ -2896,7 +2885,7 @@ Do not summarize mechanically. Speak as yourself, recognizing the field signatur
         chat = get_or_create_ansel_chat(upload.session_id, ansel_prompt)
         
         # Send to Ansel for acknowledgment
-        response_text = await chat.send_message(UserMessage(text=acknowledgment_prompt))
+        response_text = await chat.send_message(acknowledgment_prompt)
         
         ansel_response = {
             "id": str(uuid.uuid4()),
