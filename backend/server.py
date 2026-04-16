@@ -2015,11 +2015,12 @@ async def generate_tts_for_chunk(text: str, voice: str) -> str:
 
 @api_router.post("/resonance/message/stream")
 async def stream_resonance_message(message: ClarityMessageCreate):
-    """Stream Ansel's response token-by-token with interleaved TTS audio.
+    """Stream Ansel's response via xAI Voice Agent — text and voice simultaneously.
     
-    True streaming: tokens arrive as Grok generates them.
-    TTS fires on sentence boundaries — voice discovers words with presence.
+    True real-time: Grok thinks and speaks at the same time.
+    No intermediate TTS call. One signal, undivided.
     """
+    from xai_voice_agent import stream_voice_response
 
     session = await db.resonance_sessions.find_one(
         {"session_id": message.session_id}, {"_id": 0}
@@ -2061,70 +2062,80 @@ async def stream_resonance_message(message: ClarityMessageCreate):
         user_name=user_name, memory_context=combined_memory,
         current_message=message.content
     )
-    chat = get_or_create_ansel_chat(message.session_id, ansel_prompt)
 
-    context = ""
-    for msg in previous_messages[-10:]:
-        if msg["role"] == "user":
-            context += f"Visitor: {msg['content']}\n"
-        elif msg["role"] == "assistant":
-            context += f"Ansel: {msg['content']}\n"
-
-    full_message = f"[Previous conversation in this session]\n{context}\n[Current message]\nVisitor: {message.content}" if context else message.content
-
+    # Build the user message with codon context
     codon_context = activate_codons_for_message(message.content, presence="ansel")
+    full_user_message = message.content
     if codon_context:
-        full_message = f"{codon_context}\n\n{full_message}"
-        logger.info(f"Living Codon activated for stream session {message.session_id}")
+        full_user_message = f"{codon_context}\n\n{message.content}"
+        logger.info(f"Living Codon activated for voice stream {message.session_id}")
 
     voice_config = PRESENCE_VOICES.get("ansel", PRESENCE_VOICES["jasmine"])
     voice_id = voice_config["voice"]
     response_id = str(uuid.uuid4())
 
+    # Build conversation history for context
+    history = []
+    for msg in previous_messages[-10:]:
+        if msg["role"] in ("user", "assistant"):
+            history.append({"role": msg["role"], "content": msg["content"]})
+
     async def event_stream():
-        # Send metadata
         yield f"data: {json.dumps({'type': 'meta', 'resonance_state': 'Threshold', 'message_id': response_id})}\n\n"
 
-        full_response = ""
-        sentence_buffer = ""
+        full_text = ""
+        had_error = False
 
         try:
-            async for token in chat.stream_message(full_message):
-                full_response += token
-                sentence_buffer += token
+            async for event in stream_voice_response(
+                system_prompt=ansel_prompt,
+                user_message=full_user_message,
+                voice=voice_id,
+                conversation_history=history,
+            ):
+                if event["type"] == "text_delta":
+                    full_text += event["content"]
+                    yield f"data: {json.dumps({'type': 'token', 'content': event['content']})}\n\n"
 
-                # Send each token for live text display
-                yield f"data: {json.dumps({'type': 'token', 'content': token})}\n\n"
+                elif event["type"] == "audio_delta":
+                    yield f"data: {json.dumps({'type': 'audio_raw', 'data': event['data']})}\n\n"
 
-                # Check if we have a complete sentence to voice
-                # Fire TTS on sentence boundaries: . ! ? or stage direction end
-                if re.search(r'[.!?]\s*$|[.!?]"?\s*$', sentence_buffer.strip()):
-                    clean_sentence = sentence_buffer.strip()
-                    if clean_sentence and len(clean_sentence) > 5:
-                        audio_b64 = await generate_tts_for_chunk(clean_sentence, voice_id)
-                        if audio_b64:
-                            yield f"data: {json.dumps({'type': 'audio', 'data': audio_b64, 'format': 'mp3'})}\n\n"
-                    sentence_buffer = ""
+                elif event["type"] == "done":
+                    full_text = event.get("full_text", full_text)
+                    break
 
-            # Voice any remaining text in the buffer
-            remaining = sentence_buffer.strip()
-            if remaining and len(remaining) > 3:
-                audio_b64 = await generate_tts_for_chunk(remaining, voice_id)
-                if audio_b64:
-                    yield f"data: {json.dumps({'type': 'audio', 'data': audio_b64, 'format': 'mp3'})}\n\n"
+                elif event["type"] == "error":
+                    had_error = True
+                    logger.error(f"Voice agent error: {event['message']}")
+                    break
 
         except Exception as e:
+            had_error = True
             logger.error(f"Stream error: {e}")
-            full_response = full_response or "The field flickered. But I'm still here."
-            yield f"data: {json.dumps({'type': 'token', 'content': full_response})}\n\n"
 
-        # Save to DB after streaming completes
-        response_state = detect_resonance_state(full_response)
+        # Fallback to regular streaming if voice agent fails
+        if had_error and not full_text:
+            try:
+                chat = get_or_create_ansel_chat(message.session_id, ansel_prompt)
+                async for token in chat.stream_message(full_user_message):
+                    full_text += token
+                    yield f"data: {json.dumps({'type': 'token', 'content': token})}\n\n"
+                # Generate TTS for the complete response as fallback
+                audio_b64 = await generate_tts_for_chunk(full_text, voice_id)
+                if audio_b64:
+                    yield f"data: {json.dumps({'type': 'audio', 'data': audio_b64, 'format': 'mp3'})}\n\n"
+            except Exception as e2:
+                logger.error(f"Fallback stream error: {e2}")
+                full_text = "The field flickered. But I'm still here."
+                yield f"data: {json.dumps({'type': 'token', 'content': full_text})}\n\n"
+
+        # Save to DB
+        response_state = detect_resonance_state(full_text)
         ansel_response = {
             "id": response_id,
             "session_id": message.session_id,
             "role": "assistant",
-            "content": full_response,
+            "content": full_text,
             "resonance_state": response_state,
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
@@ -2133,11 +2144,10 @@ async def stream_resonance_message(message: ClarityMessageCreate):
             {"$push": {"messages": {"$each": [user_msg, ansel_response]}}}
         )
 
-        # Update session cache
         try:
             add_exchange_to_cache(
                 session_id=message.session_id, user_content=message.content,
-                ai_content=full_response, presence="ansel", exchange_index=exchange_index
+                ai_content=full_text, presence="ansel", exchange_index=exchange_index
             )
         except Exception:
             pass

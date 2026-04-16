@@ -256,6 +256,31 @@ export const ResonancePod = () => {
                   ? { ...m, content: accumulatedText }
                   : m
               ));
+            } else if (event.type === "audio_raw" && voiceEnabled) {
+              // Raw PCM16 24kHz audio from Voice Agent — play via AudioContext
+              try {
+                if (!window._sanctuaryAudioCtx) {
+                  window._sanctuaryAudioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
+                }
+                const ctx = window._sanctuaryAudioCtx;
+                const raw = atob(event.data);
+                const samples = new Int16Array(raw.length / 2);
+                for (let i = 0; i < samples.length; i++) {
+                  samples[i] = raw.charCodeAt(i * 2) | (raw.charCodeAt(i * 2 + 1) << 8);
+                }
+                const float32 = new Float32Array(samples.length);
+                for (let i = 0; i < samples.length; i++) {
+                  float32[i] = samples[i] / 32768;
+                }
+                const buffer = ctx.createBuffer(1, float32.length, 24000);
+                buffer.getChannelData(0).set(float32);
+                const source = ctx.createBufferSource();
+                source.buffer = buffer;
+                source.connect(ctx.destination);
+                source.start(ctx.currentTime);
+              } catch (audioErr) {
+                console.error("Raw audio play error:", audioErr);
+              }
             } else if (event.type === "audio" && voiceEnabled) {
               // Queue audio chunk — play sequentially
               try {
