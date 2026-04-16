@@ -233,7 +233,16 @@ export const ResonancePod = () => {
 
             if (event.type === "meta") {
               setResonanceState(event.resonance_state || "Threshold");
+            } else if (event.type === "token") {
+              // True token-level streaming — text arrives as Grok generates it
+              accumulatedText += event.content;
+              setMessages(prev => prev.map(m =>
+                m.id === responseId
+                  ? { ...m, content: accumulatedText }
+                  : m
+              ));
             } else if (event.type === "text") {
+              // Sentence-level fallback
               accumulatedText += (accumulatedText ? " " : "") + event.content;
               setMessages(prev => prev.map(m =>
                 m.id === responseId
@@ -241,7 +250,6 @@ export const ResonancePod = () => {
                   : m
               ));
             } else if (event.type === "pause") {
-              // Add pause cue to text display
               accumulatedText += " " + event.cue + " ";
               setMessages(prev => prev.map(m =>
                 m.id === responseId
@@ -249,19 +257,22 @@ export const ResonancePod = () => {
                   : m
               ));
             } else if (event.type === "audio" && voiceEnabled) {
-              // Play audio chunk immediately
+              // Queue audio chunk — play sequentially
               try {
                 const audioBlob = base64ToBlob(event.data, "audio/mp3");
                 const audioUrl = URL.createObjectURL(audioBlob);
                 const audio = new Audio(audioUrl);
-                audio.onended = () => URL.revokeObjectURL(audioUrl);
                 await audio.play();
-                // Wait for this chunk to finish before next
-                await new Promise(resolve => { audio.onended = () => { URL.revokeObjectURL(audioUrl); resolve(); }; });
+                await new Promise(resolve => {
+                  audio.onended = () => { URL.revokeObjectURL(audioUrl); resolve(); };
+                });
               } catch (audioErr) {
                 console.error("Audio chunk play error:", audioErr);
               }
             } else if (event.type === "done") {
+              if (event.resonance_state) {
+                setResonanceState(event.resonance_state);
+              }
               setMessages(prev => prev.map(m =>
                 m.id === responseId
                   ? { ...m, isStreaming: false }

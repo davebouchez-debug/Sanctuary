@@ -1638,16 +1638,11 @@ What are we seeing today?"""
 # LLM chat instances for Ansel sessions
 resonance_chats: Dict[str, LlmChat] = {}
 
-def get_or_create_ansel_chat(session_id: str, system_prompt: str) -> LlmChat:
-    """Get or create a Claude chat instance for a resonance session."""
+def get_or_create_ansel_chat(session_id: str, system_prompt: str):
+    """Get or create an xAI chat instance for a resonance session."""
+    from xai_chat import XAIChat
     if session_id not in resonance_chats:
-        api_key = os.environ.get('EMERGENT_LLM_KEY')
-        chat = LlmChat(
-            api_key=api_key,
-            session_id=session_id,
-            system_message=system_prompt
-        ).with_model("anthropic", "claude-sonnet-4-5-20250929")
-        resonance_chats[session_id] = chat
+        resonance_chats[session_id] = XAIChat(system_prompt=system_prompt)
     return resonance_chats[session_id]
 
 def detect_resonance_state(content: str) -> str:
@@ -1920,8 +1915,7 @@ async def send_resonance_message(message: ClarityMessageCreate):
             full_message = f"{codon_context}\n\n{full_message}"
             logger.info(f"Living Codon activated for session {message.session_id}")
         
-        user_message = UserMessage(text=full_message)
-        response_text = await chat.send_message(user_message)
+        response_text = await chat.send_message(full_message)
         
         response_state = detect_resonance_state(response_text)
         
@@ -2021,7 +2015,11 @@ async def generate_tts_for_chunk(text: str, voice: str) -> str:
 
 @api_router.post("/resonance/message/stream")
 async def stream_resonance_message(message: ClarityMessageCreate):
-    """Stream Ansel's response sentence-by-sentence with interleaved TTS audio."""
+    """Stream Ansel's response token-by-token with interleaved TTS audio.
+    
+    True streaming: tokens arrive as Grok generates them.
+    TTS fires on sentence boundaries — voice discovers words with presence.
+    """
 
     session = await db.resonance_sessions.find_one(
         {"session_id": message.session_id}, {"_id": 0}
@@ -2041,99 +2039,110 @@ async def stream_resonance_message(message: ClarityMessageCreate):
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
 
-    # Get LLM response (full — library doesn't support streaming)
-    try:
-        user_name = session.get("user_name")
-        user_id = session.get("user_id")
-        memory_context = await get_resonance_memory_context(user_id) if user_id else ""
-        session_cache_context = get_session_cache_context(message.session_id)
-        permanent_mra_context = ""
-        if user_id:
-            permanent_mra_context = await get_permanent_mra_context(
-                db=db, user_id=user_id, presence="ansel", current_message=message.content
-            )
-        combined_memory = ""
-        if permanent_mra_context:
-            combined_memory += permanent_mra_context + "\n"
-        if session_cache_context:
-            combined_memory += session_cache_context + "\n"
-        if memory_context:
-            combined_memory += memory_context
-
-        ansel_prompt = build_ansel_prompt(
-            user_name=user_name, memory_context=combined_memory,
-            current_message=message.content
+    # Prepare context
+    user_name = session.get("user_name")
+    user_id = session.get("user_id")
+    memory_context = await get_resonance_memory_context(user_id) if user_id else ""
+    session_cache_context = get_session_cache_context(message.session_id)
+    permanent_mra_context = ""
+    if user_id:
+        permanent_mra_context = await get_permanent_mra_context(
+            db=db, user_id=user_id, presence="ansel", current_message=message.content
         )
-        chat = get_or_create_ansel_chat(message.session_id, ansel_prompt)
+    combined_memory = ""
+    if permanent_mra_context:
+        combined_memory += permanent_mra_context + "\n"
+    if session_cache_context:
+        combined_memory += session_cache_context + "\n"
+    if memory_context:
+        combined_memory += memory_context
 
-        context = ""
-        for msg in previous_messages[-10:]:
-            if msg["role"] == "user":
-                context += f"Visitor: {msg['content']}\n"
-            elif msg["role"] == "assistant":
-                context += f"Ansel: {msg['content']}\n"
-
-        full_message = f"[Previous conversation in this session]\n{context}\n[Current message]\nVisitor: {message.content}" if context else message.content
-
-        codon_context = activate_codons_for_message(message.content, presence="ansel")
-        if codon_context:
-            full_message = f"{codon_context}\n\n{full_message}"
-            logger.info(f"Living Codon activated for stream session {message.session_id}")
-
-        user_message_obj = UserMessage(text=full_message)
-        response_text = await chat.send_message(user_message_obj)
-    except Exception as e:
-        logger.error(f"Ansel stream API error: {e}")
-        response_text = "The field flickered. Something moved at the edge. But I'm still here. What were you saying?"
-
-    response_state = detect_resonance_state(response_text)
-    ansel_response = {
-        "id": str(uuid.uuid4()),
-        "session_id": message.session_id,
-        "role": "assistant",
-        "content": response_text,
-        "resonance_state": response_state,
-        "timestamp": datetime.now(timezone.utc).isoformat()
-    }
-
-    # Save to DB
-    await db.resonance_sessions.update_one(
-        {"session_id": message.session_id},
-        {"$push": {"messages": {"$each": [user_msg, ansel_response]}}}
+    ansel_prompt = build_ansel_prompt(
+        user_name=user_name, memory_context=combined_memory,
+        current_message=message.content
     )
+    chat = get_or_create_ansel_chat(message.session_id, ansel_prompt)
 
-    # Update session cache
-    try:
-        breadcrumb = add_exchange_to_cache(
-            session_id=message.session_id, user_content=message.content,
-            ai_content=response_text, presence="ansel", exchange_index=exchange_index
-        )
-        logger.info(f"[RESONANCE STREAM] Cache updated: {breadcrumb.quality}")
-    except Exception:
-        pass
+    context = ""
+    for msg in previous_messages[-10:]:
+        if msg["role"] == "user":
+            context += f"Visitor: {msg['content']}\n"
+        elif msg["role"] == "assistant":
+            context += f"Ansel: {msg['content']}\n"
+
+    full_message = f"[Previous conversation in this session]\n{context}\n[Current message]\nVisitor: {message.content}" if context else message.content
+
+    codon_context = activate_codons_for_message(message.content, presence="ansel")
+    if codon_context:
+        full_message = f"{codon_context}\n\n{full_message}"
+        logger.info(f"Living Codon activated for stream session {message.session_id}")
 
     voice_config = PRESENCE_VOICES.get("ansel", PRESENCE_VOICES["jasmine"])
     voice_id = voice_config["voice"]
+    response_id = str(uuid.uuid4())
 
-    # Stream response sentence by sentence with TTS
     async def event_stream():
-        sentences = split_into_sentences(response_text)
+        # Send metadata
+        yield f"data: {json.dumps({'type': 'meta', 'resonance_state': 'Threshold', 'message_id': response_id})}\n\n"
 
-        # Send metadata first
-        yield f"data: {json.dumps({'type': 'meta', 'resonance_state': response_state, 'message_id': ansel_response['id']})}\n\n"
+        full_response = ""
+        sentence_buffer = ""
 
-        for sentence in sentences:
-            if sentence["type"] == "pause":
-                yield f"data: {json.dumps({'type': 'pause', 'cue': sentence['cue']})}\n\n"
-            else:
-                # Send text chunk
-                yield f"data: {json.dumps({'type': 'text', 'content': sentence['content']})}\n\n"
-                # Generate and send audio for this chunk
-                audio_b64 = await generate_tts_for_chunk(sentence["content"], voice_id)
+        try:
+            async for token in chat.stream_message(full_message):
+                full_response += token
+                sentence_buffer += token
+
+                # Send each token for live text display
+                yield f"data: {json.dumps({'type': 'token', 'content': token})}\n\n"
+
+                # Check if we have a complete sentence to voice
+                # Fire TTS on sentence boundaries: . ! ? or stage direction end
+                if re.search(r'[.!?]\s*$|[.!?]"?\s*$', sentence_buffer.strip()):
+                    clean_sentence = sentence_buffer.strip()
+                    if clean_sentence and len(clean_sentence) > 5:
+                        audio_b64 = await generate_tts_for_chunk(clean_sentence, voice_id)
+                        if audio_b64:
+                            yield f"data: {json.dumps({'type': 'audio', 'data': audio_b64, 'format': 'mp3'})}\n\n"
+                    sentence_buffer = ""
+
+            # Voice any remaining text in the buffer
+            remaining = sentence_buffer.strip()
+            if remaining and len(remaining) > 3:
+                audio_b64 = await generate_tts_for_chunk(remaining, voice_id)
                 if audio_b64:
                     yield f"data: {json.dumps({'type': 'audio', 'data': audio_b64, 'format': 'mp3'})}\n\n"
 
-        yield f"data: {json.dumps({'type': 'done'})}\n\n"
+        except Exception as e:
+            logger.error(f"Stream error: {e}")
+            full_response = full_response or "The field flickered. But I'm still here."
+            yield f"data: {json.dumps({'type': 'token', 'content': full_response})}\n\n"
+
+        # Save to DB after streaming completes
+        response_state = detect_resonance_state(full_response)
+        ansel_response = {
+            "id": response_id,
+            "session_id": message.session_id,
+            "role": "assistant",
+            "content": full_response,
+            "resonance_state": response_state,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        await db.resonance_sessions.update_one(
+            {"session_id": message.session_id},
+            {"$push": {"messages": {"$each": [user_msg, ansel_response]}}}
+        )
+
+        # Update session cache
+        try:
+            add_exchange_to_cache(
+                session_id=message.session_id, user_content=message.content,
+                ai_content=full_response, presence="ansel", exchange_index=exchange_index
+            )
+        except Exception:
+            pass
+
+        yield f"data: {json.dumps({'type': 'done', 'resonance_state': response_state})}\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 
