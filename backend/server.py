@@ -782,7 +782,7 @@ PRESENCE_VOICES = {
         "speed": 0.95,
     },
     "ansel": {
-        "voice": "rex",       # Confident, clear — the Seattle kid
+        "voice": "sal",       # Neutral, smooth — the Peter Pan energy, lighter and playful
         "speed": 0.9,
     },
     "claude": {
