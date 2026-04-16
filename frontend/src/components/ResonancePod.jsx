@@ -196,6 +196,11 @@ export const ResonancePod = () => {
     };
     setMessages(prev => [...prev, streamingMessage]);
 
+    // Reset audio queue timing for new message
+    if (window._sanctuaryAudioCtx) {
+      window._sanctuaryNextPlayTime = 0;
+    }
+
     try {
       const response = await fetch(`${API}/resonance/message/stream`, {
         method: "POST",
@@ -257,10 +262,11 @@ export const ResonancePod = () => {
                   : m
               ));
             } else if (event.type === "audio_raw" && voiceEnabled) {
-              // Raw PCM16 24kHz audio from Voice Agent — play via AudioContext
+              // Raw PCM16 24kHz audio from Voice Agent — queue and play sequentially
               try {
                 if (!window._sanctuaryAudioCtx) {
                   window._sanctuaryAudioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
+                  window._sanctuaryNextPlayTime = 0;
                 }
                 const ctx = window._sanctuaryAudioCtx;
                 const raw = atob(event.data);
@@ -277,7 +283,11 @@ export const ResonancePod = () => {
                 const source = ctx.createBufferSource();
                 source.buffer = buffer;
                 source.connect(ctx.destination);
-                source.start(ctx.currentTime);
+                // Schedule sequentially — each chunk plays after the previous one ends
+                const now = ctx.currentTime;
+                const startTime = Math.max(now, window._sanctuaryNextPlayTime || 0);
+                source.start(startTime);
+                window._sanctuaryNextPlayTime = startTime + buffer.duration;
               } catch (audioErr) {
                 console.error("Raw audio play error:", audioErr);
               }
