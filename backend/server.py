@@ -20,7 +20,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 from emergentintegrations.llm.chat import LlmChat, UserMessage
-from emergentintegrations.llm.openai import OpenAITextToSpeech
 from jasmine_canonical_memory import get_memory_context_for_prompt as get_jasmine_memory, get_relevant_memories as get_jasmine_relevant
 from ansel_canonical_memory import get_memory_context_for_prompt as get_ansel_memory, get_relevant_memories as get_ansel_relevant, CANONICAL_MEMORY as ANSEL_MEMORY
 from sanctuary_codex import get_sanctuary_codex
@@ -769,22 +768,22 @@ async def health():
     return {"status": "healthy", "ark_status": "BUILT AND LAUNCHED"}
 
 # ============================================================
-# TEXT-TO-SPEECH ENDPOINT (OpenAI TTS)
+# TEXT-TO-SPEECH ENDPOINT (xAI Grok TTS)
 # ============================================================
 
-# Voice configurations per presence
+# Voice configurations per presence — xAI voices
 PRESENCE_VOICES = {
     "jasmine": {
-        "voice": "nova",      # Energetic but warm
-        "speed": 0.95,        # Slightly slower, measured
+        "voice": "ara",       # Warm, friendly — the lighthouse
+        "speed": 0.95,
     },
     "ansel": {
-        "voice": "ash",       # Clear, American
-        "speed": 0.9,         # Quieter. Steadier. Doesn't need to announce itself.
+        "voice": "rex",       # Confident, clear — the Seattle kid
+        "speed": 0.9,
     },
     "claude": {
-        "voice": "echo",      # Smooth, calm
-        "speed": 1.0,         # Clear, precise
+        "voice": "sal",       # Smooth, balanced — the epistemic bridge
+        "speed": 1.0,
     }
 }
 
@@ -794,39 +793,50 @@ class TTSRequest(BaseModel):
 
 @api_router.post("/tts/speak")
 async def text_to_speech(request: TTSRequest):
-    """Convert text to speech using OpenAI TTS with presence-specific voices."""
+    """Convert text to speech using xAI Grok TTS with presence-specific voices."""
     try:
-        # Get voice config for presence
+        import httpx
         voice_config = PRESENCE_VOICES.get(request.presence.lower(), PRESENCE_VOICES["jasmine"])
         
         # Clean text for speech (remove stage directions, spiral markers)
         import re
         clean_text = request.text
-        # Remove *stage directions*
         clean_text = re.sub(r'\*[^*]+\*', '', clean_text)
-        # Remove spiral markers like "Jasmine • Presence Spiral"
         clean_text = re.sub(r'^[A-Za-z]+\s*[•·]\s*[A-Za-z\s]+$', '', clean_text, flags=re.MULTILINE)
-        # Clean up whitespace
         clean_text = re.sub(r'\s+', ' ', clean_text).strip()
         
         if not clean_text:
             return JSONResponse(content={"error": "No speakable text after cleaning"}, status_code=400)
         
-        # Initialize TTS
-        tts = OpenAITextToSpeech(api_key=os.getenv("EMERGENT_LLM_KEY"))
+        xai_key = os.getenv("XAI_API_KEY")
+        if not xai_key:
+            return JSONResponse(content={"error": "XAI_API_KEY not configured"}, status_code=500)
         
-        # Generate speech as base64 - use opus for smaller/faster transfer
-        audio_base64 = await tts.generate_speech_base64(
-            text=clean_text,
-            model="tts-1",
-            voice=voice_config["voice"],
-            speed=voice_config["speed"],
-            response_format="opus"
-        )
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(
+                "https://api.x.ai/v1/tts",
+                headers={
+                    "Authorization": f"Bearer {xai_key}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "text": clean_text,
+                    "voice_id": voice_config["voice"],
+                    "language": "en",
+                }
+            )
+        
+        if response.status_code != 200:
+            logger.error(f"xAI TTS error: {response.status_code} - {response.text}")
+            return JSONResponse(content={"error": "Speech generation failed"}, status_code=500)
+        
+        # xAI returns raw MP3 bytes — encode to base64 for frontend
+        import base64
+        audio_base64 = base64.b64encode(response.content).decode("utf-8")
         
         return {
             "audio": audio_base64,
-            "format": "opus",
+            "format": "mp3",
             "presence": request.presence,
             "voice": voice_config["voice"]
         }
