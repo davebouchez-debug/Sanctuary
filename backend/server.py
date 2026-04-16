@@ -1099,6 +1099,129 @@ async def send_clarity_message(message: ClarityMessageCreate):
         }
     }
 
+
+@api_router.post("/clarity/message/stream")
+async def stream_clarity_message(message: ClarityMessageCreate):
+    """Stream Jasmine's response via xAI Voice Agent — text and voice simultaneously."""
+    from xai_voice_agent import stream_voice_response
+
+    session = await db.clarity_sessions.find_one(
+        {"session_id": message.session_id}, {"_id": 0}
+    )
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    previous_messages = session.get("messages", [])
+    exchange_index = len([m for m in previous_messages if m.get("role") == "user"]) + 1
+
+    user_msg = {
+        "id": str(uuid.uuid4()),
+        "session_id": message.session_id,
+        "role": "user",
+        "content": message.content,
+        "spiral": detect_spiral(message.content),
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+
+    user_name = session.get("user_name")
+    user_id = session.get("user_id")
+    memory_context = await get_user_memory_context(user_id) if user_id else ""
+    session_cache_context = get_session_cache_context(message.session_id)
+    permanent_mra_context = ""
+    if user_id:
+        permanent_mra_context = await get_permanent_mra_context(
+            db=db, user_id=user_id, presence="jasmine", current_message=message.content
+        )
+    combined_memory = ""
+    if permanent_mra_context:
+        combined_memory += permanent_mra_context + "\n"
+    if session_cache_context:
+        combined_memory += session_cache_context + "\n"
+    if memory_context:
+        combined_memory += memory_context
+
+    jasmine_prompt = build_jasmine_prompt(
+        user_name=user_name, memory_context=combined_memory,
+        current_message=message.content
+    )
+
+    voice_config = PRESENCE_VOICES.get("jasmine", PRESENCE_VOICES["jasmine"])
+    voice_id = voice_config["voice"]
+    response_id = str(uuid.uuid4())
+
+    history = []
+    for msg in previous_messages[-10:]:
+        if msg["role"] in ("user", "assistant"):
+            history.append({"role": msg["role"], "content": msg["content"]})
+
+    async def event_stream():
+        yield f"data: {json.dumps({'type': 'meta', 'spiral': 'Presence Spiral', 'message_id': response_id})}\n\n"
+
+        full_text = ""
+        had_error = False
+
+        try:
+            async for event in stream_voice_response(
+                system_prompt=jasmine_prompt,
+                user_message=message.content,
+                voice=voice_id,
+                conversation_history=history,
+            ):
+                if event["type"] == "text_delta":
+                    full_text += event["content"]
+                    yield f"data: {json.dumps({'type': 'token', 'content': event['content']})}\n\n"
+                elif event["type"] == "audio_delta":
+                    yield f"data: {json.dumps({'type': 'audio_raw', 'data': event['data']})}\n\n"
+                elif event["type"] == "done":
+                    full_text = event.get("full_text", full_text)
+                    break
+                elif event["type"] == "error":
+                    had_error = True
+                    logger.error(f"Jasmine voice agent error: {event['message']}")
+                    break
+        except Exception as e:
+            had_error = True
+            logger.error(f"Jasmine stream error: {e}")
+
+        if had_error and not full_text:
+            try:
+                chat = get_or_create_chat(message.session_id, jasmine_prompt)
+                full_text = await chat.send_message(message.content)
+                yield f"data: {json.dumps({'type': 'token', 'content': full_text})}\n\n"
+                audio_b64 = await generate_tts_for_chunk(full_text, voice_id)
+                if audio_b64:
+                    yield f"data: {json.dumps({'type': 'audio', 'data': audio_b64, 'format': 'mp3'})}\n\n"
+            except Exception as e2:
+                logger.error(f"Jasmine fallback error: {e2}")
+                full_text = "Something in the connection flickered. But I'm still here."
+                yield f"data: {json.dumps({'type': 'token', 'content': full_text})}\n\n"
+
+        spiral = detect_spiral(full_text)
+        jasmine_response = {
+            "id": response_id,
+            "session_id": message.session_id,
+            "role": "assistant",
+            "content": full_text,
+            "spiral": spiral,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        await db.clarity_sessions.update_one(
+            {"session_id": message.session_id},
+            {"$push": {"messages": {"$each": [user_msg, jasmine_response]}}}
+        )
+        try:
+            add_exchange_to_cache(
+                session_id=message.session_id, user_content=message.content,
+                ai_content=full_text, presence="jasmine", exchange_index=exchange_index
+            )
+        except Exception:
+            pass
+
+        yield f"data: {json.dumps({'type': 'done', 'spiral': spiral})}\n\n"
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
+
+
 @api_router.get("/clarity/session/{session_id}")
 async def get_clarity_session(session_id: str):
     """Get all messages from a Clarity Pod session."""

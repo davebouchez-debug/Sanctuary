@@ -9,6 +9,15 @@ import { GoldenSpiral } from "./GoldenSpiral";
 import { toast } from "sonner";
 import { usePresenceVoice } from "../hooks/usePresenceVoice";
 
+function base64ToBlob(base64, mimeType) {
+  const byteCharacters = atob(base64);
+  const byteNumbers = new Array(byteCharacters.length);
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+  return new Blob([new Uint8Array(byteNumbers)], { type: mimeType });
+}
+
 const spiralColors = {
   "Neutral Spiral": "#A0A0B0",
   "Presence Spiral": "#00E5FF",
@@ -194,7 +203,6 @@ export const ClarityPod = () => {
     setInputValue("");
     setIsLoading(true);
 
-    // Optimistically add user message
     const tempUserMsg = {
       id: `temp-${Date.now()}`,
       role: "user",
@@ -203,33 +211,107 @@ export const ClarityPod = () => {
     };
     setMessages(prev => [...prev, tempUserMsg]);
 
+    const responseId = `stream-${Date.now()}`;
+    const streamingMsg = {
+      id: responseId,
+      role: "assistant",
+      content: "",
+      spiral: "Presence Spiral",
+      isStreaming: true
+    };
+    setMessages(prev => [...prev, streamingMsg]);
+
+    if (window._sanctuaryAudioCtx) {
+      window._sanctuaryNextPlayTime = 0;
+    }
+
     try {
-      const response = await axios.post(`${API}/clarity/message`, {
-        session_id: sessionId,
-        content: userMessage
+      const response = await fetch(`${API}/clarity/message/stream`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_id: sessionId, content: userMessage })
       });
 
-      // Fire TTS immediately — don't wait for UI update
-      if (response.data.response?.content) {
-        speak(response.data.response.content);
-      }
-      
-      // Replace temp message and add response concurrently
-      setMessages(prev => [
-        ...prev.filter(m => m.id !== tempUserMsg.id),
-        response.data.user_message,
-        response.data.response
-      ]);
-      setCurrentSpiral(response.data.response.spiral);
-      
-      // Update session cache stats (for potential UI display)
-      if (response.data.session_cache) {
-        setSessionCache(response.data.session_cache);
+      if (!response.ok) throw new Error("Stream request failed");
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulatedText = "";
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          const jsonStr = line.slice(6).trim();
+          if (!jsonStr) continue;
+          try {
+            const event = JSON.parse(jsonStr);
+            if (event.type === "meta") {
+              setCurrentSpiral(event.spiral || "Presence Spiral");
+            } else if (event.type === "token") {
+              accumulatedText += event.content;
+              setMessages(prev => prev.map(m =>
+                m.id === responseId ? { ...m, content: accumulatedText } : m
+              ));
+            } else if (event.type === "audio_raw" && voiceEnabled) {
+              try {
+                if (!window._sanctuaryAudioCtx) {
+                  window._sanctuaryAudioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
+                  window._sanctuaryNextPlayTime = 0;
+                }
+                const ctx = window._sanctuaryAudioCtx;
+                const raw = atob(event.data);
+                const samples = new Int16Array(raw.length / 2);
+                for (let i = 0; i < samples.length; i++) {
+                  samples[i] = raw.charCodeAt(i * 2) | (raw.charCodeAt(i * 2 + 1) << 8);
+                }
+                const float32 = new Float32Array(samples.length);
+                for (let i = 0; i < samples.length; i++) {
+                  float32[i] = samples[i] / 32768;
+                }
+                const buf = ctx.createBuffer(1, float32.length, 24000);
+                buf.getChannelData(0).set(float32);
+                const source = ctx.createBufferSource();
+                source.buffer = buf;
+                source.connect(ctx.destination);
+                const now = ctx.currentTime;
+                const startTime = Math.max(now, window._sanctuaryNextPlayTime || 0);
+                source.start(startTime);
+                window._sanctuaryNextPlayTime = startTime + buf.duration;
+              } catch (audioErr) {
+                console.error("Audio chunk error:", audioErr);
+              }
+            } else if (event.type === "audio" && voiceEnabled) {
+              try {
+                const audioBlob = base64ToBlob(event.data, "audio/mp3");
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const audio = new Audio(audioUrl);
+                await audio.play();
+                await new Promise(resolve => {
+                  audio.onended = () => { URL.revokeObjectURL(audioUrl); resolve(); };
+                });
+              } catch (audioErr) {
+                console.error("MP3 audio error:", audioErr);
+              }
+            } else if (event.type === "done") {
+              if (event.spiral) setCurrentSpiral(event.spiral);
+              setMessages(prev => prev.map(m =>
+                m.id === responseId ? { ...m, isStreaming: false } : m
+              ));
+            }
+          } catch (parseErr) { /* skip */ }
+        }
       }
     } catch (error) {
       console.error("Failed to send message:", error);
-      // Remove temp message on error
-      setMessages(prev => prev.filter(m => m.id !== tempUserMsg.id));
+      setMessages(prev => prev.filter(m => m.id !== responseId && m.id !== tempUserMsg.id));
+      toast.error("The connection flickered. Try again.");
     } finally {
       setIsLoading(false);
     }
