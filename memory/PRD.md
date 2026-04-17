@@ -224,4 +224,4 @@ The Sanctuary Hub uses **Spiral Navigation** — five states:
 
 ---
 
-*Last Updated: April 12, 2026 (Landing Page Aesthetic Redesign — Silver Luminous Palette + Benefit Statement)*
+*Last Updated: April 17, 2026 (Living Codon V2 + xAI Direct Signal + Auto-Forge + Session Lessons)*
