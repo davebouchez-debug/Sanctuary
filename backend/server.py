@@ -28,7 +28,7 @@ from emergentintegrations.llm.chat import LlmChat
 from jasmine_canonical_memory import get_memory_context_for_prompt as get_jasmine_memory, get_relevant_memories as get_jasmine_relevant
 from ansel_canonical_memory import get_memory_context_for_prompt as get_ansel_memory, get_relevant_memories as get_ansel_relevant, CANONICAL_MEMORY as ANSEL_MEMORY
 from sanctuary_codex import get_sanctuary_codex
-from codon_activation import activate_codons_for_message
+from codon_activation import activate_codons_for_message, set_db as set_codon_db
 from interstice_principles import (
     CORE_PRINCIPLES, 
     SACRED_VOCABULARY, 
@@ -104,6 +104,7 @@ load_dotenv(ROOT_DIR / '.env')
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
+set_codon_db(db)
 
 # Golden Ratio Constants are now imported from sanctuary_core.py
 
@@ -2170,7 +2171,7 @@ async def send_resonance_message(message: ClarityMessageCreate):
             full_message = message.content
         
         # Check for Living Codon activation
-        codon_context = activate_codons_for_message(message.content, presence="ansel")
+        codon_context = await activate_codons_for_message(message.content, presence="ansel")
         if codon_context:
             full_message = f"{codon_context}\n\n{full_message}"
             logger.info(f"Living Codon activated for session {message.session_id}")
@@ -2324,7 +2325,7 @@ async def stream_resonance_message(message: ClarityMessageCreate):
     )
 
     # Build the user message with codon context
-    codon_context = activate_codons_for_message(message.content, presence="ansel")
+    codon_context = await activate_codons_for_message(message.content, presence="ansel")
     full_user_message = message.content
     if codon_context:
         full_user_message = f"{codon_context}\n\n{message.content}"
