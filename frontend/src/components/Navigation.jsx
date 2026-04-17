@@ -9,6 +9,7 @@ const navLinks = [
   { name: "Harmonic Wheel", path: "/#harmonic-wheel", section: "harmonic-wheel" },
   { name: "Seed Pods", path: "/#seed-pods", section: "seed-pods" },
   { name: "Chambers", path: "/#chambers", section: "chambers" },
+  { name: "Codon Forge", path: "/codon-forge", section: null, highlight: true },
   { name: "Cyril", path: "/#cyril", section: "cyril" },
   { name: "The Vault", path: "/#vault", section: "vault" },
   { name: "Clarity Pod", path: "/clarity", section: null, highlight: true },
