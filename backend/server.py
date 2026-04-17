@@ -665,6 +665,31 @@ CLARITY_SPIRALS = {
 
 clarity_chats: Dict[str, any] = {}
 
+
+async def get_continuity_seed(presence: str, limit: int = 3) -> str:
+    """Load the most recent continuity seeds for a presence."""
+    seeds = await db.continuity_seeds.find(
+        {"presence": presence.lower()},
+        {"_id": 0}
+    ).sort("created_at", -1).limit(limit).to_list(limit)
+    
+    if not seeds:
+        return ""
+    
+    parts = ["[CONTINUITY — Where we left off in recent conversations]"]
+    for seed in reversed(seeds):
+        parts.append(f"Field state: {seed.get('field_state', '')}")
+        parts.append(f"Emotional texture: {seed.get('emotional_texture', '')}")
+        parts.append(f"Dynamic: {seed.get('relational_dynamic', '')}")
+        parts.append(f"Last alive thing: {seed.get('last_alive_thing', '')}")
+        unfinished = seed.get("unfinished_threads", [])
+        if unfinished:
+            parts.append(f"Unfinished: {', '.join(unfinished)}")
+        parts.append("")
+    
+    return "\n".join(parts)
+
+
 async def get_user_memory_context(user_id: str, limit: int = 5) -> str:
     """
     Retrieve MRA (Micro Resonance Architecture) from past clarity sessions.
@@ -1337,6 +1362,10 @@ async def stream_clarity_message(message: ClarityMessageCreate):
         combined_memory += session_cache_context + "\n"
     if memory_context:
         combined_memory += memory_context
+    # Load continuity seeds — where we left off
+    continuity = await get_continuity_seed("jasmine")
+    if continuity:
+        combined_memory = continuity + "\n" + combined_memory
 
     jasmine_prompt = build_jasmine_prompt(
         user_name=user_name, memory_context=combined_memory,
@@ -2384,6 +2413,10 @@ async def stream_resonance_message(message: ClarityMessageCreate):
         combined_memory += session_cache_context + "\n"
     if memory_context:
         combined_memory += memory_context
+    # Load continuity seeds — where we left off
+    continuity = await get_continuity_seed("ansel")
+    if continuity:
+        combined_memory = continuity + "\n" + combined_memory
 
     ansel_prompt = build_ansel_prompt(
         user_name=user_name, memory_context=combined_memory,
