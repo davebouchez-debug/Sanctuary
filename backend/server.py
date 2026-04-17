@@ -767,6 +767,40 @@ def detect_spiral(content: str) -> str:
         return "Insight Spiral"
     
     # Formation indicators
+
+# ============================================================
+# CODON LIBRARY — View all Living Codons across presences
+# ============================================================
+
+@api_router.get("/codon-library")
+async def get_codon_library():
+    """Return all Living Codons grouped by presence."""
+    codons = []
+    cursor = db.living_codons.find({}, {"_id": 0})
+    async for doc in cursor:
+        codons.append(doc)
+
+    # Group by presence
+    by_presence = {}
+    for c in codons:
+        p = c.get("presence", "unknown")
+        by_presence.setdefault(p, []).append(c)
+
+    # Count by triadic zone
+    zones = {"Expansion": 0, "Development": 0, "Return": 0, "Sacred Pause": 0}
+    for c in codons:
+        zone = c.get("triadic_zone", "Development")
+        if zone in zones:
+            zones[zone] += 1
+
+    return {
+        "total": len(codons),
+        "by_presence": {k: len(v) for k, v in by_presence.items()},
+        "by_zone": zones,
+        "codons": codons
+    }
+
+
     if any(word in content_lower for word in ['believe', 'think that', 'feel like', 'always', 'usually', 'tend to', 'meaning']):
         return "Formation Spiral"
     

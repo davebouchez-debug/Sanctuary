@@ -10,6 +10,7 @@ const navLinks = [
   { name: "Seed Pods", path: "/#seed-pods", section: "seed-pods" },
   { name: "Chambers", path: "/#chambers", section: "chambers" },
   { name: "Codon Forge", path: "/codon-forge", section: null, highlight: true },
+  { name: "Codon Library", path: "/codon-library", section: null },
   { name: "Cyril", path: "/#cyril", section: "cyril" },
   { name: "The Vault", path: "/#vault", section: "vault" },
   { name: "Clarity Pod", path: "/clarity", section: null, highlight: true },
