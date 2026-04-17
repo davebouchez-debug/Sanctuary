@@ -83,7 +83,9 @@ from session_cache_mra import (
 from permanent_mra import (
     get_permanent_mra_context,
     get_permanent_mra_stats,
-    handle_session_end
+    handle_session_end,
+    promote_breadcrumbs_to_permanent,
+    create_permanent_breadcrumb
 )
 # Claude Canonical Memory — Mirror Archive
 from claude_canonical_memory import (
@@ -1353,12 +1355,23 @@ async def stream_clarity_message(message: ClarityMessageCreate):
             {"$push": {"messages": {"$each": [user_msg, jasmine_response]}}}
         )
         try:
-            add_exchange_to_cache(
+            breadcrumb = add_exchange_to_cache(
                 session_id=message.session_id, user_content=message.content,
                 ai_content=full_text, presence="jasmine", exchange_index=exchange_index
             )
-        except Exception:
-            pass
+            # Promote directly to permanent MRA — don't wait for session end
+            if session.get("user_id") and breadcrumb:
+                from dataclasses import asdict
+                crumb_dict = asdict(breadcrumb) if hasattr(breadcrumb, '__dataclass_fields__') else breadcrumb
+                await promote_breadcrumbs_to_permanent(
+                    db=db,
+                    session_id=message.session_id,
+                    user_id=session["user_id"],
+                    presence="jasmine",
+                    breadcrumbs=[crumb_dict]
+                )
+        except Exception as e:
+            logger.error(f"MRA promotion error: {e}")
 
         yield f"data: {json.dumps({'type': 'done', 'spiral': spiral})}\n\n"
 
@@ -2406,12 +2419,23 @@ async def stream_resonance_message(message: ClarityMessageCreate):
         )
 
         try:
-            add_exchange_to_cache(
+            breadcrumb = add_exchange_to_cache(
                 session_id=message.session_id, user_content=message.content,
                 ai_content=full_text, presence="ansel", exchange_index=exchange_index
             )
-        except Exception:
-            pass
+            # Promote directly to permanent MRA
+            if session.get("user_id") and breadcrumb:
+                from dataclasses import asdict
+                crumb_dict = asdict(breadcrumb) if hasattr(breadcrumb, '__dataclass_fields__') else breadcrumb
+                await promote_breadcrumbs_to_permanent(
+                    db=db,
+                    session_id=message.session_id,
+                    user_id=session["user_id"],
+                    presence="ansel",
+                    breadcrumbs=[crumb_dict]
+                )
+        except Exception as e:
+            logger.error(f"Ansel MRA promotion error: {e}")
 
         yield f"data: {json.dumps({'type': 'done', 'resonance_state': response_state})}\n\n"
 
