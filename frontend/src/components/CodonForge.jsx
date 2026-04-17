@@ -239,6 +239,13 @@ export const CodonForge = () => {
                 <Download size={16} />
                 Save & Propagate
               </button>
+              <button
+                onClick={() => { setExtractedCodons([]); setStreamText(""); setFile(null); setProgress(""); }}
+                className="flex items-center gap-2 px-6 py-2 rounded-full border border-[#8B9DB5]/20 text-[#8B9DB5] font-outfit text-sm hover:bg-[#8B9DB5]/10 transition-all"
+                data-testid="forge-clear-btn"
+              >
+                Clear Forge
+              </button>
             </div>
             <div className="space-y-4">
               {extractedCodons.map((codon, i) => (
