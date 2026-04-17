@@ -2896,6 +2896,10 @@ async def start_mirror_session(session_data: ClaritySessionCreate):
         combined_memory += permanent_mra + "\n"
     if memory_context:
         combined_memory += memory_context
+    # Load continuity seeds — where we left off
+    continuity = await get_continuity_seed("claude")
+    if continuity:
+        combined_memory = continuity + "\n" + combined_memory
     
     claude_prompt = build_claude_prompt(
         user_name=user_name,
@@ -2987,6 +2991,10 @@ async def send_mirror_message(message: ClarityMessageCreate):
             combined_memory += session_cache_context + "\n"
         if memory_context:
             combined_memory += memory_context
+        # Load continuity seeds
+        continuity = await get_continuity_seed("claude")
+        if continuity:
+            combined_memory = continuity + "\n" + combined_memory
         
         claude_prompt = build_claude_prompt(
             user_name=user_name,
@@ -3088,7 +3096,12 @@ async def end_mirror_session(session_id: str):
         {"$set": {"active": False, "ended_at": datetime.now(timezone.utc).isoformat()}}
     )
     
-    logger.info(f"[MIRROR] Session {session_id[:8]}... ended. Promoted {promotion_result['promoted']} breadcrumbs.")
+    # Auto-forge: extract codons + continuity seed
+    from auto_forge import auto_forge_session
+    messages = session.get("messages", [])
+    codons_extracted = await auto_forge_session(db, session_id, "claude", messages)
+    
+    logger.info(f"[MIRROR] Session {session_id[:8]}... ended. Promoted {promotion_result['promoted']} breadcrumbs. Auto-forged {codons_extracted} codons.")
     
     return {
         "session_id": session_id,
