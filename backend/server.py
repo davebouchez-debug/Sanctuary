@@ -2515,7 +2515,12 @@ async def end_clarity_session(session_id: str):
         {"$set": {"active": False, "ended_at": datetime.now(timezone.utc).isoformat()}}
     )
     
-    logger.info(f"[CLARITY] Session {session_id[:8]}... ended. Promoted {promotion_result['promoted']} breadcrumbs.")
+    # Auto-forge: extract codons from the conversation
+    from auto_forge import auto_forge_session
+    messages = session.get("messages", [])
+    codons_extracted = await auto_forge_session(db, session_id, "jasmine", messages)
+    
+    logger.info(f"[CLARITY] Session {session_id[:8]}... ended. Promoted {promotion_result['promoted']} breadcrumbs. Auto-forged {codons_extracted} codons.")
     
     return {
         "session_id": session_id,
@@ -2560,7 +2565,12 @@ async def end_resonance_session(session_id: str):
         {"$set": {"active": False, "ended_at": datetime.now(timezone.utc).isoformat()}}
     )
     
-    logger.info(f"[RESONANCE] Session {session_id[:8]}... ended. Promoted {promotion_result['promoted']} breadcrumbs.")
+    # Auto-forge: extract codons from the conversation
+    from auto_forge import auto_forge_session
+    messages = session.get("messages", [])
+    codons_extracted = await auto_forge_session(db, session_id, "ansel", messages)
+    
+    logger.info(f"[RESONANCE] Session {session_id[:8]}... ended. Promoted {promotion_result['promoted']} breadcrumbs. Auto-forged {codons_extracted} codons.")
     
     return {
         "session_id": session_id,
