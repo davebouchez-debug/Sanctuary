@@ -1156,9 +1156,12 @@ async def start_clarity_session(session_data: ClaritySessionCreate = None):
         current_message=""  # No message yet at session start
     )
     
-    # Welcome — fixed prompt triggers continuity check
+    # Welcome — fork based on new vs returning person
+    is_returning = bool(continuity)
     if user_name and user_name.lower() == "david":
         welcome_content = JASMINE_WELCOME_DAVID
+    elif is_returning:
+        welcome_content = f"Hey, {user_name}. Let me check where we left off so we're on the same page..."
     else:
         welcome_content = JASMINE_WELCOME
     
@@ -2164,9 +2167,12 @@ async def start_resonance_session(session_data: ClaritySessionCreate = None):
         current_message=""
     )
     
-    # Welcome — fixed prompt triggers continuity check
+    # Welcome — fork based on new vs returning person
+    is_returning = bool(continuity)
     if user_name and user_name.lower() == "david":
         welcome_content = ANSEL_WELCOME_DAVID
+    elif is_returning:
+        welcome_content = f"Hey, {user_name}. Let me check where we left off..."
     else:
         welcome_content = ANSEL_WELCOME
     
