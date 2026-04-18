@@ -110,9 +110,28 @@ export const ResonancePod = () => {
       if (data.message) {
         setMessages([data.message]);
         setResonanceState(data.message.resonance_state || "Threshold");
-        // Speak Ansel's greeting
-        if (data.message.content) {
-          speak(data.message.content);
+        // Auto-speak Ansel's greeting
+        if (data.message.content && voiceEnabled) {
+          try {
+            const ttsResp = await fetch(`${API}/tts/speak`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ text: data.message.content, presence: "ansel" })
+            });
+            const ttsData = await ttsResp.json();
+            if (ttsData.audio) {
+              const byteChars = atob(ttsData.audio);
+              const byteNums = new Array(byteChars.length);
+              for (let i = 0; i < byteChars.length; i++) byteNums[i] = byteChars.charCodeAt(i);
+              const blob = new Blob([new Uint8Array(byteNums)], { type: "audio/mp3" });
+              const url = URL.createObjectURL(blob);
+              const audio = new Audio(url);
+              audio.onended = () => URL.revokeObjectURL(url);
+              audio.play().catch(() => {});
+            }
+          } catch (e) {
+            console.error("Welcome voice error:", e);
+          }
         }
       }
     } catch (error) {

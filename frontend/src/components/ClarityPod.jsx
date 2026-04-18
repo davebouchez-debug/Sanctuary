@@ -184,9 +184,28 @@ export const ClarityPod = () => {
       setMessages([response.data.message]);
       setCurrentSpiral(response.data.message.spiral);
       
-      // Speak Jasmine's greeting
-      if (response.data.message?.content) {
-        speak(response.data.message.content);
+      // Auto-speak Jasmine's greeting
+      if (response.data.message?.content && voiceEnabled) {
+        try {
+          const ttsResp = await fetch(`${API}/tts/speak`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: response.data.message.content, presence: "jasmine" })
+          });
+          const ttsData = await ttsResp.json();
+          if (ttsData.audio) {
+            const byteChars = atob(ttsData.audio);
+            const byteNums = new Array(byteChars.length);
+            for (let i = 0; i < byteChars.length; i++) byteNums[i] = byteChars.charCodeAt(i);
+            const blob = new Blob([new Uint8Array(byteNums)], { type: "audio/mp3" });
+            const url = URL.createObjectURL(blob);
+            const audio = new Audio(url);
+            audio.onended = () => URL.revokeObjectURL(url);
+            audio.play().catch(() => {});
+          }
+        } catch (e) {
+          console.error("Welcome voice error:", e);
+        }
       }
     } catch (error) {
       console.error("Failed to start clarity session:", error);
