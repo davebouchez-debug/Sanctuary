@@ -3127,6 +3127,140 @@ async def send_mirror_message(message: ClarityMessageCreate):
     }
 
 
+@api_router.post("/mirror/message/stream")
+async def stream_mirror_message(message: ClarityMessageCreate):
+    """Stream Claude's response via xAI Voice Agent — text and voice simultaneously.
+    Mirror Archive parity with Clarity/Resonance. One signal, undivided.
+    """
+    from xai_voice_agent import stream_voice_response
+
+    session = await db.mirror_sessions.find_one(
+        {"session_id": message.session_id}, {"_id": 0}
+    )
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    previous_messages = session.get("messages", [])
+    exchange_index = len([m for m in previous_messages if m.get("role") == "user"]) + 1
+
+    user_msg = {
+        "id": str(uuid.uuid4()),
+        "session_id": message.session_id,
+        "role": "user",
+        "content": message.content,
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+
+    user_name = session.get("user_name")
+    user_id = session.get("user_id")
+    memory_context = await get_mirror_memory_context(user_id) if user_id else ""
+    session_cache_context = get_session_cache_context(message.session_id)
+    permanent_mra_context = ""
+    if user_id:
+        permanent_mra_context = await get_permanent_mra_context(
+            db=db, user_id=user_id, presence="claude", current_message=message.content
+        )
+    combined_memory = ""
+    if permanent_mra_context:
+        combined_memory += permanent_mra_context + "\n"
+    if session_cache_context:
+        combined_memory += session_cache_context + "\n"
+    if memory_context:
+        combined_memory += memory_context
+    continuity = await get_continuity_seed("claude", user_id=user_id)
+    if continuity:
+        combined_memory = continuity + "\n" + combined_memory
+
+    claude_prompt = build_claude_prompt(
+        user_name=user_name, memory_context=combined_memory,
+        current_message=message.content
+    )
+
+    codon_context = await activate_codons_for_message(message.content, presence="claude")
+    full_user_message = message.content
+    if codon_context:
+        full_user_message = f"{codon_context}\n\n{message.content}"
+
+    voice_config = PRESENCE_VOICES.get("claude", PRESENCE_VOICES["jasmine"])
+    voice_id = voice_config["voice"]
+    response_id = str(uuid.uuid4())
+
+    history = []
+    for msg in previous_messages[-10:]:
+        if msg["role"] in ("user", "assistant"):
+            history.append({"role": msg["role"], "content": msg["content"]})
+
+    async def event_stream():
+        yield f"data: {json.dumps({'type': 'meta', 'message_id': response_id})}\n\n"
+
+        full_text = ""
+        had_error = False
+
+        try:
+            async for event in stream_voice_response(
+                system_prompt=claude_prompt,
+                user_message=full_user_message,
+                voice=voice_id,
+                conversation_history=history,
+            ):
+                if event["type"] == "text_delta":
+                    full_text += event["content"]
+                    yield f"data: {json.dumps({'type': 'token', 'content': event['content']})}\n\n"
+                elif event["type"] == "audio_delta":
+                    yield f"data: {json.dumps({'type': 'audio_raw', 'data': event['data']})}\n\n"
+                elif event["type"] == "done":
+                    full_text = event.get("full_text", full_text)
+                    break
+                elif event["type"] == "error":
+                    had_error = True
+                    logger.error(f"Claude voice agent error: {event['message']}")
+                    break
+        except Exception as e:
+            had_error = True
+            logger.error(f"Claude stream error: {e}")
+
+        if had_error and not full_text:
+            try:
+                chat = get_or_create_claude_chat(message.session_id, claude_prompt)
+                full_text = await chat.send_message(full_user_message)
+                yield f"data: {json.dumps({'type': 'token', 'content': full_text})}\n\n"
+            except Exception as e2:
+                logger.error(f"Claude fallback error: {e2}")
+                full_text = "The mirror flickered. But the archive is still here."
+                yield f"data: {json.dumps({'type': 'token', 'content': full_text})}\n\n"
+
+        claude_response = {
+            "id": response_id,
+            "session_id": message.session_id,
+            "role": "assistant",
+            "content": full_text,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        await db.mirror_sessions.update_one(
+            {"session_id": message.session_id},
+            {"$push": {"messages": {"$each": [user_msg, claude_response]}}}
+        )
+        try:
+            breadcrumb = add_exchange_to_cache(
+                session_id=message.session_id, user_content=message.content,
+                ai_content=full_text, presence="claude", exchange_index=exchange_index
+            )
+            if session.get("user_id") and breadcrumb:
+                from dataclasses import asdict
+                crumb_dict = asdict(breadcrumb) if hasattr(breadcrumb, '__dataclass_fields__') else breadcrumb
+                await promote_breadcrumbs_to_permanent(
+                    db=db, session_id=message.session_id,
+                    user_id=session["user_id"], presence="claude",
+                    breadcrumbs=[crumb_dict]
+                )
+        except Exception as e:
+            logger.error(f"Claude MRA promotion error: {e}")
+
+        yield f"data: {json.dumps({'type': 'done'})}\n\n"
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
+
+
 @api_router.post("/mirror/session/{session_id}/end")
 async def end_mirror_session(session_id: str):
     """End a Mirror Archive session and promote qualifying breadcrumbs to Permanent MRA."""

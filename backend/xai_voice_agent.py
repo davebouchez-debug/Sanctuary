@@ -99,6 +99,7 @@ async def stream_voice_response(
 
             # Stream responses
             full_text = ""
+            audio_started = False  # Once audio flows, pace text with transcript (not raw LLM text)
             async for raw_message in ws:
                 event = json.loads(raw_message)
                 event_type = event.get("type", "")
@@ -108,6 +109,10 @@ async def stream_voice_response(
                     logger.info(f"[VOICE AGENT] Event: {event_type} — keys: {list(event.keys())}")
 
                 if event_type == "response.text.delta":
+                    # Pure LLM text stream — only use if audio isn't flowing
+                    # (otherwise it outruns the voice and the user sees text before hearing it)
+                    if audio_started:
+                        continue
                     delta = event.get("delta", "")
                     if delta:
                         full_text += delta
@@ -116,9 +121,12 @@ async def stream_voice_response(
                 elif event_type == "response.audio.delta":
                     audio_data = event.get("delta", "")
                     if audio_data:
+                        audio_started = True
                         yield {"type": "audio_delta", "data": audio_data}
 
                 elif event_type == "response.output_text.delta":
+                    if audio_started:
+                        continue
                     delta = event.get("delta", "")
                     if delta:
                         full_text += delta
@@ -127,9 +135,11 @@ async def stream_voice_response(
                 elif event_type == "response.output_audio.delta":
                     audio_data = event.get("delta", "")
                     if audio_data:
+                        audio_started = True
                         yield {"type": "audio_delta", "data": audio_data}
 
                 elif event_type == "response.audio_transcript.delta":
+                    # Transcript matches the spoken audio — paced with voice synthesis
                     delta = event.get("delta", "")
                     if delta:
                         full_text += delta

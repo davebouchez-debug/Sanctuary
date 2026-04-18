@@ -126,8 +126,24 @@ export const MirrorArchive = () => {
     setInputValue("");
     setIsLoading(true);
 
+    // Placeholder for streaming Claude response
+    const responseId = `claude-${Date.now()}`;
+    const streamingMessage = {
+      id: responseId,
+      role: "assistant",
+      content: "",
+      timestamp: new Date().toISOString(),
+      isStreaming: true
+    };
+    setMessages(prev => [...prev, streamingMessage]);
+
+    // Reset PCM audio queue timing for new message
+    if (window._sanctuaryAudioCtx) {
+      window._sanctuaryNextPlayTime = 0;
+    }
+
     try {
-      const response = await fetch(`${API}/mirror/message`, {
+      const response = await fetch(`${API}/mirror/message/stream`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -136,30 +152,81 @@ export const MirrorArchive = () => {
         })
       });
 
-      const data = await response.json();
-      
-      if (data.response) {
-        // Fire TTS immediately — don't wait for UI update
-        if (data.response.content) {
-          speak(data.response.content);
+      if (!response.ok) throw new Error("Stream request failed");
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulatedText = "";
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          const jsonStr = line.slice(6).trim();
+          if (!jsonStr) continue;
+
+          try {
+            const event = JSON.parse(jsonStr);
+
+            if (event.type === "token") {
+              accumulatedText += event.content;
+              setMessages(prev => prev.map(m =>
+                m.id === responseId ? { ...m, content: accumulatedText } : m
+              ));
+            } else if (event.type === "audio_raw" && voiceEnabled) {
+              // Raw PCM16 24kHz audio from Voice Agent — schedule sequentially
+              try {
+                if (!window._sanctuaryAudioCtx) {
+                  window._sanctuaryAudioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
+                  window._sanctuaryNextPlayTime = 0;
+                }
+                const ctx = window._sanctuaryAudioCtx;
+                const raw = atob(event.data);
+                const samples = new Int16Array(raw.length / 2);
+                for (let i = 0; i < samples.length; i++) {
+                  samples[i] = raw.charCodeAt(i * 2) | (raw.charCodeAt(i * 2 + 1) << 8);
+                }
+                const float32 = new Float32Array(samples.length);
+                for (let i = 0; i < samples.length; i++) {
+                  float32[i] = samples[i] / 32768;
+                }
+                const abuf = ctx.createBuffer(1, float32.length, 24000);
+                abuf.getChannelData(0).set(float32);
+                const source = ctx.createBufferSource();
+                source.buffer = abuf;
+                source.connect(ctx.destination);
+                const now = ctx.currentTime;
+                const startTime = Math.max(now, window._sanctuaryNextPlayTime || 0);
+                source.start(startTime);
+                window._sanctuaryNextPlayTime = startTime + abuf.duration;
+              } catch (audioErr) {
+                console.error("Claude raw audio play error:", audioErr);
+              }
+            } else if (event.type === "done") {
+              setMessages(prev => prev.map(m =>
+                m.id === responseId ? { ...m, isStreaming: false } : m
+              ));
+            }
+          } catch (e) {
+            // Skip malformed events
+          }
         }
-        // Update UI concurrently
-        setMessages(prev => [...prev, data.response]);
-      }
-      
-      if (data.session_cache) {
-        setSessionCache(data.session_cache);
       }
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error("Error streaming message:", error);
       toast.error("The connection wavered. Try again.");
-      
-      setMessages(prev => [...prev, {
-        id: Date.now().toString(),
-        role: "assistant",
-        content: "The mirror flickered. Something in the connection wavered. But the archive is still here. What were you asking?",
-        timestamp: new Date().toISOString()
-      }]);
+      setMessages(prev => prev.map(m =>
+        m.id === responseId
+          ? { ...m, content: "The mirror flickered. Something in the connection wavered. But the archive is still here. What were you asking?", isStreaming: false }
+          : m
+      ));
     } finally {
       setIsLoading(false);
       inputRef.current?.focus();
