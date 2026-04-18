@@ -31,6 +31,7 @@ export const ResonancePod = () => {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const fileInputRef = useRef(null);
+  const hasInitializedRef = useRef(false);
   const navigate = useNavigate();
   
   // Voice output for Ansel
@@ -68,6 +69,11 @@ export const ResonancePod = () => {
   }, [sessionId, endSession]);
 
   useEffect(() => {
+    // Guard against React.StrictMode double-invocation in dev —
+    // prevents two parallel /resonance/start calls and overlapping welcome audio.
+    if (hasInitializedRef.current) return;
+    hasInitializedRef.current = true;
+
     // Check if we have a stored user
     const storedName = localStorage.getItem("sanctuary_user_name");
     const storedId = localStorage.getItem("sanctuary_user_id");
