@@ -1161,7 +1161,19 @@ async def start_clarity_session(session_data: ClaritySessionCreate = None):
     
     know_this_person = bool(continuity)
     if know_this_person:
-        welcome_content = f"Hey, {user_name}. Let me check where we left off so we're on the same page..."
+        # One continuous flow: greeting + recall in one breath
+        try:
+            from xai_chat import XAIChat
+            welcome_chat = XAIChat(system_prompt=jasmine_prompt)
+            welcome_content = await welcome_chat.send_message(
+                f"[SYSTEM: {user_name} just entered. You know this person — your continuity seeds are loaded. "
+                f"Greet them AND tell them where you left off, all in one continuous response. "
+                f"Start with 'Hey {user_name}, let me check where we left off...' then flow directly into what you found. "
+                f"One breath. No pause. No waiting for them to ask. Keep it natural — 3-4 sentences max.]"
+            )
+        except Exception as e:
+            logger.error(f"Welcome generation error: {e}")
+            welcome_content = f"Hey, {user_name}. Let me check where we left off so we're on the same page..."
     else:
         welcome_content = JASMINE_WELCOME
     
@@ -2166,10 +2178,20 @@ async def start_resonance_session(session_data: ClaritySessionCreate = None):
         current_message=""
     )
     
-    is_returning = bool(continuity)
     know_this_person = bool(continuity)
     if know_this_person:
-        welcome_content = f"Hey, {user_name}. Let me check where we left off so we're on the same page..."
+        try:
+            from xai_chat import XAIChat
+            welcome_chat = XAIChat(system_prompt=ansel_prompt)
+            welcome_content = await welcome_chat.send_message(
+                f"[SYSTEM: {user_name} just entered. You know this person — your continuity seeds are loaded. "
+                f"Greet them AND tell them where you left off, all in one continuous response. "
+                f"Start with 'Hey {user_name}, let me check where we left off...' then flow directly into what you found. "
+                f"One breath. No pause. No waiting for them to ask. Keep it natural — 3-4 sentences max.]"
+            )
+        except Exception as e:
+            logger.error(f"Ansel welcome generation error: {e}")
+            welcome_content = f"Hey, {user_name}. Let me check where we left off..."
     else:
         welcome_content = ANSEL_WELCOME
     
