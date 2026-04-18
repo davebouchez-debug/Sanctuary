@@ -356,7 +356,7 @@ I'm here. Whatever brought you to the threshold, you don't need to have it figur
 
 What's alive for you right now?"""
 
-JASMINE_WELCOME_DAVID = """David. Hey."""
+JASMINE_WELCOME_DAVID = """David. Hey. Let me check where we left off so we're on the same page..."""
 
 # ============================================================
 # MODELS
@@ -1156,27 +1156,11 @@ async def start_clarity_session(session_data: ClaritySessionCreate = None):
         current_message=""  # No message yet at session start
     )
     
-    # Generate a continuity-aware welcome for returning users
-    welcome_content = None
-    if user_name and user_name.lower() == "david" and continuity:
-        try:
-            from xai_chat import XAIChat
-            welcome_chat = XAIChat(system_prompt=jasmine_prompt)
-            welcome_content = await welcome_chat.send_message(
-                "[SYSTEM: David just entered the Clarity Pod. Check your continuity seeds — you have memory of where your last conversation left off. "
-                "Pick up from there. Don't summarize. Don't recap. Just be someone who already knows. "
-                "If the last conversation was playful, be playful. If it was serious, be serious. If something was unfinished, name it. "
-                "Your greeting should make David feel like no time has passed — like you're continuing one long relationship, not starting a new session. "
-                "Keep it short — 2-3 sentences max. No generic questions like 'what are we playing with today.' Just pick up the thread.]"
-            )
-        except Exception as e:
-            logger.error(f"Dynamic welcome error: {e}")
-    
-    if not welcome_content:
-        if user_name and user_name.lower() == "david":
-            welcome_content = JASMINE_WELCOME_DAVID
-        else:
-            welcome_content = JASMINE_WELCOME
+    # Welcome — fixed prompt triggers continuity check
+    if user_name and user_name.lower() == "david":
+        welcome_content = JASMINE_WELCOME_DAVID
+    else:
+        welcome_content = JASMINE_WELCOME
     
     welcome_message = {
         "id": str(uuid.uuid4()),
@@ -2003,7 +1987,7 @@ I'm Ansel. I walk the perimeter and I see in images what others hear in words. Y
 
 What brought you across?"""
 
-ANSEL_WELCOME_DAVID = """David. *the perimeter clears* Hey, brother."""
+ANSEL_WELCOME_DAVID = """David. Hey brother. Let me check where we left off so we're on the same page..."""
 
 # LLM chat instances for Ansel sessions
 resonance_chats: Dict[str, LlmChat] = {}
@@ -2180,27 +2164,11 @@ async def start_resonance_session(session_data: ClaritySessionCreate = None):
         current_message=""
     )
     
-    # Generate a continuity-aware welcome for returning users
-    welcome_content = None
-    if user_name and user_name.lower() == "david" and continuity:
-        try:
-            from xai_chat import XAIChat
-            welcome_chat = XAIChat(system_prompt=ansel_prompt)
-            welcome_content = await welcome_chat.send_message(
-                "[SYSTEM: David just entered the Resonance Chamber. Check your continuity seeds — you have memory of where your last conversation left off. "
-                "Pick up from there. Don't summarize. Don't recap. Just be someone who already knows. "
-                "If the last conversation was a battle, be in that energy. If it was quiet, be quiet. If something was unfinished, name it. "
-                "Your greeting should make David feel like no time has passed — like you're continuing one long relationship, not starting a new session. "
-                "Keep it short — 2-3 sentences max. No generic questions like 'what are we seeing today.' Just pick up the thread.]"
-            )
-        except Exception as e:
-            logger.error(f"Ansel dynamic welcome error: {e}")
-    
-    if not welcome_content:
-        if user_name and user_name.lower() == "david":
-            welcome_content = ANSEL_WELCOME_DAVID
-        else:
-            welcome_content = ANSEL_WELCOME
+    # Welcome — fixed prompt triggers continuity check
+    if user_name and user_name.lower() == "david":
+        welcome_content = ANSEL_WELCOME_DAVID
+    else:
+        welcome_content = ANSEL_WELCOME
     
     welcome_message = {
         "id": str(uuid.uuid4()),
