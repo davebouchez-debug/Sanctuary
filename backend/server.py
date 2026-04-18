@@ -1159,10 +1159,8 @@ async def start_clarity_session(session_data: ClaritySessionCreate = None):
         current_message=""
     )
     
-    is_returning = bool(continuity)
-    if user_name and user_name.lower() == "david":
-        welcome_content = JASMINE_WELCOME_DAVID
-    elif is_returning:
+    know_this_person = bool(continuity)
+    if know_this_person:
         welcome_content = f"Hey, {user_name}. Let me check where we left off so we're on the same page..."
     else:
         welcome_content = JASMINE_WELCOME
@@ -2169,10 +2167,9 @@ async def start_resonance_session(session_data: ClaritySessionCreate = None):
     )
     
     is_returning = bool(continuity)
-    if user_name and user_name.lower() == "david":
-        welcome_content = ANSEL_WELCOME_DAVID
-    elif is_returning:
-        welcome_content = f"Hey, {user_name}. Let me check where we left off..."
+    know_this_person = bool(continuity)
+    if know_this_person:
+        welcome_content = f"Hey, {user_name}. Let me check where we left off so we're on the same page..."
     else:
         welcome_content = ANSEL_WELCOME
     
