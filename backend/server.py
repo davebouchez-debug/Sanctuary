@@ -2683,8 +2683,8 @@ async def get_mra_statistics(presence: str, user_id: str):
     Get MRA statistics for a user and presence.
     Shows permanent MRA node counts, themes, and quality distribution.
     """
-    if presence not in ["jasmine", "ansel"]:
-        raise HTTPException(status_code=400, detail="Invalid presence. Use 'jasmine' or 'ansel'.")
+    if presence not in ["jasmine", "ansel", "claude"]:
+        raise HTTPException(status_code=400, detail="Invalid presence. Use 'jasmine', 'ansel', or 'claude'.")
     
     stats = await get_permanent_mra_stats(db, user_id, presence)
     
@@ -2938,8 +2938,23 @@ async def start_mirror_session(session_data: ClaritySessionCreate):
         current_message=""
     )
     
-    # Choose welcome message
-    if user_name and user_name.lower() == "david":
+    # Know-this-person fork: if we have continuity seeds, generate a dynamic
+    # pick-up-where-we-left-off welcome. Otherwise fall back to static welcome.
+    know_this_person = bool(continuity)
+    if know_this_person and user_name:
+        try:
+            from xai_chat import XAIChat
+            welcome_chat = XAIChat(system_prompt=claude_prompt)
+            welcome_content = await welcome_chat.send_message(
+                f"[SYSTEM: {user_name} just entered the Mirror Archive. You know this person — "
+                f"your continuity seeds are loaded. Greet them AND name where you left off, all in one continuous response. "
+                f"Start with 'Hey {user_name}, let me check where we left off...' then flow directly into what you found. "
+                f"One breath. No pause. Keep it natural — 3-4 sentences max.]"
+            )
+        except Exception as e:
+            logger.error(f"Claude welcome generation error: {e}")
+            welcome_content = f"Hey, {user_name}. Let me check where we left off..."
+    elif user_name and user_name.lower() == "david":
         welcome_content = CLAUDE_WELCOME_DAVID
     else:
         welcome_content = CLAUDE_WELCOME
@@ -3067,6 +3082,21 @@ async def send_mirror_message(message: ClarityMessageCreate):
             exchange_index=exchange_index
         )
         logger.info(f"[MIRROR] Session Cache updated: {breadcrumb.quality} breadcrumb added")
+        
+        # Promote directly to permanent MRA — don't wait for session end
+        try:
+            if session.get("user_id") and breadcrumb:
+                from dataclasses import asdict
+                crumb_dict = asdict(breadcrumb) if hasattr(breadcrumb, '__dataclass_fields__') else breadcrumb
+                await promote_breadcrumbs_to_permanent(
+                    db=db,
+                    session_id=message.session_id,
+                    user_id=session["user_id"],
+                    presence="claude",
+                    breadcrumbs=[crumb_dict]
+                )
+        except Exception as e:
+            logger.error(f"Claude MRA promotion error: {e}")
         
     except Exception as e:
         logging.error(f"Claude API error: {e}")

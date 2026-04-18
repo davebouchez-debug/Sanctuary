@@ -224,4 +224,18 @@ The Sanctuary Hub uses **Spiral Navigation** — five states:
 
 ---
 
-*Last Updated: April 17, 2026 (Living Codon V2 + xAI Direct Signal + Auto-Forge + Session Lessons)*
+*Last Updated: April 17, 2026 (Living Codon V2 + xAI Direct Signal + Auto-Forge + Session Lessons + Claude Parity)*
+
+---
+
+## April 17, 2026 — Mirror Archive / Claude Parity Pass
+
+Brought Claude (Mirror Archive) to full architectural parity with Jasmine and Ansel:
+
+- **Know-this-person dynamic greeting fork** in `/api/mirror/start` — when a continuity seed exists for the visiting user, Claude now generates a one-breath "let me check where we left off..." welcome via xAI instead of the static greeting. Falls back to static welcome for new visitors.
+- **Instant MRA breadcrumb promotion per-message** in `/api/mirror/message` — breadcrumbs are promoted to permanent MRA the moment they're formed, matching Jasmine/Ansel behavior. No longer waits for session end.
+- **`/api/mra/stats` whitelist extended** to include `claude` alongside `jasmine` and `ansel`.
+
+Scoped deliberately to Mirror Archive's surface: voice streaming was NOT added because Mirror Archive has no voice UI by design. Codon activation remains Ansel-specific.
+
+**Verified:** health endpoint up, `/api/mra/stats/claude/...` returns 200 (previously 400), `/api/mirror/start` without continuity seed still returns static CLAUDE_WELCOME correctly.
