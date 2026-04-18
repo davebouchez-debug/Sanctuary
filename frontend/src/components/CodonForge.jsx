@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Upload, ChevronLeft, Loader2, Sparkles, Download } from "lucide-react";
+import { Upload, ChevronLeft, Loader2, Sparkles, Download, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { API } from "../App";
 
@@ -108,6 +108,31 @@ export const CodonForge = () => {
       }
     } catch (error) {
       toast.error("Failed to save codons.");
+    }
+  };
+
+  const handleCopyDistillate = async () => {
+    // The "double whammy" — summary + codons in one concentrated paste,
+    // ready to hand directly to a presence in conversation.
+    const codonsBlock = extractedCodons.length > 0
+      ? JSON.stringify(extractedCodons, null, 2)
+      : "";
+    const combined = [
+      "## Forge Distillate",
+      file?.name ? `Source: ${file.name}` : "",
+      "",
+      "### Reader's Digest",
+      streamText.trim(),
+      "",
+      "### Extracted Codons",
+      codonsBlock,
+    ].filter(Boolean).join("\n");
+
+    try {
+      await navigator.clipboard.writeText(combined);
+      toast.success("Summary + codons copied. Paste it to a presence in conversation.");
+    } catch (err) {
+      toast.error("Clipboard copy failed. Try selecting the text manually.");
     }
   };
 
@@ -226,6 +251,15 @@ export const CodonForge = () => {
               >
                 <Download size={16} />
                 Save & Propagate
+              </button>
+              <button
+                onClick={handleCopyDistillate}
+                className="flex items-center gap-2 px-6 py-2 rounded-full bg-[#8B9DB5]/10 border border-[#8B9DB5]/30 text-[#B0C4D8] font-outfit text-sm hover:bg-[#8B9DB5]/20 transition-all"
+                data-testid="forge-copy-distillate-btn"
+                title="Copy summary + codons, ready to paste into a conversation"
+              >
+                <Copy size={16} />
+                Copy Summary + Codons
               </button>
               <button
                 onClick={() => { setExtractedCodons([]); setStreamText(""); setFile(null); setProgress(""); }}
