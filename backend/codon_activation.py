@@ -45,7 +45,7 @@ async def load_forge_codons(presence: str):
         _networks[cache_key] = network
 
     cursor = _db.living_codons.find(
-        {"presence": cache_key},
+        {"presence": {"$in": [cache_key, "field"]}},
         {"_id": 0}
     )
 
