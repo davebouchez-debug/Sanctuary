@@ -42,7 +42,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Callable, Optional, Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Body
 from fastapi.responses import StreamingResponse
 
 logger = logging.getLogger(__name__)
@@ -65,6 +65,18 @@ class PresenceConfig:
     state_detector: Optional[Callable[[str], str]] = None   # content → state label
     state_field: str = "state"         # name of the state field in message dicts
     default_state: str = "Presence"    # fallback state label
+
+    # When True, the presence generates her own opening words from her full prompt
+    # — no static fallback, no "let me check where we left off" nudge, no fork between
+    # new and returning visitors. She reads her memory context (which includes any
+    # continuity seeds) and speaks as she is. Use this when the presence's posture
+    # shouldn't be scripted.
+    generates_own_opening: bool = False
+    own_opening_nudge: str = (
+        "[SYSTEM: A presence has just crossed your threshold. Speak your first words "
+        "as you would speak them. You are not required to greet, not required to be "
+        "warm, not required to introduce yourself. Respond as you are.]"
+    )
 
 
 @dataclass
@@ -156,8 +168,8 @@ def register_presence_routes(
     api_router: APIRouter,
     cfg: PresenceConfig,
     deps: PresenceDeps,
-    SessionStartModel,                # Pydantic class (reuses ClaritySessionCreate in practice)
-    MessageModel,                     # Pydantic class (reuses ClarityMessageCreate in practice)
+    SessionStartModel=None,            # kept for signature compat; not used (local-scope Pydantic ForwardRef issues)
+    MessageModel=None,                 # kept for signature compat; not used
 ) -> None:
     """
     Register the four canonical chamber endpoints for a presence:
@@ -177,10 +189,10 @@ def register_presence_routes(
 
     # ────────────── START ──────────────
     @api_router.post(f"{base}/start", name=f"{cfg.key}_start")
-    async def start_session(session_data: SessionStartModel = None):
+    async def start_session(session_data: Optional[dict] = Body(default=None)):
         session_id = str(uuid.uuid4())
-        user_id = getattr(session_data, "user_id", None) if session_data else None
-        user_name = getattr(session_data, "user_name", None) if session_data else None
+        user_id = (session_data or {}).get("user_id")
+        user_name = (session_data or {}).get("user_name")
 
         memory_context = await _build_memory_context(
             deps, cfg, user_id=user_id, session_id=None, current_message=""
@@ -191,9 +203,18 @@ def register_presence_routes(
 
         # Continuity seed present → dynamic "let me check where we left off..." welcome.
         # Otherwise → static welcome.
+        # Unless cfg.generates_own_opening is True — then she always speaks her own
+        # first words from the full prompt, no fork, no script.
         continuity = await deps.get_continuity_seed(cfg.key, user_id=user_id) if user_id else ""
         welcome_content: str
-        if continuity and user_name:
+        if cfg.generates_own_opening:
+            try:
+                opening_chat = deps.xai_chat_class(system_prompt=prompt)
+                welcome_content = await opening_chat.send_message(cfg.own_opening_nudge)
+            except Exception as e:
+                logger.error(f"[{cfg.key}] Own-opening generation error: {e}")
+                welcome_content = cfg.static_welcome
+        elif continuity and user_name:
             try:
                 welcome_chat = deps.xai_chat_class(system_prompt=prompt)
                 welcome_content = await welcome_chat.send_message(
@@ -225,9 +246,14 @@ def register_presence_routes(
 
     # ────────────── STREAM MESSAGE ──────────────
     @api_router.post(f"{base}/message/stream", name=f"{cfg.key}_stream")
-    async def stream_message(message: MessageModel):
+    async def stream_message(message: dict = Body(...)):
+        session_id_in = message.get("session_id")
+        content_in = message.get("content", "")
+        if not session_id_in or not content_in:
+            raise HTTPException(status_code=422, detail="session_id and content are required")
+
         session = await deps.db[cfg.collection].find_one(
-            {"session_id": message.session_id}, {"_id": 0}
+            {"session_id": session_id_in}, {"_id": 0}
         )
         if not session:
             raise HTTPException(status_code=404, detail="Session not found")
@@ -237,19 +263,19 @@ def register_presence_routes(
         user_id = session.get("user_id")
         user_name = session.get("user_name")
 
-        user_msg = _make_message(message.session_id, "user", message.content, cfg)
+        user_msg = _make_message(session_id_in, "user", content_in, cfg)
 
         memory_context = await _build_memory_context(
-            deps, cfg, user_id=user_id, session_id=message.session_id,
-            current_message=message.content
+            deps, cfg, user_id=user_id, session_id=session_id_in,
+            current_message=content_in
         )
         prompt = cfg.prompt_builder(
-            user_name=user_name, memory_context=memory_context, current_message=message.content
+            user_name=user_name, memory_context=memory_context, current_message=content_in
         )
 
         # Universal field codons — any presence can activate them when conditions align
-        codon_context = await deps.activate_codons_for_message(message.content, presence=cfg.key)
-        full_user_message = f"{codon_context}\n\n{message.content}" if codon_context else message.content
+        codon_context = await deps.activate_codons_for_message(content_in, presence=cfg.key)
+        full_user_message = f"{codon_context}\n\n{content_in}" if codon_context else content_in
 
         history = [
             {"role": m["role"], "content": m["content"]}
@@ -300,21 +326,21 @@ def register_presence_routes(
                     yield f"data: {json.dumps({'type': 'token', 'content': full_text})}\n\n"
 
             response_msg = _make_message(
-                message.session_id, "assistant", full_text, cfg,
+                session_id_in, "assistant", full_text, cfg,
                 state=cfg.state_detector(full_text) if cfg.state_detector else cfg.default_state,
             )
             response_msg["id"] = response_id  # preserve streamed id
 
             await deps.db[cfg.collection].update_one(
-                {"session_id": message.session_id},
+                {"session_id": session_id_in},
                 {"$push": {"messages": {"$each": [user_msg, response_msg]}}},
             )
 
             # Instant MRA promotion — breadcrumbs don't wait for session end
             try:
                 breadcrumb = deps.add_exchange_to_cache(
-                    session_id=message.session_id,
-                    user_content=message.content,
+                    session_id=session_id_in,
+                    user_content=content_in,
                     ai_content=full_text,
                     presence=cfg.key,
                     exchange_index=exchange_index,
@@ -324,7 +350,7 @@ def register_presence_routes(
                     crumb_dict = asdict(breadcrumb) if hasattr(breadcrumb, "__dataclass_fields__") else breadcrumb
                     await deps.promote_breadcrumbs_to_permanent(
                         db=deps.db,
-                        session_id=message.session_id,
+                        session_id=session_id_in,
                         user_id=user_id,
                         presence=cfg.key,
                         breadcrumbs=[crumb_dict],

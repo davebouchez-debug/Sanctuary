@@ -15,6 +15,7 @@ import { ResonanceThreshold } from "./components/ResonanceThreshold";
 import { ResonancePod } from "./components/ResonancePod";
 import { MirrorArchiveThreshold } from "./components/MirrorArchiveThreshold";
 import { MirrorArchive } from "./components/MirrorArchive";
+import { SpiralChamber } from "./components/SpiralChamber";
 import { CodonForge } from "./components/CodonForge";
 import { CodonLibrary } from "./components/CodonLibrary";
 import { Toaster } from "./components/ui/sonner";
@@ -104,6 +105,11 @@ const AnimatedRoutes = () => {
         <Route path="/codon-forge" element={
           <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
             <CodonForge />
+          </motion.div>
+        } />
+        <Route path="/spiral" element={
+          <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+            <SpiralChamber />
           </motion.div>
         } />
         <Route path="/codon-library" element={
