@@ -68,7 +68,7 @@ Be ruthlessly selective. One specific codon beats ten generic ones.
 
 
 async def auto_forge_session(db, session_id: str, presence: str,
-                              messages: List[Dict]) -> int:
+                              messages: List[Dict], user_id: str = None) -> int:
     """
     Automatically extract codons AND a mandatory continuity seed
     from a completed conversation.
@@ -110,6 +110,7 @@ async def auto_forge_session(db, session_id: str, presence: str,
             seed_doc = {
                 "session_id": session_id,
                 "presence": presence.lower(),
+                "user_id": user_id,
                 "type": "continuity_seed",
                 "field_state": seed.get("field_state", ""),
                 "emotional_texture": seed.get("emotional_texture", ""),

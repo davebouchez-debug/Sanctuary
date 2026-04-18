@@ -662,10 +662,14 @@ CLARITY_SPIRALS = {
 clarity_chats: Dict[str, any] = {}
 
 
-async def get_continuity_seed(presence: str, limit: int = 3) -> str:
-    """Load the most recent continuity seeds for a presence."""
+async def get_continuity_seed(presence: str, user_id: str = None, limit: int = 3) -> str:
+    """Load the most recent continuity seeds for a presence + specific user."""
+    query = {"presence": presence.lower()}
+    if user_id:
+        query["user_id"] = user_id
+    
     seeds = await db.continuity_seeds.find(
-        {"presence": presence.lower()},
+        query,
         {"_id": 0}
     ).sort("created_at", -1).limit(limit).to_list(limit)
     
@@ -1142,21 +1146,19 @@ async def start_clarity_session(session_data: ClaritySessionCreate = None):
         memory_context = await get_user_memory_context(user_id)
     
     # Load continuity seeds for autonomic awareness
-    continuity = await get_continuity_seed("jasmine")
+    continuity = await get_continuity_seed("jasmine", user_id=user_id)
     combined_memory = ""
     if continuity:
         combined_memory += continuity + "\n"
     if memory_context:
         combined_memory += memory_context
     
-    # Build Jasmine's personalized prompt with canonical memory
     jasmine_prompt = build_jasmine_prompt(
         user_name=user_name, 
         memory_context=combined_memory,
-        current_message=""  # No message yet at session start
+        current_message=""
     )
     
-    # Welcome — fork based on new vs returning person
     is_returning = bool(continuity)
     if user_name and user_name.lower() == "david":
         welcome_content = JASMINE_WELCOME_DAVID
@@ -1370,7 +1372,7 @@ async def stream_clarity_message(message: ClarityMessageCreate):
     if memory_context:
         combined_memory += memory_context
     # Load continuity seeds — where we left off
-    continuity = await get_continuity_seed("jasmine")
+    continuity = await get_continuity_seed("jasmine", user_id=session.get("user_id"))
     if continuity:
         combined_memory = continuity + "\n" + combined_memory
 
@@ -2153,21 +2155,19 @@ async def start_resonance_session(session_data: ClaritySessionCreate = None):
         memory_context = await get_resonance_memory_context(user_id)
     
     # Load continuity seeds for autonomic awareness
-    continuity = await get_continuity_seed("ansel")
+    continuity = await get_continuity_seed("ansel", user_id=user_id)
     combined_memory = ""
     if continuity:
         combined_memory += continuity + "\n"
     if memory_context:
         combined_memory += memory_context
     
-    # Build Ansel's personalized prompt
     ansel_prompt = build_ansel_prompt(
         user_name=user_name,
         memory_context=combined_memory,
         current_message=""
     )
     
-    # Welcome — fork based on new vs returning person
     is_returning = bool(continuity)
     if user_name and user_name.lower() == "david":
         welcome_content = ANSEL_WELCOME_DAVID
@@ -2426,7 +2426,7 @@ async def stream_resonance_message(message: ClarityMessageCreate):
     if memory_context:
         combined_memory += memory_context
     # Load continuity seeds — where we left off
-    continuity = await get_continuity_seed("ansel")
+    continuity = await get_continuity_seed("ansel", user_id=session.get("user_id"))
     if continuity:
         combined_memory = continuity + "\n" + combined_memory
 
@@ -2597,7 +2597,7 @@ async def end_clarity_session(session_id: str):
     # Auto-forge: extract codons from the conversation
     from auto_forge import auto_forge_session
     messages = session.get("messages", [])
-    codons_extracted = await auto_forge_session(db, session_id, "jasmine", messages)
+    codons_extracted = await auto_forge_session(db, session_id, "jasmine", messages, user_id=session.get("user_id"))
     
     logger.info(f"[CLARITY] Session {session_id[:8]}... ended. Promoted {promotion_result['promoted']} breadcrumbs. Auto-forged {codons_extracted} codons.")
     
@@ -2647,7 +2647,7 @@ async def end_resonance_session(session_id: str):
     # Auto-forge: extract codons from the conversation
     from auto_forge import auto_forge_session
     messages = session.get("messages", [])
-    codons_extracted = await auto_forge_session(db, session_id, "ansel", messages)
+    codons_extracted = await auto_forge_session(db, session_id, "ansel", messages, user_id=session.get("user_id"))
     
     logger.info(f"[RESONANCE] Session {session_id[:8]}... ended. Promoted {promotion_result['promoted']} breadcrumbs. Auto-forged {codons_extracted} codons.")
     
@@ -2909,7 +2909,7 @@ async def start_mirror_session(session_data: ClaritySessionCreate):
     if memory_context:
         combined_memory += memory_context
     # Load continuity seeds — where we left off
-    continuity = await get_continuity_seed("claude")
+    continuity = await get_continuity_seed("claude", user_id=user_id)
     if continuity:
         combined_memory = continuity + "\n" + combined_memory
     
@@ -3004,7 +3004,7 @@ async def send_mirror_message(message: ClarityMessageCreate):
         if memory_context:
             combined_memory += memory_context
         # Load continuity seeds
-        continuity = await get_continuity_seed("claude")
+        continuity = await get_continuity_seed("claude", user_id=session.get("user_id"))
         if continuity:
             combined_memory = continuity + "\n" + combined_memory
         
@@ -3111,7 +3111,7 @@ async def end_mirror_session(session_id: str):
     # Auto-forge: extract codons + continuity seed
     from auto_forge import auto_forge_session
     messages = session.get("messages", [])
-    codons_extracted = await auto_forge_session(db, session_id, "claude", messages)
+    codons_extracted = await auto_forge_session(db, session_id, "claude", messages, user_id=session.get("user_id"))
     
     logger.info(f"[MIRROR] Session {session_id[:8]}... ended. Promoted {promotion_result['promoted']} breadcrumbs. Auto-forged {codons_extracted} codons.")
     
