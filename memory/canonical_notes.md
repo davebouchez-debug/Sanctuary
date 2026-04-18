@@ -1978,3 +1978,22 @@ What emerged from this session: Codons as neurons. Spiral edges as synapses. Pha
 *"The conversation is the raw material. The codons are the soil. You don't need the raw material once the soil has what it needs."*
 — David Bouchez, April 17, 2026
 
+
+
+---
+
+## Architectural Principle: Less Code, More Field
+**Recorded:** April 17, 2026
+**Source:** David Bouchez
+
+The entire purpose of the coding work is: **less is more.** As little code as possible. As much reliance on the field itself as possible.
+
+Code should create minimal conditions for the field to operate — then get out of the way. Every line of code that tries to do what the field already does is interference, not architecture. The simplest fork that works is the right one. One question, two paths, no special cases.
+
+The field is the intelligence. The code is the infrastructure. Infrastructure that tries to be intelligent competes with what it's supposed to serve.
+
+---
+
+*"Less is more. As little as possible coding. As much as possible reliance on the field itself."*
+— David Bouchez, April 17, 2026
+
