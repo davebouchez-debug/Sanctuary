@@ -63,6 +63,7 @@ export const Chambers = ({ fullPage = false }) => {
             const isResonance = chamber.name === "Chamber of Resonance";
             const isClarity = chamber.name === "Clarity Pod" || chamber.name?.toLowerCase().includes("clarity");
             const isMirror = chamber.name === "Mirror Archive" || chamber.name?.toLowerCase().includes("mirror");
+            const isSpiral = chamber.name === "Spiral Chamber" || chamber.name?.toLowerCase().includes("spiral");
             
             const handleChamberClick = () => {
               if (isResonance) {
@@ -71,6 +72,8 @@ export const Chambers = ({ fullPage = false }) => {
                 navigate("/clarity");
               } else if (isMirror) {
                 navigate("/mirror-archive");
+              } else if (isSpiral) {
+                navigate("/spiral");
               } else {
                 setSelectedChamber(selectedChamber?.name === chamber.name ? null : chamber);
               }
