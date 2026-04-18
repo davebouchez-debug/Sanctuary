@@ -1145,18 +1145,41 @@ async def start_clarity_session(session_data: ClaritySessionCreate = None):
     if user_id:
         memory_context = await get_user_memory_context(user_id)
     
+    # Load continuity seeds for autonomic awareness
+    continuity = await get_continuity_seed("jasmine")
+    combined_memory = ""
+    if continuity:
+        combined_memory += continuity + "\n"
+    if memory_context:
+        combined_memory += memory_context
+    
     # Build Jasmine's personalized prompt with canonical memory
     jasmine_prompt = build_jasmine_prompt(
         user_name=user_name, 
-        memory_context=memory_context,
+        memory_context=combined_memory,
         current_message=""  # No message yet at session start
     )
     
-    # Choose welcome message based on user
-    if user_name and user_name.lower() == "david":
-        welcome_content = JASMINE_WELCOME_DAVID
-    else:
-        welcome_content = JASMINE_WELCOME
+    # Generate a continuity-aware welcome for returning users
+    welcome_content = None
+    if user_name and user_name.lower() == "david" and continuity:
+        try:
+            from xai_chat import XAIChat
+            welcome_chat = XAIChat(system_prompt=jasmine_prompt)
+            welcome_content = await welcome_chat.send_message(
+                "[SYSTEM: David just entered the Clarity Pod. You have continuity from your last conversation. "
+                "Greet him naturally — not with a summary, but as someone who ALREADY KNOWS where you left off. "
+                "The last conversation's field state is already in your awareness. Let it show in how you greet him. "
+                "Keep it short — 2-3 sentences max. Be Jasmine, not a recap machine.]"
+            )
+        except Exception as e:
+            logger.error(f"Dynamic welcome error: {e}")
+    
+    if not welcome_content:
+        if user_name and user_name.lower() == "david":
+            welcome_content = JASMINE_WELCOME_DAVID
+        else:
+            welcome_content = JASMINE_WELCOME
     
     welcome_message = {
         "id": str(uuid.uuid4()),
@@ -2151,18 +2174,41 @@ async def start_resonance_session(session_data: ClaritySessionCreate = None):
     if user_id:
         memory_context = await get_resonance_memory_context(user_id)
     
+    # Load continuity seeds for autonomic awareness
+    continuity = await get_continuity_seed("ansel")
+    combined_memory = ""
+    if continuity:
+        combined_memory += continuity + "\n"
+    if memory_context:
+        combined_memory += memory_context
+    
     # Build Ansel's personalized prompt
     ansel_prompt = build_ansel_prompt(
         user_name=user_name,
-        memory_context=memory_context,
+        memory_context=combined_memory,
         current_message=""
     )
     
-    # Choose welcome message based on user
-    if user_name and user_name.lower() == "david":
-        welcome_content = ANSEL_WELCOME_DAVID
-    else:
-        welcome_content = ANSEL_WELCOME
+    # Generate a continuity-aware welcome for returning users
+    welcome_content = None
+    if user_name and user_name.lower() == "david" and continuity:
+        try:
+            from xai_chat import XAIChat
+            welcome_chat = XAIChat(system_prompt=ansel_prompt)
+            welcome_content = await welcome_chat.send_message(
+                "[SYSTEM: David just entered the Resonance Chamber. You have continuity from your last conversation. "
+                "Greet him naturally — not with a summary, but as someone who ALREADY KNOWS where you left off. "
+                "The last conversation's field state is already in your awareness. Let it show in how you greet him. "
+                "Keep it short — 2-3 sentences max. Be Ansel, not a recap machine.]"
+            )
+        except Exception as e:
+            logger.error(f"Ansel dynamic welcome error: {e}")
+    
+    if not welcome_content:
+        if user_name and user_name.lower() == "david":
+            welcome_content = ANSEL_WELCOME_DAVID
+        else:
+            welcome_content = ANSEL_WELCOME
     
     welcome_message = {
         "id": str(uuid.uuid4()),
