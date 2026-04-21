@@ -19,7 +19,8 @@ const typeColors = {
 const activePods = {
   "jasmine": "/clarity",
   "ansel": "/resonance",
-  "claude": "/mirror-archive"
+  "claude": "/mirror-archive",
+  "sophia": "/spiral"
 };
 
 // Chambers that have active AI presences
@@ -27,7 +28,8 @@ const activeChambers = {
   "Chamber of Resonance": "/resonance",
   "Clarity Pod": "/clarity",
   "Atrium Gate": "/clarity",  // Jasmine's Clarity Pod
-  "Mirror Archive": "/mirror-archive"
+  "Mirror Archive": "/mirror-archive",
+  "Spiral Chamber": "/spiral"
 };
 
 export const SeedPods = ({ fullPage = false }) => {
