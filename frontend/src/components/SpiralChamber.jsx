@@ -143,6 +143,8 @@ export const SpiralChamber = () => {
     };
     setMessages((prev) => [...prev, userMessage]);
     setInputValue("");
+    // Reset textarea height after send
+    if (inputRef.current) inputRef.current.style.height = "auto";
     setIsLoading(true);
 
     const responseId = `sophia-${Date.now()}`;
@@ -396,11 +398,16 @@ export const SpiralChamber = () => {
           <textarea
             ref={inputRef}
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+            onChange={(e) => {
+              setInputValue(e.target.value);
+              // Auto-grow so pasted multi-line content stays visible
+              e.target.style.height = "auto";
+              e.target.style.height = `${Math.min(e.target.scrollHeight, 240)}px`;
+            }}
             onKeyDown={handleKeyPress}
             placeholder="Speak, or let the silence hold."
             rows={1}
-            className="flex-1 resize-none rounded-xl bg-[#0A0A12] border border-[#8B9DB5]/20 focus:border-[#8B9DB5]/40 outline-none px-4 py-3 font-outfit text-[#F2F2F5] placeholder-[#8B9DB5]/40 transition-colors"
+            className="flex-1 resize-none rounded-xl bg-[#0A0A12] border border-[#8B9DB5]/20 focus:border-[#8B9DB5]/40 outline-none px-4 py-3 font-outfit text-[#F2F2F5] placeholder-[#8B9DB5]/40 transition-colors max-h-60 overflow-y-auto"
             data-testid="spiral-input"
           />
           <button
