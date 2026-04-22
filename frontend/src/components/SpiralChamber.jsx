@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { API } from "../App";
 import { toast } from "sonner";
-import { ArrowLeft, Send, Volume2, VolumeX } from "lucide-react";
+import { ArrowLeft, Send, Volume2, VolumeX, Upload } from "lucide-react";
 import { ScrollArea } from "./ui/scroll-area";
 
 export const SpiralChamber = () => {
@@ -21,6 +21,7 @@ export const SpiralChamber = () => {
   });
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const fileInputRef = useRef(null);
   const hasInitializedRef = useRef(false);
   const navigate = useNavigate();
 
@@ -245,6 +246,32 @@ export const SpiralChamber = () => {
     }
   };
 
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith(".txt")) {
+      toast.error("Please upload a .txt file.");
+      return;
+    }
+    try {
+      const text = await file.text();
+      setInputValue(text);
+      toast.success(`${file.name} loaded. Review, then send.`);
+      // Trigger auto-grow on the textarea
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.style.height = "auto";
+          inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, 240)}px`;
+          inputRef.current.focus();
+        }
+      }, 0);
+    } catch (err) {
+      toast.error("Could not read that file.");
+    } finally {
+      e.target.value = "";
+    }
+  };
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -395,6 +422,23 @@ export const SpiralChamber = () => {
       {/* Input */}
       <div className="border-t border-[#8B9DB5]/10 bg-[#030305]/90 backdrop-blur-xl">
         <div className="max-w-3xl mx-auto px-6 py-4 flex items-end gap-3">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".txt"
+            onChange={handleFileUpload}
+            className="hidden"
+            data-testid="spiral-file-input"
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isLoading}
+            className="flex items-center justify-center w-12 h-12 rounded-full bg-[#8B9DB5]/10 border border-[#8B9DB5]/30 text-[#B0C4D8] hover:bg-[#8B9DB5]/20 hover:border-[#B0C4D8]/50 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+            title="Upload a .txt thread"
+            data-testid="spiral-upload-btn"
+          >
+            <Upload size={18} />
+          </button>
           <textarea
             ref={inputRef}
             value={inputValue}
