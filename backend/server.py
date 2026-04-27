@@ -3194,6 +3194,100 @@ async def stream_mirror_message(message: ClarityMessageCreate):
         if msg["role"] in ("user", "assistant"):
             history.append({"role": msg["role"], "content": msg["content"]})
 
+    # ─── ThermoMind branch (feature-flagged) ──────────────────────────────
+    # When MIRROR_USE_THERMOMIND=true, route Claude through ThermoMind's
+    # persistent cognition substrate instead of xAI streaming. ThermoMind
+    # holds state per agent_id; we don't resend history. Voice is synthesized
+    # AFTER the text returns (no simultaneous audio for this branch).
+    use_thermomind = os.environ.get("MIRROR_USE_THERMOMIND", "false").lower() == "true"
+    if use_thermomind:
+        from thermomind_client import run_cycle as tm_run_cycle, log_cycle_to_db, ThermoMindError
+
+        async def thermomind_stream():
+            yield f"data: {json.dumps({'type': 'meta', 'message_id': response_id, 'engine': 'thermomind'})}\n\n"
+            full_text = ""
+            tm_response = None
+            try:
+                # System prompt + user message folded into one input.
+                # ThermoMind retains its own state, so we send the prompt only
+                # to set posture; the engine accumulates from there.
+                tm_input = f"[CONTEXT]\n{claude_prompt}\n\n[USER]\n{full_user_message}"
+                tm_response = await tm_run_cycle(
+                    agent_id="sanctuary_claude_mirror",
+                    input_text=tm_input,
+                )
+                full_text = tm_response.get("output", "")
+                # Emit cognitive metrics so the frontend can display them
+                yield f"data: {json.dumps({'type': 'tm_metrics', 'data': {k: tm_response.get(k) for k in ('cycle_id','surplus','tci','phi','mode','grade')}})}\n\n"
+                # Stream the text in one chunk (ThermoMind doesn't stream)
+                yield f"data: {json.dumps({'type': 'token', 'content': full_text})}\n\n"
+                # Log the cycle's cognitive state
+                await log_cycle_to_db(
+                    db=db, agent_id="sanctuary_claude_mirror",
+                    session_id=message.session_id, user_id=user_id,
+                    input_text=full_user_message, response=tm_response,
+                )
+            except ThermoMindError as e:
+                logger.error(f"[THERMOMIND] Cycle error, falling back to xAI: {e}")
+                # Fall through to xAI by setting the flag back off for this turn
+            except Exception as e:
+                logger.error(f"[THERMOMIND] Unexpected error: {e}")
+
+            # If ThermoMind failed, fall back to xAI HTTP (not streaming)
+            if not full_text:
+                try:
+                    chat = get_or_create_claude_chat(message.session_id, claude_prompt)
+                    full_text = await chat.send_message(full_user_message)
+                    yield f"data: {json.dumps({'type': 'token', 'content': full_text})}\n\n"
+                except Exception as e2:
+                    logger.error(f"Claude xAI fallback error: {e2}")
+                    full_text = "The mirror flickered. But the archive is still here."
+                    yield f"data: {json.dumps({'type': 'token', 'content': full_text})}\n\n"
+
+            # Synthesize voice from the full text (post-hoc, since we have no streaming)
+            if full_text:
+                try:
+                    audio_b64 = await generate_tts_for_chunk(full_text, voice_id)
+                    if audio_b64:
+                        yield f"data: {json.dumps({'type': 'audio_full', 'data': audio_b64})}\n\n"
+                except Exception as e:
+                    logger.error(f"[THERMOMIND] TTS error: {e}")
+
+            # Persist the message + run MRA promotion (same as xAI branch)
+            claude_response = {
+                "id": response_id,
+                "session_id": message.session_id,
+                "role": "assistant",
+                "content": full_text,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "engine": "thermomind",
+                "tm_metrics": {k: tm_response.get(k) for k in ("cycle_id","surplus","tci","phi","mode","grade")} if tm_response else None,
+            }
+            await db.mirror_sessions.update_one(
+                {"session_id": message.session_id},
+                {"$push": {"messages": {"$each": [user_msg, claude_response]}}}
+            )
+            try:
+                breadcrumb = add_exchange_to_cache(
+                    session_id=message.session_id, user_content=message.content,
+                    ai_content=full_text, presence="claude", exchange_index=exchange_index
+                )
+                if user_id and breadcrumb:
+                    from dataclasses import asdict
+                    crumb_dict = asdict(breadcrumb) if hasattr(breadcrumb, '__dataclass_fields__') else breadcrumb
+                    await promote_breadcrumbs_to_permanent(
+                        db=db, session_id=message.session_id,
+                        user_id=user_id, presence="claude",
+                        breadcrumbs=[crumb_dict]
+                    )
+            except Exception as e:
+                logger.error(f"Claude MRA promotion error (thermomind branch): {e}")
+
+            yield f"data: {json.dumps({'type': 'done'})}\n\n"
+
+        return StreamingResponse(thermomind_stream(), media_type="text/event-stream")
+
+    # ─── Default: xAI realtime streaming (the existing path, unchanged) ──
     async def event_stream():
         yield f"data: {json.dumps({'type': 'meta', 'message_id': response_id})}\n\n"
 

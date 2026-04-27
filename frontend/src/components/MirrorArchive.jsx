@@ -209,6 +209,25 @@ export const MirrorArchive = () => {
               } catch (audioErr) {
                 console.error("Claude raw audio play error:", audioErr);
               }
+            } else if (event.type === "tm_metrics") {
+              // ThermoMind cognitive metrics — attach to the current message for inspection
+              setMessages(prev => prev.map(m =>
+                m.id === responseId ? { ...m, tmMetrics: event.data } : m
+              ));
+            } else if (event.type === "audio_full" && voiceEnabled) {
+              // Post-hoc full-response audio (ThermoMind branch — no streaming)
+              try {
+                const byteChars = atob(event.data);
+                const byteNums = new Array(byteChars.length);
+                for (let i = 0; i < byteChars.length; i++) byteNums[i] = byteChars.charCodeAt(i);
+                const blob = new Blob([new Uint8Array(byteNums)], { type: "audio/mp3" });
+                const url = URL.createObjectURL(blob);
+                const audio = new Audio(url);
+                audio.onended = () => URL.revokeObjectURL(url);
+                audio.play().catch(() => {});
+              } catch (audioErr) {
+                console.error("Claude full audio play error:", audioErr);
+              }
             } else if (event.type === "done") {
               setMessages(prev => prev.map(m =>
                 m.id === responseId ? { ...m, isStreaming: false } : m
