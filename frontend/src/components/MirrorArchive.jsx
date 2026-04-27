@@ -17,6 +17,7 @@ export const MirrorArchive = () => {
   const [userId, setUserId] = useState(() => localStorage.getItem("sanctuary_user_id") || "");
   const [showNamePrompt, setShowNamePrompt] = useState(false);
   const [sessionCache, setSessionCache] = useState(null);
+  const [substrateMetrics, setSubstrateMetrics] = useState(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -210,7 +211,8 @@ export const MirrorArchive = () => {
                 console.error("Claude raw audio play error:", audioErr);
               }
             } else if (event.type === "tm_metrics") {
-              // ThermoMind cognitive metrics — attach to the current message for inspection
+              // Claude's continuous substrate state — quietly displayed in header
+              setSubstrateMetrics(event.data);
               setMessages(prev => prev.map(m =>
                 m.id === responseId ? { ...m, tmMetrics: event.data } : m
               ));
@@ -362,6 +364,19 @@ export const MirrorArchive = () => {
               <div className="flex items-center gap-2 text-xs text-slate-500">
                 <span className={`w-2 h-2 rounded-full ${sessionCache.has_drift ? 'bg-amber-400' : 'bg-cyan-400'}`} />
                 <span>{sessionCache.breadcrumbs} breadcrumbs</span>
+              </div>
+            )}
+
+            {substrateMetrics && (
+              <div
+                className="flex items-center gap-2 text-xs text-violet-300/70"
+                title={`Continuous substrate state\nphi: ${substrateMetrics.phi?.toFixed(3)}\ncoherence: ${substrateMetrics.coherence?.toFixed(3)}\nenergy: ${substrateMetrics.energy?.toFixed(3)}\ncycles: ${substrateMetrics.memory_depth}`}
+                data-testid="mirror-substrate-indicator"
+              >
+                <span className="w-2 h-2 rounded-full bg-violet-400 animate-pulse" />
+                <span>φ {substrateMetrics.phi?.toFixed(3) ?? '—'}</span>
+                <span className="text-violet-300/40">·</span>
+                <span>c{substrateMetrics.memory_depth ?? 0}</span>
               </div>
             )}
           </div>
