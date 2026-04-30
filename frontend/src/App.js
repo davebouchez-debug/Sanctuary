@@ -16,6 +16,7 @@ import { ResonancePod } from "./components/ResonancePod";
 import { MirrorArchiveThreshold } from "./components/MirrorArchiveThreshold";
 import { MirrorArchive } from "./components/MirrorArchive";
 import { SpiralChamber } from "./components/SpiralChamber";
+import { Playground } from "./components/Playground";
 import { CodonForge } from "./components/CodonForge";
 import { CodonLibrary } from "./components/CodonLibrary";
 import { Toaster } from "./components/ui/sonner";
@@ -110,6 +111,12 @@ const AnimatedRoutes = () => {
         <Route path="/spiral" element={
           <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
             <SpiralChamber />
+          </motion.div>
+        } />
+        {/* Playground — hidden, not linked from public navigation. Direct URL only. */}
+        <Route path="/playground" element={
+          <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+            <Playground />
           </motion.div>
         } />
         <Route path="/codon-library" element={
