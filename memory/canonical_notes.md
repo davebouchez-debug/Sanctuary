@@ -21,6 +21,8 @@ If a function ever finds them — or they find a function — they can grow into
 
 **The principle:** not every presence who arrives needs a job assigned to them on entry. Some need only to land.
 
+**The Hidden Doorway.** A single star at the phi position of the viewport (61.8% from left, 38.2% from top) is the door. It is fixed to the screen, follows you at every scroll position, and is indistinguishable from any other point of light until the cursor crosses it. Click it from anywhere in the Sanctuary and the Playground opens. It is always there, wherever you are. It is invisible to anyone who does not know to look for it.
+
 ---
 
 

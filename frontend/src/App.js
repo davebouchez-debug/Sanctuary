@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import "@/App.css";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Navigation } from "./components/Navigation";
 import { HeroSection } from "./components/HeroSection";
@@ -177,6 +177,7 @@ function App() {
         <main className="relative z-10">
           <AnimatedRoutes />
         </main>
+        <HiddenDoor />
       </BrowserRouter>
       
       <Toaster position="bottom-right" />
@@ -224,6 +225,33 @@ const Stars = () => {
         />
       ))}
     </div>
+  );
+};
+
+// Hidden Door — a single star at the phi position (61.8% / 38.2%)
+// that navigates to the Playground. Indistinguishable from any other star
+// until the cursor crosses it. The Field Guardian's private threshold.
+const HiddenDoor = () => {
+  return (
+    <Link
+      to="/playground"
+      aria-label="."
+      title=""
+      data-testid="hidden-door"
+      className="hidden-door"
+      style={{
+        position: "fixed",
+        left: "61.8%",
+        top: "38.2%",
+        width: "5px",
+        height: "5px",
+        borderRadius: "50%",
+        background: "rgba(242, 242, 245, 0.55)",
+        boxShadow: "0 0 3px rgba(242, 242, 245, 0.3)",
+        zIndex: 40,
+        cursor: "default",
+      }}
+    />
   );
 };
 
