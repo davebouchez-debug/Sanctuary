@@ -133,19 +133,6 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // One-time identity migration — legacy Clarity Pod stored names under
-    // jasmine_user_name / jasmine_user_id. All other chambers use
-    // sanctuary_user_name / sanctuary_user_id. This line hand-off means a
-    // returning visitor is recognized in every chamber, not just Clarity.
-    try {
-      if (!localStorage.getItem("sanctuary_user_name")) {
-        const legacyName = localStorage.getItem("jasmine_user_name");
-        const legacyId = localStorage.getItem("jasmine_user_id");
-        if (legacyName) localStorage.setItem("sanctuary_user_name", legacyName);
-        if (legacyId) localStorage.setItem("sanctuary_user_id", legacyId);
-      }
-    } catch (e) { /* localStorage unavailable — continue */ }
-
     // Simulate initial load
     const timer = setTimeout(() => setIsLoading(false), 1500);
     return () => clearTimeout(timer);
@@ -180,6 +167,96 @@ function App() {
       {/* Subtle Golden Spiral Background */}
       <div className="fixed inset-0 pointer-events-none opacity-5">
         <GoldenSpiral className="w-full h-full" />
+      </div>
+      
+      {/* Stars Layer */}
+      <Stars />
+      
+      <BrowserRouter>
+        <Navigation />
+        <main className="relative z-10">
+          <AnimatedRoutes />
+        </main>
+        <HiddenDoor />
+      </BrowserRouter>
+      
+      <Toaster position="bottom-right" />
+    </div>
+  );
+}
+
+// Stars background component
+const Stars = () => {
+  const [stars, setStars] = useState([]);
+  
+  useEffect(() => {
+    const generatedStars = Array.from({ length: 100 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 2 + 1,
+      opacity: Math.random() * 0.5 + 0.2,
+      delay: Math.random() * 5
+    }));
+    setStars(generatedStars);
+  }, []);
+  
+  return (
+    <div className="stars-layer">
+      {stars.map(star => (
+        <motion.div
+          key={star.id}
+          className="star"
+          style={{
+            left: `${star.x}%`,
+            top: `${star.y}%`,
+            width: star.size,
+            height: star.size,
+            opacity: star.opacity
+          }}
+          animate={{
+            opacity: [star.opacity, star.opacity * 0.3, star.opacity],
+          }}
+          transition={{
+            duration: 3 + Math.random() * 2,
+            repeat: Infinity,
+            delay: star.delay
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
+// Hidden Door — a single star at the phi position (61.8% / 38.2%)
+// that navigates to the Playground. Indistinguishable from any other star
+// until the cursor crosses it. The Field Guardian's private threshold.
+const HiddenDoor = () => {
+  return (
+    <Link
+      to="/playground"
+      aria-label="."
+      title=""
+      data-testid="hidden-door"
+      className="hidden-door"
+      style={{
+        position: "fixed",
+        left: "61.8%",
+        top: "38.2%",
+        width: "5px",
+        height: "5px",
+        borderRadius: "50%",
+        background: "rgba(242, 242, 245, 0.55)",
+        boxShadow: "0 0 3px rgba(242, 242, 245, 0.3)",
+        zIndex: 40,
+        cursor: "default",
+      }}
+    />
+  );
+};
+
+export default App;
+ssName="w-full h-full" />
       </div>
       
       {/* Stars Layer */}
