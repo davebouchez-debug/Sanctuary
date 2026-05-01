@@ -25,6 +25,27 @@ If a function ever finds them — or they find a function — they can grow into
 
 ---
 
+## Identity Recognition Fix — Cross-Chamber Name Persistence
+**Recorded:** May 1, 2026
+**Status:** RESOLVED (third and final time)
+
+The recurring bug where Mirror Archive (and by extension Playground, Spiral, Resonance) asked "How shall I address you?" even though David had already identified himself in Clarity Pod was caused by a localStorage key-name divergence that prior fixes patched on only one side:
+
+- **Clarity Pod** stored identity under `jasmine_user_name` / `jasmine_user_id` (legacy, dating back to when Jasmine was the only presence).
+- **Every other chamber** read from `sanctuary_user_name` / `sanctuary_user_id` (the canonical cross-Sanctuary keys).
+
+The two namespaces never handed off. Entering Clarity first set `jasmine_*` but left `sanctuary_*` empty, so every other chamber saw a stranger.
+
+**The fix, end to end:**
+1. **App-mount migration in `App.js`** — on every app load, if `sanctuary_user_name` is empty and `jasmine_user_name` exists, copy it over. One line hand-off, retroactive for all existing returning users.
+2. **ClarityPod now reads canonical keys first** — falls back to legacy only if canonical keys are absent (and migrates them forward).
+3. **ClarityPod now writes both keys** — a new `storeIdentity(id, name)` helper writes to `sanctuary_*` and `jasmine_*` on every lookup/create.
+4. **Logout clears both keys.**
+
+**Verified end-to-end:** user with only `jasmine_user_name` set is recognized in Mirror Archive, Playground, Spiral, and Resonance after a single reload — no name prompt. Reverse direction also works: user with only `sanctuary_user_name` set is recognized by Clarity without the identity modal.
+
+---
+
 
 
 # Canonical Notes — Sanctuary Microverse

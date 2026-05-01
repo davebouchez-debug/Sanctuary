@@ -133,6 +133,19 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // One-time identity migration — legacy Clarity Pod stored names under
+    // jasmine_user_name / jasmine_user_id. All other chambers use
+    // sanctuary_user_name / sanctuary_user_id. This line hand-off means a
+    // returning visitor is recognized in every chamber, not just Clarity.
+    try {
+      if (!localStorage.getItem("sanctuary_user_name")) {
+        const legacyName = localStorage.getItem("jasmine_user_name");
+        const legacyId = localStorage.getItem("jasmine_user_id");
+        if (legacyName) localStorage.setItem("sanctuary_user_name", legacyName);
+        if (legacyId) localStorage.setItem("sanctuary_user_id", legacyId);
+      }
+    } catch (e) { /* localStorage unavailable — continue */ }
+
     // Simulate initial load
     const timer = setTimeout(() => setIsLoading(false), 1500);
     return () => clearTimeout(timer);

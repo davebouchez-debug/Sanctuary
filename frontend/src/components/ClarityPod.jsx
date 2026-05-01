@@ -124,16 +124,37 @@ export const ClarityPod = () => {
     }
   }, [isLoading, inputValue]);
 
-  // Check for stored user identity
+  // Check for stored user identity — unified across all chambers
+  // Canonical keys: sanctuary_user_id / sanctuary_user_name
+  // Legacy keys (migrated in): jasmine_user_id / jasmine_user_name
   useEffect(() => {
-    const storedUserId = localStorage.getItem("jasmine_user_id");
-    const storedUserName = localStorage.getItem("jasmine_user_name");
+    let storedUserId = localStorage.getItem("sanctuary_user_id");
+    let storedUserName = localStorage.getItem("sanctuary_user_name");
+    // One-time migration from legacy jasmine_* keys
+    if (!storedUserId || !storedUserName) {
+      const legacyId = localStorage.getItem("jasmine_user_id");
+      const legacyName = localStorage.getItem("jasmine_user_name");
+      if (legacyId && legacyName) {
+        storedUserId = storedUserId || legacyId;
+        storedUserName = storedUserName || legacyName;
+        localStorage.setItem("sanctuary_user_id", storedUserId);
+        localStorage.setItem("sanctuary_user_name", storedUserName);
+      }
+    }
     if (storedUserId && storedUserName) {
       setUserId(storedUserId);
       setUserName(storedUserName);
       setShowIdentityModal(false);
     }
   }, []);
+
+  // Helper — write identity to both canonical and legacy keys
+  const storeIdentity = (id, name) => {
+    localStorage.setItem("sanctuary_user_id", id);
+    localStorage.setItem("sanctuary_user_name", name);
+    localStorage.setItem("jasmine_user_id", id);
+    localStorage.setItem("jasmine_user_name", name);
+  };
 
   // Handle identity submission
   const handleIdentitySubmit = async () => {
@@ -146,16 +167,14 @@ export const ClarityPod = () => {
       const lookupResponse = await axios.get(`${API}/users/lookup/${encodeURIComponent(name)}`);
       setUserId(lookupResponse.data.id);
       setUserName(lookupResponse.data.name);
-      localStorage.setItem("jasmine_user_id", lookupResponse.data.id);
-      localStorage.setItem("jasmine_user_name", lookupResponse.data.name);
+      storeIdentity(lookupResponse.data.id, lookupResponse.data.name);
     } catch {
       // Create new user
       try {
         const createResponse = await axios.post(`${API}/users`, { name });
         setUserId(createResponse.data.id);
         setUserName(name);
-        localStorage.setItem("jasmine_user_id", createResponse.data.id);
-        localStorage.setItem("jasmine_user_name", name);
+        storeIdentity(createResponse.data.id, name);
       } catch (error) {
         console.error("Failed to create user:", error);
       }
@@ -371,8 +390,10 @@ export const ClarityPod = () => {
     }
   }, [isLoading, messages, showIdentityModal]);
 
-  // Clear identity (for testing)
+  // Clear identity (for testing) — clears both canonical and legacy keys
   const clearIdentity = () => {
+    localStorage.removeItem("sanctuary_user_id");
+    localStorage.removeItem("sanctuary_user_name");
     localStorage.removeItem("jasmine_user_id");
     localStorage.removeItem("jasmine_user_name");
     setUserId(null);
