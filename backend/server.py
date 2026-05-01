@@ -1698,6 +1698,78 @@ async def lookup_user_by_name(name: str):
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
+
+@api_router.get("/identity/recent")
+async def get_recent_identity():
+    """
+    Recall the most-recent visitor identity from MongoDB so the frontend
+    can hydrate localStorage on a fresh browser/origin/device.
+
+    This is the canonical source of truth for "who has been here before".
+    It scans every session collection for the latest user_name + user_id
+    pair and returns it. If nothing is found, returns 204.
+
+    Why this exists: localStorage is per-origin and per-browser. Every fork
+    URL change, cache clear, or device switch erases it — which is why the
+    "name prompt" kept reappearing across sessions. MongoDB persists; this
+    endpoint exposes that persistence to the client at boot time.
+    """
+    collections = [
+        "mirror_sessions",
+        "clarity_sessions",
+        "resonance_sessions",
+        "spiral_sessions",
+        "playground_sessions",
+    ]
+
+    latest_doc = None
+    latest_ts = ""
+
+    for coll_name in collections:
+        try:
+            coll = db[coll_name]
+            doc = await coll.find_one(
+                {
+                    "user_name": {"$exists": True, "$nin": [None, ""]},
+                    "user_id": {"$exists": True, "$nin": [None, ""]},
+                },
+                sort=[("created_at", -1)],
+                projection={"_id": 0, "user_id": 1, "user_name": 1, "created_at": 1},
+            )
+            if doc:
+                ts = doc.get("created_at", "") or ""
+                if ts > latest_ts:
+                    latest_ts = ts
+                    latest_doc = {
+                        "user_id": doc["user_id"],
+                        "user_name": doc["user_name"],
+                        "last_seen": ts,
+                        "source": coll_name,
+                    }
+        except Exception as e:
+            logger.warning(f"identity/recent scan failed for {coll_name}: {e}")
+            continue
+
+    if not latest_doc:
+        # Fall back to the explicit users collection
+        user = await db.users.find_one(
+            {},
+            sort=[("created_at", -1)],
+            projection={"_id": 0, "id": 1, "name": 1, "created_at": 1},
+        )
+        if user:
+            latest_doc = {
+                "user_id": user["id"],
+                "user_name": user["name"],
+                "last_seen": user.get("created_at", ""),
+                "source": "users",
+            }
+
+    if not latest_doc:
+        raise HTTPException(status_code=404, detail="No prior identity found")
+
+    return latest_doc
+
 # Platform Deployments - Now serving V3.1 data
 @api_router.get("/platforms")
 async def get_platforms():

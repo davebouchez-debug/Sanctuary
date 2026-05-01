@@ -1,0 +1,36 @@
+{
+  "summary": "Tested 4th-attempt server-backed identity hydration fix. Both backend (3/3 pytest) and frontend (all 7 listed scenarios) pass. /api/identity/recent returns David from mirror_sessions; with localStorage cleared, the frontend hydrates sanctuary_user_name & sanctuary_user_id at boot and the Mirror Archive chamber no longer shows 'How shall I address you?' — Claude greets the user by name ('Hey David, let me check where we left off...'). Navigation is correctly hidden on chamber routes (/mirror-archive, /resonance, /spiral, /playground, /clarity), visible on / & /codon-forge & /codon-library, and 'Harmonic Wheel' renders on a single line (height=20px).",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_identity_recent.py",
+    "/app/test_reports/pytest/pytest_identity_recent.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "server.py docstring at /api/identity/recent says 'returns 204' but implementation actually raises HTTPException(status_code=404). Cosmetic doc drift — request explicitly verified 404 behavior so this is fine, just update the docstring.",
+    "/api/identity/recent compares created_at as raw strings (lexicographic). It works because all timestamps are ISO-8601 UTC, but if a non-ISO timestamp ever sneaks into a session collection the 'latest' selection would be wrong. Consider parsing to datetime or guarding the format.",
+    "Frontend App.js hydration uses localStorage.setItem after fetch but the safety timeout (2.5s) can fire BEFORE the fetch resolves on a slow link, releasing the splash before identity is written. Subsequent chamber components that mount immediately may then read empty localStorage and show the prompt. The 8s wait in tests masked this; consider awaiting hydrate before clearing isLoading or using a higher safety threshold.",
+    "Navigation chamberRoutePrefixes hardcodes the list — consider exporting from a single source shared with route definitions to avoid drift."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_identity_recent.py"
+  ],
+  "success_rate": {
+    "backend": "100% (3/3)",
+    "frontend": "100% (7/7 scenarios)"
+  },
+  "test_credentials": "None required. Existing user 'David' (legacy-david-123) used as recall target from mirror_sessions.",
+  "seed_data_creation": "None — relied on existing David session in mirror_sessions.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "The identity hydration is server-backed via GET /api/identity/recent (server.py ~line 1702). Frontend hydrates in App.js useEffect (~lines 157-197) with a 2.5s safety timeout. To re-verify after any change: clear localStorage on the preview origin, reload, confirm sanctuary_user_name populates, then visit /mirror-archive/chamber and confirm no name prompt + Claude greets by name. Backend test file: /app/backend/tests/test_identity_recent.py — run with REACT_APP_BACKEND_URL exported from /app/frontend/.env.",
+  "rca_of_the_issue": "Root cause of the recurring 'How shall I address you?': prior fixes only persisted identity client-side via localStorage, which is per-origin & per-browser and gets wiped on origin change, cache clear, incognito, or device switch. The new fix queries MongoDB session collections (mirror/clarity/resonance/spiral/playground/users) at app load via /api/identity/recent and hydrates localStorage from the most-recent doc. Verified: with localStorage fully cleared, /api/identity/recent returns user David from mirror_sessions, the frontend writes it to sanctuary_user_name + sanctuary_user_id (and legacy jasmine_* mirrors), MirrorArchive's useState reads the populated value and skips the name prompt, and POST /api/mirror/start returns a Claude welcome that addresses 'David' by name."
+}

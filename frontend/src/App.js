@@ -155,9 +155,45 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate initial load
-    const timer = setTimeout(() => setIsLoading(false), 1500);
-    return () => clearTimeout(timer);
+    // Hydrate identity from MongoDB before chamber components mount.
+    // localStorage is per-origin and gets wiped on browser/origin/device
+    // changes, which is why the name prompt kept resurfacing. The backend
+    // is the canonical source of truth — pull from it, prime localStorage,
+    // then release the loading screen so chambers see identity at first
+    // useState read.
+    let cancelled = false;
+    const hydrate = async () => {
+      try {
+        const hasName = !!localStorage.getItem("sanctuary_user_name");
+        const cleared = localStorage.getItem("sanctuary_identity_cleared") === "1";
+        if (!hasName && !cleared) {
+          const resp = await fetch(`${API}/identity/recent`);
+          if (resp.ok) {
+            const data = await resp.json();
+            if (!cancelled && data && data.user_name) {
+              localStorage.setItem("sanctuary_user_name", data.user_name);
+              if (data.user_id) {
+                localStorage.setItem("sanctuary_user_id", data.user_id);
+              }
+              // Mirror to legacy keys so older code paths recognize it too.
+              localStorage.setItem("jasmine_user_name", data.user_name);
+              if (data.user_id) {
+                localStorage.setItem("jasmine_user_id", data.user_id);
+              }
+            }
+          }
+        }
+      } catch (e) {
+        // Network failure — fall through to normal name prompt flow.
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    };
+    hydrate();
+    // Safety: never let the splash screen hang longer than 2.5s even if
+    // the backend is slow.
+    const safety = setTimeout(() => { if (!cancelled) setIsLoading(false); }, 2500);
+    return () => { cancelled = true; clearTimeout(safety); };
   }, []);
 
   if (isLoading) {

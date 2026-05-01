@@ -34,6 +34,23 @@ export const Navigation = () => {
     setIsMobileMenuOpen(false);
   }, [location]);
 
+  // Chamber routes render their own back-button header. Hiding the global
+  // navigation on these routes prevents the two headers from overlapping
+  // and keeps each chamber visually self-contained.
+  const chamberRoutePrefixes = [
+    "/mirror-archive",
+    "/resonance",
+    "/spiral",
+    "/playground",
+    "/clarity",
+  ];
+  const isChamberRoute = chamberRoutePrefixes.some(
+    (p) => location.pathname === p || location.pathname.startsWith(`${p}/`)
+  );
+  if (isChamberRoute) {
+    return null;
+  }
+
   const handleNavClick = (e, link) => {
     if (link.section && location.pathname === "/") {
       e.preventDefault();
@@ -77,14 +94,14 @@ export const Navigation = () => {
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center gap-8">
+            <div className="hidden lg:flex items-center gap-6 xl:gap-8 flex-nowrap">
               {navLinks.map((link) => (
                 <Link
                   key={link.name}
                   to={link.path}
                   data-testid={`nav-link-${link.name.toLowerCase().replace(" ", "-")}`}
                   onClick={(e) => handleNavClick(e, link)}
-                  className={`relative font-outfit text-sm tracking-wide transition-colors duration-300 ${
+                  className={`relative font-outfit text-sm tracking-wide transition-colors duration-300 whitespace-nowrap flex-shrink-0 ${
                     link.highlight
                       ? "flex items-center gap-2 px-4 py-2 rounded-full border border-[#8B9DB5]/35 text-[#B0C4D8] hover:bg-[#8B9DB5]/10 hover:border-[#8B9DB5]/60"
                       : "nav-link"
