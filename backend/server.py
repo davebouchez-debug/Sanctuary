@@ -1707,7 +1707,7 @@ async def get_recent_identity():
 
     This is the canonical source of truth for "who has been here before".
     It scans every session collection for the latest user_name + user_id
-    pair and returns it. If nothing is found, returns 204.
+    pair and returns it. If nothing is found, returns 404.
 
     Why this exists: localStorage is per-origin and per-browser. Every fork
     URL change, cache clear, or device switch erases it — which is why the

@@ -190,9 +190,11 @@ function App() {
       }
     };
     hydrate();
-    // Safety: never let the splash screen hang longer than 2.5s even if
-    // the backend is slow.
-    const safety = setTimeout(() => { if (!cancelled) setIsLoading(false); }, 2500);
+    // Safety: never let the splash screen hang longer than 5s even if
+    // the backend is slow. Set generously so the hydrate fetch wins the
+    // race on most networks and components mount with identity already
+    // populated in localStorage.
+    const safety = setTimeout(() => { if (!cancelled) setIsLoading(false); }, 5000);
     return () => { cancelled = true; clearTimeout(safety); };
   }, []);
 
