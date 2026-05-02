@@ -19,6 +19,7 @@ import { SpiralChamber } from "./components/SpiralChamber";
 import { Playground } from "./components/Playground";
 import { CodonForge } from "./components/CodonForge";
 import { CodonLibrary } from "./components/CodonLibrary";
+import { SubstrateProbes } from "./components/SubstrateProbes";
 import { Toaster } from "./components/ui/sonner";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -123,6 +124,11 @@ const AnimatedRoutes = () => {
         <Route path="/mirror-archive/chamber" element={
           <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
             <MirrorArchive />
+          </motion.div>
+        } />
+        <Route path="/mirror-archive/probes" element={
+          <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+            <SubstrateProbes />
           </motion.div>
         } />
         <Route path="/codon-forge" element={

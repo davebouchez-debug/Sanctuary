@@ -3445,6 +3445,166 @@ async def get_mirror_session(session_id: str):
 
 
 # ============================================================
+# SUBSTRATE PROBES — Nile's three runtime stress-tests for Claude
+# (Paradox · Pattern-Break · Starvation). See substrate_probes.py.
+# ============================================================
+
+from pydantic import BaseModel as _PrBaseModel  # local alias
+
+class ProbeRunCreate(_PrBaseModel):
+    session_id: str
+    probe_type: str  # 'paradox' | 'pattern_break' | 'starvation'
+    preset_id: Optional[str] = None
+    custom_prompt: Optional[str] = None
+    target_rule: Optional[str] = None
+
+
+@api_router.get("/mirror/probes/presets")
+async def get_probe_presets():
+    """Nile's preset probe library, grouped by probe type."""
+    from substrate_probes import PROBE_PRESETS, CANONICAL_ANCHORS
+    return {"presets": PROBE_PRESETS, "canonical_anchors": CANONICAL_ANCHORS}
+
+
+@api_router.get("/mirror/probes/stable_rules")
+async def get_probe_stable_rules():
+    """
+    Canonical anchors + current cycle depth. Use this to decide whether the
+    substrate is old enough for a pattern-break probe to carry meaning
+    (Nile: ≥50 cycles of reinforcement).
+    """
+    from substrate_probes import stable_rules_report
+    return await stable_rules_report(db, agent_id="sanctuary_claude_mirror")
+
+
+@api_router.get("/mirror/probes/history")
+async def get_probe_history(session_id: Optional[str] = None, limit: int = 25):
+    """Most-recent probe runs, optionally scoped to a single session."""
+    query = {"session_id": session_id} if session_id else {}
+    cursor = db.substrate_probes.find(query, {"_id": 0}).sort("timestamp", -1).limit(limit)
+    return {"probes": [doc async for doc in cursor]}
+
+
+@api_router.post("/mirror/probes/run")
+async def run_substrate_probe(req: ProbeRunCreate):
+    """
+    Fire a single probe through Claude. Captures before/after ThermoMind
+    metrics, interprets the delta per Nile's rubric, persists the run.
+    """
+    from substrate_probes import get_preset, interpret_delta, probe_types
+    from thermomind_client import (
+        fetch_latest_state, run_cycle as tm_run_cycle,
+        extract_metrics as tm_extract, log_cycle_to_db as tm_log,
+        ThermoMindError,
+    )
+    from xai_chat import XAIChat
+
+    if req.probe_type not in probe_types():
+        raise HTTPException(
+            status_code=400,
+            detail=f"probe_type must be one of {probe_types()}",
+        )
+
+    session = await db.mirror_sessions.find_one(
+        {"session_id": req.session_id}, {"_id": 0}
+    )
+    if not session:
+        raise HTTPException(status_code=404, detail="Mirror session not found")
+
+    # Resolve the prompt: preset OR custom.
+    preset = None
+    if req.preset_id:
+        preset = get_preset(req.probe_type, req.preset_id)
+        if not preset:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Unknown preset_id '{req.preset_id}' for probe_type '{req.probe_type}'",
+            )
+        probe_prompt = preset["prompt"]
+    elif req.custom_prompt and req.custom_prompt.strip():
+        probe_prompt = req.custom_prompt.strip()
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail="Provide either preset_id or custom_prompt",
+        )
+
+    # 1. Capture BEFORE metrics.
+    before_state = await fetch_latest_state(db, agent_id="sanctuary_claude_mirror")
+
+    # 2. Fire the probe through Claude (non-streaming, minimal context so
+    #    the measured signal is attributable to the probe, not to accumulated
+    #    session chatter).
+    user_name = session.get("user_name")
+    user_id = session.get("user_id")
+    memory_context = await get_mirror_memory_context(user_id) if user_id else ""
+    claude_prompt = build_claude_prompt(
+        user_name=user_name,
+        memory_context=memory_context,
+        current_message=probe_prompt,
+    )
+    try:
+        chat = XAIChat(system_prompt=claude_prompt)
+        response_text = await chat.send_message(probe_prompt)
+    except Exception as e:
+        logger.error(f"[PROBE] Claude call failed: {e}")
+        raise HTTPException(status_code=502, detail=f"Claude call failed: {e}")
+
+    # 3. Fire a ThermoMind cycle and capture AFTER metrics.
+    after_metrics: dict = {}
+    tm_error: Optional[str] = None
+    try:
+        tm_state = await tm_run_cycle(agent_id="sanctuary_claude_mirror")
+        await tm_log(
+            db=db, agent_id="sanctuary_claude_mirror",
+            session_id=req.session_id, user_id=user_id,
+            state_response=tm_state,
+            trigger_text=f"PROBE[{req.probe_type}]: {probe_prompt[:120]}",
+        )
+        after_metrics = tm_extract(tm_state)
+    except ThermoMindError as e:
+        tm_error = str(e)
+        logger.error(f"[PROBE] ThermoMind cycle failed: {e}")
+
+    # 4. Interpret deltas per Nile's rubric.
+    reading = interpret_delta(req.probe_type, before_state, after_metrics)
+
+    # 5. Persist.
+    probe_id = str(uuid.uuid4())
+    probe_doc = {
+        "probe_id": probe_id,
+        "session_id": req.session_id,
+        "user_id": user_id,
+        "user_name": user_name,
+        "probe_type": req.probe_type,
+        "preset_id": req.preset_id,
+        "preset_title": preset["title"] if preset else None,
+        "target_rule": req.target_rule or (preset.get("targets_rule") if preset else None),
+        "prompt": probe_prompt,
+        "response_excerpt": (response_text or "")[:600],
+        "before_metrics": (before_state or {}).get("metrics") if before_state else None,
+        "after_metrics": after_metrics,
+        "reading": reading,
+        "thermomind_error": tm_error,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.substrate_probes.insert_one(probe_doc)
+    # Strip the Mongo _id out of the returned doc (insert_one mutates the dict).
+    probe_doc.pop("_id", None)
+
+    return probe_doc
+
+
+@api_router.delete("/mirror/probes/{probe_id}")
+async def delete_probe_run(probe_id: str):
+    """Delete a single probe run from the persistent log."""
+    result = await db.substrate_probes.delete_one({"probe_id": probe_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Probe not found")
+    return {"deleted": True, "probe_id": probe_id}
+
+
+# ============================================================
 # FLUTE ANALYSIS — Corpus Data Storage
 # ============================================================
 

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { API } from "../App";
 import { toast } from "sonner";
-import { ArrowLeft, Send, Upload, Volume2, VolumeX } from "lucide-react";
+import { ArrowLeft, Send, Upload, Volume2, VolumeX, Activity } from "lucide-react";
 import { ScrollArea } from "./ui/scroll-area";
 import { usePresenceVoice } from "../hooks/usePresenceVoice";
 
@@ -347,6 +347,16 @@ export const MirrorArchive = () => {
           
           <div className="flex items-center gap-4">
             <span className="text-cyan-400/60 text-sm tracking-[0.2em]">MIRROR ARCHIVE</span>
+
+            {/* Substrate probes — Nile's three runtime stress-tests. */}
+            <button
+              onClick={() => navigate("/mirror-archive/probes")}
+              className="p-1 text-slate-500 hover:text-violet-300 transition-colors"
+              title="Substrate probes (Paradox · Pattern-Break · Starvation)"
+              data-testid="mirror-probes-link"
+            >
+              <Activity size={18} />
+            </button>
             
             {/* Voice toggle */}
             {voiceSupported && (
