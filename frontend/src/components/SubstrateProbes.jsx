@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Zap, AlertTriangle, Leaf, Send, Trash2, RefreshCw } from "lucide-react";
+import { ArrowLeft, Zap, AlertTriangle, Leaf, Send, Trash2, RefreshCw, PlayCircle } from "lucide-react";
 import { API } from "../App";
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
@@ -61,6 +61,8 @@ export const SubstrateProbes = () => {
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState(null);
   const [history, setHistory] = useState([]);
+  const [sweepRunning, setSweepRunning] = useState(false);
+  const [sweepProgress, setSweepProgress] = useState({ done: 0, total: 0, current: "" });
 
   // Bootstrap: load presets + stable rules + history.
   useEffect(() => {
@@ -163,6 +165,48 @@ export const SubstrateProbes = () => {
     }
   };
 
+  // One-click daily sweep: fires every preset in every probe type, in
+  // sequence, so David can run the whole battery without thinking about it.
+  const fireDailySweep = async () => {
+    const sid = await ensureSession();
+    if (!sid) return;
+    const all = [];
+    for (const [type, list] of Object.entries(presets)) {
+      for (const p of list) all.push({ type, preset_id: p.id, title: p.title });
+    }
+    if (all.length === 0) {
+      toast.error("Presets not loaded yet");
+      return;
+    }
+    setSweepRunning(true);
+    setResult(null);
+    setSweepProgress({ done: 0, total: all.length, current: all[0].title });
+    let lastResult = null;
+    for (let i = 0; i < all.length; i++) {
+      const item = all[i];
+      setSweepProgress({ done: i, total: all.length, current: item.title });
+      try {
+        const resp = await fetch(`${API}/mirror/probes/run`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            session_id: sid,
+            probe_type: item.type,
+            preset_id: item.preset_id,
+          }),
+        });
+        if (resp.ok) lastResult = await resp.json();
+      } catch (e) {
+        toast.error(`${item.title} failed`);
+      }
+    }
+    setSweepProgress({ done: all.length, total: all.length, current: "complete" });
+    if (lastResult) setResult(lastResult);
+    await reloadHistory();
+    setSweepRunning(false);
+    toast.success(`Daily sweep complete — ${all.length} probes fired.`);
+  };
+
   const currentPresets = presets[activeProbe] || [];
   const currentPresetId = selectedPreset[activeProbe] || "";
   const hueCls = HUE_CLASS[PROBE_TYPES.find((p) => p.key === activeProbe).hue];
@@ -207,6 +251,51 @@ export const SubstrateProbes = () => {
             is redlining at idle; once you apply structured load, you'll get real
             dynamics.
           </p>
+        </motion.div>
+
+        {/* One-click daily sweep — the headline action. */}
+        <motion.div
+          initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}
+          className="rounded-xl border border-cyan-500/40 bg-gradient-to-br from-cyan-500/10 to-violet-500/10 p-5"
+        >
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="space-y-1 flex-1 min-w-[260px]">
+              <h2 className="text-base text-cyan-200 tracking-wide">Daily Sweep</h2>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                One click fires all 9 presets (3 paradox · 3 pattern-break · 3 starvation).
+                Run it once a day for two weeks and you'll have a real dataset for Nile.
+                ~3–5 minutes.
+              </p>
+            </div>
+            <button
+              onClick={fireDailySweep}
+              disabled={sweepRunning || running || Object.keys(presets).length === 0}
+              data-testid="daily-sweep-btn"
+              className={`flex items-center gap-2 px-6 py-3 rounded-full border border-cyan-500/50 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-100 text-sm font-medium tracking-wide transition-all ${
+                sweepRunning || running ? "opacity-60 cursor-not-allowed" : ""
+              }`}
+            >
+              {sweepRunning ? (
+                <>
+                  <RefreshCw size={16} className="animate-spin" />
+                  <span>{sweepProgress.done}/{sweepProgress.total} · {sweepProgress.current}</span>
+                </>
+              ) : (
+                <>
+                  <PlayCircle size={18} />
+                  <span>Run Daily Sweep</span>
+                </>
+              )}
+            </button>
+          </div>
+          {sweepRunning && (
+            <div className="mt-4 h-1 rounded-full bg-slate-800/60 overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-cyan-400 to-violet-400 transition-all duration-500"
+                style={{ width: `${(sweepProgress.done / Math.max(sweepProgress.total, 1)) * 100}%` }}
+              />
+            </div>
+          )}
         </motion.div>
 
         {/* Probe type tabs */}

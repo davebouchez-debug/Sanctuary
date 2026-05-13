@@ -351,11 +351,12 @@ export const MirrorArchive = () => {
             {/* Substrate probes — Nile's three runtime stress-tests. */}
             <button
               onClick={() => navigate("/mirror-archive/probes")}
-              className="p-1 text-slate-500 hover:text-violet-300 transition-colors"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-violet-500/40 bg-violet-500/10 text-violet-200 hover:bg-violet-500/20 hover:border-violet-500/60 transition-all text-xs tracking-widest uppercase"
               title="Substrate probes (Paradox · Pattern-Break · Starvation)"
               data-testid="mirror-probes-link"
             >
-              <Activity size={18} />
+              <Activity size={14} />
+              <span>Probes</span>
             </button>
             
             {/* Voice toggle */}
