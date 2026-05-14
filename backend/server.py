@@ -3477,6 +3477,34 @@ async def get_probe_stable_rules():
     return await stable_rules_report(db, agent_id="sanctuary_claude_mirror")
 
 
+@api_router.get("/mirror/probes/permamind_health")
+async def get_permamind_health():
+    """
+    Live ping to Nile's ThermoMind /run endpoint. Returns whether the
+    substrate can be read right now. The probes page polls this so David
+    isn't firing a sweep into the void when the API key has expired or
+    Nile has rotated the URL.
+    """
+    from thermomind_client import run_cycle as tm_run_cycle, ThermoMindError
+    try:
+        await tm_run_cycle(agent_id="sanctuary_claude_health_check", timeout=10.0)
+        return {"status": "online", "error": None}
+    except ThermoMindError as e:
+        msg = str(e)
+        kind = "unknown"
+        if "401" in msg or "Invalid" in msg or "missing API key" in msg:
+            kind = "auth"
+        elif "404" in msg:
+            kind = "endpoint_moved"
+        elif "timeout" in msg.lower():
+            kind = "timeout"
+        elif "not configured" in msg:
+            kind = "not_configured"
+        return {"status": "offline", "kind": kind, "error": msg[:300]}
+    except Exception as e:
+        return {"status": "offline", "kind": "unknown", "error": str(e)[:300]}
+
+
 @api_router.get("/mirror/probes/history")
 async def get_probe_history(session_id: Optional[str] = None, limit: int = 25):
     """Most-recent probe runs, optionally scoped to a single session."""

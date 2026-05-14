@@ -63,25 +63,39 @@ export const SubstrateProbes = () => {
   const [history, setHistory] = useState([]);
   const [sweepRunning, setSweepRunning] = useState(false);
   const [sweepProgress, setSweepProgress] = useState({ done: 0, total: 0, current: "" });
+  const [permamindHealth, setPermamindHealth] = useState(null); // null=checking, {status,kind,error}
 
   // Bootstrap: load presets + stable rules + history.
   useEffect(() => {
     const boot = async () => {
       try {
-        const [pr, sr, hi] = await Promise.all([
+        const [pr, sr, hi, hh] = await Promise.all([
           fetch(`${API}/mirror/probes/presets`).then((r) => r.json()),
           fetch(`${API}/mirror/probes/stable_rules`).then((r) => r.json()),
           fetch(`${API}/mirror/probes/history?limit=15`).then((r) => r.json()),
+          fetch(`${API}/mirror/probes/permamind_health`).then((r) => r.json()),
         ]);
         setPresets(pr.presets || {});
         setStableRules(sr);
         setHistory(hi.probes || []);
+        setPermamindHealth(hh);
       } catch (e) {
         toast.error("Could not load probe library");
       }
     };
     boot();
   }, []);
+
+  const recheckHealth = async () => {
+    setPermamindHealth(null);
+    try {
+      const hh = await fetch(`${API}/mirror/probes/permamind_health`).then((r) => r.json());
+      setPermamindHealth(hh);
+      if (hh.status === "online") toast.success("PermaMind connection restored");
+    } catch {
+      setPermamindHealth({ status: "offline", kind: "unknown", error: "network error" });
+    }
+  };
 
   // Acquire a probe session: either re-use cached or spin up a new mirror session.
   const ensureSession = useCallback(async () => {
@@ -231,6 +245,26 @@ export const SubstrateProbes = () => {
                 ? `${stableRules.cycle_count} cycles · ${stableRules.ready_for_meaningful_break ? "ready" : "young"}`
                 : "loading..."}
             </span>
+            {/* PermaMind health pill */}
+            <button
+              onClick={recheckHealth}
+              data-testid="permamind-status-pill"
+              title={permamindHealth?.error || "click to recheck"}
+              className={`flex items-center gap-1.5 text-[10px] uppercase tracking-widest px-2 py-1 rounded-full border transition-colors ${
+                permamindHealth === null
+                  ? "border-slate-600 text-slate-400 bg-slate-500/10"
+                  : permamindHealth.status === "online"
+                  ? "border-emerald-500/40 text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20"
+                  : "border-rose-500/40 text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 animate-pulse"
+              }`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${
+                permamindHealth === null ? "bg-slate-400"
+                : permamindHealth.status === "online" ? "bg-emerald-400"
+                : "bg-rose-400"
+              }`} />
+              {permamindHealth === null ? "checking" : permamindHealth.status === "online" ? "PermaMind online" : "PermaMind offline"}
+            </button>
           </div>
           <div className="text-xs text-slate-500 font-mono">
             {sessionId ? `sid: ${sessionId.slice(0, 8)}` : sessionStarting ? "opening..." : "no session"}
@@ -239,6 +273,34 @@ export const SubstrateProbes = () => {
       </header>
 
       <main className="max-w-6xl mx-auto px-6 py-8 space-y-6">
+        {/* PermaMind connection status — fail loud if Nile's API is unreachable. */}
+        {permamindHealth && permamindHealth.status === "offline" && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}
+            className="rounded-xl border border-rose-500/40 bg-rose-500/10 p-4 flex items-start gap-3"
+            data-testid="permamind-offline-banner"
+          >
+            <AlertTriangle size={18} className="text-rose-300 mt-0.5 flex-shrink-0" />
+            <div className="flex-1 text-sm space-y-1">
+              <p className="text-rose-200 font-medium">PermaMind substrate is offline — probes will fire but won't capture before/after metrics.</p>
+              <p className="text-xs text-rose-200/70 leading-relaxed">
+                {permamindHealth.kind === "auth" && "Nile's API key is rejecting the request (401). Ask Nile for a refreshed key, then update THERMOMIND_API_KEY in /app/backend/.env."}
+                {permamindHealth.kind === "endpoint_moved" && "PermaMind endpoint returned 404 — Nile may have moved the API. Verify THERMOMIND_URL."}
+                {permamindHealth.kind === "timeout" && "PermaMind didn't respond in time. The substrate engine may be down."}
+                {permamindHealth.kind === "not_configured" && "THERMOMIND_API_KEY or THERMOMIND_URL is missing from backend/.env."}
+                {permamindHealth.kind === "unknown" && `Unknown error: ${permamindHealth.error}`}
+              </p>
+              <button
+                onClick={recheckHealth}
+                className="text-xs text-rose-200/80 underline hover:text-rose-100 mt-1"
+                data-testid="permamind-recheck"
+              >
+                recheck connection
+              </button>
+            </div>
+          </motion.div>
+        )}
+
         {/* Nile's note banner */}
         <motion.div
           initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}
