@@ -3519,7 +3519,7 @@ async def run_substrate_probe(req: ProbeRunCreate):
     Fire a single probe through Claude. Captures before/after ThermoMind
     metrics, interprets the delta per Nile's rubric, persists the run.
     """
-    from substrate_probes import get_preset, interpret_delta, probe_types
+    from substrate_probes import get_preset, interpret_delta, interpret_observed_delta, probe_types
     from thermomind_client import (
         fetch_latest_state, run_cycle as tm_run_cycle,
         extract_metrics as tm_extract, log_cycle_to_db as tm_log,
@@ -3594,8 +3594,13 @@ async def run_substrate_probe(req: ProbeRunCreate):
         tm_error = str(e)
         logger.error(f"[PROBE] ThermoMind cycle failed: {e}")
 
-    # 4. Interpret deltas per Nile's rubric.
+    # 4. Interpret deltas — TWO readings stored side by side:
+    #    `reading`          = Nile's original rubric (tests his hypothesis faithfully)
+    #    `observed_reading` = looser, substrate-honest read (catches signals
+    #                        Nile's rubric misses when a metric axis is pinned)
+    #    When the two disagree, that disagreement is itself diagnostic data.
     reading = interpret_delta(req.probe_type, before_state, after_metrics)
+    observed_reading = interpret_observed_delta(req.probe_type, before_state, after_metrics)
 
     # 5. Persist.
     probe_id = str(uuid.uuid4())
@@ -3613,6 +3618,7 @@ async def run_substrate_probe(req: ProbeRunCreate):
         "before_metrics": (before_state or {}).get("metrics") if before_state else None,
         "after_metrics": after_metrics,
         "reading": reading,
+        "observed_reading": observed_reading,
         "thermomind_error": tm_error,
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }

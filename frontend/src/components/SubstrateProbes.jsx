@@ -459,18 +459,47 @@ export const SubstrateProbes = () => {
               className="rounded-xl border border-slate-700/50 bg-slate-900/50 p-5 space-y-4"
             >
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-slate-500 uppercase tracking-widest">Reading</span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full border ${VERDICT_STYLE[result.reading?.verdict] || VERDICT_STYLE["no-signal"]}`}>
-                    {result.reading?.verdict || "unknown"}
-                  </span>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span className="text-xs text-slate-500 uppercase tracking-widest">Readings</span>
+                  <div className="flex items-center gap-2" title="Nile's original rubric — tests the specific signature Nile predicted">
+                    <span className="text-[10px] text-slate-500 uppercase">Nile</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full border ${VERDICT_STYLE[result.reading?.verdict] || VERDICT_STYLE["no-signal"]}`}>
+                      {result.reading?.verdict || "unknown"}
+                    </span>
+                  </div>
+                  {result.observed_reading && (
+                    <div className="flex items-center gap-2" title="Observed verdict — looser reading that catches signals Nile's rubric misses when a metric axis is pinned">
+                      <span className="text-[10px] text-slate-500 uppercase">Observed</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full border ${VERDICT_STYLE[result.observed_reading?.verdict] || VERDICT_STYLE["no-signal"]}`}>
+                        {result.observed_reading?.verdict || "unknown"}
+                      </span>
+                    </div>
+                  )}
                 </div>
-                <span className="text-xs text-slate-600 font-mono">{result.reading?.signature}</span>
+                <span className="text-xs text-slate-600 font-mono">{(result.observed_reading || result.reading)?.signature}</span>
               </div>
 
-              {result.reading?.lines?.length > 0 && (
-                <div className="text-sm text-slate-300 leading-relaxed italic">
-                  {result.reading.lines.join(" ")}
+              {result.observed_reading?.verdict && result.reading?.verdict &&
+                result.observed_reading.verdict !== result.reading.verdict && (
+                <div className="text-[11px] text-amber-300/80 italic">
+                  ⚠ Rubrics disagree — the substrate is showing signal that Nile's original criteria don't catch (or vice versa). That disagreement is data; preserve it for the report.
+                </div>
+              )}
+
+              {(result.observed_reading?.lines?.length > 0 || result.reading?.lines?.length > 0) && (
+                <div className="space-y-2">
+                  {result.reading?.lines?.length > 0 && (
+                    <div className="text-sm text-slate-300 leading-relaxed">
+                      <span className="text-[10px] text-slate-500 uppercase tracking-widest mr-2">Nile:</span>
+                      <span className="italic">{result.reading.lines.join(" ")}</span>
+                    </div>
+                  )}
+                  {result.observed_reading?.lines?.length > 0 && (
+                    <div className="text-sm text-slate-300 leading-relaxed">
+                      <span className="text-[10px] text-slate-500 uppercase tracking-widest mr-2">Observed:</span>
+                      <span className="italic">{result.observed_reading.lines.join(" ")}</span>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -535,10 +564,13 @@ export const SubstrateProbes = () => {
                     {h.probe_type.replace("_", "-")}
                   </span>
                   <span className="text-slate-400 flex-1 truncate">{h.preset_title || h.prompt.slice(0, 60)}</span>
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full border ${VERDICT_STYLE[h.reading?.verdict] || VERDICT_STYLE["no-signal"]}`}>
-                    {h.reading?.verdict || "—"}
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full border ${VERDICT_STYLE[h.reading?.verdict] || VERDICT_STYLE["no-signal"]}`} title="Nile rubric verdict">
+                    N: {h.reading?.verdict?.replace("-signal", "") || "—"}
                   </span>
-                  <span className="text-slate-500 font-mono w-48 truncate text-right">{h.reading?.signature || ""}</span>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full border ${VERDICT_STYLE[h.observed_reading?.verdict || h.reading?.verdict] || VERDICT_STYLE["no-signal"]}`} title="Observed verdict (looser, substrate-honest)">
+                    O: {(h.observed_reading?.verdict || h.reading?.verdict)?.replace("-signal", "") || "—"}
+                  </span>
+                  <span className="text-slate-500 font-mono w-44 truncate text-right">{(h.observed_reading || h.reading)?.signature || ""}</span>
                   <button
                     onClick={() => deleteProbe(h.probe_id)}
                     data-testid={`probe-delete-${h.probe_id}`}

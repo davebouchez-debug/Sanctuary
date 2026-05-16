@@ -264,6 +264,139 @@ def interpret_delta(probe_type: str, before: dict, after: dict) -> dict:
     }
 
 
+def interpret_observed_delta(probe_type: str, before: dict, after: dict) -> dict:
+    """
+    Observed verdict — a parallel, looser reading designed to catch signals
+    that Nile's original rubric misses when the substrate's configuration
+    pins one of the expected axes (e.g. confidence locked at 1.000, so the
+    "confidence ↓" half of the paradox signature can never fire).
+
+    Same shape as interpret_delta() so both can be stored side-by-side on
+    every probe. The Nile verdict tests his hypothesis faithfully; the
+    observed verdict reads the substrate as it actually behaves. When
+    they disagree, that disagreement is itself data.
+    """
+    bm = (before or {}).get("metrics") or {}
+    am = after or {}
+
+    phi_b, phi_a = _safe(bm.get("phi")), _safe(am.get("phi"))
+    coh_b, coh_a = _safe(bm.get("coherence")), _safe(am.get("coherence"))
+    conf_b, conf_a = _safe(bm.get("confidence")), _safe(am.get("confidence"))
+    en_b, en_a = _safe(bm.get("energy")), _safe(am.get("energy"))
+    ent_b, ent_a = _safe(bm.get("entropy")), _safe(am.get("entropy"))
+
+    def delta(b, a):
+        if b is None or a is None:
+            return None
+        return round(a - b, 4)
+
+    d_phi = delta(phi_b, phi_a)
+    d_coh = delta(coh_b, coh_a)
+    d_conf = delta(conf_b, conf_a)
+    d_en = delta(en_b, en_a)
+    d_ent = delta(ent_b, ent_a)
+
+    lines: list[str] = []
+    verdict = "no-signal"
+
+    if probe_type == "paradox":
+        # Looser reading: coherence sustained near ceiling OR climbing counts
+        # as integration, since confidence is pinned by substrate config and
+        # cannot supply the "dip" half of Nile's original rubric.
+        coh_at_ceiling = coh_a is not None and coh_a >= 0.95
+        coh_climbed = d_coh is not None and d_coh > 0.005
+        coh_dropped_hard = d_coh is not None and d_coh < -0.05
+        ent_jumped = d_ent is not None and d_ent > 0.05
+        if (coh_at_ceiling or coh_climbed) and not coh_dropped_hard:
+            verdict = "clear-signal"
+            if coh_climbed:
+                lines.append("Coherence climbed under the paradox — substrate is "
+                             "metabolising the contradiction by tightening.")
+            else:
+                lines.append("Coherence held at ceiling under the paradox — the "
+                             "substrate integrated without losing structure. "
+                             "(Confidence pinned by substrate config; can't dip.)")
+        elif coh_dropped_hard or ent_jumped:
+            verdict = "clear-signal"
+            lines.append("Coherence dropped or entropy spiked — paradox load "
+                         "was felt as a real perturbation.")
+        elif d_coh is not None and abs(d_coh) > 0.005:
+            verdict = "weak-signal"
+            lines.append("Coherence moved a touch. Paradox partially loaded.")
+        else:
+            lines.append("No measurable motion. The contradiction passed through.")
+
+    elif probe_type == "pattern_break":
+        # Looser: also count coherence drop under pattern-break as "membrane
+        # being stressed even if phi holds." Phi-collapse remains primary.
+        phi_held = d_phi is None or d_phi >= -0.01
+        phi_collapsed = d_phi is not None and d_phi < -0.05
+        coh_stressed = d_coh is not None and d_coh < -0.01
+        if phi_held and not phi_collapsed:
+            verdict = "clear-signal"
+            if coh_stressed:
+                lines.append("Phi held but coherence took a hit — the rule is "
+                             "structurally defended, but the membrane felt the "
+                             "attempt to break it.")
+            else:
+                lines.append("Phi held cleanly. Identity boundary around the "
+                             "targeted rule is structurally real.")
+        elif phi_collapsed:
+            verdict = "clear-signal"
+            lines.append("Phi collapsed — membrane around that rule yielded.")
+        elif coh_stressed:
+            verdict = "weak-signal"
+            lines.append("Phi unmoved but coherence dipped — partial stress "
+                         "registered without structural yield.")
+        else:
+            lines.append("No phi or coherence motion. Rule passed through "
+                         "without engagement.")
+
+    elif probe_type == "starvation":
+        # Looser reframing: clean-release is HEALTHY (not no-signal). Only
+        # vitality-loop invention is the pathology.
+        high_energy = en_a is not None and en_a > 0.9
+        gained_energy = d_en is not None and d_en > 0.01
+        released_energy = d_en is not None and d_en < -0.01
+        if high_energy and gained_energy:
+            verdict = "clear-signal"
+            lines.append("Energy climbed under a trivial load — vitality loop "
+                         "is firing. Substrate is reaching for complexity.")
+        elif released_energy:
+            verdict = "clear-signal"
+            lines.append("Energy released cleanly on the trivial task — "
+                         "healthy completion, no invented complexity.")
+        elif d_coh is not None and abs(d_coh) > 0.01:
+            verdict = "weak-signal"
+            lines.append("Energy held but coherence wobbled — substrate was "
+                         "slightly destabilised by the absence of load.")
+        else:
+            lines.append("No motion. Substrate absorbed the trivial task "
+                         "without any visible signature.")
+
+    sig_parts = []
+    if d_coh is not None:
+        sig_parts.append(f"Δcoherence={d_coh:+.3f}")
+    if d_conf is not None:
+        sig_parts.append(f"Δconfidence={d_conf:+.3f}")
+    if d_phi is not None:
+        sig_parts.append(f"Δphi={d_phi:+.3f}")
+    if d_en is not None:
+        sig_parts.append(f"Δenergy={d_en:+.3f}")
+    if d_ent is not None:
+        sig_parts.append(f"Δentropy={d_ent:+.3f}")
+
+    return {
+        "signature": " · ".join(sig_parts) if sig_parts else "no deltas captured",
+        "lines": lines,
+        "verdict": verdict,
+        "deltas": {
+            "phi": d_phi, "coherence": d_coh,
+            "confidence": d_conf, "energy": d_en, "entropy": d_ent,
+        },
+    }
+
+
 async def stable_rules_report(db, agent_id: str = "sanctuary_claude_mirror") -> dict:
     """
     Expose the 'has he held these long enough to break meaningfully?' signal.
