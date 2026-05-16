@@ -55,7 +55,7 @@ async def run_cycle(
         raise ThermoMindError("THERMOMIND_API_KEY or THERMOMIND_URL not configured")
 
     url = f"{base_url.rstrip('/')}/run"
-    headers = {"x-api-key": api_key}
+    headers = {"Authorization": api_key}
     params = {"mode": mode, "agent_id": agent_id}
 
     async with httpx.AsyncClient(timeout=timeout) as client:
@@ -75,7 +75,7 @@ async def get_usage(timeout: float = 15.0) -> dict:
     if not api_key or not base_url:
         raise ThermoMindError("THERMOMIND_API_KEY or THERMOMIND_URL not configured")
     url = f"{base_url.rstrip('/')}/keys/usage"
-    headers = {"x-api-key": api_key}
+    headers = {"Authorization": api_key}
     async with httpx.AsyncClient(timeout=timeout) as client:
         resp = await client.get(url, headers=headers)
         resp.raise_for_status()
