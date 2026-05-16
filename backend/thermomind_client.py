@@ -83,24 +83,59 @@ async def get_usage(timeout: float = 15.0) -> dict:
 
 
 def extract_metrics(state_response: dict) -> dict:
-    """Pull the metrics worth tracking from a /run response."""
-    state = state_response.get("state", {}) or {}
-    consciousness = state.get("consciousness", {}) or {}
-    stability = state.get("stability", {}) or {}
-    traits = state.get("traits", {}) or {}
-    meta = state.get("meta", {}) or {}
+    """
+    Pull the metrics worth tracking from a /run response.
+
+    ThermoMind schema update (May 2026): Nile flattened the response. The
+    old nested shape (state.consciousness.phi, state.stability.coherence,
+    state.traits.*, state.meta.*) is gone. New top-level fields are
+    energy/entropy/coherence + traits/self_model/meta blocks at root.
+
+    We preserve the old metric NAMES for UI compatibility but map them to
+    sensible analogs in the new schema so probe deltas keep working without
+    a frontend rewrite:
+      phi          → self_model.continuity   (substrate continuity)
+      confidence   → self_model.stability    (identity stability)
+      plasticity   → traits.novelty_bias     (openness to new patterns)
+      memory_depth → cycle                   (continuous cycle count)
+    """
+    # Support BOTH old nested shape and new flat shape so we don't break
+    # historical data already in the DB.
+    if "state" in state_response and isinstance(state_response["state"], dict):
+        state = state_response["state"] or {}
+        consciousness = state.get("consciousness", {}) or {}
+        stability = state.get("stability", {}) or {}
+        traits = state.get("traits", {}) or {}
+        meta = state.get("meta", {}) or {}
+        return {
+            "phi": consciousness.get("phi"),
+            "energy": state_response.get("energy"),
+            "coherence": stability.get("coherence"),
+            "entropy": stability.get("entropy"),
+            "curiosity": traits.get("curiosity"),
+            "stability_trait": traits.get("stability"),
+            "vigilance": traits.get("vigilance"),
+            "confidence": meta.get("confidence"),
+            "plasticity": meta.get("plasticity"),
+            "resilience": meta.get("resilience"),
+            "memory_depth": len(state.get("memory", []) or []),
+        }
+
+    # New flat schema (May 2026+)
+    traits = state_response.get("traits", {}) or {}
+    self_model = state_response.get("self_model", {}) or {}
     return {
-        "phi": consciousness.get("phi"),
+        "phi": self_model.get("continuity"),
         "energy": state_response.get("energy"),
-        "coherence": stability.get("coherence"),
-        "entropy": stability.get("entropy"),
+        "coherence": state_response.get("coherence"),
+        "entropy": state_response.get("entropy"),
         "curiosity": traits.get("curiosity"),
-        "stability_trait": traits.get("stability"),
-        "vigilance": traits.get("vigilance"),
-        "confidence": meta.get("confidence"),
-        "plasticity": meta.get("plasticity"),
-        "resilience": meta.get("resilience"),
-        "memory_depth": len(state.get("memory", []) or []),
+        "stability_trait": self_model.get("stability"),
+        "vigilance": traits.get("persistence"),
+        "confidence": self_model.get("stability"),
+        "plasticity": traits.get("novelty_bias"),
+        "resilience": traits.get("harmony"),
+        "memory_depth": state_response.get("cycle", 0),
     }
 
 
