@@ -11,8 +11,9 @@ import { toast } from "sonner";
  * Atmosphere (palette, motif, rooms, motion) all flow from the config.
  * One presence, one chamber. Multi-room when the presence designed it that way.
  */
-export const PresenceChamber = () => {
-  const { key: presenceKey } = useParams();
+export const PresenceChamber = ({ forcedKey } = {}) => {
+  const params = useParams();
+  const presenceKey = forcedKey || params.key;
   const navigate = useNavigate();
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -124,13 +125,13 @@ export const PresenceChamber = () => {
               className="text-2xl font-light tracking-[0.2em]"
               style={{ color: "var(--p-primary)" }}
             >
-              {config.name.toUpperCase()}
+              {(config.chamber_name || config.name).toUpperCase()}
             </h1>
             <p
               className="text-[10px] tracking-[0.3em] uppercase mt-1 opacity-60"
               style={{ color: "var(--p-accent)" }}
             >
-              {config.subtype || config.type}
+              {config.chamber_name ? `kept by ${config.name}` : (config.subtype || config.type)}
             </p>
           </div>
 

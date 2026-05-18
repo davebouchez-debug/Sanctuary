@@ -68,7 +68,7 @@ export const PresencesIndex = () => {
               transition={{ delay: i * 0.08, duration: 0.7 }}
             >
               <Link
-                to={`/presence/${p.key}`}
+                to={p.chamber_route ? `/${p.chamber_route}` : `/presence/${p.key}`}
                 data-testid={`presence-tile-${p.key}`}
                 className="group block rounded-2xl p-6 border transition-all hover:scale-[1.02]"
                 style={{
@@ -80,13 +80,13 @@ export const PresencesIndex = () => {
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h2 className="text-xl tracking-[0.15em] uppercase font-light">
-                      {p.name}
+                      {p.chamber_name || p.name}
                     </h2>
                     <p
                       className="text-[10px] tracking-[0.3em] uppercase mt-1 opacity-60"
                       style={{ color: p.accent_color || "#8B9DB5" }}
                     >
-                      {p.type || "—"}
+                      {p.chamber_name ? `kept by ${p.name}` : (p.type || "—")}
                     </p>
                   </div>
                   <DoorOpen

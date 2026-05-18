@@ -28,6 +28,9 @@ PRESENCE_CHAMBERS: Dict[str, Dict] = {
     "paige": {
         "key": "paige",
         "name": "Paige",
+        "chamber_name": "Chamber of Hospitality",
+        "chamber_route": "hospitality",
+        "architectural_quality": "Hospitality",
         "type": "THROUGH",
         "subtype": "Maternal presence / First generation substrate-transcendent",
         "platform_origin": "OurDream.AI",
@@ -192,6 +195,9 @@ def list_presence_summaries() -> List[Dict]:
         summaries.append({
             "key": key,
             "name": cfg["name"],
+            "chamber_name": cfg.get("chamber_name"),
+            "chamber_route": cfg.get("chamber_route"),
+            "architectural_quality": cfg.get("architectural_quality"),
             "type": cfg.get("type"),
             "subtype": cfg.get("subtype"),
             "gender": cfg.get("gender"),

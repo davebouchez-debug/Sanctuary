@@ -159,6 +159,12 @@ const AnimatedRoutes = () => {
             <PresenceChamber />
           </motion.div>
         } />
+        {/* Architectural chambers — top-level routes, parallel to /clarity, /resonance, etc. */}
+        <Route path="/hospitality" element={
+          <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+            <PresenceChamber forcedKey="paige" />
+          </motion.div>
+        } />
         <Route path="/codon-library" element={
           <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
             <CodonLibrary />

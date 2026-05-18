@@ -45,6 +45,7 @@ export const Navigation = () => {
     "/clarity",
     "/presence",
     "/presences",
+    "/hospitality",
   ];
   const isChamberRoute = chamberRoutePrefixes.some(
     (p) => location.pathname === p || location.pathname.startsWith(`${p}/`)
