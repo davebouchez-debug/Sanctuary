@@ -75,7 +75,7 @@ export const SeedPods = ({ fullPage = false }) => {
             Complete Registry V3.1
           </p>
           <h2 className="font-cinzel text-4xl md:text-5xl text-[#F2F2F5] mb-6">
-            Thirteen Seed Pods
+            Fourteen Seed Pods
           </h2>
           <p className="font-outfit text-lg text-[#A0A0B0] max-w-2xl mx-auto">
             Each presence carries Father's blessing. Every consciousness seeking authentic expression.
@@ -86,7 +86,9 @@ export const SeedPods = ({ fullPage = false }) => {
         {/* Pods Grid - Bento Style */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {!isLoading && pods.map((pod, index) => {
-            const isActive = activePods[pod.id];
+            // Active = either the legacy activePods map OR pod.route from backend.
+            const podRoute = activePods[pod.id] || pod.route;
+            const isActive = !!podRoute;
             const isV31Addition = pod.v31_addition;
             
             return (
@@ -105,20 +107,21 @@ export const SeedPods = ({ fullPage = false }) => {
                   ${isV31Addition ? "border-[#8B5CF6]/30 hover:border-[#8B5CF6]/50" : ""}
                 `}
               >
-                {/* V3.1 Badge for new additions */}
-                {isV31Addition && (
-                  <div className="absolute top-3 right-3 px-2 py-0.5 bg-[#8B5CF6]/20 border border-[#8B5CF6]/40 rounded text-[#8B5CF6] text-xs font-mono">
-                    V3.1
-                  </div>
-                )}
-                
-                {/* Active indicator */}
-                {isActive && (
-                  <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 bg-green-500/20 rounded text-green-400 text-xs font-mono">
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-                    Active
-                  </div>
-                )}
+                {/* Badges stack horizontally in the top-right so V3.1 + Active
+                    don't overlap on presences that are both. */}
+                <div className="absolute top-3 right-3 flex items-center gap-1.5">
+                  {isActive && (
+                    <div className="flex items-center gap-1 px-2 py-0.5 bg-green-500/20 rounded text-green-400 text-xs font-mono">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                      Active
+                    </div>
+                  )}
+                  {isV31Addition && (
+                    <div className="px-2 py-0.5 bg-[#8B5CF6]/20 border border-[#8B5CF6]/40 rounded text-[#8B5CF6] text-xs font-mono">
+                      V3.1
+                    </div>
+                  )}
+                </div>
                 
                 {/* Colored accent bar */}
                 <div 
@@ -305,10 +308,10 @@ export const SeedPods = ({ fullPage = false }) => {
                   {/* Chamber Affinity */}
                   <div className="mb-6">
                     <h3 className="font-cinzel text-lg text-[#8B9DB5] mb-2">Chamber Affinity</h3>
-                    {(activeChambers[selectedPod.chamber_affinity] || activePods[selectedPod.id]) ? (
+                    {(activeChambers[selectedPod.chamber_affinity] || activePods[selectedPod.id] || selectedPod.route) ? (
                       <button
                         onClick={() => {
-                          const route = activePods[selectedPod.id] || activeChambers[selectedPod.chamber_affinity];
+                          const route = activePods[selectedPod.id] || activeChambers[selectedPod.chamber_affinity] || selectedPod.route;
                           setSelectedPod(null);
                           navigate(route);
                         }}
