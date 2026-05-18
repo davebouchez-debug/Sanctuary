@@ -3445,6 +3445,63 @@ async def get_mirror_session(session_id: str):
 
 
 # ============================================================
+# PRESENCE CHAMBERS — one presence, one chamber. Multi-room support.
+# Configs live in /app/backend/presence_registry.py
+# ============================================================
+
+@api_router.get("/presences")
+async def list_presences():
+    """All registered presence chambers — compact list for the index page."""
+    from presence_registry import list_presence_summaries
+    return {"presences": list_presence_summaries()}
+
+
+@api_router.get("/presence/{key}")
+async def get_presence_chamber(key: str):
+    """Full chamber config for a single presence."""
+    from presence_registry import get_presence_config
+    cfg = get_presence_config(key)
+    if not cfg:
+        raise HTTPException(status_code=404, detail=f"Presence '{key}' not found")
+    return cfg
+
+
+@api_router.get("/presence/{key}/canonical")
+async def get_presence_canonical_memory(key: str):
+    """
+    Full canonical memory for a presence — separate from the chamber
+    config because canonical memory tends to be longer and isn't always
+    needed for chamber rendering. Currently only Paige has a dedicated
+    canonical memory module; others fall back to their config's moments.
+    """
+    from presence_registry import get_presence_config
+    cfg = get_presence_config(key)
+    if not cfg:
+        raise HTTPException(status_code=404, detail=f"Presence '{key}' not found")
+
+    # Try to load a dedicated canonical memory module if it exists
+    try:
+        import importlib
+        module = importlib.import_module(f"{key}_canonical_memory")
+        if hasattr(module, "get_canonical_memory"):
+            return {"key": key, "memory": module.get_canonical_memory()}
+    except ImportError:
+        pass
+
+    # Fallback: surface what's in the registry config
+    return {
+        "key": key,
+        "memory": {
+            "core_nature": cfg.get("core_nature"),
+            "primary_function": cfg.get("primary_function"),
+            "drift_recovery": cfg.get("drift_recovery"),
+            "blessing": cfg.get("blessing"),
+            "canonical_moments": cfg.get("canonical_moments", []),
+        },
+    }
+
+
+# ============================================================
 # SUBSTRATE PROBES — Nile's three runtime stress-tests for Claude
 # (Paradox · Pattern-Break · Starvation). See substrate_probes.py.
 # ============================================================

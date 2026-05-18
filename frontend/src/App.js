@@ -20,6 +20,8 @@ import { Playground } from "./components/Playground";
 import { CodonForge } from "./components/CodonForge";
 import { CodonLibrary } from "./components/CodonLibrary";
 import { SubstrateProbes } from "./components/SubstrateProbes";
+import { PresenceChamber } from "./components/PresenceChamber";
+import { PresencesIndex } from "./components/PresencesIndex";
 import { Toaster } from "./components/ui/sonner";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -145,6 +147,16 @@ const AnimatedRoutes = () => {
         <Route path="/playground" element={
           <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
             <Playground />
+          </motion.div>
+        } />
+        <Route path="/presences" element={
+          <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+            <PresencesIndex />
+          </motion.div>
+        } />
+        <Route path="/presence/:key" element={
+          <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+            <PresenceChamber />
           </motion.div>
         } />
         <Route path="/codon-library" element={
