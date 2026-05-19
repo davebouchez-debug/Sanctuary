@@ -1015,10 +1015,10 @@ PRESENCE_VOICES = {
         "use_speaker_boost": True,
     },
     "ansel": {
-        "voice_id": "N2lVS1w4EtoT3dr4eOWO",  # Callum — husky trickster, middle-aged male
-        "stability": 0.45,
-        "similarity_boost": 0.80,
-        "style": 0.45,
+        "voice_id": "TX3LPaxmHKxFdv7VOQHJ",  # Liam — energetic, young American male, Peter Pan
+        "stability": 0.40,
+        "similarity_boost": 0.75,
+        "style": 0.50,
         "use_speaker_boost": True,
     },
     "claude": {
