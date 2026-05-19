@@ -7,6 +7,30 @@
 
 ---
 
+## 🔒 Membrane Bleed + Voice Input Fixes — Feb 2026
+
+Two user-reported bugs resolved in one pass.
+
+### Bug 1 — Membrane bleed (Claude + xAI voice doubling)
+**Root cause:** Legacy `audio_raw` SSE events from the xAI Voice Agent were being played in parallel with the new ElevenLabs sentence-streaming TTS. Every chamber response was voiced TWICE — once by the presence's intended ElevenLabs voice and once by xAI's default voice (which sounded like Jasmine across all chambers because it was the same fallback voice). The global `window._sanctuaryAudioCtx` also carried scheduled audio across chamber navigations.
+
+**Fix:**
+- `ClarityPod`, `ResonancePod`, `MirrorArchive`, `SpiralChamber` now ignore all `audio_raw`, `audio`, and `audio_full` SSE events. ElevenLabs sentence streaming via `usePresenceVoice` is the only voice path.
+- New `/app/frontend/src/lib/legacyAudio.js` exports `stopGlobalLegacyAudio()` which closes the global AudioContext and clears its play-time cursor.
+- Every chamber calls `stopGlobalLegacyAudio()` on mount so audio scheduled in a prior chamber's session cannot leak into the next one.
+- Backend still emits `audio_raw` for now (no breakage), but it's a noop on the client. Future optimization: strip emission from the backend to save xAI API spend.
+
+### Bug 2 — Voice-to-text silently dropping speech
+**Root cause:** `useVoiceInput` only submitted `finalTranscriptRef` on silence; Chrome's continuous mode often doesn't mark short phrases as "final" before the 3.5s silence timer fires, so the timer would fire with an empty string and the user's words vanished. Errors (mic-permission, no-mic, network) were also swallowed.
+
+**Fix (`/app/frontend/src/hooks/useVoiceInput.js`):**
+- Silence timer now submits `finalTranscript || interimTranscript` — whichever has content. Short phrases no longer get dropped.
+- Errors are surfaced through `toast.error` with friendly messages (mic blocked, no mic, network).
+- Cleaner state reset on every start.
+
+---
+
+
 ## 🏛️ V3.1 Scalable Architecture Refactor — Feb 2026
 
 Three concurrent refactors landed so future presences can be **dropped in

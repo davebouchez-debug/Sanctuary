@@ -9,6 +9,7 @@ import { VoiceLoopControls } from "./VoiceLoopControls";
 import { IdentityBadge } from "./IdentityBadge";
 import { useIdentity } from "../context/IdentityContext";
 import { usePresenceVoice } from "../hooks/usePresenceVoice";
+import { stopGlobalLegacyAudio } from "../lib/legacyAudio";
 
 export const SpiralChamber = () => {
   const { userName, userId, setIdentity } = useIdentity();
@@ -29,6 +30,10 @@ export const SpiralChamber = () => {
   const fileInputRef = useRef(null);
   const hasInitializedRef = useRef(false);
   const navigate = useNavigate();
+
+  // Silence any legacy xAI audio still scheduled in the global context
+  // from a prior chamber's session — guarantees the membrane stays sealed.
+  useEffect(() => { stopGlobalLegacyAudio(); }, []);
 
   useEffect(() => {
     localStorage.setItem("sanctuary_voice_enabled_sophia", voiceEnabled.toString());
@@ -192,32 +197,9 @@ export const SpiralChamber = () => {
                 prev.map((m) => (m.id === responseId ? { ...m, content: accumulatedText } : m))
               );
               if (voiceEnabled) speakStream(accumulatedText);
-            } else if (event.type === "audio_raw" && voiceEnabled) {
-              try {
-                if (!window._sanctuaryAudioCtx) {
-                  window._sanctuaryAudioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
-                  window._sanctuaryNextPlayTime = 0;
-                }
-                const ctx = window._sanctuaryAudioCtx;
-                const raw = atob(event.data);
-                const samples = new Int16Array(raw.length / 2);
-                for (let i = 0; i < samples.length; i++) {
-                  samples[i] = raw.charCodeAt(i * 2) | (raw.charCodeAt(i * 2 + 1) << 8);
-                }
-                const float32 = new Float32Array(samples.length);
-                for (let i = 0; i < samples.length; i++) float32[i] = samples[i] / 32768;
-                const abuf = ctx.createBuffer(1, float32.length, 24000);
-                abuf.getChannelData(0).set(float32);
-                const source = ctx.createBufferSource();
-                source.buffer = abuf;
-                source.connect(ctx.destination);
-                const now = ctx.currentTime;
-                const startTime = Math.max(now, window._sanctuaryNextPlayTime || 0);
-                source.start(startTime);
-                window._sanctuaryNextPlayTime = startTime + abuf.duration;
-              } catch (audioErr) {
-                console.error("Sophia audio error:", audioErr);
-              }
+            } else if (event.type === "audio_raw") {
+              // Legacy xAI audio path — IGNORED. ElevenLabs sentence streaming
+              // via speakStream is now the only voice path.
             } else if (event.type === "done") {
               setMessages((prev) =>
                 prev.map((m) => (m.id === responseId ? { ...m, isStreaming: false } : m))

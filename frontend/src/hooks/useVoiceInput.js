@@ -3,18 +3,26 @@
  * for the Sanctuary presence chambers.
  *
  * Behavior:
- *   - Press the mic button → continuous listening starts.
+ *   - Click the mic → continuous listening starts (browser prompts for
+ *     mic permission on first use).
  *   - As you speak, interim transcripts populate so you can see what was heard.
- *   - When you stop speaking for `silenceMs` (default 3500ms / 3.5s),
- *     the final transcript is auto-submitted.
- *   - Honors the presence's pace: silence is part of the conversation.
+ *   - When you stop speaking for `silenceMs` (default 3.5s), the heard
+ *     transcript is auto-submitted via onTranscript(text).
+ *   - If the browser hasn't marked the speech "final" by the time the
+ *     silence timer fires (Chrome's auto-finalize is slow on short phrases),
+ *     we submit the interim text instead — better to send what we heard
+ *     than to drop the user's words silently.
+ *   - Errors are surfaced through the `error` field and via toast so the
+ *     user sees what went wrong (permission denied, no mic, etc.).
  *
- * Uses browser-native Web Speech API (free, real-time). Falls back gracefully
- * when unsupported (Firefox, older browsers) — the chamber stays usable via text.
+ * Uses the browser-native Web Speech API. Returns isSupported=false on
+ * Firefox and older browsers — chambers stay usable via text input.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 const DEFAULT_SILENCE_MS = 3500;
+const MIN_USEFUL_CHARS = 2;  // single "a"/"i" tokens are usually noise
 
 export const useVoiceInput = ({
   onTranscript,
@@ -29,21 +37,18 @@ export const useVoiceInput = ({
   const recognitionRef = useRef(null);
   const silenceTimerRef = useRef(null);
   const finalTranscriptRef = useRef("");
+  const interimTranscriptRef = useRef("");
   const onTranscriptRef = useRef(onTranscript);
   const silenceMsRef = useRef(silenceMs);
   const wantListeningRef = useRef(false);
 
-  // Keep refs in sync with latest props so the recognition handlers
-  // (registered once) always call the freshest callback / silence value.
   useEffect(() => { onTranscriptRef.current = onTranscript; }, [onTranscript]);
   useEffect(() => { silenceMsRef.current = silenceMs; }, [silenceMs]);
 
   // Detect support once
   useEffect(() => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) {
-      setIsSupported(false);
-    }
+    if (!SR) setIsSupported(false);
   }, []);
 
   const clearSilenceTimer = useCallback(() => {
@@ -53,26 +58,32 @@ export const useVoiceInput = ({
     }
   }, []);
 
+  // Submit the heard transcript on silence. Falls back to interim if the
+  // browser hasn't yet marked anything final.
+  const submitHeard = useCallback(() => {
+    const finalText = finalTranscriptRef.current.trim();
+    const interimText = interimTranscriptRef.current.trim();
+    const text = finalText || interimText;
+    if (text.length >= MIN_USEFUL_CHARS) {
+      finalTranscriptRef.current = "";
+      interimTranscriptRef.current = "";
+      setInterim("");
+      wantListeningRef.current = false;
+      try { recognitionRef.current?.stop(); } catch { /* no-op */ }
+      onTranscriptRef.current?.(text);
+    }
+  }, []);
+
   const armSilenceTimer = useCallback(() => {
     clearSilenceTimer();
-    silenceTimerRef.current = setTimeout(() => {
-      // 3.5s of silence → submit whatever final transcript we have
-      const text = finalTranscriptRef.current.trim();
-      if (text) {
-        finalTranscriptRef.current = "";
-        setInterim("");
-        // Stop recognition; it will be restarted by the consumer if they want
-        wantListeningRef.current = false;
-        try { recognitionRef.current?.stop(); } catch { /* no-op */ }
-        onTranscriptRef.current?.(text);
-      }
-    }, silenceMsRef.current);
-  }, [clearSilenceTimer]);
+    silenceTimerRef.current = setTimeout(submitHeard, silenceMsRef.current);
+  }, [clearSilenceTimer, submitHeard]);
 
   const stop = useCallback(() => {
     wantListeningRef.current = false;
     clearSilenceTimer();
     finalTranscriptRef.current = "";
+    interimTranscriptRef.current = "";
     setInterim("");
     try { recognitionRef.current?.stop(); } catch { /* no-op */ }
     setIsListening(false);
@@ -81,8 +92,10 @@ export const useVoiceInput = ({
   const start = useCallback(() => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) {
-      setError("Voice input is not supported in this browser.");
+      const msg = "Voice input isn't supported in this browser. Try Chrome, Edge, or Safari.";
+      setError(msg);
       setIsSupported(false);
+      toast.error(msg);
       return;
     }
 
@@ -96,12 +109,12 @@ export const useVoiceInput = ({
       setIsListening(true);
       setError(null);
       finalTranscriptRef.current = "";
+      interimTranscriptRef.current = "";
       setInterim("");
     };
 
     recognition.onresult = (event) => {
       let interimText = "";
-      // Walk new results since last index
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const res = event.results[i];
         const transcript = res[0]?.transcript || "";
@@ -111,23 +124,35 @@ export const useVoiceInput = ({
           interimText += transcript;
         }
       }
+      interimTranscriptRef.current = interimText;
       setInterim(interimText);
       // Any new speech (final OR interim) resets the silence countdown.
       armSilenceTimer();
     };
 
     recognition.onerror = (event) => {
+      const err = event.error;
       // "no-speech" fires on long silence — that's expected, don't surface it.
-      if (event.error && event.error !== "no-speech" && event.error !== "aborted") {
-        setError(event.error);
+      // "aborted" fires when we stop() ourselves — also expected.
+      if (err && err !== "no-speech" && err !== "aborted") {
+        setError(err);
+        const friendly = err === "not-allowed"
+          ? "Microphone access was denied. Enable it in your browser settings to speak."
+          : err === "audio-capture"
+            ? "No microphone detected. Plug one in and try again."
+            : err === "network"
+              ? "Voice recognition needs a network connection."
+              : `Voice input error: ${err}`;
+        toast.error(friendly);
+        wantListeningRef.current = false;
       }
     };
 
     recognition.onend = () => {
       setIsListening(false);
       clearSilenceTimer();
-      // If the user still wants to listen (e.g. browser stopped on a pause),
-      // auto-restart. Otherwise leave it off.
+      // If the user still wants to listen (browser auto-stopped on a pause),
+      // restart. Otherwise leave it off.
       if (wantListeningRef.current) {
         try {
           recognition.start();
@@ -142,7 +167,9 @@ export const useVoiceInput = ({
     try {
       recognition.start();
     } catch (e) {
-      setError(e.message || "Could not start microphone.");
+      const msg = e?.message || "Could not start the microphone.";
+      setError(msg);
+      toast.error(msg);
       wantListeningRef.current = false;
     }
   }, [language, armSilenceTimer, clearSilenceTimer]);

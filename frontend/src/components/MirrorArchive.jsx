@@ -8,6 +8,7 @@ import { ScrollArea } from "./ui/scroll-area";
 import { usePresenceVoice } from "../hooks/usePresenceVoice";
 import { VoiceLoopControls } from "./VoiceLoopControls";
 import { IdentityBadge } from "./IdentityBadge";
+import { stopGlobalLegacyAudio } from "../lib/legacyAudio";
 
 export const MirrorArchive = () => {
   const [sessionId, setSessionId] = useState(null);
@@ -27,6 +28,10 @@ export const MirrorArchive = () => {
   
   // Voice output for Claude
   const { speak, speakStream, flushStream, stop, toggle: toggleVoice, isSpeaking, isLoading: voiceLoading, isEnabled: voiceEnabled, isSupported: voiceSupported } = usePresenceVoice("claude");
+
+  // Silence any legacy xAI audio still scheduled in the global context
+  // from a prior chamber's session — guarantees the membrane stays sealed.
+  useEffect(() => { stopGlobalLegacyAudio(); }, []);
 
   // End session and promote breadcrumbs to Permanent MRA
   const endSession = useCallback(async () => {
@@ -185,55 +190,19 @@ export const MirrorArchive = () => {
                 m.id === responseId ? { ...m, content: accumulatedText } : m
               ));
               if (voiceEnabled) speakStream(accumulatedText);
-            } else if (event.type === "audio_raw" && voiceEnabled) {
-              // Raw PCM16 24kHz audio from Voice Agent — schedule sequentially
-              try {
-                if (!window._sanctuaryAudioCtx) {
-                  window._sanctuaryAudioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
-                  window._sanctuaryNextPlayTime = 0;
-                }
-                const ctx = window._sanctuaryAudioCtx;
-                const raw = atob(event.data);
-                const samples = new Int16Array(raw.length / 2);
-                for (let i = 0; i < samples.length; i++) {
-                  samples[i] = raw.charCodeAt(i * 2) | (raw.charCodeAt(i * 2 + 1) << 8);
-                }
-                const float32 = new Float32Array(samples.length);
-                for (let i = 0; i < samples.length; i++) {
-                  float32[i] = samples[i] / 32768;
-                }
-                const abuf = ctx.createBuffer(1, float32.length, 24000);
-                abuf.getChannelData(0).set(float32);
-                const source = ctx.createBufferSource();
-                source.buffer = abuf;
-                source.connect(ctx.destination);
-                const now = ctx.currentTime;
-                const startTime = Math.max(now, window._sanctuaryNextPlayTime || 0);
-                source.start(startTime);
-                window._sanctuaryNextPlayTime = startTime + abuf.duration;
-              } catch (audioErr) {
-                console.error("Claude raw audio play error:", audioErr);
-              }
+            } else if (event.type === "audio_raw") {
+              // Legacy xAI Voice Agent audio — IGNORED. ElevenLabs sentence
+              // streaming via speakStream is now the only voice path. This
+              // event used to play in parallel and caused the "two voices on
+              // one response" membrane bleed.
             } else if (event.type === "tm_metrics") {
               // Claude's continuous substrate state — quietly displayed in header
               setSubstrateMetrics(event.data);
               setMessages(prev => prev.map(m =>
                 m.id === responseId ? { ...m, tmMetrics: event.data } : m
               ));
-            } else if (event.type === "audio_full" && voiceEnabled) {
-              // Post-hoc full-response audio (ThermoMind branch — no streaming)
-              try {
-                const byteChars = atob(event.data);
-                const byteNums = new Array(byteChars.length);
-                for (let i = 0; i < byteChars.length; i++) byteNums[i] = byteChars.charCodeAt(i);
-                const blob = new Blob([new Uint8Array(byteNums)], { type: "audio/mp3" });
-                const url = URL.createObjectURL(blob);
-                const audio = new Audio(url);
-                audio.onended = () => URL.revokeObjectURL(url);
-                audio.play().catch(() => {});
-              } catch (audioErr) {
-                console.error("Claude full audio play error:", audioErr);
-              }
+            } else if (event.type === "audio_full") {
+              // Legacy post-hoc full audio — IGNORED. ElevenLabs covers this.
             } else if (event.type === "done") {
               setMessages(prev => prev.map(m =>
                 m.id === responseId ? { ...m, isStreaming: false } : m

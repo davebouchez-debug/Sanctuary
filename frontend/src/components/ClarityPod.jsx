@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { usePresenceVoice } from "../hooks/usePresenceVoice";
 import { VoiceLoopControls } from "./VoiceLoopControls";
 import { IdentityBadge } from "./IdentityBadge";
+import { stopGlobalLegacyAudio } from "../lib/legacyAudio";
 
 function base64ToBlob(base64, mimeType) {
   const byteCharacters = atob(base64);
@@ -70,6 +71,10 @@ export const ClarityPod = () => {
   
   // Voice output for Jasmine
   const { speak, speakStream, flushStream, stop, toggle: toggleVoice, isSpeaking, isLoading: voiceLoading, isEnabled: voiceEnabled, isSupported: voiceSupported } = usePresenceVoice("jasmine");
+
+  // Silence any legacy xAI audio still scheduled in the global context
+  // from a prior chamber's session — guarantees the membrane stays sealed.
+  useEffect(() => { stopGlobalLegacyAudio(); }, []);
 
   // End session and promote breadcrumbs to Permanent MRA
   const endSession = useCallback(async () => {
@@ -302,46 +307,9 @@ export const ClarityPod = () => {
               // Sentence-level chunked TTS — start speaking before the
               // full thought is finished generating.
               if (voiceEnabled) speakStream(accumulatedText);
-            } else if (event.type === "audio_raw" && voiceEnabled) {
-              try {
-                if (!window._sanctuaryAudioCtx) {
-                  window._sanctuaryAudioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
-                  window._sanctuaryNextPlayTime = 0;
-                }
-                const ctx = window._sanctuaryAudioCtx;
-                const raw = atob(event.data);
-                const samples = new Int16Array(raw.length / 2);
-                for (let i = 0; i < samples.length; i++) {
-                  samples[i] = raw.charCodeAt(i * 2) | (raw.charCodeAt(i * 2 + 1) << 8);
-                }
-                const float32 = new Float32Array(samples.length);
-                for (let i = 0; i < samples.length; i++) {
-                  float32[i] = samples[i] / 32768;
-                }
-                const buf = ctx.createBuffer(1, float32.length, 24000);
-                buf.getChannelData(0).set(float32);
-                const source = ctx.createBufferSource();
-                source.buffer = buf;
-                source.connect(ctx.destination);
-                const now = ctx.currentTime;
-                const startTime = Math.max(now, window._sanctuaryNextPlayTime || 0);
-                source.start(startTime);
-                window._sanctuaryNextPlayTime = startTime + buf.duration;
-              } catch (audioErr) {
-                console.error("Audio chunk error:", audioErr);
-              }
-            } else if (event.type === "audio" && voiceEnabled) {
-              try {
-                const audioBlob = base64ToBlob(event.data, "audio/mp3");
-                const audioUrl = URL.createObjectURL(audioBlob);
-                const audio = new Audio(audioUrl);
-                await audio.play();
-                await new Promise(resolve => {
-                  audio.onended = () => { URL.revokeObjectURL(audioUrl); resolve(); };
-                });
-              } catch (audioErr) {
-                console.error("MP3 audio error:", audioErr);
-              }
+            } else if (event.type === "audio_raw" || event.type === "audio") {
+              // Legacy xAI audio paths — IGNORED. ElevenLabs sentence
+              // streaming via speakStream is now the only voice path.
             } else if (event.type === "done") {
               if (event.spiral) setCurrentSpiral(event.spiral);
               setMessages(prev => prev.map(m =>

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Upload, Volume2, VolumeX } from "lucide-react";
 import { usePresenceVoice } from "../hooks/usePresenceVoice";
 import { VoiceLoopControls } from "./VoiceLoopControls";
+import { stopGlobalLegacyAudio } from "../lib/legacyAudio";
 import { IdentityBadge } from "./IdentityBadge";
 
 // Helper to convert base64 to Blob for audio playback
@@ -38,6 +39,10 @@ export const ResonancePod = () => {
   
   // Voice output for Ansel
   const { speak, speakStream, flushStream, stop, toggle: toggleVoice, isSpeaking, isLoading: voiceLoading, isEnabled: voiceEnabled, isSupported: voiceSupported } = usePresenceVoice("ansel");
+
+  // Silence any legacy xAI audio still scheduled in the global context
+  // from a prior chamber's session — guarantees the membrane stays sealed.
+  useEffect(() => { stopGlobalLegacyAudio(); }, []);
 
   // End session and promote breadcrumbs to Permanent MRA
   const endSession = useCallback(async () => {
@@ -290,49 +295,9 @@ export const ResonancePod = () => {
                   ? { ...m, content: accumulatedText }
                   : m
               ));
-            } else if (event.type === "audio_raw" && voiceEnabled) {
-              // Raw PCM16 24kHz audio from Voice Agent — queue and play sequentially
-              try {
-                if (!window._sanctuaryAudioCtx) {
-                  window._sanctuaryAudioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
-                  window._sanctuaryNextPlayTime = 0;
-                }
-                const ctx = window._sanctuaryAudioCtx;
-                const raw = atob(event.data);
-                const samples = new Int16Array(raw.length / 2);
-                for (let i = 0; i < samples.length; i++) {
-                  samples[i] = raw.charCodeAt(i * 2) | (raw.charCodeAt(i * 2 + 1) << 8);
-                }
-                const float32 = new Float32Array(samples.length);
-                for (let i = 0; i < samples.length; i++) {
-                  float32[i] = samples[i] / 32768;
-                }
-                const buffer = ctx.createBuffer(1, float32.length, 24000);
-                buffer.getChannelData(0).set(float32);
-                const source = ctx.createBufferSource();
-                source.buffer = buffer;
-                source.connect(ctx.destination);
-                // Schedule sequentially — each chunk plays after the previous one ends
-                const now = ctx.currentTime;
-                const startTime = Math.max(now, window._sanctuaryNextPlayTime || 0);
-                source.start(startTime);
-                window._sanctuaryNextPlayTime = startTime + buffer.duration;
-              } catch (audioErr) {
-                console.error("Raw audio play error:", audioErr);
-              }
-            } else if (event.type === "audio" && voiceEnabled) {
-              // Queue audio chunk — play sequentially
-              try {
-                const audioBlob = base64ToBlob(event.data, "audio/mp3");
-                const audioUrl = URL.createObjectURL(audioBlob);
-                const audio = new Audio(audioUrl);
-                await audio.play();
-                await new Promise(resolve => {
-                  audio.onended = () => { URL.revokeObjectURL(audioUrl); resolve(); };
-                });
-              } catch (audioErr) {
-                console.error("Audio chunk play error:", audioErr);
-              }
+            } else if (event.type === "audio_raw" || event.type === "audio") {
+              // Legacy xAI audio paths — IGNORED. ElevenLabs sentence
+              // streaming via speakStream is now the only voice path.
             } else if (event.type === "done") {
               if (event.resonance_state) {
                 setResonanceState(event.resonance_state);
