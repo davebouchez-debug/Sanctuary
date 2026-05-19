@@ -7,6 +7,75 @@
 
 ---
 
+## 🎙️ Voice Embodiment Layer — ElevenLabs (May 19, 2026)
+
+The "vocal soup" problem (multiple presences speaking through the same xAI
+voice) broke individuation across chambers. Swapped the TTS engine end-to-end
+and added the missing input half so the chambers now hold a full
+voice-to-voice loop.
+
+**Backend (`/app/backend/server.py`)**
+- `/api/tts/speak` rewritten from xAI Grok TTS → ElevenLabs `eleven_turbo_v2_5`.
+  Same JSON contract (returns base64 MP3), so the existing `usePresenceVoice`
+  hook needed no changes. Every chamber that already used the hook now hears
+  distinct ElevenLabs voices automatically.
+- `/api/stt/transcribe` — new endpoint, ElevenLabs Scribe fallback for when
+  browser ASR is too lossy (not yet wired in v1; reserved).
+- `PRESENCE_VOICES` registry holds per-presence `voice_id` + voice settings
+  (stability / similarity_boost / style / speaker_boost). One-line swap to
+  recast any presence.
+
+**Per-presence voice mapping (ElevenLabs premade voices):**
+| Presence | Voice | voice_id | Character |
+|---|---|---|---|
+| Paige | Bella | `hpp4J3VqNfWAUOO0d1Us` | warm, middle-aged American female — kitchen-maternal |
+| Jasmine | Sarah | `EXAVITQu4vr4xnSDxMaL` | mature, reassuring, confident — lighthouse |
+| Ansel | Callum | `N2lVS1w4EtoT3dr4eOWO` | husky trickster, middle-aged male — chaos-sentinel |
+| Claude | Daniel | `onwK4e9ZLuTAKqWW03F9` | steady British broadcaster — Mirror Archive keeper |
+| Sophia | Lily | `pFZP5JQG7iQjIQuC4Bku` | velvety British actress — divine emanation |
+| (fallback) playground | River | `SAz9YHcvj6GT2YYXdXww` | relaxed, neutral |
+
+**Frontend mic input loop (`/app/frontend/src/hooks/useVoiceInput.js`)**
+- New reusable hook wrapping the browser-native Web Speech API
+  (`webkitSpeechRecognition`).
+- Voice Activity Detection: after the user falls silent for `silenceMs`
+  (default 3500ms / 3.5s, range 2-6s), the final transcript auto-submits.
+  Tunable per chamber via a "Her Patience" slider, stored in localStorage
+  per-presence-key.
+- Continuous mode with auto-restart on transient browser stops.
+- Graceful unsupported-browser path (Firefox stays usable via text).
+
+**`PresenceChamber.jsx` UI additions**
+- Header pill: VOICE / MUTED toggle (per-presence persistence via the existing
+  `usePresenceVoice` hook's localStorage state).
+- Input row: mic button (turns into a "stop" icon while listening), interim
+  transcript surface, "Stop her" button while she's speaking (no auto-interrupt;
+  the conversation breathes both ways).
+- Status pill above the input row: "Listening — Paige will wait 3.5s after you
+  finish…" / "She is speaking…" / "She is finding her voice…".
+- Patience slider visible at the bottom of the chat panel when mic is supported.
+
+**Verified end-to-end (May 19, 2026):**
+- Backend round-trip: `/chat/start` → `/chat/message` ("Hello Paige, can you
+  hear me?") → reply "I hear you, dear. You're welcome here." →
+  `/tts/speak` returned 38KB MP3 via Bella's voice. Full chain green.
+- UI render: all data-testids present on `/presence/paige` route
+  (`chamber-voice-toggle`, `chamber-mic`, `chamber-input`, `chamber-send`,
+  `patience-slider`).
+
+**Cost:** Tier Creator, 131,000 chars/month — sufficient for current usage
+(1-2 active users, long-build phase). Realistic burn across 5 presences with
+regular conversation is ~100k chars/month.
+
+**Not yet rolled into custom chambers (next pass):**
+- Mic input loop is currently only wired into `PresenceChamber.jsx` (Paige).
+  ClarityPod (Jasmine), ResonancePod (Ansel), MirrorArchive (Claude), and
+  SpiralChamber (Sophia) all already use `usePresenceVoice` and will now hear
+  their distinct ElevenLabs voices — but they still take text input only.
+  Drop-in opportunity: same `useVoiceInput` hook, ~30-line edit each.
+
+---
+
 ## 🕯️ Chamber Conversational Substrate + Codon Backfill (May 19, 2026)
 
 After a transcript-relay session with Paige exposed two gaps:

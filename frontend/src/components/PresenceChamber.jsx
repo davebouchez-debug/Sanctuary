@@ -1,9 +1,11 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, DoorOpen, BookOpen, X, Send } from "lucide-react";
+import { ArrowLeft, DoorOpen, BookOpen, X, Send, Mic, MicOff, Volume2, VolumeX, Square } from "lucide-react";
 import { API } from "../App";
 import { toast } from "sonner";
+import { usePresenceVoice } from "../hooks/usePresenceVoice";
+import { useVoiceInput } from "../hooks/useVoiceInput";
 
 /**
  * PresenceChamber — the shared multi-room engine.
@@ -32,6 +34,44 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
   const [chatError, setChatError] = useState(null);
   const messagesEndRef = useRef(null);
   const sessionIdRef = useRef(null);
+
+  // Voice (TTS) — auto-play her reply through ElevenLabs
+  const {
+    speak,
+    stop: stopSpeaking,
+    toggle: toggleVoice,
+    isSpeaking,
+    isLoading: voiceLoading,
+    isEnabled: voiceEnabled,
+  } = usePresenceVoice(presenceKey);
+
+  // Voice (Mic) — speak to her; auto-submit after 3.5s of silence
+  const [patience, setPatience] = useState(() => {
+    const stored = localStorage.getItem(`sanctuary_patience_${presenceKey}`);
+    return stored ? parseInt(stored, 10) : 3500;
+  });
+  useEffect(() => {
+    localStorage.setItem(`sanctuary_patience_${presenceKey}`, String(patience));
+  }, [patience, presenceKey]);
+
+  // The mic submission handler is set up after sendMessage is defined (below).
+  const sendMessageRef = useRef(null);
+  const {
+    start: startListening,
+    stop: stopListening,
+    isListening,
+    interim,
+    isSupported: micSupported,
+  } = useVoiceInput({
+    silenceMs: patience,
+    onTranscript: (text) => {
+      // Pipe the heard speech straight into the same send path the textarea uses.
+      sendMessageRef.current?.(text);
+    },
+  });
+
+  // Track the last message we've spoken so we don't repeat ourselves on re-renders.
+  const lastSpokenIdRef = useRef(null);
 
   // Keep ref in sync so the unload beacon (registered once) sees latest id
   useEffect(() => { sessionIdRef.current = sessionId; }, [sessionId]);
@@ -139,11 +179,14 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
     };
   }, [presenceKey]);
 
-  const sendMessage = async () => {
-    const text = input.trim();
+  const sendMessage = async (overrideText) => {
+    const text = (overrideText ?? input).trim();
     if (!text || !sessionId || sending) return;
     setSending(true);
     setChatError(null);
+    // Mic input arrives without going through the textarea state — clear it
+    // only when we are sending the textarea contents.
+    if (overrideText === undefined) setInput("");
     const userMsg = {
       id: `local-${Date.now()}`,
       role: "user",
@@ -151,7 +194,6 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
       timestamp: new Date().toISOString(),
     };
     setMessages((prev) => [...prev, userMsg]);
-    setInput("");
     try {
       const resp = await fetch(`${API}/presence/${presenceKey}/chat/message`, {
         method: "POST",
@@ -168,11 +210,27 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
       setChatError(e.message);
       // Roll back the optimistic user message so they can retry without dupes
       setMessages((prev) => prev.filter((m) => m.id !== userMsg.id));
-      setInput(text);
+      if (overrideText === undefined) setInput(text);
     } finally {
       setSending(false);
     }
   };
+
+  // Keep the ref pointed at the latest sendMessage closure so the mic hook
+  // (registered once) always calls the freshest version.
+  useEffect(() => {
+    sendMessageRef.current = sendMessage;
+  });
+
+  // Auto-speak every new assistant reply (when voice is enabled).
+  useEffect(() => {
+    if (!voiceEnabled || messages.length === 0) return;
+    const last = messages[messages.length - 1];
+    if (last.role !== "assistant") return;
+    if (lastSpokenIdRef.current === last.id) return;
+    lastSpokenIdRef.current = last.id;
+    speak(last.content);
+  }, [messages, voiceEnabled, speak]);
 
   const handleKeyDown = (e) => {
     // Enter sends; Shift+Enter inserts a newline (paste-friendly)
@@ -247,15 +305,33 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
             </p>
           </div>
 
-          <button
-            onClick={loadCanonical}
-            className="flex items-center gap-2 text-sm tracking-wide opacity-70 hover:opacity-100 transition-opacity"
-            style={{ color: "var(--p-primary)" }}
-            data-testid="chamber-canonical"
-          >
-            <BookOpen size={16} />
-            <span className="hidden sm:inline">HER STORY</span>
-          </button>
+          <div className="flex items-center gap-3">
+            {/* Sound toggle — global mute for this presence */}
+            <button
+              onClick={toggleVoice}
+              className="flex items-center gap-1.5 text-xs tracking-wide opacity-70 hover:opacity-100 transition-opacity px-2 py-1 rounded-full"
+              style={{
+                color: "var(--p-primary)",
+                background: voiceEnabled ? "color-mix(in srgb, var(--p-accent) 18%, transparent)" : "transparent",
+                border: "1px solid color-mix(in srgb, var(--p-accent) 30%, transparent)",
+              }}
+              data-testid="chamber-voice-toggle"
+              title={voiceEnabled ? "Voice on — click to mute" : "Voice off — click to unmute"}
+            >
+              {voiceEnabled ? <Volume2 size={14} /> : <VolumeX size={14} />}
+              <span className="hidden md:inline">{voiceEnabled ? "VOICE" : "MUTED"}</span>
+            </button>
+
+            <button
+              onClick={loadCanonical}
+              className="flex items-center gap-2 text-sm tracking-wide opacity-70 hover:opacity-100 transition-opacity"
+              style={{ color: "var(--p-primary)" }}
+              data-testid="chamber-canonical"
+            >
+              <BookOpen size={16} />
+              <span className="hidden sm:inline">HER STORY</span>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -466,11 +542,89 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
             <div ref={messagesEndRef} />
           </div>
 
+          {/* Voice status pill — what state the loop is in right now */}
+          {(isListening || isSpeaking || voiceLoading || sending) && (
+            <div
+              className="px-6 md:px-8 py-2 text-[10px] tracking-[0.25em] uppercase opacity-80 flex items-center justify-between gap-3 border-t"
+              style={{
+                borderColor: "color-mix(in srgb, var(--p-accent) 12%, transparent)",
+                color: "var(--p-accent)",
+              }}
+              data-testid="voice-status"
+            >
+              <motion.span
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 1.6, repeat: Infinity }}
+              >
+                {isListening
+                  ? `Listening — ${config.name} will wait ${(patience / 1000).toFixed(1)}s after you finish…`
+                  : sending
+                    ? `${config.name} is hearing you…`
+                    : voiceLoading
+                      ? `${config.name} is finding her voice…`
+                      : isSpeaking
+                        ? `${config.name} is speaking…`
+                        : ""}
+              </motion.span>
+              {isSpeaking && (
+                <button
+                  onClick={stopSpeaking}
+                  className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] tracking-widest uppercase opacity-80 hover:opacity-100 transition-opacity"
+                  style={{
+                    color: "var(--p-bg)",
+                    background: "var(--p-accent)",
+                  }}
+                  data-testid="chamber-stop-speaking"
+                  title="Stop her speaking"
+                >
+                  <Square size={10} />
+                  Stop her
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Interim transcript while listening — gives the user feedback they're being heard */}
+          {isListening && interim && (
+            <div
+              className="px-6 md:px-8 py-2 text-sm italic opacity-70 border-t"
+              style={{
+                borderColor: "color-mix(in srgb, var(--p-accent) 10%, transparent)",
+                color: "var(--p-primary)",
+              }}
+              data-testid="voice-interim"
+            >
+              "{interim}"
+            </div>
+          )}
+
           {/* Input row — textarea natively supports paste of long text / .txt contents */}
           <div
             className="px-4 md:px-6 py-4 border-t flex items-end gap-3"
             style={{ borderColor: "color-mix(in srgb, var(--p-accent) 15%, transparent)" }}
           >
+            {/* Mic button — only shown if the browser supports speech recognition */}
+            {micSupported && (
+              <button
+                data-testid="chamber-mic"
+                onClick={() => (isListening ? stopListening() : startListening())}
+                disabled={!sessionId}
+                className="flex items-center justify-center rounded-xl px-4 py-3 transition-all disabled:opacity-40 hover:opacity-90"
+                style={{
+                  background: isListening
+                    ? "var(--p-accent)"
+                    : "color-mix(in srgb, var(--p-accent) 18%, transparent)",
+                  color: isListening ? "var(--p-bg)" : "var(--p-primary)",
+                  border: "1px solid color-mix(in srgb, var(--p-accent) 35%, transparent)",
+                  minHeight: "52px",
+                }}
+                title={isListening ? "Stop listening" : "Speak to her"}
+                aria-label={isListening ? "Stop listening" : "Start listening"}
+              >
+                {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+              </button>
+            )}
+
             <textarea
               data-testid="chamber-input"
               value={input}
@@ -494,7 +648,7 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
             />
             <button
               data-testid="chamber-send"
-              onClick={sendMessage}
+              onClick={() => sendMessage()}
               disabled={!sessionId || sending || !input.trim()}
               className="flex items-center justify-center rounded-xl px-4 py-3 transition-opacity disabled:opacity-40 hover:opacity-90"
               style={{
@@ -507,6 +661,34 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
               <Send size={18} />
             </button>
           </div>
+
+          {/* Patience slider — how long she waits in your silence before responding */}
+          {micSupported && (
+            <div
+              className="px-6 md:px-8 py-3 flex items-center gap-3 border-t text-[10px] tracking-[0.2em] uppercase opacity-70"
+              style={{
+                borderColor: "color-mix(in srgb, var(--p-accent) 10%, transparent)",
+                color: "var(--p-primary)",
+              }}
+            >
+              <span style={{ color: "var(--p-accent)" }}>Her patience</span>
+              <input
+                type="range"
+                min={2000}
+                max={6000}
+                step={500}
+                value={patience}
+                onChange={(e) => setPatience(parseInt(e.target.value, 10))}
+                className="flex-1 accent-current"
+                style={{ accentColor: "var(--p-accent)" }}
+                data-testid="patience-slider"
+                aria-label="Silence threshold before she responds"
+              />
+              <span className="tabular-nums" style={{ color: "var(--p-accent)" }}>
+                {(patience / 1000).toFixed(1)}s
+              </span>
+            </div>
+          )}
         </motion.section>
 
 

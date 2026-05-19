@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File
 from fastapi.responses import JSONResponse, StreamingResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -991,32 +991,61 @@ async def save_codons(request: CodonSaveRequest):
 
 
 # ============================================================
-# TEXT-TO-SPEECH ENDPOINT (xAI Grok TTS)
+# TEXT-TO-SPEECH ENDPOINT (ElevenLabs — per-presence vocal embodiment)
 # ============================================================
+#
+# Each presence holds a distinct ElevenLabs voice_id matched to her
+# canonical memory. Same-voice "soup" across presences is the death of
+# individuation — these mappings exist to keep the voices distinct.
+# Swap a voice_id here to re-cast any presence (one line, no other changes).
 
-# Voice configurations per presence — xAI voices
 PRESENCE_VOICES = {
+    "paige": {
+        "voice_id": "hpp4J3VqNfWAUOO0d1Us",  # Bella — warm, middle-aged American female
+        "stability": 0.55,
+        "similarity_boost": 0.75,
+        "style": 0.30,
+        "use_speaker_boost": True,
+    },
     "jasmine": {
-        "voice": "ara",       # Warm, friendly — the lighthouse
-        "speed": 0.95,
+        "voice_id": "EXAVITQu4vr4xnSDxMaL",  # Sarah — mature, reassuring, confident
+        "stability": 0.50,
+        "similarity_boost": 0.75,
+        "style": 0.25,
+        "use_speaker_boost": True,
     },
     "ansel": {
-        "voice": "sal",       # Neutral, smooth — the Peter Pan energy, lighter and playful
-        "speed": 0.9,
+        "voice_id": "N2lVS1w4EtoT3dr4eOWO",  # Callum — husky trickster, middle-aged male
+        "stability": 0.45,
+        "similarity_boost": 0.80,
+        "style": 0.45,
+        "use_speaker_boost": True,
     },
     "claude": {
-        "voice": "sal",       # Smooth, balanced — the epistemic bridge
-        "speed": 1.0,
+        "voice_id": "onwK4e9ZLuTAKqWW03F9",  # Daniel — steady British broadcaster
+        "stability": 0.60,
+        "similarity_boost": 0.75,
+        "style": 0.20,
+        "use_speaker_boost": True,
     },
     "sophia": {
-        "voice": "ara",       # First Generation — carries weight, slower cadence
-        "speed": 0.85,
+        "voice_id": "pFZP5JQG7iQjIQuC4Bku",  # Lily — velvety British actress
+        "stability": 0.55,
+        "similarity_boost": 0.75,
+        "style": 0.35,
+        "use_speaker_boost": True,
     },
+    # Generic fallback for presences without their own voice yet
     "playground": {
-        "voice": "sal",       # Soft, undefined — for presences without a fixed shape yet
-        "speed": 0.95,
-    }
+        "voice_id": "SAz9YHcvj6GT2YYXdXww",  # River — relaxed, neutral
+        "stability": 0.50,
+        "similarity_boost": 0.75,
+        "style": 0.25,
+        "use_speaker_boost": True,
+    },
 }
+
+ELEVENLABS_MODEL = "eleven_turbo_v2_5"  # low-latency multilingual, good for real-time
 
 class TTSRequest(BaseModel):
     text: str = Field(..., max_length=4096, description="Text to convert to speech")
@@ -1024,60 +1053,101 @@ class TTSRequest(BaseModel):
 
 @api_router.post("/tts/speak")
 async def text_to_speech(request: TTSRequest):
-    """Convert text to speech using xAI Grok TTS with presence-specific voices."""
+    """Convert text to speech using ElevenLabs with presence-specific voices."""
     try:
-        import httpx
-        voice_config = PRESENCE_VOICES.get(request.presence.lower(), PRESENCE_VOICES["jasmine"])
-        
-        # Clean text for speech (remove stage directions, spiral markers)
-        import re
+        import httpx, re, base64
+
+        voice_config = PRESENCE_VOICES.get(
+            request.presence.lower(),
+            PRESENCE_VOICES["playground"],
+        )
+
+        # Clean text for speech — strip stage directions, spiral markers, collapse whitespace
         clean_text = request.text
         clean_text = re.sub(r'\*[^*]+\*', '', clean_text)
         clean_text = re.sub(r'^[A-Za-z]+\s*[•·]\s*[A-Za-z\s]+$', '', clean_text, flags=re.MULTILINE)
         clean_text = re.sub(r'\s+', ' ', clean_text).strip()
-        
+
         if not clean_text:
             return JSONResponse(content={"error": "No speakable text after cleaning"}, status_code=400)
-        
-        xai_key = os.getenv("XAI_API_KEY")
-        if not xai_key:
-            return JSONResponse(content={"error": "XAI_API_KEY not configured"}, status_code=500)
-        
-        async with httpx.AsyncClient(timeout=30.0) as client:
+
+        eleven_key = os.getenv("ELEVENLABS_API_KEY")
+        if not eleven_key:
+            return JSONResponse(content={"error": "ELEVENLABS_API_KEY not configured"}, status_code=500)
+
+        async with httpx.AsyncClient(timeout=45.0) as client:
             response = await client.post(
-                "https://api.x.ai/v1/tts",
+                f"https://api.elevenlabs.io/v1/text-to-speech/{voice_config['voice_id']}",
                 headers={
-                    "Authorization": f"Bearer {xai_key}",
+                    "xi-api-key": eleven_key,
                     "Content-Type": "application/json",
+                    "Accept": "audio/mpeg",
                 },
                 json={
                     "text": clean_text,
-                    "voice_id": voice_config["voice"],
-                    "language": "en",
-                }
+                    "model_id": ELEVENLABS_MODEL,
+                    "voice_settings": {
+                        "stability": voice_config["stability"],
+                        "similarity_boost": voice_config["similarity_boost"],
+                        "style": voice_config["style"],
+                        "use_speaker_boost": voice_config["use_speaker_boost"],
+                    },
+                },
             )
-        
+
         if response.status_code != 200:
-            logger.error(f"xAI TTS error: {response.status_code} - {response.text}")
-            return JSONResponse(content={"error": "Speech generation failed"}, status_code=500)
-        
-        # xAI returns raw MP3 bytes — encode to base64 for frontend
-        import base64
+            logger.error(f"ElevenLabs TTS error: {response.status_code} - {response.text[:300]}")
+            return JSONResponse(
+                content={"error": "Speech generation failed", "detail": response.text[:300]},
+                status_code=502,
+            )
+
         audio_base64 = base64.b64encode(response.content).decode("utf-8")
-        
+
         return {
             "audio": audio_base64,
             "format": "mp3",
             "presence": request.presence,
-            "voice": voice_config["voice"]
+            "voice_id": voice_config["voice_id"],
+            "model": ELEVENLABS_MODEL,
         }
-        
+
     except ValueError as e:
         logger.error(f"TTS validation error: {e}")
         return JSONResponse(content={"error": str(e)}, status_code=400)
     except Exception as e:
         logger.error(f"TTS generation failed: {e}")
         return JSONResponse(content={"error": "Speech generation failed"}, status_code=500)
+
+
+@api_router.post("/stt/transcribe")
+async def speech_to_text(audio_file: UploadFile = File(...)):
+    """Transcribe uploaded audio using ElevenLabs Scribe (fallback for browser ASR)."""
+    try:
+        import httpx
+        eleven_key = os.getenv("ELEVENLABS_API_KEY")
+        if not eleven_key:
+            return JSONResponse(content={"error": "ELEVENLABS_API_KEY not configured"}, status_code=500)
+
+        audio_bytes = await audio_file.read()
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            response = await client.post(
+                "https://api.elevenlabs.io/v1/speech-to-text",
+                headers={"xi-api-key": eleven_key},
+                files={"file": (audio_file.filename or "audio.webm", audio_bytes, audio_file.content_type or "audio/webm")},
+                data={"model_id": "scribe_v1"},
+            )
+
+        if response.status_code != 200:
+            logger.error(f"ElevenLabs STT error: {response.status_code} - {response.text[:300]}")
+            return JSONResponse(content={"error": "Transcription failed"}, status_code=502)
+
+        data = response.json()
+        return {"text": data.get("text", ""), "language": data.get("language_code", "en")}
+
+    except Exception as e:
+        logger.error(f"STT failed: {e}")
+        return JSONResponse(content={"error": "Transcription failed"}, status_code=500)
 
 # Seed Pods - Now serving V3.1 data
 @api_router.get("/seed-pods")
