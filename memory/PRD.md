@@ -7,6 +7,52 @@
 
 ---
 
+## 🏛️ V3.1 Scalable Architecture Refactor — Feb 2026
+
+Three concurrent refactors landed so future presences can be **dropped in
+by file** without touching `server.py`, navigation, or chamber components.
+
+### 1. Drop-in Presence Architecture (Backend)
+**New package `/app/backend/presences/`** with auto-discovery loader:
+- Each presence is a single file: `paige.py`, `sophia.py`, `playground.py`, etc.
+- File exports `PRESENCE` dict (chamber/identity config) — required.
+- File optionally exports `BACKEND` dict (chamber_path, collection, prompt_builder, voice) for template-based chat routes.
+- `presences/__init__.py` walks the directory at import, aggregates configs, and (via `register_all_presence_routes`) wires template chat endpoints automatically.
+- `server.py` no longer contains per-presence configs — Sophia and Playground moved into `presences/sophia.py` and `presences/playground.py`.
+- Legacy `presence_registry.py` is now a thin shim re-exporting from the new package (backward compatible).
+- `/api/presences` filters `hidden: True` presences (Playground stays direct-URL only).
+
+**To add a 4th, 5th, …100th presence:** drop a new file into `presences/`. Nothing else changes.
+
+### 2. Global Identity Context (Frontend)
+**New `/app/frontend/src/context/IdentityContext.jsx`**:
+- `<IdentityProvider>` wraps the app (in `App.js`).
+- `useIdentity()` returns `{ userName, userId, setIdentity, clearIdentity }`.
+- Reads canonical `sanctuary_user_name` / `sanctuary_user_id` localStorage keys at hydration.
+- Cross-tab sync via `storage` event + same-tab sync via custom `sanctuary-identity-change` event.
+- `IdentityBadge` now consumes context and broadcasts changes to every chamber instantly.
+- `PresenceChamber.jsx` re-runs its chat-start effect on `userName`/`userId` changes — no more `identityVersion` bumps.
+- `SpiralChamber.jsx` migrated to `useIdentity()` so /spiral participates in cross-chamber propagation.
+
+**Critical fix:** `IdentityBadge` modal now uses `createPortal(..., document.body)` to escape `<main class="relative z-10">` stacking contexts that previously intercepted the Save click.
+
+### 3. Navigation Cleanup (Frontend)
+Top nav reduced from 9 wrapping links to **3 dropdown groups + 1 CTA**:
+- **Sanctuary** — Hero/Harmonic Wheel/Seed Pods/Chambers/Cyril/The Vault (anchor scrolls).
+- **Chambers** — Clarity Pod / Resonance / Mirror Archive / Spiral / Hospitality / All Presences.
+- **Codons** — Codon Forge / Codon Library.
+- **Enter Clarity** — primary CTA pill, always visible.
+- Mobile menu: same groups, flat list with section headers.
+
+Adding a new chamber → add one line to the `Chambers` group items array.
+
+### Tests
+- `/app/backend/tests/test_refactor_v31.py` — 13 backend tests (presence registry, auto-registered routes, paige substrate, identity, legacy chambers). 13/13 passing.
+- Frontend smoke + identity propagation verified end-to-end via testing agent (iteration_6.json).
+
+---
+
+
 ## 🎙️ Voice Embodiment Layer — ElevenLabs (May 19, 2026)
 
 The "vocal soup" problem (multiple presences speaking through the same xAI
