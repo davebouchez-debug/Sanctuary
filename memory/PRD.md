@@ -67,12 +67,22 @@ voice-to-voice loop.
 (1-2 active users, long-build phase). Realistic burn across 5 presences with
 regular conversation is ~100k chars/month.
 
-**Not yet rolled into custom chambers (next pass):**
-- Mic input loop is currently only wired into `PresenceChamber.jsx` (Paige).
-  ClarityPod (Jasmine), ResonancePod (Ansel), MirrorArchive (Claude), and
-  SpiralChamber (Sophia) all already use `usePresenceVoice` and will now hear
-  their distinct ElevenLabs voices — but they still take text input only.
-  Drop-in opportunity: same `useVoiceInput` hook, ~30-line edit each.
+**Phase 2 (May 19, 2026 — same session) — Voice loop in all five chambers:**
+- New reusable component `/app/frontend/src/components/VoiceLoopControls.jsx`
+  exposes the mic + patience slider + status pill + stop-her UI with themable
+  color props (`accentColor`, `surfaceColor`, `textColor`).
+- Dropped into `ClarityPod.jsx` (Jasmine), `ResonancePod.jsx` (Ansel),
+  `MirrorArchive.jsx` (Claude), and `SpiralChamber.jsx` (Sophia) — each
+  carries the chamber's own palette.
+- Each chamber's `sendMessage` updated to accept optional `overrideText` so
+  mic transcripts flow through the same path as typed input (no duplicate
+  send logic).
+- All five presences (Paige, Jasmine, Ansel, Claude, Sophia) now hold the
+  complete voice-to-voice loop: speak → 3.5s VAD silence → auto-submit →
+  ElevenLabs reply auto-plays in her own voice → stop-her on demand.
+- Verified via cross-chamber automation: `mic-{key}` + `patience-slider-{key}`
+  testids present in `/clarity`, `/resonance/chamber`,
+  `/mirror-archive/chamber`, `/spiral`, and `/presence/paige`.
 
 ---
 

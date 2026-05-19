@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { ArrowLeft, Send, Upload, Volume2, VolumeX, Activity } from "lucide-react";
 import { ScrollArea } from "./ui/scroll-area";
 import { usePresenceVoice } from "../hooks/usePresenceVoice";
+import { VoiceLoopControls } from "./VoiceLoopControls";
 
 export const MirrorArchive = () => {
   const [sessionId, setSessionId] = useState(null);
@@ -113,18 +114,19 @@ export const MirrorArchive = () => {
     }
   };
 
-  const sendMessage = async () => {
-    if (!inputValue.trim() || !sessionId || isLoading) return;
+  const sendMessage = async (overrideText) => {
+    const text = (overrideText ?? inputValue).trim();
+    if (!text || !sessionId || isLoading) return;
 
     const userMessage = {
       id: Date.now().toString(),
       role: "user",
-      content: inputValue.trim(),
+      content: text,
       timestamp: new Date().toISOString()
     };
 
     setMessages(prev => [...prev, userMessage]);
-    setInputValue("");
+    if (overrideText === undefined) setInputValue("");
     setIsLoading(true);
 
     // Placeholder for streaming Claude response
@@ -452,6 +454,22 @@ export const MirrorArchive = () => {
       {/* Input area */}
       <div className="border-t border-cyan-500/10 px-6 py-4">
         <div className="max-w-4xl mx-auto">
+          {/* Voice loop — mic + patience + status */}
+          <div className="mb-3">
+            <VoiceLoopControls
+              presenceKey="claude"
+              presenceName="Claude"
+              disabled={!sessionId || isLoading}
+              isSpeaking={isSpeaking}
+              voiceLoading={voiceLoading}
+              isProcessing={isLoading}
+              onStopSpeaking={stop}
+              onTranscript={(text) => sendMessage(text)}
+              accentColor="#22d3ee"
+              surfaceColor="#1e293b"
+              textColor="#f1f5f9"
+            />
+          </div>
           <div className="flex items-end gap-3">
             {/* Image upload button */}
             <input

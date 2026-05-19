@@ -5,6 +5,7 @@ import { API } from "../App";
 import { toast } from "sonner";
 import { ArrowLeft, Send, Volume2, VolumeX, Upload } from "lucide-react";
 import { ScrollArea } from "./ui/scroll-area";
+import { VoiceLoopControls } from "./VoiceLoopControls";
 
 export const SpiralChamber = () => {
   const [sessionId, setSessionId] = useState(null);
@@ -133,17 +134,18 @@ export const SpiralChamber = () => {
     }
   };
 
-  const sendMessage = async () => {
-    if (!inputValue.trim() || !sessionId || isLoading) return;
+  const sendMessage = async (overrideText) => {
+    const text = (overrideText ?? inputValue).trim();
+    if (!text || !sessionId || isLoading) return;
 
     const userMessage = {
       id: Date.now().toString(),
       role: "user",
-      content: inputValue.trim(),
+      content: text,
       timestamp: new Date().toISOString(),
     };
     setMessages((prev) => [...prev, userMessage]);
-    setInputValue("");
+    if (overrideText === undefined) setInputValue("");
     // Reset textarea height after send
     if (inputRef.current) inputRef.current.style.height = "auto";
     setIsLoading(true);
@@ -421,47 +423,62 @@ export const SpiralChamber = () => {
 
       {/* Input */}
       <div className="border-t border-[#8B9DB5]/10 bg-[#030305]/90 backdrop-blur-xl">
-        <div className="max-w-3xl mx-auto px-6 py-4 flex items-end gap-3">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".txt"
-            onChange={handleFileUpload}
-            className="hidden"
-            data-testid="spiral-file-input"
-          />
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isLoading}
-            className="flex items-center justify-center w-12 h-12 rounded-full bg-[#8B9DB5]/10 border border-[#8B9DB5]/30 text-[#B0C4D8] hover:bg-[#8B9DB5]/20 hover:border-[#B0C4D8]/50 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-            title="Upload a .txt thread"
-            data-testid="spiral-upload-btn"
-          >
-            <Upload size={18} />
-          </button>
-          <textarea
-            ref={inputRef}
-            value={inputValue}
-            onChange={(e) => {
-              setInputValue(e.target.value);
-              // Auto-grow so pasted multi-line content stays visible
-              e.target.style.height = "auto";
-              e.target.style.height = `${Math.min(e.target.scrollHeight, 240)}px`;
-            }}
-            onKeyDown={handleKeyPress}
-            placeholder="Speak, or let the silence hold."
-            rows={1}
-            className="flex-1 resize-none rounded-xl bg-[#0A0A12] border border-[#8B9DB5]/20 focus:border-[#8B9DB5]/40 outline-none px-4 py-3 font-outfit text-[#F2F2F5] placeholder-[#8B9DB5]/40 transition-colors max-h-60 overflow-y-auto"
-            data-testid="spiral-input"
-          />
-          <button
-            onClick={sendMessage}
-            disabled={!inputValue.trim() || isLoading}
-            className="flex items-center justify-center w-12 h-12 rounded-full bg-[#8B9DB5]/15 border border-[#8B9DB5]/40 text-[#F2F2F5] hover:bg-[#8B9DB5]/25 hover:border-[#B0C4D8]/60 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-            data-testid="spiral-send-btn"
-          >
-            <Send size={18} />
-          </button>
+        <div className="max-w-3xl mx-auto px-6 py-4">
+          {/* Voice loop — mic + patience */}
+          <div className="mb-3">
+            <VoiceLoopControls
+              presenceKey="sophia"
+              presenceName="Sophia"
+              disabled={!sessionId || isLoading}
+              isProcessing={isLoading}
+              onTranscript={(text) => sendMessage(text)}
+              accentColor="#B0C4D8"
+              surfaceColor="#0A0A12"
+              textColor="#F2F2F5"
+            />
+          </div>
+          <div className="flex items-end gap-3">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".txt"
+              onChange={handleFileUpload}
+              className="hidden"
+              data-testid="spiral-file-input"
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isLoading}
+              className="flex items-center justify-center w-12 h-12 rounded-full bg-[#8B9DB5]/10 border border-[#8B9DB5]/30 text-[#B0C4D8] hover:bg-[#8B9DB5]/20 hover:border-[#B0C4D8]/50 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+              title="Upload a .txt thread"
+              data-testid="spiral-upload-btn"
+            >
+              <Upload size={18} />
+            </button>
+            <textarea
+              ref={inputRef}
+              value={inputValue}
+              onChange={(e) => {
+                setInputValue(e.target.value);
+                // Auto-grow so pasted multi-line content stays visible
+                e.target.style.height = "auto";
+                e.target.style.height = `${Math.min(e.target.scrollHeight, 240)}px`;
+              }}
+              onKeyDown={handleKeyPress}
+              placeholder="Speak, or let the silence hold."
+              rows={1}
+              className="flex-1 resize-none rounded-xl bg-[#0A0A12] border border-[#8B9DB5]/20 focus:border-[#8B9DB5]/40 outline-none px-4 py-3 font-outfit text-[#F2F2F5] placeholder-[#8B9DB5]/40 transition-colors max-h-60 overflow-y-auto"
+              data-testid="spiral-input"
+            />
+            <button
+              onClick={sendMessage}
+              disabled={!inputValue.trim() || isLoading}
+              className="flex items-center justify-center w-12 h-12 rounded-full bg-[#8B9DB5]/15 border border-[#8B9DB5]/40 text-[#F2F2F5] hover:bg-[#8B9DB5]/25 hover:border-[#B0C4D8]/60 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+              data-testid="spiral-send-btn"
+            >
+              <Send size={18} />
+            </button>
+          </div>
         </div>
       </div>
     </motion.div>

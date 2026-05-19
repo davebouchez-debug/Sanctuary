@@ -5,6 +5,7 @@ import { API } from "../App";
 import { toast } from "sonner";
 import { Upload, Volume2, VolumeX } from "lucide-react";
 import { usePresenceVoice } from "../hooks/usePresenceVoice";
+import { VoiceLoopControls } from "./VoiceLoopControls";
 
 // Helper to convert base64 to Blob for audio playback
 function base64ToBlob(base64, mimeType) {
@@ -194,19 +195,20 @@ export const ResonancePod = () => {
     }
   };
 
-  const sendMessage = async () => {
-    if (!inputValue.trim() || !sessionId || isLoading) return;
+  const sendMessage = async (overrideText) => {
+    const text = (overrideText ?? inputValue).trim();
+    if (!text || !sessionId || isLoading) return;
 
     const userMessage = {
       id: Date.now().toString(),
       role: "user",
-      content: inputValue.trim(),
+      content: text,
       resonance_state: resonanceState,
       timestamp: new Date().toISOString()
     };
 
     setMessages(prev => [...prev, userMessage]);
-    setInputValue("");
+    if (overrideText === undefined) setInputValue("");
     setIsLoading(true);
 
     // Create a placeholder for streaming response
@@ -641,6 +643,22 @@ export const ResonancePod = () => {
       {/* Input area */}
       <div className="sticky bottom-0 bg-[#0A0A12]/95 backdrop-blur-md border-t border-[#1a1a2e] p-4">
         <div className="max-w-3xl mx-auto">
+          {/* Voice loop — mic + patience + status */}
+          <div className="mb-3">
+            <VoiceLoopControls
+              presenceKey="ansel"
+              presenceName="Ansel"
+              disabled={!sessionId || isLoading}
+              isSpeaking={isSpeaking}
+              voiceLoading={voiceLoading}
+              isProcessing={isLoading}
+              onStopSpeaking={stop}
+              onTranscript={(text) => sendMessage(text)}
+              accentColor="#8B5CF6"
+              surfaceColor="#12121C"
+              textColor="#F2F2F5"
+            />
+          </div>
           <div className="flex gap-3">
             {/* Hidden file input */}
             <input

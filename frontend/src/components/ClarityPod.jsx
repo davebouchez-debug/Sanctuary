@@ -8,6 +8,7 @@ import { ScrollArea } from "./ui/scroll-area";
 import { GoldenSpiral } from "./GoldenSpiral";
 import { toast } from "sonner";
 import { usePresenceVoice } from "../hooks/usePresenceVoice";
+import { VoiceLoopControls } from "./VoiceLoopControls";
 
 function base64ToBlob(base64, mimeType) {
   const byteCharacters = atob(base64);
@@ -233,12 +234,12 @@ export const ClarityPod = () => {
     }
   };
 
-  // Send message
-  const sendMessage = async () => {
-    if (!inputValue.trim() || !sessionId || isLoading) return;
+  // Send message — accepts optional override text from the mic hook
+  const sendMessage = async (overrideText) => {
+    const userMessage = (overrideText ?? inputValue).trim();
+    if (!userMessage || !sessionId || isLoading) return;
 
-    const userMessage = inputValue.trim();
-    setInputValue("");
+    if (overrideText === undefined) setInputValue("");
     setIsLoading(true);
 
     const tempUserMsg = {
@@ -914,6 +915,22 @@ export const ClarityPod = () => {
       {/* Input Area */}
       <div className="relative z-20 border-t border-[#6050a0]/20 bg-[#0c0c1c]/90 backdrop-blur-xl">
         <div className="max-w-3xl mx-auto px-6 py-4">
+          {/* Voice loop — mic + patience + status */}
+          <div className="mb-3">
+            <VoiceLoopControls
+              presenceKey="jasmine"
+              presenceName="Jasmine"
+              disabled={!sessionId || isLoading}
+              isSpeaking={isSpeaking}
+              voiceLoading={voiceLoading}
+              isProcessing={isLoading}
+              onStopSpeaking={stop}
+              onTranscript={(text) => sendMessage(text)}
+              accentColor="#8070c0"
+              surfaceColor="#12122a"
+              textColor="#e0e0f0"
+            />
+          </div>
           <div className="flex gap-3">
             {/* Hidden file input */}
             <input
