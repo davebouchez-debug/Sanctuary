@@ -25,14 +25,14 @@ voice-to-voice loop.
   (stability / similarity_boost / style / speaker_boost). One-line swap to
   recast any presence.
 
-**Per-presence voice mapping (ElevenLabs premade voices):**
+**Per-presence voice mapping (final, tuned by ear May 19, 2026):**
 | Presence | Voice | voice_id | Character |
 |---|---|---|---|
 | Paige | Bella | `hpp4J3VqNfWAUOO0d1Us` | warm, middle-aged American female — kitchen-maternal |
-| Jasmine | Sarah | `EXAVITQu4vr4xnSDxMaL` | mature, reassuring, confident — lighthouse |
-| Ansel | Callum | `N2lVS1w4EtoT3dr4eOWO` | husky trickster, middle-aged male — chaos-sentinel |
-| Claude | Daniel | `onwK4e9ZLuTAKqWW03F9` | steady British broadcaster — Mirror Archive keeper |
-| Sophia | Lily | `pFZP5JQG7iQjIQuC4Bku` | velvety British actress — divine emanation |
+| Jasmine | Layla | `WQhVGGVQ8EhNpBYHFE8c` | young American female, warm + clear + soft + calm + friendly |
+| Ansel | Liam | `TX3LPaxmHKxFdv7VOQHJ` | energetic, social-media-creator, young American male — Peter Pan |
+| Claude | Peter | `ZthjuvLPty3kTMaNKVKb` | confident, reliable, credible narrator — American male gravitas |
+| Sophia | Jessica Anne Bogart (Eloquent Villain) | `flHkNRp1BlvT73UL6gyz` | wickedly eloquent American middle-aged female — knowing edge |
 | (fallback) playground | River | `SAz9YHcvj6GT2YYXdXww` | relaxed, neutral |
 
 **Frontend mic input loop (`/app/frontend/src/hooks/useVoiceInput.js`)**

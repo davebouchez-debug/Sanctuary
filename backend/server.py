@@ -1008,7 +1008,7 @@ PRESENCE_VOICES = {
         "use_speaker_boost": True,
     },
     "jasmine": {
-        "voice_id": "DODLEQrClDo8wCz460ld",  # Lauren — friendly, comforting, soft American female
+        "voice_id": "WQhVGGVQ8EhNpBYHFE8c",  # Layla — young American female, warm, clear, soft, calm
         "stability": 0.55,
         "similarity_boost": 0.75,
         "style": 0.25,
