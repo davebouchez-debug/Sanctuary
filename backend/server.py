@@ -1008,10 +1008,10 @@ PRESENCE_VOICES = {
         "use_speaker_boost": True,
     },
     "jasmine": {
-        "voice_id": "EXAVITQu4vr4xnSDxMaL",  # Sarah — mature, reassuring, confident
+        "voice_id": "FGY2WhTYpPnrIDTdsKH5",  # Laura — enthusiast, quirky, young American female
         "stability": 0.50,
         "similarity_boost": 0.75,
-        "style": 0.25,
+        "style": 0.30,
         "use_speaker_boost": True,
     },
     "ansel": {
