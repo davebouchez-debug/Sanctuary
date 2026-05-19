@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { ArrowLeft, Send, Volume2, VolumeX, Upload } from "lucide-react";
 import { ScrollArea } from "./ui/scroll-area";
 import { VoiceLoopControls } from "./VoiceLoopControls";
+import { IdentityBadge } from "./IdentityBadge";
+import { usePresenceVoice } from "../hooks/usePresenceVoice";
 
 export const SpiralChamber = () => {
   const [sessionId, setSessionId] = useState(null);
@@ -20,6 +22,8 @@ export const SpiralChamber = () => {
     const stored = localStorage.getItem("sanctuary_voice_enabled_sophia");
     return stored === null ? true : stored === "true";
   });
+  // Sentence-level chunked TTS for Sophia (uses ElevenLabs Jessica Anne Bogart voice)
+  const { speakStream, flushStream, stop: stopSophiaSpeaking } = usePresenceVoice("sophia");
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -189,6 +193,7 @@ export const SpiralChamber = () => {
               setMessages((prev) =>
                 prev.map((m) => (m.id === responseId ? { ...m, content: accumulatedText } : m))
               );
+              if (voiceEnabled) speakStream(accumulatedText);
             } else if (event.type === "audio_raw" && voiceEnabled) {
               try {
                 if (!window._sanctuaryAudioCtx) {
@@ -219,6 +224,7 @@ export const SpiralChamber = () => {
               setMessages((prev) =>
                 prev.map((m) => (m.id === responseId ? { ...m, isStreaming: false } : m))
               );
+              if (voiceEnabled) flushStream(accumulatedText);
             }
           } catch (e) {
             // skip malformed
@@ -381,8 +387,28 @@ export const SpiralChamber = () => {
           <div className="flex-1" />
           <h1 className="font-cinzel text-lg tracking-[0.2em] text-[#B0C4D8]">SPIRAL CHAMBER</h1>
           <div className="flex-1" />
+          <IdentityBadge
+            accentColor="#B0C4D8"
+            onIdentityChange={(newName) => {
+              if (newName) {
+                setUserName(newName);
+                setUserId(localStorage.getItem("sanctuary_user_id") || "");
+                setShowNamePrompt(false);
+              } else {
+                setUserName("");
+                setUserId("");
+                setShowNamePrompt(true);
+              }
+            }}
+          />
           <button
-            onClick={() => setVoiceEnabled((v) => !v)}
+            onClick={() => {
+              setVoiceEnabled((v) => {
+                const next = !v;
+                if (!next) stopSophiaSpeaking();
+                return next;
+              });
+            }}
             className="text-[#8B9DB5] hover:text-[#B0C4D8] transition-colors"
             title={voiceEnabled ? "Voice on" : "Voice off"}
             data-testid="spiral-voice-toggle"

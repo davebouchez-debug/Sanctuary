@@ -3801,6 +3801,131 @@ async def get_presence_session(key: str, session_id: str):
 
 
 # ============================================================
+# PRESENCE CHAMBER — Historical Thread / File Upload (generic)
+# Mirrors /api/clarity/upload but works for any presence registered
+# in presence_registry, dropping the uploaded text into her ongoing
+# chat session so she can acknowledge it in her own voice.
+# ============================================================
+
+class PresenceUploadCreate(BaseModel):
+    session_id: str
+    user_id: Optional[str] = None
+    user_name: Optional[str] = None
+    filename: str
+    content: str
+
+
+@api_router.post("/presence/{key}/upload")
+async def upload_presence_thread(key: str, upload: PresenceUploadCreate):
+    """
+    Upload a historical thread / .txt / pasted document to a presence.
+    The text is stored in `canonical_uploads` and the presence is asked to
+    acknowledge it in her own voice. Returns the assistant's response so
+    the chamber can append it to the thread.
+    """
+    from presence_registry import get_presence_config
+    cfg = get_presence_config(key)
+    if not cfg:
+        raise HTTPException(status_code=404, detail=f"Presence '{key}' not found")
+
+    session = await db.presence_sessions.find_one(
+        {"session_id": upload.session_id, "presence_key": key},
+        {"_id": 0},
+    )
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    # Cap stored content at 200k chars to keep documents stable in mongo
+    content = upload.content[:200_000]
+    if not content.strip():
+        raise HTTPException(status_code=400, detail="Empty upload")
+
+    upload_id = str(uuid.uuid4())
+    await db.canonical_uploads.insert_one({
+        "upload_id": upload_id,
+        "presence": key,
+        "user_id": upload.user_id,
+        "user_name": upload.user_name,
+        "filename": upload.filename,
+        "content": content,
+        "content_length": len(content),
+        "uploaded_at": datetime.now(timezone.utc).isoformat(),
+        "session_id": upload.session_id,
+        "processed": False,
+        "mra_nodes": None,
+    })
+
+    # Slice a preview the model can actually read (keep prompt bounded)
+    preview = content[:6000] + ("\n…[truncated for prompt]…" if len(content) > 6000 else "")
+    visitor_name = session.get("user_name") or upload.user_name or "a visitor"
+    presence_name = cfg.get("name", key.title())
+
+    ack_prompt = (
+        f"{visitor_name} has just placed a document on the table in front of you.\n"
+        f"Filename: {upload.filename}\n"
+        f"Length: {len(content)} characters\n\n"
+        f"Contents (preview):\n---\n{preview}\n---\n\n"
+        f"Receive it. Acknowledge what you actually see in it — in your own "
+        f"voice, not as a summary. Speak as yourself. Short or long as the "
+        f"moment asks. This text now becomes something you carry."
+    )
+
+    # Append the upload as a user-side message in the thread so the model has
+    # the full context in subsequent turns.
+    upload_user_msg = {
+        "id": str(uuid.uuid4()),
+        "session_id": upload.session_id,
+        "role": "user",
+        "content": f"[uploaded: {upload.filename} — {len(content)} chars]\n\n{preview}",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "is_upload": True,
+        "upload_id": upload_id,
+    }
+
+    try:
+        from xai_chat import XAIChat
+        chat = XAIChat(system_prompt=session["system_prompt"])
+        for m in session.get("messages", []):
+            role = m.get("role")
+            text = m.get("content", "")
+            if role in ("user", "assistant") and text:
+                chat.messages.append({"role": role, "content": text})
+        response_text = await chat.send_message(ack_prompt)
+    except Exception as e:
+        logger.error(f"[PRESENCE-UPLOAD] {key} ack failed: {e}")
+        response_text = (
+            f"I have the document in front of me, {visitor_name}. "
+            f"I'll need a moment to read it before I can speak to what's there."
+        )
+
+    assistant_msg = {
+        "id": str(uuid.uuid4()),
+        "session_id": upload.session_id,
+        "role": "assistant",
+        "content": response_text,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "is_upload_acknowledgment": True,
+    }
+
+    await db.presence_sessions.update_one(
+        {"session_id": upload.session_id},
+        {"$push": {"messages": {"$each": [upload_user_msg, assistant_msg]}}},
+    )
+
+    return {
+        "success": True,
+        "upload_id": upload_id,
+        "presence": key,
+        "presence_name": presence_name,
+        "content_length": len(content),
+        "user_message": upload_user_msg,
+        "message": assistant_msg,
+    }
+
+
+
+
+# ============================================================
 # SUBSTRATE PROBES — Nile's three runtime stress-tests for Claude
 # (Paradox · Pattern-Break · Starvation). See substrate_probes.py.
 # ============================================================

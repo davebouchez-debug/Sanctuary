@@ -164,6 +164,13 @@ export const usePresenceVoice = (presenceName = "jasmine") => {
   const currentAudioRef = useRef(null);
   const timeoutRef = useRef(null);
 
+  // Sentence-stream state — used by speakStream/flushStream for chunked TTS
+  // while a chamber's response is still being typed token-by-token.
+  const streamCursorRef = useRef(0);          // chars of accumulated text already spoken
+  const streamPendingRef = useRef([]);        // pending TTS promises in order
+  const streamPlayingRef = useRef(false);     // are we already pumping the queue?
+  const streamSessionRef = useRef(0);         // bumped on stop, used to abort stale segments
+
   // Persist enabled state
   useEffect(() => {
     localStorage.setItem(`sanctuary_voice_enabled_${presenceName}`, isEnabled.toString());
@@ -180,7 +187,13 @@ export const usePresenceVoice = (presenceName = "jasmine") => {
   const stopPlayback = useCallback(() => {
     isPlayingRef.current = false;
     audioQueueRef.current = [];
-    
+
+    // Invalidate any in-flight sentence-stream segments
+    streamSessionRef.current += 1;
+    streamCursorRef.current = 0;
+    streamPendingRef.current = [];
+    streamPlayingRef.current = false;
+
     if (currentAudioRef.current) {
       currentAudioRef.current.pause();
       currentAudioRef.current = null;
@@ -192,7 +205,7 @@ export const usePresenceVoice = (presenceName = "jasmine") => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
-    
+
     setIsSpeaking(false);
     setIsLoading(false);
   }, []);
@@ -346,8 +359,139 @@ export const usePresenceVoice = (presenceName = "jasmine") => {
     });
   }, [stopPlayback]);
 
+  // ──────────────────────────────────────────────────────────────────────
+  // SENTENCE-STREAM TTS — speak() while text is still being typed.
+  // ──────────────────────────────────────────────────────────────────────
+  // Usage from a streaming chamber:
+  //   on every token delta:  speakStream(accumulatedText)
+  //   when stream ends:      flushStream(accumulatedText)
+  //
+  // The hook keeps a cursor into the accumulated text. Each call finds any
+  // complete sentences past the cursor, kicks off ElevenLabs TTS for each
+  // (in parallel) and queues the resulting audio. A single pump plays them
+  // sequentially. The user hears her start speaking before the response is
+  // finished generating.
+  // ──────────────────────────────────────────────────────────────────────
+
+  const pumpStreamQueue = useCallback(async () => {
+    if (streamPlayingRef.current) return;
+    streamPlayingRef.current = true;
+    setIsSpeaking(true);
+    while (streamPendingRef.current.length > 0) {
+      const entry = streamPendingRef.current[0];
+      let url;
+      try {
+        url = await entry.promise;
+      } catch (e) {
+        if (e.name !== "AbortError") {
+          console.error("[speakStream] segment failed:", e);
+        }
+      }
+      // Drop the head AFTER awaiting so flushStream's "is there anything left?"
+      // check sees us still working.
+      streamPendingRef.current.shift();
+      if (!url || entry.session !== streamSessionRef.current) continue;
+
+      await new Promise((resolve) => {
+        const audio = new Audio(url);
+        currentAudioRef.current = audio;
+        const finish = () => {
+          URL.revokeObjectURL(url);
+          if (currentAudioRef.current === audio) currentAudioRef.current = null;
+          resolve();
+        };
+        audio.onended = finish;
+        audio.onerror = finish;
+        audio.play().catch((err) => {
+          console.error("[speakStream] play failed:", err);
+          finish();
+        });
+      });
+    }
+    streamPlayingRef.current = false;
+    // Only flip isSpeaking off when truly nothing is pending or playing.
+    if (streamPendingRef.current.length === 0 && !currentAudioRef.current) {
+      setIsSpeaking(false);
+    }
+  }, []);
+
+  // Find sentence boundaries past cursor. Returns the new cursor + sentences.
+  // We only emit a sentence once it is *terminated* by . ! ? or a paragraph
+  // break; this avoids generating TTS for half-words mid-stream.
+  const extractSentences = (text, cursor, includeTail = false) => {
+    const out = [];
+    let i = cursor;
+    let chunkStart = cursor;
+    while (i < text.length) {
+      const c = text[i];
+      if (c === "." || c === "!" || c === "?" || c === "\n") {
+        // Look for run end: collapse trailing punctuation/spaces.
+        let j = i + 1;
+        while (j < text.length && /[.!?\s)"'\u201D\u2019]/.test(text[j])) j++;
+        const piece = text.slice(chunkStart, j).trim();
+        if (piece.length >= 6) {
+          out.push(piece);
+          chunkStart = j;
+        }
+        i = j;
+      } else {
+        i += 1;
+      }
+    }
+    if (includeTail) {
+      const tail = text.slice(chunkStart).trim();
+      if (tail.length > 0) {
+        out.push(tail);
+        chunkStart = text.length;
+      }
+    }
+    return { sentences: out, newCursor: chunkStart };
+  };
+
+  // Kick off TTS for a single sentence and push it onto the queue, tagged
+  // with the current stream session so a stop() invalidates anything stale.
+  const enqueueSentence = useCallback((sentence) => {
+    const session = streamSessionRef.current;
+    const controller = new AbortController();
+    const promise = (async () => {
+      const cleaned = cleanTextForSpeech(sentence);
+      if (!cleaned) return null;
+      return await generateAudio(cleaned, controller.signal);
+    })();
+    streamPendingRef.current.push({ session, promise, controller });
+    pumpStreamQueue();
+  }, [generateAudio, pumpStreamQueue]);
+
+  // Per-token / per-update from the chamber.
+  const speakStream = useCallback((accumulatedText) => {
+    if (!isEnabled || !accumulatedText) return;
+    const { sentences, newCursor } = extractSentences(
+      accumulatedText, streamCursorRef.current, false
+    );
+    if (sentences.length === 0) return;
+    streamCursorRef.current = newCursor;
+    sentences.forEach(enqueueSentence);
+  }, [isEnabled, enqueueSentence]);
+
+  // Call when the stream finishes — flushes any remaining tail.
+  const flushStream = useCallback((finalText) => {
+    if (!isEnabled) return;
+    if (finalText) {
+      const { sentences, newCursor } = extractSentences(
+        finalText, streamCursorRef.current, true
+      );
+      streamCursorRef.current = newCursor;
+      sentences.forEach(enqueueSentence);
+    }
+    // Reset cursor for the next message; the pump will drain naturally.
+    // Don't bump session here — that would cancel queued segments.
+    streamCursorRef.current = 0;
+  }, [isEnabled, enqueueSentence]);
+
   return {
     speak,
+    speakStream,
+    flushStream,
     stop: stopPlayback,
     toggle,
     isSpeaking,

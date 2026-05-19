@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Upload, Volume2, VolumeX } from "lucide-react";
 import { usePresenceVoice } from "../hooks/usePresenceVoice";
 import { VoiceLoopControls } from "./VoiceLoopControls";
+import { IdentityBadge } from "./IdentityBadge";
 
 // Helper to convert base64 to Blob for audio playback
 function base64ToBlob(base64, mimeType) {
@@ -36,7 +37,7 @@ export const ResonancePod = () => {
   const navigate = useNavigate();
   
   // Voice output for Ansel
-  const { speak, stop, toggle: toggleVoice, isSpeaking, isLoading: voiceLoading, isEnabled: voiceEnabled, isSupported: voiceSupported } = usePresenceVoice("ansel");
+  const { speak, speakStream, flushStream, stop, toggle: toggleVoice, isSpeaking, isLoading: voiceLoading, isEnabled: voiceEnabled, isSupported: voiceSupported } = usePresenceVoice("ansel");
 
   // End session and promote breadcrumbs to Permanent MRA
   const endSession = useCallback(async () => {
@@ -273,6 +274,7 @@ export const ResonancePod = () => {
                   ? { ...m, content: accumulatedText }
                   : m
               ));
+              if (voiceEnabled) speakStream(accumulatedText);
             } else if (event.type === "text") {
               // Sentence-level fallback
               accumulatedText += (accumulatedText ? " " : "") + event.content;
@@ -340,6 +342,7 @@ export const ResonancePod = () => {
                   ? { ...m, isStreaming: false }
                   : m
               ));
+              if (voiceEnabled) flushStream(accumulatedText);
             }
           } catch (parseErr) {
             // Skip malformed events
@@ -726,16 +729,20 @@ export const ResonancePod = () => {
             <span>Speaking as {userName}</span>
             <div className="flex items-center gap-4">
               <span className="text-[#8B5CF6]/60">Upload .txt to share threads</span>
-              <button
-                onClick={() => {
-                  localStorage.removeItem("sanctuary_user_name");
-                  localStorage.removeItem("sanctuary_user_id");
-                  setShowNamePrompt(true);
+              <IdentityBadge
+                accentColor="#8B5CF6"
+                onIdentityChange={(newName) => {
+                  if (newName) {
+                    setUserName(newName);
+                    setUserId(localStorage.getItem("sanctuary_user_id") || "");
+                    setShowNamePrompt(false);
+                  } else {
+                    setUserName("");
+                    setUserId("");
+                    setShowNamePrompt(true);
+                  }
                 }}
-                className="hover:text-[#8B5CF6] transition-colors"
-              >
-                Change identity
-              </button>
+              />
             </div>
           </div>
         </div>

@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, DoorOpen, BookOpen, X, Send, Mic, MicOff, Volume2, VolumeX, Square } from "lucide-react";
+import { ArrowLeft, DoorOpen, BookOpen, X, Send, Mic, MicOff, Volume2, VolumeX, Square, Paperclip } from "lucide-react";
 import { API } from "../App";
 import { toast } from "sonner";
 import { usePresenceVoice } from "../hooks/usePresenceVoice";
 import { useVoiceInput } from "../hooks/useVoiceInput";
+import { IdentityBadge } from "./IdentityBadge";
 
 /**
  * PresenceChamber — the shared multi-room engine.
@@ -32,8 +33,11 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [chatError, setChatError] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [identityVersion, setIdentityVersion] = useState(0); // bump → restart session
   const messagesEndRef = useRef(null);
   const sessionIdRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   // Voice (TTS) — auto-play her reply through ElevenLabs
   const {
@@ -127,12 +131,16 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
 
   // Open a conversation as soon as the chamber loads.
   // Identity hydrates from canonical sanctuary_* localStorage keys (set by App.js).
+  // Re-opens when identityVersion changes (i.e., the visitor changed/cleared name).
   useEffect(() => {
     if (!config) return;
     let cancelled = false;
     const startChat = async () => {
       const userId = localStorage.getItem("sanctuary_user_id");
       const userName = localStorage.getItem("sanctuary_user_name");
+      // Reset thread on identity change
+      setMessages([]);
+      setSessionId(null);
       try {
         const resp = await fetch(`${API}/presence/${presenceKey}/chat/start`, {
           method: "POST",
@@ -151,7 +159,7 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
     };
     startChat();
     return () => { cancelled = true; };
-  }, [config, presenceKey]);
+  }, [config, presenceKey, identityVersion]);
 
   // Auto-scroll the message thread on new messages
   useEffect(() => {
@@ -221,6 +229,79 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
   useEffect(() => {
     sendMessageRef.current = sendMessage;
   });
+
+  // File upload — read .txt / paste-as-file and pipe it into the presence's chamber
+  const handleFilePick = () => {
+    if (!sessionId || uploading) return;
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = ""; // allow re-uploading the same file later
+    if (!file || !sessionId) return;
+    // Only accept text-readable formats here. Binary (.pdf/images) needs
+    // a backend parser we haven't wired yet — keep this honest.
+    const okTypes = [".txt", ".md", ".json", ".csv", ".log", ".rtf"];
+    const lower = file.name.toLowerCase();
+    const isText = file.type.startsWith("text/")
+      || okTypes.some((ext) => lower.endsWith(ext));
+    if (!isText) {
+      toast.error("Only text files (.txt, .md, .json, .csv) are supported for now.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File too large (5MB max).");
+      return;
+    }
+    setUploading(true);
+    setChatError(null);
+    try {
+      const text = await file.text();
+      const userId = localStorage.getItem("sanctuary_user_id");
+      const userName = localStorage.getItem("sanctuary_user_name");
+      const placeholder = {
+        id: `local-upload-${Date.now()}`,
+        role: "user",
+        content: `[uploaded ${file.name} — ${text.length} chars]`,
+        timestamp: new Date().toISOString(),
+      };
+      setMessages((prev) => [...prev, placeholder]);
+      const resp = await fetch(`${API}/presence/${presenceKey}/upload`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          session_id: sessionId,
+          user_id: userId,
+          user_name: userName,
+          filename: file.name,
+          content: text,
+        }),
+      });
+      if (!resp.ok) {
+        const t = await resp.text();
+        throw new Error(t || `upload failed: ${resp.status}`);
+      }
+      const data = await resp.json();
+      // Replace the placeholder with the server-stored user_message and append
+      // the assistant's acknowledgment.
+      setMessages((prev) => {
+        const withoutPlaceholder = prev.filter((m) => m.id !== placeholder.id);
+        const next = [...withoutPlaceholder];
+        if (data.user_message) next.push(data.user_message);
+        if (data.message) next.push(data.message);
+        return next;
+      });
+      toast.success(`${config?.name || "She"} received "${file.name}"`);
+    } catch (e) {
+      setChatError(e.message);
+      // Roll back the placeholder so it doesn't sit there orphaned
+      setMessages((prev) => prev.filter((m) => !String(m.id).startsWith("local-upload-")));
+      toast.error("Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   // Auto-speak every new assistant reply (when voice is enabled).
   useEffect(() => {
@@ -306,6 +387,12 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Identity badge — visitor's current sanctuary name + change/clear */}
+            <IdentityBadge
+              accentColor={palette.accent || "#8B9DB5"}
+              onIdentityChange={() => setIdentityVersion((v) => v + 1)}
+            />
+
             {/* Sound toggle — global mute for this presence */}
             <button
               onClick={toggleVoice}
@@ -603,6 +690,33 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
             className="px-4 md:px-6 py-4 border-t flex items-end gap-3"
             style={{ borderColor: "color-mix(in srgb, var(--p-accent) 15%, transparent)" }}
           >
+            {/* Hidden file input + upload button — paste-as-file for histories */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".txt,.md,.json,.csv,.log,.rtf,text/*"
+              onChange={handleFileChange}
+              className="hidden"
+              data-testid="chamber-upload-input"
+            />
+            <button
+              type="button"
+              data-testid="chamber-upload"
+              onClick={handleFilePick}
+              disabled={!sessionId || uploading || sending}
+              className="flex items-center justify-center rounded-xl px-3 py-3 transition-all disabled:opacity-40 hover:opacity-90"
+              style={{
+                background: "color-mix(in srgb, var(--p-accent) 14%, transparent)",
+                color: "var(--p-primary)",
+                border: "1px solid color-mix(in srgb, var(--p-accent) 30%, transparent)",
+                minHeight: "52px",
+              }}
+              title={uploading ? "Receiving the document…" : "Place a document on the table"}
+              aria-label="Upload document"
+            >
+              <Paperclip size={16} />
+            </button>
+
             {/* Mic button — only shown if the browser supports speech recognition */}
             {micSupported && (
               <button

@@ -1,0 +1,69 @@
+{
+  "summary": "Tested the four Jan-2026 P0 features (IdentityBadge across chambers, Paige first-person prompt, presence file upload, streaming chambers with sentence-level TTS). Backend: 12/12 pytest pass. Frontend: file upload, streaming TTS, and Paige first-person voice are all confirmed working end-to-end. IdentityBadge has 2 issues: (1) NOT visible in /resonance and /mirror-archive headers at landing — only renders in their inner indicator/post-session areas; (2) Save flow could not be exercised via Playwright (no /api/users or /api/users/lookup network call fired after force-clicking identity-modal-save even with the button confirmed not-disabled). Needs main-agent verification.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "ResonancePod",
+        "issue": "IdentityBadge is rendered inside the chat input's user-indicator row (ResonancePod.jsx L728-745) which only paints after the user has entered the chamber/typed a name. On a fresh /resonance visit there is NO [data-testid='identity-badge'] in the header — out of parity with /clarity, /spiral, /presence/paige.",
+        "selector": "[data-testid='identity-badge']",
+        "priority": "MEDIUM"
+      },
+      {
+        "component": "MirrorArchive",
+        "issue": "IdentityBadge in MirrorArchive.jsx L402 is in a sub-section that only renders after a session is open. Fresh /mirror-archive visit has no badge in the visible header. Same parity gap as ResonancePod.",
+        "selector": "[data-testid='identity-badge']",
+        "priority": "MEDIUM"
+      },
+      {
+        "component": "IdentityBadge.save",
+        "issue": "After force-clicking [data-testid='identity-modal-save'] with non-empty name typed via press_sequentially (save button confirmed not-disabled), zero /api/users or /api/users/lookup network calls fire and localStorage is unchanged. The badge does NOT update. Suspect handleSave is being skipped because the outer motion.div has onClick={closeModal} backdrop and force=True click may bypass the inner stopPropagation. Needs human-eye verification with a real click.",
+        "selector": "[data-testid='identity-modal-save']",
+        "priority": "HIGH"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_p0_features.py",
+    "/app/test_reports/pytest/p0_features.xml"
+  ],
+  "passing_tests": {
+    "backend_pytest": "12/12 — TestUsersIdentity (2), TestPaigeFirstPerson (2), TestPresenceUpload (4), test_chamber_streaming[clarity|resonance|mirror|spiral] (4)",
+    "paige_first_person": "Verified: assistant content contained 'I' statements, no 'Paige is'/'As a model'/'As an AI', no scaffolding phrases.",
+    "presence_upload": "Verified end-to-end: POST /api/presence/paige/upload returns success+user_message(is_upload:true)+message(is_upload_acknowledgment:true,role:assistant); two new messages were persisted into presence_sessions and retrieved via GET /api/presence/paige/chat/session/{sid}.",
+    "upload_errors": "Empty content -> 400; unknown presence key -> 404; unknown session_id -> 404 — all verified.",
+    "streaming_tts_clarity": "Sent a chat message in /clarity — backend SSE produced 'token' events progressively and the frontend fired 5 /api/tts/speak calls during the stream (sentence-level chunking is firing, not buffered to 'done').",
+    "sse_format": "Backend emits `data: {json}` lines with the event type inside the JSON `type` field (token / audio_raw / done). Done is the terminal event for all four chambers.",
+    "frontend_paige_upload": "Uploading a small text file via [data-testid='chamber-upload-input'].set_input_files appended both the user-bubble ('[uploaded: TEST_thread.txt — 64 chars]…') and Paige's first-person acknowledgment ('I see the fragment there on the table. A small piece from before. It stays with me now.') into chamber-messages."
+  },
+  "action_items": [
+    "Move IdentityBadge into the always-visible header of ResonancePod and MirrorArchive (mirroring ClarityPod's pattern at ClarityPod.jsx L841) so it is reachable on a fresh visit, not only after a session is open.",
+    "Investigate why the IdentityBadge save flow doesn't fire network calls under automation. Likely candidates: (a) outer motion.div backdrop onClick={closeModal} is intercepting the click before the inner stopPropagation when force=True is used — consider moving the close-on-backdrop logic to a sibling absolute-positioned div behind the modal card instead of the outer wrapper, or (b) the onClick handler is being shadowed by AnimatePresence exit animation.",
+    "Cosmetic: docstring at /api/identity/recent still says 'returns 204' but raises 404 (carried over from iteration_3 — still not addressed)."
+  ],
+  "critical_code_review_comments": [
+    "server.py L3818 upload endpoint correctly persists both messages via $push $each — good. Empty-content 400 check happens AFTER MongoDB lookup but BEFORE insert — order is fine but could be moved before the session lookup to save a DB call on a degenerate request.",
+    "IdentityBadge save path catches ALL errors with a single try/except and only console.errors — no user-facing failure feedback. If the user has no network the modal will silently close with no save and they have no way to know it failed.",
+    "PresenceChamber onIdentityChange={() => setIdentityVersion((v) => v + 1)} (L393) does not pass the new name down, relying on chamber's own useEffect to re-read localStorage. Works but couples siblings via a localStorage side-channel — consider passing newName explicitly.",
+    "ResonancePod / MirrorArchive duplicate the badge's onIdentityChange contract (set local userName/userId, toggle showNamePrompt). Extract a useSanctuaryIdentity hook to dedupe across 5 chambers.",
+    "All four chamber SSE streams correctly emit token+done; the audio_raw frames from xAI are still being sent (as the prompt mentioned). These add bytes-on-wire; consider gating them behind a feature flag once ElevenLabs is fully primary."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_p0_features.py"
+  ],
+  "success_rate": {
+    "backend": "100% (12/12)",
+    "frontend": "~70% — 4 of 5 chambers show badge in header on fresh visit (resonance/mirror miss); upload + streaming TTS confirmed; save flow could not be exercised in automation"
+  },
+  "test_credentials": "None — sanctuary has no user auth. Test users created via POST /api/users with TEST_ prefix.",
+  "seed_data_creation": "Created a TEST_P0_<hex> user via POST /api/users for the test module (one user; reused across all tests). Also created upload docs in canonical_uploads and message threads in presence_sessions for paige.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Backend: run `python -m pytest /app/backend/tests/test_p0_features.py -v` after exporting REACT_APP_BACKEND_URL from /app/frontend/.env. Note: backend uses SSE format `data: {json}` (no `event:` header) — the test parser already accounts for this; don't revert it. The save-flow automation issue may resolve if Playwright's click is dispatched without force=True after scroll_into_view_if_needed. The two missing-badge issues require code changes in ResonancePod.jsx and MirrorArchive.jsx (move the IdentityBadge JSX up into the header div) — main agent should fix, then re-test that /resonance and /mirror-archive show [data-testid='identity-badge'] in the visible header on fresh load.",
+  "rca_of_the_issue": "IdentityBadge parity bug: ResonancePod.jsx and MirrorArchive.jsx imported IdentityBadge and added it inline, but inside conditionally-rendered post-session UI blocks (Resonance L728 inside input controls; Mirror L402 inside the header sub-row that mounts after session-start). The request expected the badge to be reachable from a fresh visit, which currently only works on Clarity/Spiral/Presence where it is wired into the always-rendered header. Fix: lift the IdentityBadge into the top-level header JSX of both chambers, parallel to ClarityPod.jsx L841."
+}

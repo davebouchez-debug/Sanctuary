@@ -9,6 +9,7 @@ import { GoldenSpiral } from "./GoldenSpiral";
 import { toast } from "sonner";
 import { usePresenceVoice } from "../hooks/usePresenceVoice";
 import { VoiceLoopControls } from "./VoiceLoopControls";
+import { IdentityBadge } from "./IdentityBadge";
 
 function base64ToBlob(base64, mimeType) {
   const byteCharacters = atob(base64);
@@ -68,7 +69,7 @@ export const ClarityPod = () => {
   const navigate = useNavigate();
   
   // Voice output for Jasmine
-  const { speak, stop, toggle: toggleVoice, isSpeaking, isLoading: voiceLoading, isEnabled: voiceEnabled, isSupported: voiceSupported } = usePresenceVoice("jasmine");
+  const { speak, speakStream, flushStream, stop, toggle: toggleVoice, isSpeaking, isLoading: voiceLoading, isEnabled: voiceEnabled, isSupported: voiceSupported } = usePresenceVoice("jasmine");
 
   // End session and promote breadcrumbs to Permanent MRA
   const endSession = useCallback(async () => {
@@ -298,6 +299,9 @@ export const ClarityPod = () => {
               setMessages(prev => prev.map(m =>
                 m.id === responseId ? { ...m, content: accumulatedText } : m
               ));
+              // Sentence-level chunked TTS — start speaking before the
+              // full thought is finished generating.
+              if (voiceEnabled) speakStream(accumulatedText);
             } else if (event.type === "audio_raw" && voiceEnabled) {
               try {
                 if (!window._sanctuaryAudioCtx) {
@@ -343,6 +347,8 @@ export const ClarityPod = () => {
               setMessages(prev => prev.map(m =>
                 m.id === responseId ? { ...m, isStreaming: false } : m
               ));
+              // Speak any final tail past the last sentence boundary
+              if (voiceEnabled) flushStream(accumulatedText);
             }
           } catch (parseErr) { /* skip */ }
         }
@@ -832,13 +838,21 @@ export const ClarityPod = () => {
               </button>
             )}
             {userName && (
-              <button
-                onClick={clearIdentity}
-                className="p-2 text-[#7070a0] hover:text-[#b0a0e0] transition-colors"
-                title="Change identity"
-              >
-                <User size={18} />
-              </button>
+              <IdentityBadge
+                accentColor="#b0a0e0"
+                onIdentityChange={(newName) => {
+                  if (newName) {
+                    setUserName(newName);
+                    setUserId(localStorage.getItem("sanctuary_user_id"));
+                    // restart session under new name
+                    setSessionId(null);
+                    setMessages([]);
+                    setTimeout(() => startSession(), 0);
+                  } else {
+                    clearIdentity();
+                  }
+                }}
+              />
             )}
             <div 
               className="w-3 h-3 rounded-full animate-pulse"

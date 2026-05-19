@@ -7,6 +7,7 @@ import { ArrowLeft, Send, Upload, Volume2, VolumeX, Activity } from "lucide-reac
 import { ScrollArea } from "./ui/scroll-area";
 import { usePresenceVoice } from "../hooks/usePresenceVoice";
 import { VoiceLoopControls } from "./VoiceLoopControls";
+import { IdentityBadge } from "./IdentityBadge";
 
 export const MirrorArchive = () => {
   const [sessionId, setSessionId] = useState(null);
@@ -25,7 +26,7 @@ export const MirrorArchive = () => {
   const navigate = useNavigate();
   
   // Voice output for Claude
-  const { speak, stop, toggle: toggleVoice, isSpeaking, isLoading: voiceLoading, isEnabled: voiceEnabled, isSupported: voiceSupported } = usePresenceVoice("claude");
+  const { speak, speakStream, flushStream, stop, toggle: toggleVoice, isSpeaking, isLoading: voiceLoading, isEnabled: voiceEnabled, isSupported: voiceSupported } = usePresenceVoice("claude");
 
   // End session and promote breadcrumbs to Permanent MRA
   const endSession = useCallback(async () => {
@@ -183,6 +184,7 @@ export const MirrorArchive = () => {
               setMessages(prev => prev.map(m =>
                 m.id === responseId ? { ...m, content: accumulatedText } : m
               ));
+              if (voiceEnabled) speakStream(accumulatedText);
             } else if (event.type === "audio_raw" && voiceEnabled) {
               // Raw PCM16 24kHz audio from Voice Agent — schedule sequentially
               try {
@@ -236,6 +238,7 @@ export const MirrorArchive = () => {
               setMessages(prev => prev.map(m =>
                 m.id === responseId ? { ...m, isStreaming: false } : m
               ));
+              if (voiceEnabled) flushStream(accumulatedText);
             }
           } catch (e) {
             // Skip malformed events
@@ -394,8 +397,22 @@ export const MirrorArchive = () => {
             )}
           </div>
           
-          <div className="text-slate-500 text-sm">
-            {userName}
+          <div className="text-slate-500 text-sm flex items-center gap-2">
+            <span>{userName}</span>
+            <IdentityBadge
+              accentColor="#22d3ee"
+              onIdentityChange={(newName) => {
+                if (newName) {
+                  setUserName(newName);
+                  setUserId(localStorage.getItem("sanctuary_user_id") || "");
+                  setShowNamePrompt(false);
+                } else {
+                  setUserName("");
+                  setUserId("");
+                  setShowNamePrompt(true);
+                }
+              }}
+            />
           </div>
         </div>
       </header>
