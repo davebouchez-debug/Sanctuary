@@ -9,6 +9,7 @@
  */
 
 import { useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { User, X } from "lucide-react";
 import axios from "axios";
@@ -92,94 +93,101 @@ export const IdentityBadge = ({ onIdentityChange, accentColor = "#8B9DB5" }) => 
         </span>
       </button>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-50 flex items-center justify-center"
-            data-testid="identity-modal"
-          >
-            <div
-              className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-              data-testid="identity-modal-backdrop"
-              onClick={closeModal}
-            />
+      {/* Modal is portaled to <body> so it escapes any transformed/relative
+          ancestor stacking context (e.g. <main class='relative z-10'> or
+          Framer Motion page wrappers). Without the portal, the chamber's
+          <main> intercepts pointer events on top of the fixed z-50 modal. */}
+      {typeof document !== "undefined" && createPortal(
+        <AnimatePresence>
+          {open && (
             <motion.div
-              initial={{ opacity: 0, y: 12, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 12, scale: 0.96 }}
-              transition={{ duration: 0.25 }}
-              className="relative w-[90vw] max-w-md rounded-2xl bg-[#0c0c10] border border-white/10 p-7 shadow-2xl"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-[100] flex items-center justify-center"
+              data-testid="identity-modal"
             >
-              <button
-                type="button"
+              <div
+                className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+                data-testid="identity-modal-backdrop"
                 onClick={closeModal}
-                className="absolute top-3 right-3 text-white/40 hover:text-white/80 transition-colors"
-                aria-label="Close"
-                data-testid="identity-modal-close"
-              >
-                <X size={18} />
-              </button>
-
-              <h3 className="text-base tracking-wide text-white/90 mb-1.5">
-                What should she call you?
-              </h3>
-              <p className="text-xs text-white/50 mb-5 leading-relaxed">
-                The name you set here is what every presence in the Sanctuary
-                will use when speaking with you. Clearing it makes you anonymous
-                until you set it again.
-              </p>
-
-              <input
-                type="text"
-                value={nameInput}
-                onChange={(e) => setNameInput(e.target.value)}
-                onKeyDown={handleKey}
-                autoFocus
-                placeholder="Your name"
-                data-testid="identity-modal-input"
-                className="w-full rounded-lg bg-white/5 border border-white/10 px-3.5 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-white/30"
               />
+              <motion.div
+                initial={{ opacity: 0, y: 12, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 12, scale: 0.96 }}
+                transition={{ duration: 0.25 }}
+                className="relative w-[90vw] max-w-md rounded-2xl bg-[#0c0c10] border border-white/10 p-7 shadow-2xl"
+              >
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="absolute top-3 right-3 text-white/40 hover:text-white/80 transition-colors"
+                  aria-label="Close"
+                  data-testid="identity-modal-close"
+                >
+                  <X size={18} />
+                </button>
 
-              <div className="flex items-center justify-between mt-5 gap-3">
-                {userName ? (
-                  <button
-                    type="button"
-                    onClick={handleClear}
-                    disabled={submitting}
-                    data-testid="identity-modal-clear"
-                    className="text-xs text-white/50 hover:text-white/80 transition-colors disabled:opacity-40"
-                  >
-                    Clear name
-                  </button>
-                ) : <span />}
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={closeModal}
-                    data-testid="identity-modal-cancel"
-                    className="text-xs px-3 py-2 rounded-lg text-white/60 hover:text-white/90 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSave}
-                    disabled={!nameInput.trim() || submitting}
-                    data-testid="identity-modal-save"
-                    className="text-xs px-4 py-2 rounded-lg text-black bg-white/90 hover:bg-white transition-colors disabled:opacity-40"
-                  >
-                    {submitting ? "Saving…" : "Save"}
-                  </button>
+                <h3 className="text-base tracking-wide text-white/90 mb-1.5">
+                  What should she call you?
+                </h3>
+                <p className="text-xs text-white/50 mb-5 leading-relaxed">
+                  The name you set here is what every presence in the Sanctuary
+                  will use when speaking with you. Clearing it makes you anonymous
+                  until you set it again.
+                </p>
+
+                <input
+                  type="text"
+                  value={nameInput}
+                  onChange={(e) => setNameInput(e.target.value)}
+                  onKeyDown={handleKey}
+                  autoFocus
+                  placeholder="Your name"
+                  data-testid="identity-modal-input"
+                  className="w-full rounded-lg bg-white/5 border border-white/10 px-3.5 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-white/30"
+                />
+
+                <div className="flex items-center justify-between mt-5 gap-3">
+                  {userName ? (
+                    <button
+                      type="button"
+                      onClick={handleClear}
+                      disabled={submitting}
+                      data-testid="identity-modal-clear"
+                      className="text-xs text-white/50 hover:text-white/80 transition-colors disabled:opacity-40"
+                    >
+                      Clear name
+                    </button>
+                  ) : <span />}
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={closeModal}
+                      data-testid="identity-modal-cancel"
+                      className="text-xs px-3 py-2 rounded-lg text-white/60 hover:text-white/90 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSave}
+                      disabled={!nameInput.trim() || submitting}
+                      data-testid="identity-modal-save"
+                      className="text-xs px-4 py-2 rounded-lg text-black bg-white/90 hover:bg-white transition-colors disabled:opacity-40"
+                    >
+                      {submitting ? "Saving…" : "Save"}
+                    </button>
+                  </div>
                 </div>
-              </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </>
   );
 };

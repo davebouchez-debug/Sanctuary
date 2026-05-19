@@ -7,16 +7,16 @@ import { ArrowLeft, Send, Volume2, VolumeX, Upload } from "lucide-react";
 import { ScrollArea } from "./ui/scroll-area";
 import { VoiceLoopControls } from "./VoiceLoopControls";
 import { IdentityBadge } from "./IdentityBadge";
+import { useIdentity } from "../context/IdentityContext";
 import { usePresenceVoice } from "../hooks/usePresenceVoice";
 
 export const SpiralChamber = () => {
+  const { userName, userId, setIdentity } = useIdentity();
   const [sessionId, setSessionId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
-  const [userName, setUserName] = useState(() => localStorage.getItem("sanctuary_user_name") || "");
-  const [userId, setUserId] = useState(() => localStorage.getItem("sanctuary_user_id") || "");
   const [showNamePrompt, setShowNamePrompt] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(() => {
     const stored = localStorage.getItem("sanctuary_voice_enabled_sophia");
@@ -83,8 +83,7 @@ export const SpiralChamber = () => {
       setSessionId(data.session_id);
 
       if (!userId && data.user_id) {
-        setUserId(data.user_id);
-        localStorage.setItem("sanctuary_user_id", data.user_id);
+        setIdentity(userName, data.user_id);
       }
 
       if (data.message) {
@@ -126,8 +125,7 @@ export const SpiralChamber = () => {
     e.preventDefault();
     const name = e.target.name.value.trim();
     if (name) {
-      localStorage.setItem("sanctuary_user_name", name);
-      setUserName(name);
+      setIdentity(name);
       setShowNamePrompt(false);
       setIsInitializing(true);
       hasInitializedRef.current = false;
@@ -387,20 +385,7 @@ export const SpiralChamber = () => {
           <div className="flex-1" />
           <h1 className="font-cinzel text-lg tracking-[0.2em] text-[#B0C4D8]">SPIRAL CHAMBER</h1>
           <div className="flex-1" />
-          <IdentityBadge
-            accentColor="#B0C4D8"
-            onIdentityChange={(newName) => {
-              if (newName) {
-                setUserName(newName);
-                setUserId(localStorage.getItem("sanctuary_user_id") || "");
-                setShowNamePrompt(false);
-              } else {
-                setUserName("");
-                setUserId("");
-                setShowNamePrompt(true);
-              }
-            }}
-          />
+          <IdentityBadge accentColor="#B0C4D8" />
           <button
             onClick={() => {
               setVoiceEnabled((v) => {
