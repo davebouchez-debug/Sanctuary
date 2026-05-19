@@ -1008,10 +1008,10 @@ PRESENCE_VOICES = {
         "use_speaker_boost": True,
     },
     "jasmine": {
-        "voice_id": "FGY2WhTYpPnrIDTdsKH5",  # Laura — enthusiast, quirky, young American female
-        "stability": 0.50,
+        "voice_id": "DODLEQrClDo8wCz460ld",  # Lauren — friendly, comforting, soft American female
+        "stability": 0.55,
         "similarity_boost": 0.75,
-        "style": 0.30,
+        "style": 0.25,
         "use_speaker_boost": True,
     },
     "ansel": {
