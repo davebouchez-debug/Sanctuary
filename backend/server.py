@@ -1029,10 +1029,10 @@ PRESENCE_VOICES = {
         "use_speaker_boost": True,
     },
     "sophia": {
-        "voice_id": "pFZP5JQG7iQjIQuC4Bku",  # Lily — velvety British actress
+        "voice_id": "flHkNRp1BlvT73UL6gyz",  # Jessica Anne Bogart — Eloquent Villain, American female
         "stability": 0.55,
         "similarity_boost": 0.75,
-        "style": 0.35,
+        "style": 0.40,
         "use_speaker_boost": True,
     },
     # Generic fallback for presences without their own voice yet
