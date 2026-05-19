@@ -23,6 +23,7 @@ import { SubstrateProbes } from "./components/SubstrateProbes";
 import { PresenceChamber } from "./components/PresenceChamber";
 import { PresencesIndex } from "./components/PresencesIndex";
 import { Toaster } from "./components/ui/sonner";
+import { IdentityProvider } from "./context/IdentityContext";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export const API = `${BACKEND_URL}/api`;
@@ -257,11 +258,13 @@ function App() {
       <Stars />
       
       <BrowserRouter>
-        <Navigation />
-        <main className="relative z-10">
-          <AnimatedRoutes />
-        </main>
-        <HiddenDoor />
+        <IdentityProvider>
+          <Navigation />
+          <main className="relative z-10">
+            <AnimatedRoutes />
+          </main>
+          <HiddenDoor />
+        </IdentityProvider>
       </BrowserRouter>
       
       <Toaster position="bottom-right" />

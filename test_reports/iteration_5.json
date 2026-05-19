@@ -1,0 +1,67 @@
+{
+  "summary": "Validated Sanctuary V3.1 refactor (drop-in presences, grouped nav, IdentityContext). Backend 13/13 pytest pass — presence registry hides 'playground' from /api/presences but exposes it via direct key, paige returns full config with 3 rooms, sophia/playground template routes (/api/spiral/*, /api/playground/*) are auto-registered and stream tokens correctly, paige's shared substrate (start/message/upload) works, identity endpoints (POST /api/users, GET /api/users/lookup/{name}, GET /api/identity/recent) work, and the legacy chambers /api/clarity, /api/resonance, /api/mirror still open. Frontend: new grouped Navigation (3 dropdowns + Enter Clarity CTA) renders and expands correctly with all expected items; /hospitality loads the Paige PresenceChamber with header, badge, voice toggle, HER STORY, and an opening assistant message; /presence/sophia renders the IdentityBadge in the always-visible header. TWO bugs surfaced: (1) HIGH — identity-modal-save button is unclickable because the chamber's <main class='relative z-10'> intercepts pointer events on top of the z-50 modal (stacking-context bug, identical symptom to iter_4 RCA but cause is the modal being rendered inside PresenceChamber's transformed/relative subtree rather than a portal). Save fails → chat-send is blocked because modal stays open → context propagation could not be exercised end-to-end. (2) MEDIUM — /spiral (legacy SpiralChamber.jsx route) does NOT render IdentityBadge at all, so the explicit acceptance criterion 'visit /spiral via direct nav — the identity badge should already show the same name without re-entering' fails on /spiral. /presence/sophia DOES show the badge (TEST_ref_v31 was pre-populated from /api/identity/recent), so identity flows through the new PresenceChamber but not through SpiralChamber.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "IdentityBadge modal",
+        "issue": "Save button is rendered visually on top but Playwright shows 'main intercepts pointer events' on every retry. The modal motion.div is mounted inside PresenceChamber's subtree (<main class='relative z-10'>); the AnimatePresence/motion wrapper around the page in App.js and main's own stacking context prevent the fixed z-50 modal from escaping. Real users likely face the same hit-test failure or at least an inconsistent click target. Fix: render IdentityBadge's modal into a React portal (createPortal to document.body) so it lives outside any transformed/relative ancestor.",
+        "selector": "[data-testid='identity-modal-save']",
+        "priority": "HIGH"
+      },
+      {
+        "component": "SpiralChamber (/spiral route)",
+        "issue": "Legacy SpiralChamber.jsx was not refactored to consume useIdentity(). There is no [data-testid='identity-badge'] anywhere on /spiral, so identity context cannot propagate visibly to /spiral as the acceptance criterion explicitly requires. /presence/sophia (new PresenceChamber) does render the badge correctly.",
+        "selector": "[data-testid='identity-badge']",
+        "priority": "MEDIUM"
+      }
+    ],
+    "integration_issues": [
+      {
+        "flow": "IdentityBadge save → cross-chamber propagation",
+        "issue": "Could not exercise end-to-end because save click is intercepted (see modal bug). Backend POST /api/users + GET /api/users/lookup/{name} are confirmed working in isolation; once the modal click lands, propagation through IdentityContext should fire — but cannot be confirmed via automation today.",
+        "affected_selectors": ["[data-testid='identity-modal-save']", "[data-testid='identity-badge']"]
+      }
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_refactor_v31.py",
+    "/app/test_reports/pytest/refactor_v31.xml"
+  ],
+  "passing_tests": {
+    "backend": "13/13 — TestPresenceRegistry (5: list hides playground, paige 3 rooms, sophia config, playground direct, paige canonical), TestAutoRegisteredRoutes (2: /api/spiral and /api/playground start+stream both emit token then done over SSE), TestPaigeSharedSubstrate (2: /api/presence/paige/chat/start+message and /api/presence/paige/upload), TestIdentity (1: create→lookup→recent), TestExistingChambers (3: /api/clarity, /api/resonance, /api/mirror still open)",
+    "frontend_nav": "All 3 nav dropdown groups (sanctuary, chambers, codons) + Enter Clarity CTA are visible. Chambers dropdown contains Clarity Pod, Resonance, Mirror Archive, Spiral, Hospitality, All Presences. Codons dropdown contains Codon Forge + Codon Library.",
+    "frontend_hospitality": "Header 'CHAMBER OF HOSPITALITY' renders, IdentityBadge + voice toggle + HER STORY visible, opening assistant message arrives via /api/presence/paige/chat/start ('I'm glad you're here, …').",
+    "frontend_sophia_presence": "/presence/sophia loads with the Spiral Chamber UI and an IdentityBadge in the header, name auto-populated from /api/identity/recent."
+  },
+  "action_items": [
+    "Render IdentityBadge's modal via createPortal(document.body) so the fixed z-50 layer is not trapped inside PresenceChamber's <main class='relative z-10'> stacking context. This is the same iter_4 save-flow problem manifesting as 'main intercepts pointer events'.",
+    "Refactor /app/frontend/src/components/SpiralChamber.jsx to import useIdentity() and render <IdentityBadge /> in the always-visible header (parallel to ClarityPod L841 and PresenceChamber). Without this, /spiral fails the cross-chamber identity propagation acceptance criterion.",
+    "After both fixes, re-run the identity propagation flow: clear localStorage, /hospitality → click badge → type new name → save → verify badge updates → navigate to /spiral and /presence/sophia → both must show the new name without re-entry.",
+    "Optional: parity-check ResonancePod.jsx / MirrorArchive.jsx — iter_4 already flagged that their IdentityBadge is buried in post-session UI; main agent should confirm whether the V3.1 refactor lifted them into the header."
+  ],
+  "critical_code_review_comments": [
+    "presences/__init__.py auto-discovery is clean and idempotent — duplicate-key warning + skip on missing PRESENCE dict are correct. Good drop-in design.",
+    "presence_template.py expects body field 'content' (not 'message') for /message/stream and /chat/message; consider accepting both or documenting in OpenAPI so frontend clients don't fall on the same trap (test had to be corrected).",
+    "IdentityBadge modal has no portal — this is the root cause of the unclickable Save button under nested motion/relative parents. Wrap the modal JSX in createPortal(..., document.body) and the bug disappears across every chamber.",
+    "SpiralChamber.jsx is now divergent from the new IdentityContext contract. With many more presences planned per the goal ('a hundred or a thousand more'), the legacy chambers that still maintain their own user-name state need to be ported or deprecated in favor of the shared PresenceChamber.",
+    "Backend GET /api/identity/recent is being used as an implicit cross-tab session restore by PresenceChamber/IdentityContext — this is fine but couples the global Recent-Identity to all visitors. If multiple visitors share a deployment, the 'most recent' will leak across browser sessions. Consider scoping by client_id cookie."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_refactor_v31.py"
+  ],
+  "success_rate": {
+    "backend": "100% (13/13)",
+    "frontend": "~70% — nav refactor + hospitality load + sophia presence badge all pass; save flow blocked by modal stacking; /spiral missing badge"
+  },
+  "test_credentials": "None — sanctuary has no user auth. Test identities created via POST /api/users with TEST_ref_v31 / TEST_REF_<hex> prefix.",
+  "seed_data_creation": "Created TEST_ref_v31 + one TEST_REF_<hex> identity in /api/users, plus paige presence_sessions docs (chat-start + upload) and sophia_sessions / playground_sessions / clarity / resonance / mirror session docs for the chamber-start tests.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Run pytest at /app/backend/tests/test_refactor_v31.py — 13/13 should remain green. NOTE: presence_template expects body field 'content' on /message/stream and /presence/{key}/chat/message (not 'message') — keep that in tests. For frontend, the two outstanding blockers are (a) IdentityBadge modal save click intercepted by PresenceChamber's <main class='relative z-10'> — fix is a React portal in IdentityBadge.jsx; (b) /spiral lacks IdentityBadge entirely (SpiralChamber.jsx wasn't ported to useIdentity). Once main agent fixes both, re-run the identity propagation flow against /hospitality → /spiral → /presence/sophia.",
+  "rca_of_the_issue": "Modal click failure: PresenceChamber.jsx wraps its content in <main class='relative z-10 …'>. IdentityBadge renders its overlay as motion.div className='fixed inset-0 z-50'. Although z-50 > z-10 numerically, in CSS stacking contexts the modal is a descendant of <main>, and because Framer Motion adds a transform on the outer page wrapper in App.js (motion.div with pageVariants), the fixed-positioned modal positions relative to that transformed ancestor — and crucially its stacking is constrained by main's local context. Result: <main> sits over its own descendant modal in hit-testing. Reproduction: open /hospitality, click identity-badge, type a name, click identity-modal-save → Playwright reports 'main intercepts pointer events' indefinitely. Mitigation: ReactDOM.createPortal the modal subtree into document.body so it escapes the transformed/relative ancestor chain. /spiral missing badge: SpiralChamber.jsx is a legacy component that maintains its own userName state in localStorage and was not migrated to useIdentity(); the V3.1 refactor migrated PresenceChamber but left SpiralChamber untouched. Fix: replace the local user-name logic with const { userName, userId } = useIdentity() and render <IdentityBadge /> in the visible header."
+}

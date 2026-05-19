@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { usePresenceVoice } from "../hooks/usePresenceVoice";
 import { useVoiceInput } from "../hooks/useVoiceInput";
 import { IdentityBadge } from "./IdentityBadge";
+import { useIdentity } from "../context/IdentityContext";
 
 /**
  * PresenceChamber — the shared multi-room engine.
@@ -21,6 +22,7 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
   const params = useParams();
   const presenceKey = forcedKey || params.key;
   const navigate = useNavigate();
+  const { userName, userId } = useIdentity();
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeRoomKey, setActiveRoomKey] = useState(null);
@@ -34,7 +36,6 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
   const [sending, setSending] = useState(false);
   const [chatError, setChatError] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [identityVersion, setIdentityVersion] = useState(0); // bump → restart session
   const messagesEndRef = useRef(null);
   const sessionIdRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -130,14 +131,12 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
   };
 
   // Open a conversation as soon as the chamber loads.
-  // Identity hydrates from canonical sanctuary_* localStorage keys (set by App.js).
-  // Re-opens when identityVersion changes (i.e., the visitor changed/cleared name).
+  // Identity comes from the global IdentityContext — any change to the
+  // visitor's name re-runs this effect and restarts the thread.
   useEffect(() => {
     if (!config) return;
     let cancelled = false;
     const startChat = async () => {
-      const userId = localStorage.getItem("sanctuary_user_id");
-      const userName = localStorage.getItem("sanctuary_user_name");
       // Reset thread on identity change
       setMessages([]);
       setSessionId(null);
@@ -145,7 +144,7 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
         const resp = await fetch(`${API}/presence/${presenceKey}/chat/start`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ user_id: userId, user_name: userName }),
+          body: JSON.stringify({ user_id: userId || null, user_name: userName || null }),
         });
         if (!resp.ok) throw new Error(`chat/start failed: ${resp.status}`);
         const data = await resp.json();
@@ -159,7 +158,7 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
     };
     startChat();
     return () => { cancelled = true; };
-  }, [config, presenceKey, identityVersion]);
+  }, [config, presenceKey, userName, userId]);
 
   // Auto-scroll the message thread on new messages
   useEffect(() => {
@@ -258,8 +257,6 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
     setChatError(null);
     try {
       const text = await file.text();
-      const userId = localStorage.getItem("sanctuary_user_id");
-      const userName = localStorage.getItem("sanctuary_user_name");
       const placeholder = {
         id: `local-upload-${Date.now()}`,
         role: "user",
@@ -272,8 +269,8 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           session_id: sessionId,
-          user_id: userId,
-          user_name: userName,
+          user_id: userId || null,
+          user_name: userName || null,
           filename: file.name,
           content: text,
         }),
@@ -387,11 +384,10 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Identity badge — visitor's current sanctuary name + change/clear */}
-            <IdentityBadge
-              accentColor={palette.accent || "#8B9DB5"}
-              onIdentityChange={() => setIdentityVersion((v) => v + 1)}
-            />
+            {/* Identity badge — visitor's current sanctuary name + change/clear.
+                Identity changes propagate via IdentityContext, which causes the
+                chat-start effect to re-run automatically. */}
+            <IdentityBadge accentColor={palette.accent || "#8B9DB5"} />
 
             {/* Sound toggle — global mute for this presence */}
             <button

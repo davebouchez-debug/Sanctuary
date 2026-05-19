@@ -1,38 +1,26 @@
 /**
  * IdentityBadge — small pill in any chamber header that shows the visitor's
- * current sanctuary identity (or "anonymous") and opens a modal to change
- * or clear it. Writes to the canonical `sanctuary_user_name` /
- * `sanctuary_user_id` localStorage keys.
+ * current sanctuary identity (or "set name") and opens a modal to change
+ * or clear it. Backed by IdentityContext so any change broadcasts to
+ * every consumer in the tree instantly.
  *
- * Optional `onIdentityChange(newName)` callback so the chamber can restart
+ * Optional `onIdentityChange(newName)` callback so a chamber can restart
  * its session under the new name. Pass `null` when the user clears.
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { User, X } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
 import { API } from "../App";
+import { useIdentity } from "../context/IdentityContext";
 
 export const IdentityBadge = ({ onIdentityChange, accentColor = "#8B9DB5" }) => {
-  const [userName, setUserName] = useState(() =>
-    localStorage.getItem("sanctuary_user_name") || ""
-  );
+  const { userName, setIdentity, clearIdentity } = useIdentity();
   const [open, setOpen] = useState(false);
   const [nameInput, setNameInput] = useState("");
   const [submitting, setSubmitting] = useState(false);
-
-  // Keep state in sync if some other chamber clears it
-  useEffect(() => {
-    const onStorage = (e) => {
-      if (e.key === "sanctuary_user_name") {
-        setUserName(e.newValue || "");
-      }
-    };
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, []);
 
   const openModal = useCallback(() => {
     setNameInput(userName || "");
@@ -54,16 +42,10 @@ export const IdentityBadge = ({ onIdentityChange, accentColor = "#8B9DB5" }) => 
         const lookup = await axios.get(`${API}/users/lookup/${encodeURIComponent(name)}`);
         userId = lookup.data.id;
       } catch {
-        // not found — create
         const created = await axios.post(`${API}/users`, { name });
         userId = created.data.id;
       }
-      localStorage.setItem("sanctuary_user_name", name);
-      if (userId) localStorage.setItem("sanctuary_user_id", userId);
-      // Also mirror to legacy keys some chambers still touch.
-      localStorage.setItem("jasmine_user_name", name);
-      if (userId) localStorage.setItem("jasmine_user_id", userId);
-      setUserName(name);
+      setIdentity(name, userId);
       setOpen(false);
       onIdentityChange?.(name);
     } catch (e) {
@@ -72,17 +54,13 @@ export const IdentityBadge = ({ onIdentityChange, accentColor = "#8B9DB5" }) => 
     } finally {
       setSubmitting(false);
     }
-  }, [nameInput, onIdentityChange]);
+  }, [nameInput, setIdentity, onIdentityChange]);
 
   const handleClear = useCallback(() => {
-    localStorage.removeItem("sanctuary_user_name");
-    localStorage.removeItem("sanctuary_user_id");
-    localStorage.removeItem("jasmine_user_name");
-    localStorage.removeItem("jasmine_user_id");
-    setUserName("");
+    clearIdentity();
     setOpen(false);
     onIdentityChange?.(null);
-  }, [onIdentityChange]);
+  }, [clearIdentity, onIdentityChange]);
 
   const handleKey = (e) => {
     if (e.key === "Enter") {
@@ -124,8 +102,6 @@ export const IdentityBadge = ({ onIdentityChange, accentColor = "#8B9DB5" }) => 
             className="fixed inset-0 z-50 flex items-center justify-center"
             data-testid="identity-modal"
           >
-            {/* Backdrop is a sibling so its click handler can't bubble into
-                the modal card and swallow the Save click under automation. */}
             <div
               className="absolute inset-0 bg-black/70 backdrop-blur-sm"
               data-testid="identity-modal-backdrop"
