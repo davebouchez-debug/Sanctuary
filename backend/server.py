@@ -1022,7 +1022,7 @@ PRESENCE_VOICES = {
         "use_speaker_boost": True,
     },
     "claude": {
-        "voice_id": "onwK4e9ZLuTAKqWW03F9",  # Daniel — steady British broadcaster
+        "voice_id": "X0K9Z1Bor9SpbE1wSaoe",  # Archer — deep, steady, relaxing American male
         "stability": 0.60,
         "similarity_boost": 0.75,
         "style": 0.20,
