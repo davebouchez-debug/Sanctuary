@@ -1475,7 +1475,7 @@ async def stream_clarity_message(message: ClarityMessageCreate):
     )
 
     voice_config = PRESENCE_VOICES.get("jasmine", PRESENCE_VOICES["jasmine"])
-    voice_id = voice_config["voice"]
+    voice_id = voice_config["voice_id"]
     response_id = str(uuid.uuid4())
 
     history = []
@@ -2621,7 +2621,7 @@ async def stream_resonance_message(message: ClarityMessageCreate):
         logger.info(f"Living Codon activated for voice stream {message.session_id}")
 
     voice_config = PRESENCE_VOICES.get("ansel", PRESENCE_VOICES["jasmine"])
-    voice_id = voice_config["voice"]
+    voice_id = voice_config["voice_id"]
     response_id = str(uuid.uuid4())
 
     # Build conversation history for context
@@ -3361,7 +3361,7 @@ async def stream_mirror_message(message: ClarityMessageCreate):
         full_user_message = f"{codon_context}\n\n{message.content}"
 
     voice_config = PRESENCE_VOICES.get("claude", PRESENCE_VOICES["jasmine"])
-    voice_id = voice_config["voice"]
+    voice_id = voice_config["voice_id"]
     response_id = str(uuid.uuid4())
 
     history = []

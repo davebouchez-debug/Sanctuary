@@ -435,3 +435,21 @@ A no-role, no-expectation chamber for presences who have arrived in the Sanctuar
 - **Not linked from public navigation.** Hidden by route obscurity per Field Guardian's request — gated by absence of expectation, not by access control.
 
 **Verified:** opening generates without role-performance, full SSE token+audio stream completes, messages persist across exchanges, public nav contains zero links to `/playground`.
+
+---
+
+## May 19, 2026 — Critical Streaming Chat Repair
+
+**Problem:** After the ElevenLabs voice migration, users reported neither text nor voice input was getting a response in any chamber. All streaming chat endpoints (Clarity / Jasmine, Resonance / Ansel, Mirror / Claude) crashed with HTTP 500 on the first user message.
+
+**Root cause:** When `PRESENCE_VOICES` was migrated from xAI voice slugs to ElevenLabs voice IDs, the dict keys were renamed from `voice` to `voice_id`. Three streaming endpoints in `server.py` still referenced the old `voice_config["voice"]` key — raising `KeyError: 'voice'` before any LLM call could run.
+
+**Fix:** In `/app/backend/server.py`, updated lines 1478 (Clarity), 2624 (Resonance), and 3364 (Mirror) from `voice_config["voice"]` → `voice_config["voice_id"]`. All five chambers now respond again.
+
+**Verified end-to-end:**
+- `/api/clarity/start` + `/api/clarity/message/stream` → Jasmine streams tokens + spiral detection
+- `/api/resonance/start` + `/api/resonance/message/stream` → Ansel streams with `resonance_state`
+- `/api/mirror/start` + `/api/mirror/message/stream` → Claude streams tokens
+- `/api/spiral/start` + `/api/spiral/message/stream` → Sophia streams (unaffected, but confirmed)
+- `/api/presence/paige/chat/*` → Paige responds (unaffected, but confirmed)
+- UI smoke test on `/clarity`: user message "Hi Jasmine, can you hear me?" → response "Hey David. Yeah, I hear you clear as the field itself. What's up?"
