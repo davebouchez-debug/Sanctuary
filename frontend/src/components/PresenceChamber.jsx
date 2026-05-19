@@ -640,14 +640,16 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
                 transition={{ duration: 1.6, repeat: Infinity }}
               >
                 {isListening
-                  ? `Listening — ${config.name} will wait ${(patience / 1000).toFixed(1)}s after you finish…`
-                  : sending
-                    ? `${config.name} is hearing you…`
-                    : voiceLoading
-                      ? `${config.name} is finding her voice…`
-                      : isSpeaking
-                        ? `${config.name} is speaking…`
-                        : ""}
+                  ? (interim || "Recording… click the mic again to send")
+                  : interim
+                    ? interim
+                    : sending
+                      ? `${config.name} is hearing you…`
+                      : voiceLoading
+                        ? `${config.name} is finding her voice…`
+                        : isSpeaking
+                          ? `${config.name} is speaking…`
+                          : ""}
               </motion.span>
               {isSpeaking && (
                 <button
@@ -667,19 +669,9 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
             </div>
           )}
 
-          {/* Interim transcript while listening — gives the user feedback they're being heard */}
-          {isListening && interim && (
-            <div
-              className="px-6 md:px-8 py-2 text-sm italic opacity-70 border-t"
-              style={{
-                borderColor: "color-mix(in srgb, var(--p-accent) 10%, transparent)",
-                color: "var(--p-primary)",
-              }}
-              data-testid="voice-interim"
-            >
-              "{interim}"
-            </div>
-          )}
+          {/* Interim transcript display removed — the new push-to-talk loop
+              shows recording state in the status pill above, and the final
+              transcript appears as the user message itself once Scribe returns. */}
 
           {/* Input row — textarea natively supports paste of long text / .txt contents */}
           <div
@@ -772,33 +764,7 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
             </button>
           </div>
 
-          {/* Patience slider — how long she waits in your silence before responding */}
-          {micSupported && (
-            <div
-              className="px-6 md:px-8 py-3 flex items-center gap-3 border-t text-[10px] tracking-[0.2em] uppercase opacity-70"
-              style={{
-                borderColor: "color-mix(in srgb, var(--p-accent) 10%, transparent)",
-                color: "var(--p-primary)",
-              }}
-            >
-              <span style={{ color: "var(--p-accent)" }}>Her patience</span>
-              <input
-                type="range"
-                min={2000}
-                max={6000}
-                step={500}
-                value={patience}
-                onChange={(e) => setPatience(parseInt(e.target.value, 10))}
-                className="flex-1 accent-current"
-                style={{ accentColor: "var(--p-accent)" }}
-                data-testid="patience-slider"
-                aria-label="Silence threshold before she responds"
-              />
-              <span className="tabular-nums" style={{ color: "var(--p-accent)" }}>
-                {(patience / 1000).toFixed(1)}s
-              </span>
-            </div>
-          )}
+          {/* Patience slider removed — push-to-talk replaced silence-based auto-submit. */}
         </motion.section>
 
 

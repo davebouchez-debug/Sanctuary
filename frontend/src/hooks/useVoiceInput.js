@@ -1,187 +1,240 @@
 /**
- * useVoiceInput — microphone capture + voice activity detection (VAD)
- * for the Sanctuary presence chambers.
+ * useVoiceInput — push-to-talk microphone capture, transcribed server-side
+ * by ElevenLabs Scribe.
  *
- * Behavior:
- *   - Click the mic → continuous listening starts (browser prompts for
- *     mic permission on first use).
- *   - As you speak, interim transcripts populate so you can see what was heard.
- *   - When you stop speaking for `silenceMs` (default 3.5s), the heard
- *     transcript is auto-submitted via onTranscript(text).
- *   - If the browser hasn't marked the speech "final" by the time the
- *     silence timer fires (Chrome's auto-finalize is slow on short phrases),
- *     we submit the interim text instead — better to send what we heard
- *     than to drop the user's words silently.
- *   - Errors are surfaced through the `error` field and via toast so the
- *     user sees what went wrong (permission denied, no mic, etc.).
+ * Why this instead of the browser's Web Speech API?
+ *   - Web Speech is Chrome-only-ish, flaky inside iframes (e.g. preview hosts),
+ *     and drops short phrases when Chrome doesn't mark them "final" before
+ *     the silence timer fires. Multiple users hit the silent-failure case.
+ *   - This hook records audio with MediaRecorder, posts the .webm blob to
+ *     /api/stt/transcribe (ElevenLabs Scribe), and calls onTranscript with
+ *     whatever came back. It works in any modern browser, including Firefox.
  *
- * Uses the browser-native Web Speech API. Returns isSupported=false on
- * Firefox and older browsers — chambers stay usable via text input.
+ * UX:
+ *   - Click the mic → permission prompt (first time), then recording starts.
+ *   - Click again → recording stops, audio uploads, onTranscript(text) fires.
+ *   - 60s safety cap so a forgotten-on mic doesn't run forever.
+ *
+ * API kept compatible with the previous WebSpeech-based hook:
+ *   { start, stop, isListening, interim, error, isSupported }
+ * `interim` is now a status string ("Recording 2.3s…" or "Transcribing…").
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { API } from "../App";
 
-const DEFAULT_SILENCE_MS = 3500;
-const MIN_USEFUL_CHARS = 2;  // single "a"/"i" tokens are usually noise
+const MAX_RECORD_MS = 60_000;
+
+const pickAudioMime = () => {
+  const candidates = [
+    "audio/webm;codecs=opus",
+    "audio/webm",
+    "audio/ogg;codecs=opus",
+    "audio/mp4",
+    "",
+  ];
+  if (typeof MediaRecorder === "undefined") return null;
+  for (const m of candidates) {
+    if (!m || MediaRecorder.isTypeSupported(m)) return m;
+  }
+  return "";
+};
 
 export const useVoiceInput = ({
   onTranscript,
-  silenceMs = DEFAULT_SILENCE_MS,
-  language = "en-US",
+  // silenceMs / language are kept for API parity but unused now —
+  // push-to-talk replaces the silence-timer / language flow.
+  // eslint-disable-next-line no-unused-vars
+  silenceMs,
+  // eslint-disable-next-line no-unused-vars
+  language,
 } = {}) => {
   const [isListening, setIsListening] = useState(false);
   const [interim, setInterim] = useState("");
   const [error, setError] = useState(null);
   const [isSupported, setIsSupported] = useState(true);
 
-  const recognitionRef = useRef(null);
-  const silenceTimerRef = useRef(null);
-  const finalTranscriptRef = useRef("");
-  const interimTranscriptRef = useRef("");
+  const recorderRef = useRef(null);
+  const streamRef = useRef(null);
+  const chunksRef = useRef([]);
+  const startedAtRef = useRef(0);
+  const tickerRef = useRef(null);
+  const maxTimerRef = useRef(null);
   const onTranscriptRef = useRef(onTranscript);
-  const silenceMsRef = useRef(silenceMs);
-  const wantListeningRef = useRef(false);
 
   useEffect(() => { onTranscriptRef.current = onTranscript; }, [onTranscript]);
-  useEffect(() => { silenceMsRef.current = silenceMs; }, [silenceMs]);
 
   // Detect support once
   useEffect(() => {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) setIsSupported(false);
+    const hasMR = typeof MediaRecorder !== "undefined";
+    const hasGUM = !!navigator.mediaDevices?.getUserMedia;
+    if (!hasMR || !hasGUM) setIsSupported(false);
   }, []);
 
-  const clearSilenceTimer = useCallback(() => {
-    if (silenceTimerRef.current) {
-      clearTimeout(silenceTimerRef.current);
-      silenceTimerRef.current = null;
+  const cleanupStream = useCallback(() => {
+    if (tickerRef.current) {
+      clearInterval(tickerRef.current);
+      tickerRef.current = null;
     }
+    if (maxTimerRef.current) {
+      clearTimeout(maxTimerRef.current);
+      maxTimerRef.current = null;
+    }
+    try {
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+    } catch { /* no-op */ }
+    streamRef.current = null;
+    recorderRef.current = null;
+    chunksRef.current = [];
   }, []);
 
-  // Submit the heard transcript on silence. Falls back to interim if the
-  // browser hasn't yet marked anything final.
-  const submitHeard = useCallback(() => {
-    const finalText = finalTranscriptRef.current.trim();
-    const interimText = interimTranscriptRef.current.trim();
-    const text = finalText || interimText;
-    if (text.length >= MIN_USEFUL_CHARS) {
-      finalTranscriptRef.current = "";
-      interimTranscriptRef.current = "";
+  const uploadAndTranscribe = useCallback(async (blob, mime) => {
+    setInterim("Transcribing…");
+    try {
+      const form = new FormData();
+      const ext = (mime || "audio/webm").split("/")[1]?.split(";")[0] || "webm";
+      form.append("audio_file", blob, `recording.${ext}`);
+      const resp = await fetch(`${API}/stt/transcribe`, {
+        method: "POST",
+        body: form,
+      });
+      if (!resp.ok) {
+        const data = await resp.json().catch(() => ({}));
+        throw new Error(data.error || `Transcription failed (${resp.status})`);
+      }
+      const data = await resp.json();
+      const text = (data.text || "").trim();
+      if (text) {
+        onTranscriptRef.current?.(text);
+      } else {
+        toast.message("I didn't catch any words. Try again?");
+      }
+    } catch (e) {
+      console.error("[useVoiceInput] transcription error:", e);
+      const msg = e?.message || "Transcription failed.";
+      setError(msg);
+      toast.error(msg);
+    } finally {
       setInterim("");
-      wantListeningRef.current = false;
-      try { recognitionRef.current?.stop(); } catch { /* no-op */ }
-      onTranscriptRef.current?.(text);
     }
   }, []);
-
-  const armSilenceTimer = useCallback(() => {
-    clearSilenceTimer();
-    silenceTimerRef.current = setTimeout(submitHeard, silenceMsRef.current);
-  }, [clearSilenceTimer, submitHeard]);
 
   const stop = useCallback(() => {
-    wantListeningRef.current = false;
-    clearSilenceTimer();
-    finalTranscriptRef.current = "";
-    interimTranscriptRef.current = "";
-    setInterim("");
-    try { recognitionRef.current?.stop(); } catch { /* no-op */ }
-    setIsListening(false);
-  }, [clearSilenceTimer]);
+    const recorder = recorderRef.current;
+    if (!recorder) {
+      cleanupStream();
+      setIsListening(false);
+      return;
+    }
+    if (recorder.state === "recording") {
+      try { recorder.stop(); } catch { /* no-op */ }
+    } else {
+      cleanupStream();
+      setIsListening(false);
+    }
+  }, [cleanupStream]);
 
-  const start = useCallback(() => {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) {
-      const msg = "Voice input isn't supported in this browser. Try Chrome, Edge, or Safari.";
+  const start = useCallback(async () => {
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+      const msg = "Voice input isn't supported in this browser.";
       setError(msg);
       setIsSupported(false);
       toast.error(msg);
       return;
     }
 
-    // Re-init each session so a previous abort doesn't poison state.
-    const recognition = new SR();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = language;
-
-    recognition.onstart = () => {
-      setIsListening(true);
-      setError(null);
-      finalTranscriptRef.current = "";
-      interimTranscriptRef.current = "";
-      setInterim("");
-    };
-
-    recognition.onresult = (event) => {
-      let interimText = "";
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const res = event.results[i];
-        const transcript = res[0]?.transcript || "";
-        if (res.isFinal) {
-          finalTranscriptRef.current += transcript + " ";
-        } else {
-          interimText += transcript;
-        }
-      }
-      interimTranscriptRef.current = interimText;
-      setInterim(interimText);
-      // Any new speech (final OR interim) resets the silence countdown.
-      armSilenceTimer();
-    };
-
-    recognition.onerror = (event) => {
-      const err = event.error;
-      // "no-speech" fires on long silence — that's expected, don't surface it.
-      // "aborted" fires when we stop() ourselves — also expected.
-      if (err && err !== "no-speech" && err !== "aborted") {
-        setError(err);
-        const friendly = err === "not-allowed"
-          ? "Microphone access was denied. Enable it in your browser settings to speak."
-          : err === "audio-capture"
-            ? "No microphone detected. Plug one in and try again."
-            : err === "network"
-              ? "Voice recognition needs a network connection."
-              : `Voice input error: ${err}`;
-        toast.error(friendly);
-        wantListeningRef.current = false;
-      }
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-      clearSilenceTimer();
-      // If the user still wants to listen (browser auto-stopped on a pause),
-      // restart. Otherwise leave it off.
-      if (wantListeningRef.current) {
-        try {
-          recognition.start();
-        } catch {
-          // Already started or other transient state — leave alone.
-        }
-      }
-    };
-
-    recognitionRef.current = recognition;
-    wantListeningRef.current = true;
+    setError(null);
+    let stream;
     try {
-      recognition.start();
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch (e) {
-      const msg = e?.message || "Could not start the microphone.";
+      const name = e?.name;
+      const msg = name === "NotAllowedError" || name === "SecurityError"
+        ? "Microphone access was denied. Enable it in your browser settings to speak."
+        : name === "NotFoundError"
+          ? "No microphone detected. Plug one in and try again."
+          : `Could not open the microphone: ${e?.message || name || "unknown error"}`;
       setError(msg);
       toast.error(msg);
-      wantListeningRef.current = false;
+      return;
     }
-  }, [language, armSilenceTimer, clearSilenceTimer]);
+
+    const mime = pickAudioMime();
+    let recorder;
+    try {
+      recorder = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+    } catch (e) {
+      stream.getTracks().forEach((t) => t.stop());
+      const msg = `Could not start the recorder: ${e?.message || "unknown error"}`;
+      setError(msg);
+      toast.error(msg);
+      return;
+    }
+
+    streamRef.current = stream;
+    recorderRef.current = recorder;
+    chunksRef.current = [];
+    startedAtRef.current = Date.now();
+
+    recorder.ondataavailable = (event) => {
+      if (event.data && event.data.size > 0) {
+        chunksRef.current.push(event.data);
+      }
+    };
+
+    recorder.onstop = async () => {
+      const blob = new Blob(chunksRef.current, { type: mime || "audio/webm" });
+      const tooShort = (Date.now() - startedAtRef.current) < 300;
+      cleanupStream();
+      setIsListening(false);
+      if (tooShort || blob.size < 1024) {
+        toast.message("That was too brief to catch. Try holding the mic a moment longer.");
+        return;
+      }
+      await uploadAndTranscribe(blob, mime || "audio/webm");
+    };
+
+    recorder.onerror = (event) => {
+      const msg = `Recording error: ${event?.error?.message || "unknown"}`;
+      setError(msg);
+      toast.error(msg);
+      cleanupStream();
+      setIsListening(false);
+    };
+
+    try {
+      recorder.start();
+    } catch (e) {
+      cleanupStream();
+      setIsListening(false);
+      const msg = `Could not start the recorder: ${e?.message || "unknown error"}`;
+      setError(msg);
+      toast.error(msg);
+      return;
+    }
+
+    setIsListening(true);
+    setInterim("Recording 0.0s…");
+
+    // Live duration display
+    tickerRef.current = setInterval(() => {
+      const elapsed = (Date.now() - startedAtRef.current) / 1000;
+      setInterim(`Recording ${elapsed.toFixed(1)}s…`);
+    }, 200);
+
+    // Safety cap
+    maxTimerRef.current = setTimeout(() => {
+      toast.message("Reached the 60s recording limit. Stopping.");
+      stop();
+    }, MAX_RECORD_MS);
+  }, [cleanupStream, stop, uploadAndTranscribe]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      wantListeningRef.current = false;
-      clearSilenceTimer();
-      try { recognitionRef.current?.abort(); } catch { /* no-op */ }
+      cleanupStream();
     };
-  }, [clearSilenceTimer]);
+  }, [cleanupStream]);
 
   return {
     start,

@@ -21,14 +21,21 @@ Two user-reported bugs resolved in one pass.
 - Backend still emits `audio_raw` for now (no breakage), but it's a noop on the client. Future optimization: strip emission from the backend to save xAI API spend.
 
 ### Bug 2 — Voice-to-text silently dropping speech
-**Root cause:** `useVoiceInput` only submitted `finalTranscriptRef` on silence; Chrome's continuous mode often doesn't mark short phrases as "final" before the 3.5s silence timer fires, so the timer would fire with an empty string and the user's words vanished. Errors (mic-permission, no-mic, network) were also swallowed.
+**Root cause (initial diagnosis):** `useVoiceInput` only submitted `finalTranscriptRef` on silence; Chrome's continuous mode often doesn't mark short phrases as "final" before the 3.5s silence timer fires, so the timer would fire with an empty string and the user's words vanished.
 
-**Fix (`/app/frontend/src/hooks/useVoiceInput.js`):**
-- Silence timer now submits `finalTranscript || interimTranscript` — whichever has content. Short phrases no longer get dropped.
-- Errors are surfaced through `toast.error` with friendly messages (mic blocked, no mic, network).
-- Cleaner state reset on every start.
+**First attempt (insufficient):** Made the silence timer submit `interim` as fallback. User reported it still didn't work — Web Speech API is too unreliable in embedded iframe contexts (the Emergent App Preview iframe likely doesn't pass `allow="microphone"` to WebSpeech APIs).
+
+**Final fix — push-to-talk via MediaRecorder + ElevenLabs Scribe:**
+- Rewrote `/app/frontend/src/hooks/useVoiceInput.js` to use `navigator.mediaDevices.getUserMedia` + `MediaRecorder` to capture WebM/Opus audio.
+- On stop, blob is POSTed to `/api/stt/transcribe` (already wired to ElevenLabs Scribe).
+- Transcript fires `onTranscript(text)` exactly like before — drop-in replacement.
+- Works in all modern browsers (Chrome, Edge, Safari, Firefox).
+- 60s safety cap, sub-300ms recordings rejected as too brief, friendly error toasts for mic-blocked / no-mic / network errors.
+- `VoiceLoopControls` UI updated: helper text now reads "Click to speak to {Name}" / "Click mic again to send"; the patience slider is removed (no longer relevant under push-to-talk).
+- `PresenceChamber.jsx`: patience slider removed; status pill now shows live "Recording X.Xs…" then "Transcribing…".
 
 ---
+
 
 
 ## 🏛️ V3.1 Scalable Architecture Refactor — Feb 2026

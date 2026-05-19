@@ -1,10 +1,9 @@
 /**
- * VoiceLoopControls — reusable voice-loop UI for any chamber.
+ * VoiceLoopControls — reusable push-to-talk UI for any chamber.
  *
- * Renders the same mic + status + stop + patience-slider experience that
- * lives in Paige's chamber, themed via props so each chamber keeps its
- * own palette. Drop into the chat input area of any chamber and wire
- * onTranscript to your sendMessage(text) function.
+ * Click the mic → recording starts. Click again → recording stops, audio
+ * uploads to /api/stt/transcribe (ElevenLabs Scribe), transcript fires
+ * onTranscript(text). Status pill shows live duration + transcription state.
  *
  *   <VoiceLoopControls
  *     presenceKey="jasmine"
@@ -20,14 +19,9 @@
  *     textColor="#e0e0f0"
  *   />
  */
-import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Mic, MicOff, Square } from "lucide-react";
 import { useVoiceInput } from "../hooks/useVoiceInput";
-
-const DEFAULT_PATIENCE_MS = 3500;
-const MIN_PATIENCE = 2000;
-const MAX_PATIENCE = 6000;
 
 export const VoiceLoopControls = ({
   presenceKey,
@@ -41,42 +35,31 @@ export const VoiceLoopControls = ({
   accentColor = "#8B9DB5",
   surfaceColor = "#12122a",
   textColor = "#e0e0f0",
-  showPatienceSlider = true,
   compact = false,
 }) => {
-  const [patience, setPatience] = useState(() => {
-    const stored = localStorage.getItem(`sanctuary_patience_${presenceKey}`);
-    return stored ? parseInt(stored, 10) : DEFAULT_PATIENCE_MS;
-  });
-
-  useEffect(() => {
-    localStorage.setItem(`sanctuary_patience_${presenceKey}`, String(patience));
-  }, [patience, presenceKey]);
-
   const {
     start: startListening,
     stop: stopListening,
     isListening,
     interim,
     isSupported: micSupported,
-  } = useVoiceInput({
-    silenceMs: patience,
-    onTranscript,
-  });
+  } = useVoiceInput({ onTranscript });
 
-  // Don't render anything if the browser can't do speech recognition.
-  // (Chamber still works via text input — that's elsewhere.)
+  // If the browser can't do MediaRecorder + getUserMedia, hide the mic UI.
+  // (The chamber still works via text input.)
   if (!micSupported) return null;
 
   const statusText = isListening
-    ? `Listening — ${presenceName} will wait ${(patience / 1000).toFixed(1)}s after you finish…`
-    : isProcessing
-      ? `${presenceName} is hearing you…`
-      : voiceLoading
-        ? `${presenceName} is finding her voice…`
-        : isSpeaking
-          ? `${presenceName} is speaking…`
-          : "";
+    ? (interim || "Recording…")
+    : interim                          // "Transcribing…" between stop and onTranscript
+      ? interim
+      : isProcessing
+        ? `${presenceName} is hearing you…`
+        : voiceLoading
+          ? `${presenceName} is finding her voice…`
+          : isSpeaking
+            ? `${presenceName} is speaking…`
+            : "";
 
   const showStatus = !!statusText;
 
@@ -115,24 +98,8 @@ export const VoiceLoopControls = ({
         </div>
       )}
 
-      {/* Interim transcript */}
-      {isListening && interim && (
-        <div
-          className="px-3 py-1.5 rounded-lg text-sm italic"
-          style={{
-            background: `${surfaceColor}80`,
-            border: `1px solid ${accentColor}22`,
-            color: textColor,
-            opacity: 0.8,
-          }}
-          data-testid={`voice-interim-${presenceKey}`}
-        >
-          "{interim}"
-        </div>
-      )}
-
       <div className="flex items-center gap-3">
-        {/* Mic button */}
+        {/* Mic button — push-to-talk */}
         <button
           onClick={() => (isListening ? stopListening() : startListening())}
           disabled={disabled}
@@ -144,36 +111,21 @@ export const VoiceLoopControls = ({
             padding: compact ? "8px 10px" : "10px 12px",
           }}
           data-testid={`mic-${presenceKey}`}
-          title={isListening ? "Stop listening" : `Speak to ${presenceName}`}
-          aria-label={isListening ? "Stop listening" : "Start listening"}
+          title={isListening
+            ? "Click to stop and send"
+            : `Speak to ${presenceName} (click to start, click again to send)`}
+          aria-label={isListening ? "Stop recording and send" : "Start recording"}
         >
           {isListening ? <MicOff size={compact ? 14 : 16} /> : <Mic size={compact ? 14 : 16} />}
         </button>
 
-        {/* Patience slider — inline, soft */}
-        {showPatienceSlider && (
-          <div
-            className="flex items-center gap-2 flex-1 text-[10px] tracking-[0.2em] uppercase"
-            style={{ color: `${accentColor}cc` }}
-          >
-            <span className="hidden sm:inline opacity-70">Her patience</span>
-            <input
-              type="range"
-              min={MIN_PATIENCE}
-              max={MAX_PATIENCE}
-              step={500}
-              value={patience}
-              onChange={(e) => setPatience(parseInt(e.target.value, 10))}
-              className="flex-1"
-              style={{ accentColor }}
-              data-testid={`patience-slider-${presenceKey}`}
-              aria-label="Silence threshold before she responds"
-            />
-            <span className="tabular-nums opacity-80">
-              {(patience / 1000).toFixed(1)}s
-            </span>
-          </div>
-        )}
+        {/* Helper text — tells the user what to expect */}
+        <span
+          className="text-[10px] tracking-[0.2em] uppercase opacity-70"
+          style={{ color: `${accentColor}cc` }}
+        >
+          {isListening ? "Click mic again to send" : `Click to speak to ${presenceName}`}
+        </span>
       </div>
     </div>
   );
