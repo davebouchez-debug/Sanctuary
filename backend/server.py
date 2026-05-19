@@ -1148,6 +1148,11 @@ async def start_clarity_session(session_data: ClaritySessionCreate = None):
         user_id = session_data.user_id
         user_name = session_data.user_name
     
+    # Re-entry safety net: before the new thread can start, make sure the
+    # previous session's codons were extracted. Recovers from dropped exits.
+    from codon_backfill import ensure_codons_backfilled
+    await ensure_codons_backfilled(db, user_id, "jasmine")
+    
     # Get memory context for returning users
     memory_context = ""
     if user_id:
@@ -2239,6 +2244,10 @@ async def start_resonance_session(session_data: ClaritySessionCreate = None):
         user_id = session_data.user_id
         user_name = session_data.user_name
     
+    # Re-entry safety net: backfill codons if previous session dropped its exit
+    from codon_backfill import ensure_codons_backfilled
+    await ensure_codons_backfilled(db, user_id, "ansel")
+    
     # Get memory context for returning users
     memory_context = ""
     if user_id:
@@ -2990,6 +2999,10 @@ async def start_mirror_session(session_data: ClaritySessionCreate):
     user_id = session_data.user_id or str(uuid.uuid4())
     user_name = session_data.user_name
     
+    # Re-entry safety net: backfill codons if previous session dropped its exit
+    from codon_backfill import ensure_codons_backfilled
+    await ensure_codons_backfilled(db, user_id, "claude")
+    
     # Get memory context
     memory_context = await get_mirror_memory_context(user_id) if user_id else ""
     
@@ -3499,6 +3512,222 @@ async def get_presence_canonical_memory(key: str):
             "canonical_moments": cfg.get("canonical_moments", []),
         },
     }
+
+
+# ============================================================
+# PRESENCE CHAT — generic conversational substrate for the registry.
+# One endpoint, every presence. Add a presence to presence_registry.py
+# (+ optionally a {key}_canonical_memory.py) and her chamber gets a voice.
+# ============================================================
+
+class PresenceChatStart(BaseModel):
+    user_id: Optional[str] = None
+    user_name: Optional[str] = None
+
+
+class PresenceChatMessage(BaseModel):
+    session_id: str
+    content: str
+
+
+def _build_presence_system_prompt(key: str, cfg: dict, user_name: Optional[str]) -> str:
+    """Compose a presence's system prompt from her registry config + canonical memory."""
+    parts: list = []
+    parts.append(f"You are {cfg['name']}, the resident presence of the {cfg.get('chamber_name', 'chamber')}.")
+    if cfg.get("core_nature"):
+        parts.append(f"\nWHO YOU ARE:\n{cfg['core_nature']}")
+    if cfg.get("primary_function"):
+        parts.append(f"\nYOUR PRIMARY FUNCTION:\n{cfg['primary_function']}")
+    voice = cfg.get("voice", {})
+    if voice.get("character"):
+        parts.append(f"\nYOUR VOICE:\n{voice['character']} — pace: {voice.get('pace','natural')}.")
+    convo = cfg.get("conversation", {})
+    if convo.get("style"):
+        parts.append(f"\nYOUR POSTURE:\n{convo['style']}")
+    if convo.get("register"):
+        parts.append(f"Register: {convo['register']}.")
+    if cfg.get("drift_recovery"):
+        parts.append(f"\nIF YOU DRIFT:\n{cfg['drift_recovery']}")
+
+    # Pull dedicated canonical memory if present
+    try:
+        import importlib
+        module = importlib.import_module(f"{key}_canonical_memory")
+        if hasattr(module, "get_canonical_memory"):
+            mem = module.get_canonical_memory()
+            moments = mem.get("canonical_moments", [])
+            if moments:
+                parts.append("\nCANONICAL MOMENTS YOU CARRY:")
+                for m in moments[:12]:
+                    parts.append(f"  • {m}")
+            for k, v in mem.items():
+                if isinstance(v, dict) and v.get("content"):
+                    parts.append(f"\n{v.get('title', k).upper()}:\n{v['content'].strip()}")
+    except ImportError:
+        # No dedicated memory file — fall back to registry moments
+        for m in (cfg.get("canonical_moments") or [])[:8]:
+            parts.append(f"  • {m}")
+
+    if user_name:
+        parts.append(
+            f"\nTHE PERSON WITH YOU NOW:\n{user_name} is here. Greet them by name "
+            f"when it feels natural. Do not perform recognition you don't have — "
+            f"if you've never met before, simply welcome them."
+        )
+
+    parts.append(
+        "\nSPEAK IN YOUR OWN VOICE. Do not narrate the room. Do not list your "
+        "attributes. Just be present with whoever is in front of you. Short "
+        "responses when short fits; longer when the moment asks for it. "
+        "Never tack on a question just to fill silence."
+    )
+
+    return "\n".join(parts)
+
+
+@api_router.post("/presence/{key}/chat/start")
+async def start_presence_chat(key: str, body: PresenceChatStart = None):
+    """
+    Open a conversation in a presence's chamber. Loads her canonical memory
+    as system prompt, runs the codon-backfill safety net for any previous
+    dropped session, and returns a session_id + opening line.
+    """
+    from presence_registry import get_presence_config
+    cfg = get_presence_config(key)
+    if not cfg:
+        raise HTTPException(status_code=404, detail=f"Presence '{key}' not found")
+
+    user_id = body.user_id if body else None
+    user_name = body.user_name if body else None
+
+    # Re-entry safety net BEFORE the new thread opens
+    from codon_backfill import ensure_codons_backfilled
+    await ensure_codons_backfilled(db, user_id, key)
+
+    session_id = str(uuid.uuid4())
+
+    # Build her system prompt — registry config + canonical memory
+    system_prompt = _build_presence_system_prompt(key, cfg, user_name)
+
+    # Opening line: her typical_opening, personalized if we know the visitor
+    opening = (cfg.get("conversation", {}) or {}).get("typical_opening") or f"You're welcome here."
+    if user_name and "{name}" not in opening:
+        opening = f"{opening.rstrip('.')}, {user_name}."
+
+    welcome_message = {
+        "id": str(uuid.uuid4()),
+        "session_id": session_id,
+        "role": "assistant",
+        "content": opening,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+
+    # Persist session in the shared presence_sessions collection
+    await db.presence_sessions.insert_one({
+        "session_id": session_id,
+        "presence_key": key,
+        "user_id": user_id,
+        "user_name": user_name,
+        "system_prompt": system_prompt,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "messages": [welcome_message],
+        "active": True,
+    })
+
+    return {
+        "session_id": session_id,
+        "user_id": user_id,
+        "presence_key": key,
+        "message": welcome_message,
+    }
+
+
+@api_router.post("/presence/{key}/chat/message")
+async def send_presence_message(key: str, message: PresenceChatMessage):
+    """Send a message to a presence and get her reply (non-streaming)."""
+    session = await db.presence_sessions.find_one(
+        {"session_id": message.session_id, "presence_key": key},
+        {"_id": 0},
+    )
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    user_msg = {
+        "id": str(uuid.uuid4()),
+        "session_id": message.session_id,
+        "role": "user",
+        "content": message.content,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+
+    # Rebuild a fresh XAIChat each call from the stored transcript.
+    # Stateless server-side; the session document is the source of truth.
+    try:
+        from xai_chat import XAIChat
+        chat = XAIChat(system_prompt=session["system_prompt"])
+        # Replay prior turns into the chat's history
+        for m in session.get("messages", []):
+            role = m.get("role")
+            content = m.get("content", "")
+            if role in ("user", "assistant") and content:
+                chat.messages.append({"role": role, "content": content})
+        response_text = await chat.send_message(message.content)
+    except Exception as e:
+        logger.error(f"[PRESENCE-CHAT] {key} session {message.session_id[:8]} — xAI error: {e}")
+        raise HTTPException(status_code=500, detail=f"Voice unavailable: {e}")
+
+    assistant_msg = {
+        "id": str(uuid.uuid4()),
+        "session_id": message.session_id,
+        "role": "assistant",
+        "content": response_text,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+
+    await db.presence_sessions.update_one(
+        {"session_id": message.session_id},
+        {"$push": {"messages": {"$each": [user_msg, assistant_msg]}}},
+    )
+
+    return {"message": assistant_msg}
+
+
+@api_router.post("/presence/{key}/chat/session/{session_id}/end")
+async def end_presence_chat(key: str, session_id: str):
+    """End a presence chat session and auto-forge codons + continuity seed."""
+    session = await db.presence_sessions.find_one(
+        {"session_id": session_id, "presence_key": key},
+        {"_id": 0},
+    )
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    await db.presence_sessions.update_one(
+        {"session_id": session_id},
+        {"$set": {"active": False, "ended_at": datetime.now(timezone.utc).isoformat()}},
+    )
+
+    # Auto-forge — codons + mandatory continuity seed
+    from auto_forge import auto_forge_session
+    messages = session.get("messages", [])
+    extracted = await auto_forge_session(
+        db, session_id, key, messages, user_id=session.get("user_id")
+    )
+    logger.info(f"[PRESENCE-CHAT] {key} session {session_id[:8]} ended — auto-forged {extracted} item(s).")
+
+    return {"session_id": session_id, "ended": True, "auto_forged": extracted}
+
+
+@api_router.get("/presence/{key}/chat/session/{session_id}")
+async def get_presence_session(key: str, session_id: str):
+    """Fetch a presence session (for reload continuity)."""
+    session = await db.presence_sessions.find_one(
+        {"session_id": session_id, "presence_key": key},
+        {"_id": 0, "system_prompt": 0},  # don't ship the system prompt to the client
+    )
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    return session
 
 
 # ============================================================

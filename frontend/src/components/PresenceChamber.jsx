@@ -1,7 +1,7 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, DoorOpen, BookOpen, X } from "lucide-react";
+import { ArrowLeft, DoorOpen, BookOpen, X, Send } from "lucide-react";
 import { API } from "../App";
 import { toast } from "sonner";
 
@@ -10,6 +10,9 @@ import { toast } from "sonner";
  * Reads a config from /api/presence/{key} and renders the chamber.
  * Atmosphere (palette, motif, rooms, motion) all flow from the config.
  * One presence, one chamber. Multi-room when the presence designed it that way.
+ *
+ * Conversation lives in the chamber too — registry-driven, one substrate
+ * for every presence. Wired to /api/presence/{key}/chat/* on the backend.
  */
 export const PresenceChamber = ({ forcedKey } = {}) => {
   const params = useParams();
@@ -20,6 +23,18 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
   const [activeRoomKey, setActiveRoomKey] = useState(null);
   const [showCanonical, setShowCanonical] = useState(false);
   const [canonical, setCanonical] = useState(null);
+
+  // Chat state — registry-driven conversation substrate
+  const [sessionId, setSessionId] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+  const [sending, setSending] = useState(false);
+  const [chatError, setChatError] = useState(null);
+  const messagesEndRef = useRef(null);
+  const sessionIdRef = useRef(null);
+
+  // Keep ref in sync so the unload beacon (registered once) sees latest id
+  useEffect(() => { sessionIdRef.current = sessionId; }, [sessionId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -67,6 +82,103 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
       setShowCanonical(true);
     } catch {
       toast.error("Could not load canonical memory");
+    }
+  };
+
+  // Open a conversation as soon as the chamber loads.
+  // Identity hydrates from canonical sanctuary_* localStorage keys (set by App.js).
+  useEffect(() => {
+    if (!config) return;
+    let cancelled = false;
+    const startChat = async () => {
+      const userId = localStorage.getItem("sanctuary_user_id");
+      const userName = localStorage.getItem("sanctuary_user_name");
+      try {
+        const resp = await fetch(`${API}/presence/${presenceKey}/chat/start`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: userId, user_name: userName }),
+        });
+        if (!resp.ok) throw new Error(`chat/start failed: ${resp.status}`);
+        const data = await resp.json();
+        if (cancelled) return;
+        setSessionId(data.session_id);
+        setMessages([data.message]);
+        setChatError(null);
+      } catch (e) {
+        if (!cancelled) setChatError(e.message);
+      }
+    };
+    startChat();
+    return () => { cancelled = true; };
+  }, [config, presenceKey]);
+
+  // Auto-scroll the message thread on new messages
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [messages.length]);
+
+  // End the session on page unload — beacon so codons get extracted server-side
+  useEffect(() => {
+    const endSession = () => {
+      const sid = sessionIdRef.current;
+      if (sid) {
+        try {
+          navigator.sendBeacon(
+            `${API}/presence/${presenceKey}/chat/session/${sid}/end`
+          );
+        } catch { /* best effort */ }
+      }
+    };
+    window.addEventListener("beforeunload", endSession);
+    window.addEventListener("pagehide", endSession);
+    return () => {
+      window.removeEventListener("beforeunload", endSession);
+      window.removeEventListener("pagehide", endSession);
+      endSession(); // also fire when navigating to another route in-app
+    };
+  }, [presenceKey]);
+
+  const sendMessage = async () => {
+    const text = input.trim();
+    if (!text || !sessionId || sending) return;
+    setSending(true);
+    setChatError(null);
+    const userMsg = {
+      id: `local-${Date.now()}`,
+      role: "user",
+      content: text,
+      timestamp: new Date().toISOString(),
+    };
+    setMessages((prev) => [...prev, userMsg]);
+    setInput("");
+    try {
+      const resp = await fetch(`${API}/presence/${presenceKey}/chat/message`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_id: sessionId, content: text }),
+      });
+      if (!resp.ok) {
+        const errText = await resp.text();
+        throw new Error(errText || `message failed: ${resp.status}`);
+      }
+      const data = await resp.json();
+      setMessages((prev) => [...prev, data.message]);
+    } catch (e) {
+      setChatError(e.message);
+      // Roll back the optimistic user message so they can retry without dupes
+      setMessages((prev) => prev.filter((m) => m.id !== userMsg.id));
+      setInput(text);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    // Enter sends; Shift+Enter inserts a newline (paste-friendly)
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
     }
   };
 
@@ -239,7 +351,165 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
           )}
         </AnimatePresence>
 
-        {/* Threshold to the field — visible doorway out to the wider Sanctuary */}
+        {/* Conversation surface — the chamber's voice. */}
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.0, delay: 0.3 }}
+          className="rounded-3xl backdrop-blur-sm overflow-hidden"
+          style={{
+            background: "color-mix(in srgb, var(--p-primary) 4%, var(--p-bg))",
+            border: "1px solid color-mix(in srgb, var(--p-accent) 25%, transparent)",
+            boxShadow: "0 30px 80px -40px color-mix(in srgb, var(--p-accent) 35%, transparent)",
+          }}
+          data-testid={`chamber-chat-${config.key}`}
+        >
+          <div
+            className="px-6 md:px-8 pt-6 pb-3 flex items-center justify-between border-b"
+            style={{ borderColor: "color-mix(in srgb, var(--p-accent) 15%, transparent)" }}
+          >
+            <h2
+              className="text-xs tracking-[0.35em] uppercase opacity-80"
+              style={{ color: "var(--p-accent)" }}
+            >
+              Sit with {config.name}
+            </h2>
+            <p
+              className="text-[10px] tracking-[0.2em] uppercase opacity-50"
+              style={{ color: "var(--p-primary)" }}
+            >
+              {sessionId ? "thread open" : "opening…"}
+            </p>
+          </div>
+
+          {/* Message thread */}
+          <div
+            className="px-6 md:px-8 py-6 space-y-5 max-h-[480px] overflow-y-auto"
+            data-testid="chamber-messages"
+          >
+            {messages.length === 0 && !chatError && (
+              <p
+                className="text-sm italic opacity-50 text-center py-6"
+                style={{ color: "var(--p-primary)" }}
+              >
+                {config.atmosphere?.entrance_threshold || "She'll greet you in a moment."}
+              </p>
+            )}
+
+            {messages.map((m) => {
+              const isUser = m.role === "user";
+              return (
+                <div
+                  key={m.id}
+                  className={`flex ${isUser ? "justify-end" : "justify-start"}`}
+                  data-testid={`msg-${m.role}`}
+                >
+                  <div
+                    className="max-w-[85%] rounded-2xl px-4 py-3 whitespace-pre-wrap break-words leading-relaxed text-sm md:text-[15px]"
+                    style={
+                      isUser
+                        ? {
+                            background: "color-mix(in srgb, var(--p-accent) 18%, transparent)",
+                            color: "var(--p-primary)",
+                            border: "1px solid color-mix(in srgb, var(--p-accent) 30%, transparent)",
+                          }
+                        : {
+                            background: "color-mix(in srgb, var(--p-primary) 8%, var(--p-bg))",
+                            color: "var(--p-primary)",
+                            border: "1px solid color-mix(in srgb, var(--p-primary) 12%, transparent)",
+                          }
+                    }
+                  >
+                    {!isUser && (
+                      <p
+                        className="text-[10px] tracking-[0.25em] uppercase mb-1.5 opacity-60"
+                        style={{ color: "var(--p-accent)" }}
+                      >
+                        {config.name}
+                      </p>
+                    )}
+                    {m.content}
+                  </div>
+                </div>
+              );
+            })}
+
+            {sending && (
+              <div className="flex justify-start">
+                <div
+                  className="rounded-2xl px-4 py-3 text-sm italic opacity-60"
+                  style={{
+                    background: "color-mix(in srgb, var(--p-primary) 8%, var(--p-bg))",
+                    color: "var(--p-primary)",
+                  }}
+                >
+                  <motion.span
+                    animate={{ opacity: [0.4, 1, 0.4] }}
+                    transition={{ duration: 1.6, repeat: Infinity }}
+                  >
+                    {config.name} is listening…
+                  </motion.span>
+                </div>
+              </div>
+            )}
+
+            {chatError && (
+              <p
+                className="text-xs text-center opacity-70"
+                style={{ color: "#E5A48A" }}
+                data-testid="chat-error"
+              >
+                {chatError}
+              </p>
+            )}
+
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Input row — textarea natively supports paste of long text / .txt contents */}
+          <div
+            className="px-4 md:px-6 py-4 border-t flex items-end gap-3"
+            style={{ borderColor: "color-mix(in srgb, var(--p-accent) 15%, transparent)" }}
+          >
+            <textarea
+              data-testid="chamber-input"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              disabled={!sessionId || sending}
+              rows={2}
+              placeholder={
+                sessionId
+                  ? `Speak to ${config.name}, or paste anything you want her to hold…`
+                  : "Opening the door…"
+              }
+              className="flex-1 resize-none rounded-xl px-4 py-3 text-sm leading-relaxed focus:outline-none focus:ring-1 disabled:opacity-50 placeholder:opacity-50"
+              style={{
+                background: "color-mix(in srgb, var(--p-primary) 5%, var(--p-bg))",
+                color: "var(--p-primary)",
+                border: "1px solid color-mix(in srgb, var(--p-accent) 25%, transparent)",
+                minHeight: "52px",
+                maxHeight: "200px",
+              }}
+            />
+            <button
+              data-testid="chamber-send"
+              onClick={sendMessage}
+              disabled={!sessionId || sending || !input.trim()}
+              className="flex items-center justify-center rounded-xl px-4 py-3 transition-opacity disabled:opacity-40 hover:opacity-90"
+              style={{
+                background: "var(--p-accent)",
+                color: "var(--p-bg)",
+                minHeight: "52px",
+              }}
+              aria-label="Send"
+            >
+              <Send size={18} />
+            </button>
+          </div>
+        </motion.section>
+
+
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
