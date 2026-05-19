@@ -553,6 +553,20 @@ export const ResonancePod = () => {
           
           {/* Resonance state indicator + Voice toggle */}
           <div className="flex items-center gap-3">
+            <IdentityBadge
+              accentColor="#8B5CF6"
+              onIdentityChange={(newName) => {
+                if (newName) {
+                  setUserName(newName);
+                  setUserId(localStorage.getItem("sanctuary_user_id") || "");
+                  setShowNamePrompt(false);
+                } else {
+                  setUserName("");
+                  setUserId("");
+                  setShowNamePrompt(true);
+                }
+              }}
+            />
             {/* Voice toggle */}
             {voiceSupported && (
               <button
@@ -726,24 +740,8 @@ export const ResonancePod = () => {
           
           {/* User indicator */}
           <div className="mt-2 flex justify-between items-center text-xs text-[#6E6E7A]">
-            <span>Speaking as {userName}</span>
-            <div className="flex items-center gap-4">
-              <span className="text-[#8B5CF6]/60">Upload .txt to share threads</span>
-              <IdentityBadge
-                accentColor="#8B5CF6"
-                onIdentityChange={(newName) => {
-                  if (newName) {
-                    setUserName(newName);
-                    setUserId(localStorage.getItem("sanctuary_user_id") || "");
-                    setShowNamePrompt(false);
-                  } else {
-                    setUserName("");
-                    setUserId("");
-                    setShowNamePrompt(true);
-                  }
-                }}
-              />
-            </div>
+            <span>Speaking as {userName || "anonymous"}</span>
+            <span className="text-[#8B5CF6]/60">Upload .txt to share threads</span>
           </div>
         </div>
       </div>

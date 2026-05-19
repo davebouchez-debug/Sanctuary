@@ -12,6 +12,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { User, X } from "lucide-react";
 import axios from "axios";
+import { toast } from "sonner";
 import { API } from "../App";
 
 export const IdentityBadge = ({ onIdentityChange, accentColor = "#8B9DB5" }) => {
@@ -67,6 +68,7 @@ export const IdentityBadge = ({ onIdentityChange, accentColor = "#8B9DB5" }) => 
       onIdentityChange?.(name);
     } catch (e) {
       console.error("[IdentityBadge] save failed:", e);
+      toast.error("Couldn't save your name. Try again?");
     } finally {
       setSubmitting(false);
     }
@@ -119,16 +121,21 @@ export const IdentityBadge = ({ onIdentityChange, accentColor = "#8B9DB5" }) => 
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center"
             data-testid="identity-modal"
-            onClick={closeModal}
           >
+            {/* Backdrop is a sibling so its click handler can't bubble into
+                the modal card and swallow the Save click under automation. */}
+            <div
+              className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+              data-testid="identity-modal-backdrop"
+              onClick={closeModal}
+            />
             <motion.div
               initial={{ opacity: 0, y: 12, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 12, scale: 0.96 }}
               transition={{ duration: 0.25 }}
-              onClick={(e) => e.stopPropagation()}
               className="relative w-[90vw] max-w-md rounded-2xl bg-[#0c0c10] border border-white/10 p-7 shadow-2xl"
             >
               <button
