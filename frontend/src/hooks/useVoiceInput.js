@@ -151,23 +151,19 @@ export const useVoiceInput = ({
     let inIframe = false;
     try { inIframe = window.self !== window.top; } catch { inIframe = true; }
 
-    // Best-effort: check Permissions API. If the OS/browser says "granted"
-    // but getUserMedia still fails, we're almost certainly iframe-blocked.
-    let permState = "unknown";
-    try {
-      const p = await navigator.permissions?.query?.({ name: "microphone" });
-      if (p?.state) permState = p.state;
-    } catch { /* not all browsers support this */ }
-
     let stream;
     try {
       stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch (e) {
       const name = e?.name;
       const isDenied = name === "NotAllowedError" || name === "SecurityError";
-      const iframeBlocked = isDenied && inIframe && permState !== "denied";
 
-      if (iframeBlocked) {
+      // If we're inside an iframe and the browser rejected mic access, it is
+      // almost always the parent frame's permissions-policy — NOT the user's
+      // browser setting. The Permissions API will often report "denied" here
+      // even though the user has site-permission allowed, because the iframe
+      // itself is denied. Always offer the new-tab escape in this case.
+      if (isDenied && inIframe) {
         const msg = "The preview window is blocking the mic. Open Sanctuary in a new tab to use voice.";
         setError(msg);
         toast.error(msg, {
