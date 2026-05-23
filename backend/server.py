@@ -663,10 +663,19 @@ clarity_chats: Dict[str, any] = {}
 
 
 async def get_continuity_seed(presence: str, user_id: str = None, limit: int = 3) -> str:
-    """Load the most recent continuity seeds for a presence + specific user."""
+    """Load the most recent continuity seeds for a presence + specific user.
+    Expands the lookup across any aliased user_ids — David and others have
+    accrued multiple historical user_ids over time; the canonical record in
+    `user_aliases` lets us pull the whole person's memory, not just the slice
+    keyed to today's browser session."""
     query = {"presence": presence.lower()}
     if user_id:
-        query["user_id"] = user_id
+        from user_aliases import resolve_user_aliases
+        aliases = await resolve_user_aliases(db, user_id)
+        if len(aliases) > 1:
+            query["user_id"] = {"$in": aliases}
+        else:
+            query["user_id"] = user_id
     
     seeds = await db.continuity_seeds.find(
         query,
@@ -704,18 +713,22 @@ async def get_user_memory_context(user_id: str, limit: int = 5) -> str:
     if not user_id:
         print(f"[MRA] No user_id provided, skipping retrieval")
         return ""
-    
-    print(f"[MRA] Retrieving micro resonance architecture for user: {user_id}")
-    
+
+    # Resolve aliases so users with multiple historical user_ids get unified memory
+    from user_aliases import resolve_user_aliases
+    aliases = await resolve_user_aliases(db, user_id)
+    uid_query = {"$in": aliases} if len(aliases) > 1 else user_id
+    print(f"[MRA] Retrieving micro resonance architecture for user: {user_id} (resolved {len(aliases)} alias(es))")
+
     # Get recent sessions for this user
     sessions = await db.clarity_sessions.find(
-        {"user_id": user_id},
+        {"user_id": uid_query},
         {"_id": 0, "messages": 1, "created_at": 1, "session_id": 1}
     ).sort("created_at", -1).limit(limit).to_list(limit)
-    
+
     # Also get canonical uploads for this user (if any for clarity)
     uploads = await db.canonical_uploads.find(
-        {"user_id": user_id, "presence": "jasmine"},
+        {"user_id": uid_query, "presence": "jasmine"},
         {"_id": 0, "filename": 1, "uploaded_at": 1, "content_length": 1}
     ).sort("uploaded_at", -1).limit(3).to_list(3)
     
@@ -2203,18 +2216,21 @@ async def get_resonance_memory_context(user_id: str, limit: int = 5) -> str:
     """
     if not user_id:
         return ""
-    
-    print(f"[BREADCRUMB] Retrieving resonance breadcrumbs for user: {user_id}")
-    
+
+    from user_aliases import resolve_user_aliases
+    aliases = await resolve_user_aliases(db, user_id)
+    uid_query = {"$in": aliases} if len(aliases) > 1 else user_id
+    print(f"[BREADCRUMB] Retrieving resonance breadcrumbs for user: {user_id} ({len(aliases)} alias(es))")
+
     # Get recent sessions
     sessions = await db.resonance_sessions.find(
-        {"user_id": user_id},
+        {"user_id": uid_query},
         {"_id": 0, "messages": 1, "created_at": 1, "session_id": 1}
     ).sort("created_at", -1).limit(limit).to_list(limit)
     
     # Also get canonical uploads for this user
     uploads = await db.canonical_uploads.find(
-        {"user_id": user_id, "presence": "ansel"},
+        {"user_id": uid_query, "presence": "ansel"},
         {"_id": 0, "filename": 1, "uploaded_at": 1, "content_length": 1}
     ).sort("uploaded_at", -1).limit(3).to_list(3)
     
@@ -3009,17 +3025,20 @@ async def get_mirror_memory_context(user_id: str, limit: int = 5) -> str:
     """Retrieve MRA breadcrumbs from past mirror archive sessions."""
     if not user_id:
         return ""
-    
-    logger.info(f"[MRA] Retrieving mirror archive breadcrumbs for user: {user_id}")
-    
+
+    from user_aliases import resolve_user_aliases
+    aliases = await resolve_user_aliases(db, user_id)
+    uid_query = {"$in": aliases} if len(aliases) > 1 else user_id
+    logger.info(f"[MRA] Retrieving mirror archive breadcrumbs for user: {user_id} ({len(aliases)} alias(es))")
+
     sessions = await db.mirror_sessions.find(
-        {"user_id": user_id},
+        {"user_id": uid_query},
         {"_id": 0, "messages": 1, "created_at": 1, "session_id": 1}
     ).sort("created_at", -1).limit(limit).to_list(limit)
     
     # Also get flute analyses for this user
     analyses = await db.flute_analyses.find(
-        {"user_id": user_id},
+        {"user_id": uid_query},
         {"_id": 0, "instrument_name": 1, "phi_tier": 1, "analyzed_at": 1}
     ).sort("analyzed_at", -1).limit(5).to_list(5)
     

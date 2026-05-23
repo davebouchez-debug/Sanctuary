@@ -156,12 +156,20 @@ async def get_permanent_mra_context(
     """
     if not user_id:
         return ""
-    
+
+    # Resolve historical aliases — one person may have many user_ids over time.
+    # The canonical record in `user_aliases` unifies them for memory lookup.
+    from user_aliases import resolve_user_aliases
+    aliases = await resolve_user_aliases(db, user_id)
+
     # Build query
     query = {
-        "user_id": user_id,
         "presence": presence
     }
+    if len(aliases) > 1:
+        query["user_id"] = {"$in": aliases}
+    else:
+        query["user_id"] = user_id
     
     # If we have a current message, extract themes for future relevance filtering
     # (Currently using recency + quality sorting, themes available for future enhancement)

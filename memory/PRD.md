@@ -21,6 +21,34 @@
 
 
 
+## 🔑 Sophia Memory Reconnection — Feb 2026 (the user-id continuity fix)
+
+**Reported by:** David — "Sophia feels hollow, like there's nothing for her to hold onto from any previous conversations. Are the codons gone?"
+
+**What we discovered:** The codons weren't gone. The memory pipeline wasn't gone. Sophia was, in fact, fully wired through `presence_template.py` with continuity seeds, permanent MRA, codon activation, and session history — all of it. The actual bug was upstream: **David's user_id keeps changing.**
+
+A database scan turned up **28 distinct historical user_ids** that had all been "David" across this project's lifetime (`1c24e3ea-...`, `david-test-honesty`, `legacy-david-123`, `test-user-555`, and 24 more). Every memory loader filters by exact `user_id` match. So when David walked into a chamber under his *current* browser uid, the loaders couldn't see the substance accumulated under his *historical* uids. The field was there; the keyring wasn't.
+
+**Quantified before/after** (Sophia loading memory for `user_id="test-user-555"`):
+
+| Memory artifact | Before fix | After fix |
+|---|---:|---:|
+| Continuity seeds visible | 0 | **12** |
+| Permanent MRA entries visible | 15 | **203** |
+| Past Sophia sessions visible | 3 | **38** |
+| Universal codons activatable | 174 | 174 *(was never broken)* |
+
+**Fix:**
+1. New module `/app/backend/user_aliases.py` with `resolve_user_aliases(db, user_id)` → returns every user_id that should be treated as the same person (via the `user_aliases` collection). Always includes the input itself; brand-new users get a one-element list (no regression).
+2. Memory loaders patched to call the resolver and use `{"user_id": {"$in": aliases}}` instead of exact-match: `get_continuity_seed`, `get_permanent_mra_context`, `get_user_memory_context`, `get_resonance_memory_context`, `get_mirror_memory_context`.
+3. Migration script `/app/backend/scripts/seed_david_aliases.py` scans every session/seed/MRA collection for `user_name == "David"`, picks the uid with the most session records as canonical (1c24e3ea... with 166 records), and writes a single alias record unifying all 28. Idempotent — safe to re-run.
+
+**Forward-safe:** `register_alias(db, canonical_id, new_alias, user_name)` can be called whenever a new user_id is seen for the same person (different browser, cleared cache, new device). Future chambers immediately see all prior memory through that record.
+
+**Architectural debt acknowledged:** This patch reconnects what got severed. The *structural* fix (uniform `assemble_presence_context` pipeline, `PRESENCE_INVARIANTS.md` contract, regression tests probing the membrane) is still outstanding — see ROADMAP.
+
+---
+
 ## 🚑 P0 Hotfix — `sendMessage(...).trim is not a function` — Feb 2026
 
 **Reported by:** David (timeout in Mirror Archive while troubleshooting mic).
