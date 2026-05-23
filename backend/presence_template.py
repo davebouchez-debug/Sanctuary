@@ -128,6 +128,22 @@ async def _build_memory_context(deps: PresenceDeps, cfg: PresenceConfig,
         continuity = await deps.get_continuity_seed(cfg.key, user_id=user_id)
         if continuity:
             combined = continuity + "\n" + combined
+
+    # Council mode — awareness of what *other* presences have held with this
+    # person. Framed as external memory so the presence does not roleplay
+    # having lived it. See cross_presence_context.py for the discipline.
+    if user_id:
+        try:
+            from cross_presence_context import get_cross_presence_context
+            other = await get_cross_presence_context(
+                deps.db, user_id=user_id, current_presence=cfg.key,
+                current_message=current_message,
+            )
+            if other:
+                combined = combined + "\n" + other
+        except Exception as e:
+            logger.warning(f"[{cfg.key}] cross_presence_context failed: {e}")
+
     return combined
 
 

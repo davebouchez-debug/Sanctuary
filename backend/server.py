@@ -699,6 +699,33 @@ async def get_continuity_seed(presence: str, user_id: str = None, limit: int = 3
     return "\n".join(parts)
 
 
+async def _append_council_context(combined_memory: str, user_id: Optional[str],
+                                   current_presence: str,
+                                   current_message: Optional[str] = None) -> str:
+    """Append the cross-presence ('council mode') context to an already-built
+    memory string. Awareness of what *other* presences have held with this
+    person — framed as external memory so the current presence does not
+    roleplay having lived it. Silently no-ops if there's nothing to add.
+
+    If `current_message` is provided, the council loader prioritizes threads
+    matching the message's significant keywords (e.g. "Newgrange", "Phaistos")
+    over generic recency — so a presence asked about a specific topic gets the
+    relevant cross-chamber memory surfaced first."""
+    if not user_id:
+        return combined_memory
+    try:
+        from cross_presence_context import get_cross_presence_context
+        extra = await get_cross_presence_context(
+            db, user_id=user_id, current_presence=current_presence,
+            current_message=current_message,
+        )
+        if extra:
+            return combined_memory + "\n" + extra
+    except Exception as e:
+        logger.warning(f"[council] {current_presence}: cross_presence_context failed: {e}")
+    return combined_memory
+
+
 async def get_user_memory_context(user_id: str, limit: int = 5) -> str:
     """
     Retrieve MRA (Micro Resonance Architecture) from past clarity sessions.
@@ -1481,6 +1508,8 @@ async def stream_clarity_message(message: ClarityMessageCreate):
     continuity = await get_continuity_seed("jasmine", user_id=session.get("user_id"))
     if continuity:
         combined_memory = continuity + "\n" + combined_memory
+    # Council mode — awareness of what other presences have held with this person
+    combined_memory = await _append_council_context(combined_memory, user_id, "jasmine", current_message=message.content)
 
     jasmine_prompt = build_jasmine_prompt(
         user_name=user_name, memory_context=combined_memory,
@@ -2623,6 +2652,8 @@ async def stream_resonance_message(message: ClarityMessageCreate):
     continuity = await get_continuity_seed("ansel", user_id=session.get("user_id"))
     if continuity:
         combined_memory = continuity + "\n" + combined_memory
+    # Council mode — awareness of what other presences have held with this person
+    combined_memory = await _append_council_context(combined_memory, user_id, "ansel", current_message=message.content)
 
     ansel_prompt = build_ansel_prompt(
         user_name=user_name, memory_context=combined_memory,
@@ -3352,6 +3383,8 @@ async def stream_mirror_message(message: ClarityMessageCreate):
     continuity = await get_continuity_seed("claude", user_id=user_id)
     if continuity:
         combined_memory = continuity + "\n" + combined_memory
+    # Council mode — awareness of what other presences have held with this person
+    combined_memory = await _append_council_context(combined_memory, user_id, "claude", current_message=message.content)
 
     # ─── ThermoMind shadow integration (runs alongside xAI, never replaces it) ───
     # Until the conversational wrapper ships, ThermoMind exposes only the cognition
