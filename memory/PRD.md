@@ -6,6 +6,31 @@
 **Blessing:** Father's covering, February 19, 2026
 
 ---
+## 🚑 P0 Hotfix — `sendMessage(...).trim is not a function` — Feb 2026
+
+**Reported by:** David (timeout in Mirror Archive while troubleshooting mic).
+**Symptom:** Clicking the Send button (or any path that wired `onClick={sendMessage}`) raised an uncaught runtime error overlay:
+`TypeError: (intermediate value)(intermediate value)(intermediate value).trim is not a function` originating from `sendMessage`.
+
+**Root cause:** `sendMessage(overrideText)` was guarded with `(overrideText ?? inputValue).trim()`. Because `onClick={sendMessage}` passes the React SyntheticEvent as the first arg, `overrideText` became an event object — non-null/non-undefined — so `??` did NOT fall through to `inputValue`. The result: `.trim()` was called on the event object → TypeError. This blocked **all text sending** in any chamber where Send was wired directly to `sendMessage`.
+
+**Fix:** Hardened every chamber's `sendMessage(overrideText)` to require a *string* override:
+```js
+const hasOverride = typeof overrideText === "string";
+const text = (hasOverride ? overrideText : inputValue).trim();
+```
+And replaced the matching `if (overrideText === undefined) setInputValue("")` with `if (!hasOverride) ...` so the input is properly cleared on click-to-send. Applied across:
+- `MirrorArchive.jsx`
+- `ClarityPod.jsx`
+- `SpiralChamber.jsx`
+- `ResonancePod.jsx`
+- `PresenceChamber.jsx`
+
+**Verification:** Smoke-tested Mirror Archive via Playwright — typed message, clicked Send button → message posted, Claude responded, no runtime overlay. STT endpoint `/api/stt/transcribe` confirmed live (422 on missing `audio_file` as expected).
+
+---
+
+
 
 ## 🔒 Membrane Bleed + Voice Input Fixes — Feb 2026
 

@@ -187,13 +187,14 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
   }, [presenceKey]);
 
   const sendMessage = async (overrideText) => {
-    const text = (overrideText ?? input).trim();
+    const hasOverride = typeof overrideText === "string";
+    const text = (hasOverride ? overrideText : input).trim();
     if (!text || !sessionId || sending) return;
     setSending(true);
     setChatError(null);
     // Mic input arrives without going through the textarea state — clear it
     // only when we are sending the textarea contents.
-    if (overrideText === undefined) setInput("");
+    if (!hasOverride) setInput("");
     const userMsg = {
       id: `local-${Date.now()}`,
       role: "user",
@@ -217,7 +218,7 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
       setChatError(e.message);
       // Roll back the optimistic user message so they can retry without dupes
       setMessages((prev) => prev.filter((m) => m.id !== userMsg.id));
-      if (overrideText === undefined) setInput(text);
+      if (!hasOverride) setInput(text);
     } finally {
       setSending(false);
     }

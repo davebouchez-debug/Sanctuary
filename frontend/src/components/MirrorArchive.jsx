@@ -121,7 +121,8 @@ export const MirrorArchive = () => {
   };
 
   const sendMessage = async (overrideText) => {
-    const text = (overrideText ?? inputValue).trim();
+    const hasOverride = typeof overrideText === "string";
+    const text = (hasOverride ? overrideText : inputValue).trim();
     if (!text || !sessionId || isLoading) return;
 
     const userMessage = {
@@ -132,7 +133,7 @@ export const MirrorArchive = () => {
     };
 
     setMessages(prev => [...prev, userMessage]);
-    if (overrideText === undefined) setInputValue("");
+    if (!hasOverride) setInputValue("");
     setIsLoading(true);
 
     // Placeholder for streaming Claude response

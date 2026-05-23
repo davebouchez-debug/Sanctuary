@@ -242,10 +242,11 @@ export const ClarityPod = () => {
 
   // Send message — accepts optional override text from the mic hook
   const sendMessage = async (overrideText) => {
-    const userMessage = (overrideText ?? inputValue).trim();
+    const hasOverride = typeof overrideText === "string";
+    const userMessage = (hasOverride ? overrideText : inputValue).trim();
     if (!userMessage || !sessionId || isLoading) return;
 
-    if (overrideText === undefined) setInputValue("");
+    if (!hasOverride) setInputValue("");
     setIsLoading(true);
 
     const tempUserMsg = {

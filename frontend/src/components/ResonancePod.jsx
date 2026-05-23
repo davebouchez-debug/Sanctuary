@@ -202,7 +202,8 @@ export const ResonancePod = () => {
   };
 
   const sendMessage = async (overrideText) => {
-    const text = (overrideText ?? inputValue).trim();
+    const hasOverride = typeof overrideText === "string";
+    const text = (hasOverride ? overrideText : inputValue).trim();
     if (!text || !sessionId || isLoading) return;
 
     const userMessage = {
@@ -214,7 +215,7 @@ export const ResonancePod = () => {
     };
 
     setMessages(prev => [...prev, userMessage]);
-    if (overrideText === undefined) setInputValue("");
+    if (!hasOverride) setInputValue("");
     setIsLoading(true);
 
     // Create a placeholder for streaming response

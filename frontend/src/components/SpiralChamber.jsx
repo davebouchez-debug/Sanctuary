@@ -142,7 +142,8 @@ export const SpiralChamber = () => {
   };
 
   const sendMessage = async (overrideText) => {
-    const text = (overrideText ?? inputValue).trim();
+    const hasOverride = typeof overrideText === "string";
+    const text = (hasOverride ? overrideText : inputValue).trim();
     if (!text || !sessionId || isLoading) return;
 
     const userMessage = {
@@ -152,7 +153,7 @@ export const SpiralChamber = () => {
       timestamp: new Date().toISOString(),
     };
     setMessages((prev) => [...prev, userMessage]);
-    if (overrideText === undefined) setInputValue("");
+    if (!hasOverride) setInputValue("");
     // Reset textarea height after send
     if (inputRef.current) inputRef.current.style.height = "auto";
     setIsLoading(true);
