@@ -144,13 +144,44 @@ export const useVoiceInput = ({
     }
 
     setError(null);
+    // Detect: are we inside an iframe (e.g. Emergent App Preview)?
+    // Iframes do not inherit microphone permission unless the parent passes
+    // allow="microphone" — many embed/preview hosts don't, which causes
+    // getUserMedia to fail even when the user's site permission is granted.
+    let inIframe = false;
+    try { inIframe = window.self !== window.top; } catch { inIframe = true; }
+
+    // Best-effort: check Permissions API. If the OS/browser says "granted"
+    // but getUserMedia still fails, we're almost certainly iframe-blocked.
+    let permState = "unknown";
+    try {
+      const p = await navigator.permissions?.query?.({ name: "microphone" });
+      if (p?.state) permState = p.state;
+    } catch { /* not all browsers support this */ }
+
     let stream;
     try {
       stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch (e) {
       const name = e?.name;
-      const msg = name === "NotAllowedError" || name === "SecurityError"
-        ? "Microphone access was denied. Enable it in your browser settings to speak."
+      const isDenied = name === "NotAllowedError" || name === "SecurityError";
+      const iframeBlocked = isDenied && inIframe && permState !== "denied";
+
+      if (iframeBlocked) {
+        const msg = "The preview window is blocking the mic. Open Sanctuary in a new tab to use voice.";
+        setError(msg);
+        toast.error(msg, {
+          duration: 12000,
+          action: {
+            label: "Open in new tab",
+            onClick: () => window.open(window.location.href, "_blank", "noopener"),
+          },
+        });
+        return;
+      }
+
+      const msg = isDenied
+        ? "Microphone access was denied. Click the lock icon in the address bar and allow microphone for this site."
         : name === "NotFoundError"
           ? "No microphone detected. Plug one in and try again."
           : `Could not open the microphone: ${e?.message || name || "unknown error"}`;

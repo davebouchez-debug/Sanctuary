@@ -6,6 +6,21 @@
 **Blessing:** Father's covering, February 19, 2026
 
 ---
+## 🎙️ Iframe-Blocked Mic Diagnostic & Escape Hatch — Feb 2026
+
+**Reported by:** David — "Microphone access was denied" appearing in Sanctuary even though the mic works fine in every other AI platform. **The browser permission isn't the issue.**
+
+**Root cause:** Emergent's App Preview hosts the running app inside an iframe. By browser security model, iframes do **not** inherit microphone permission from the top document unless the parent passes `allow="microphone"` on the iframe tag. When `getUserMedia({audio:true})` is called from inside such a frame, the Promise rejects with `NotAllowedError` *regardless* of the user's site-level permission — and the previous hook misreported this as "denied — enable in browser settings", sending the user on a wild goose chase. Web Speech API hit the same wall earlier; this is the same wall.
+
+**Fix:**
+- `useVoiceInput.js`: detects iframe context (`window.self !== window.top`) and pre-queries `navigator.permissions.query({name:'microphone'})`. If `getUserMedia` fails with `NotAllowedError` while in an iframe and the OS-level permission isn't actually denied, we surface the *real* message: **"The preview window is blocking the mic. Open Sanctuary in a new tab to use voice."** Toast includes an actionable **"Open in new tab"** button.
+- `VoiceLoopControls.jsx`: once the mic has failed inside an iframe (`micError` set), a persistent inline **↗ Open in new tab** button appears next to the helper text so the user has a permanent escape hatch.
+- Opening the app at its top-level URL bypasses the iframe permissions-policy restriction; mic then works normally.
+
+---
+
+
+
 ## 🚑 P0 Hotfix — `sendMessage(...).trim is not a function` — Feb 2026
 
 **Reported by:** David (timeout in Mirror Archive while troubleshooting mic).

@@ -20,8 +20,15 @@
  *   />
  */
 import { motion } from "framer-motion";
-import { Mic, MicOff, Square } from "lucide-react";
+import { ExternalLink, Mic, MicOff, Square } from "lucide-react";
 import { useVoiceInput } from "../hooks/useVoiceInput";
+
+// Detect once: are we inside an iframe (Emergent App Preview, embed, etc.)?
+// Iframes typically don't inherit microphone permission, so we offer an
+// "open in new tab" escape hatch when voice fails.
+const IS_IFRAME = (() => {
+  try { return window.self !== window.top; } catch { return true; }
+})();
 
 export const VoiceLoopControls = ({
   presenceKey,
@@ -42,6 +49,7 @@ export const VoiceLoopControls = ({
     stop: stopListening,
     isListening,
     interim,
+    error: micError,
     isSupported: micSupported,
   } = useVoiceInput({ onTranscript });
 
@@ -126,6 +134,28 @@ export const VoiceLoopControls = ({
         >
           {isListening ? "Click mic again to send" : `Click to speak to ${presenceName}`}
         </span>
+
+        {/* Escape hatch — surface a persistent "open in new tab" button once
+            the mic has failed inside an iframe. The Emergent App Preview frame
+            (and similar embeds) don't pass microphone permission to the inner
+            document, so getUserMedia fails even when the browser has granted
+            site access. Opening the app in a top-level tab fixes it. */}
+        {IS_IFRAME && micError && !isListening && (
+          <button
+            onClick={() => window.open(window.location.href, "_blank", "noopener")}
+            className="flex items-center gap-1 ml-auto px-2 py-1 rounded-md text-[9px] tracking-widest uppercase transition-opacity hover:opacity-90"
+            style={{
+              background: `${accentColor}22`,
+              border: `1px solid ${accentColor}66`,
+              color: accentColor,
+            }}
+            data-testid={`open-standalone-${presenceKey}`}
+            title="The preview frame blocks the mic. Open Sanctuary in a new tab where voice works."
+          >
+            <ExternalLink size={10} />
+            Open in new tab
+          </button>
+        )}
       </div>
     </div>
   );
