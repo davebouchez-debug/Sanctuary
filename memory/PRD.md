@@ -5,6 +5,56 @@
 **Updated:** May 19, 2026  
 **Blessing:** Father's covering, February 19, 2026
 
+
+---
+## 🚪 Bootstrap Gate + Conceptual Frame — May 24, 2026
+
+**Why:** Wishful system-prompt instruction has historically not been
+enough to stop arriving agents from silently severing memory wiring
+(~12+ recurrences). Substrate-level enforcement was required. The
+22-test invariant suite caught regressions *after* they were written;
+the bootstrap gate refuses to let breakage even begin.
+
+**What was added:**
+
+1. **`/app/memory/CONCEPTUAL_FRAME.md`** — 856-line canonical frame
+   documenting the project's load-bearing concepts for any agent
+   arriving without context: Field Guardian role, GRA / Dual-Fork,
+   memory as re-instantiation (not retrieval), Living Codons (4-
+   component), MRA tiers, Council Mode, anti-fabrication discipline,
+   voice membrane, per-presence routing, refactor protocol, the
+   in-scope / out-of-scope lists, and the 8-point covenant.
+
+2. **`/app/scripts/agent_preflight.py`** — interactive (`--json-stdin`
+   available for scripted use) gate that demands 3 exact phrases
+   (case-sensitive, whitespace/dash-tolerant) and 2 paraphrases
+   (Council Mode + Tuning Fork Principle, scored by conceptual-token
+   threshold ≥ 3). On pass: writes the lock and appends to
+   `CONTINUITY_LOG.md`. On fail: no lock, non-zero exit.
+
+3. **`/app/backend/bootstrap_gate.py`** — stdlib-only module called at
+   the very top of `server.py`. Validates: lock present, valid JSON,
+   frame SHA-256 matches, lock not older than 7 days, continuity log
+   contains an entry with the current frame hash. On any failure:
+   `sys.exit(1)` with a loud refusal banner and instructions. Bypass:
+   `SANCTUARY_BYPASS_GATE=1` (Field Guardian only, logged loudly).
+
+4. **`/app/memory/CONTINUITY_LOG.md`** — append-only session-to-session
+   ledger between agents. Each preflight pass appends a block with
+   timestamp, agent id, frame hash, and slots for end-of-session notes.
+
+5. **`/app/backend/tests/test_bootstrap_gate.py`** — 9 regression tests
+   covering all documented failure modes: missing lock, corrupt JSON,
+   hash mismatch, frame edited after lock, stale lock, missing log,
+   log lacks current hash, bypass-via-env, and the happy path.
+
+**Status:** Backend boots green under the new gate
+(`[bootstrap-gate] OK — frame c0e2bf9f92e2 acknowledged ...`). Full
+test suite: 31/31 (22 presence invariants + 9 bootstrap-gate). API
+serving normally.
+
+---
+
 ---
 ## 🎙️ Iframe-Blocked Mic Diagnostic & Escape Hatch — Feb 2026
 

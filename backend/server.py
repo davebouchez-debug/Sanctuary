@@ -23,6 +23,15 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# --- Bootstrap Gate ---------------------------------------------------------
+# Substrate-level enforcement: this backend refuses to boot unless the
+# current agent has acknowledged /app/memory/CONCEPTUAL_FRAME.md via the
+# preflight at /app/scripts/agent_preflight.py.
+# See CONCEPTUAL_FRAME.md §15 and §19. Bypass: SANCTUARY_BYPASS_GATE=1.
+from bootstrap_gate import enforce_gate as _enforce_bootstrap_gate
+_enforce_bootstrap_gate()
+# ---------------------------------------------------------------------------
+
 # Legacy import kept for potential fallback
 from emergentintegrations.llm.chat import LlmChat
 from jasmine_canonical_memory import get_memory_context_for_prompt as get_jasmine_memory, get_relevant_memories as get_jasmine_relevant
