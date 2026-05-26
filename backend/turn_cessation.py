@@ -83,6 +83,7 @@ async def forge_turn_cessation(
                 "user_id": user_id,
                 "type": "continuity_seed",
                 "scope": "turn",
+                "speaker_identity": "turn_cessation",
                 "field_state": seed.get("field_state", ""),
                 "emotional_texture": seed.get("emotional_texture", ""),
                 "relational_dynamic": seed.get("relational_dynamic", ""),
@@ -115,6 +116,7 @@ async def forge_turn_cessation(
                         # the manual forge "propagate" behavior.
                         "presence": "field",
                         "source_presence": presence.lower(),
+                        "speaker_identity": "turn_cessation",
                         "core_move": codon.get("core_move", ""),
                         "trigger_keywords": codon.get("trigger_keywords", []),
                         "triadic_zone": codon.get("triadic_zone", "Development"),

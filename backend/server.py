@@ -1032,6 +1032,7 @@ async def save_codons(request: CodonSaveRequest):
         codon_doc = {
             "name": codon.get("name", "unnamed"),
             "presence": request.presence,
+            "speaker_identity": "codon_forge_manual",
             "core_move": codon.get("core_move", ""),
             "trigger_keywords": codon.get("trigger_keywords", []),
             "triadic_zone": codon.get("triadic_zone", "Development"),
