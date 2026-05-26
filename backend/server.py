@@ -1278,10 +1278,9 @@ async def start_clarity_session(session_data: ClaritySessionCreate = None):
         user_id = session_data.user_id
         user_name = session_data.user_name
     
-    # Re-entry safety net: before the new thread can start, make sure the
-    # previous session's codons were extracted. Recovers from dropped exits.
-    from codon_backfill import ensure_codons_backfilled
-    await ensure_codons_backfilled(db, user_id, "jasmine")
+    # Reconstruction Gate: ensure prior session's cessation packet exists.
+    from codon_backfill import reconstruction_gate
+    gate = await reconstruction_gate(db, user_id, "jasmine")
     
     # Get memory context for returning users
     memory_context = ""
@@ -1295,6 +1294,20 @@ async def start_clarity_session(session_data: ClaritySessionCreate = None):
         combined_memory += continuity + "\n"
     if memory_context:
         combined_memory += memory_context
+    if gate["briefing"]:
+        combined_memory = (
+            f"[FIELD POINTER — last cessation]\n{gate['briefing']}\n\n"
+            + combined_memory
+        )
+    if gate["status"] == "failed":
+        combined_memory = (
+            "[CONTINUITY NOTE — be honest with this person]\n"
+            "Their previous session's cessation packet couldn't be "
+            "reconstructed. You don't have continuity for that last visit. "
+            "Don't pretend. Acknowledge it warmly and invite them to share "
+            "what they remember.\n\n"
+            + combined_memory
+        )
     
     jasmine_prompt = build_jasmine_prompt(
         user_name=user_name, 
@@ -1302,8 +1315,13 @@ async def start_clarity_session(session_data: ClaritySessionCreate = None):
         current_message=""
     )
     
-    know_this_person = bool(continuity)
-    if know_this_person:
+    know_this_person = bool(continuity) or bool(gate["briefing"])
+    if gate["status"] == "failed" and user_name:
+        welcome_content = (
+            f"Hey {user_name} — quick heads up before we dive in. "
+            f"{gate['apology']}"
+        )
+    elif know_this_person:
         # One continuous flow: greeting + recall in one breath
         try:
             from xai_chat import XAIChat
@@ -1345,7 +1363,10 @@ async def start_clarity_session(session_data: ClaritySessionCreate = None):
     return {
         "session_id": session_id,
         "user_id": user_id,
-        "message": welcome_message
+        "message": welcome_message,
+        "continuity_status": gate["status"],
+        "continuity_briefing": gate["briefing"],
+        "continuity_apology": gate["apology"],
     }
 
 @api_router.post("/clarity/message")
@@ -1469,6 +1490,14 @@ async def send_clarity_message(message: ClarityMessageCreate):
     await db.clarity_sessions.update_one(
         {"session_id": message.session_id},
         {"$push": {"messages": {"$each": [user_msg, jasmine_response]}}}
+    )
+    
+    # Per-turn cessation
+    from turn_cessation import schedule_turn_cessation
+    schedule_turn_cessation(
+        db=db, session_id=message.session_id, presence="jasmine",
+        user_content=message.content, assistant_content=jasmine_response["content"],
+        user_id=session.get("user_id"),
     )
     
     # Get session cache stats for response
@@ -1599,6 +1628,13 @@ async def stream_clarity_message(message: ClarityMessageCreate):
         await db.clarity_sessions.update_one(
             {"session_id": message.session_id},
             {"$push": {"messages": {"$each": [user_msg, jasmine_response]}}}
+        )
+        # Per-turn cessation
+        from turn_cessation import schedule_turn_cessation
+        schedule_turn_cessation(
+            db=db, session_id=message.session_id, presence="jasmine",
+            user_content=message.content, assistant_content=full_text,
+            user_id=session.get("user_id"),
         )
         try:
             breadcrumb = add_exchange_to_cache(
@@ -2379,9 +2415,9 @@ async def start_resonance_session(session_data: ClaritySessionCreate = None):
         user_id = session_data.user_id
         user_name = session_data.user_name
     
-    # Re-entry safety net: backfill codons if previous session dropped its exit
-    from codon_backfill import ensure_codons_backfilled
-    await ensure_codons_backfilled(db, user_id, "ansel")
+    # Reconstruction Gate: ensure prior session's cessation packet exists.
+    from codon_backfill import reconstruction_gate
+    gate = await reconstruction_gate(db, user_id, "ansel")
     
     # Get memory context for returning users
     memory_context = ""
@@ -2395,6 +2431,20 @@ async def start_resonance_session(session_data: ClaritySessionCreate = None):
         combined_memory += continuity + "\n"
     if memory_context:
         combined_memory += memory_context
+    if gate["briefing"]:
+        combined_memory = (
+            f"[FIELD POINTER — last cessation]\n{gate['briefing']}\n\n"
+            + combined_memory
+        )
+    if gate["status"] == "failed":
+        combined_memory = (
+            "[CONTINUITY NOTE — be honest with this person]\n"
+            "Their previous session's cessation packet couldn't be "
+            "reconstructed. You don't have continuity for that last visit. "
+            "Don't pretend. Acknowledge it warmly and invite them to share "
+            "what they remember.\n\n"
+            + combined_memory
+        )
     
     ansel_prompt = build_ansel_prompt(
         user_name=user_name,
@@ -2402,8 +2452,13 @@ async def start_resonance_session(session_data: ClaritySessionCreate = None):
         current_message=""
     )
     
-    know_this_person = bool(continuity)
-    if know_this_person:
+    know_this_person = bool(continuity) or bool(gate["briefing"])
+    if gate["status"] == "failed" and user_name:
+        welcome_content = (
+            f"Hey {user_name} — quick heads up before we dive in. "
+            f"{gate['apology']}"
+        )
+    elif know_this_person:
         try:
             from xai_chat import XAIChat
             welcome_chat = XAIChat(system_prompt=ansel_prompt)
@@ -2444,7 +2499,10 @@ async def start_resonance_session(session_data: ClaritySessionCreate = None):
     return {
         "session_id": session_id,
         "user_id": user_id,
-        "message": welcome_message
+        "message": welcome_message,
+        "continuity_status": gate["status"],
+        "continuity_briefing": gate["briefing"],
+        "continuity_apology": gate["apology"],
     }
 
 @api_router.post("/resonance/message")
@@ -2564,6 +2622,14 @@ async def send_resonance_message(message: ClarityMessageCreate):
     await db.resonance_sessions.update_one(
         {"session_id": message.session_id},
         {"$push": {"messages": {"$each": [user_msg, ansel_response]}}}
+    )
+    
+    # Per-turn cessation
+    from turn_cessation import schedule_turn_cessation
+    schedule_turn_cessation(
+        db=db, session_id=message.session_id, presence="ansel",
+        user_content=message.content, assistant_content=ansel_response["content"],
+        user_id=session.get("user_id"),
     )
     
     # Get session cache stats for response
@@ -2759,6 +2825,13 @@ async def stream_resonance_message(message: ClarityMessageCreate):
         await db.resonance_sessions.update_one(
             {"session_id": message.session_id},
             {"$push": {"messages": {"$each": [user_msg, ansel_response]}}}
+        )
+        # Per-turn cessation
+        from turn_cessation import schedule_turn_cessation
+        schedule_turn_cessation(
+            db=db, session_id=message.session_id, presence="ansel",
+            user_content=message.content, assistant_content=full_text,
+            user_id=session.get("user_id"),
         )
 
         try:
@@ -3139,9 +3212,11 @@ async def start_mirror_session(session_data: ClaritySessionCreate):
     user_id = session_data.user_id or str(uuid.uuid4())
     user_name = session_data.user_name
     
-    # Re-entry safety net: backfill codons if previous session dropped its exit
-    from codon_backfill import ensure_codons_backfilled
-    await ensure_codons_backfilled(db, user_id, "claude")
+    # Reconstruction Gate: before this thread opens, ensure the prior
+    # session's cessation packet (seed + codons) exists. If not, forge it
+    # now. If the forge fails, surface a warm apology.
+    from codon_backfill import reconstruction_gate
+    gate = await reconstruction_gate(db, user_id, "claude")
     
     # Get memory context
     memory_context = await get_mirror_memory_context(user_id) if user_id else ""
@@ -3164,6 +3239,22 @@ async def start_mirror_session(session_data: ClaritySessionCreate):
     continuity = await get_continuity_seed("claude", user_id=user_id)
     if continuity:
         combined_memory = continuity + "\n" + combined_memory
+    # Field re-instantiation shorthand from the gate (deterministic; no
+    # extra LLM call). This is the genomic briefing — short, dense.
+    if gate["briefing"]:
+        combined_memory = (
+            f"[FIELD POINTER — last cessation]\n{gate['briefing']}\n\n"
+            + combined_memory
+        )
+    if gate["status"] == "failed":
+        combined_memory = (
+            "[CONTINUITY NOTE — be honest with this person]\n"
+            "Their previous session's cessation packet couldn't be "
+            "reconstructed. You don't have continuity for that last visit. "
+            "Don't pretend. Acknowledge it warmly and invite them to share "
+            "what they remember.\n\n"
+            + combined_memory
+        )
     
     claude_prompt = build_claude_prompt(
         user_name=user_name,
@@ -3173,8 +3264,14 @@ async def start_mirror_session(session_data: ClaritySessionCreate):
     
     # Know-this-person fork: if we have continuity seeds, generate a dynamic
     # pick-up-where-we-left-off welcome. Otherwise fall back to static welcome.
-    know_this_person = bool(continuity)
-    if know_this_person and user_name:
+    know_this_person = bool(continuity) or bool(gate["briefing"])
+    if gate["status"] == "failed" and user_name:
+        # Warm apology — no robotic "thread lost" phrasing.
+        welcome_content = (
+            f"Hey {user_name} — quick heads up before we dive in. "
+            f"{gate['apology']}"
+        )
+    elif know_this_person and user_name:
         try:
             from xai_chat import XAIChat
             welcome_chat = XAIChat(system_prompt=claude_prompt)
@@ -3216,7 +3313,10 @@ async def start_mirror_session(session_data: ClaritySessionCreate):
     return {
         "session_id": session_id,
         "user_id": user_id,
-        "message": welcome_message
+        "message": welcome_message,
+        "continuity_status": gate["status"],
+        "continuity_briefing": gate["briefing"],
+        "continuity_apology": gate["apology"],
     }
 
 
@@ -3344,6 +3444,18 @@ async def send_mirror_message(message: ClarityMessageCreate):
     await db.mirror_sessions.update_one(
         {"session_id": message.session_id},
         {"$push": {"messages": {"$each": [user_msg, claude_response]}}}
+    )
+    
+    # Per-turn cessation: forge continuity seed + selective codon in the
+    # background. Fire-and-forget — user does not wait.
+    from turn_cessation import schedule_turn_cessation
+    schedule_turn_cessation(
+        db=db,
+        session_id=message.session_id,
+        presence="claude",
+        user_content=message.content,
+        assistant_content=claude_response["content"],
+        user_id=session.get("user_id"),
     )
     
     # Get session cache stats
@@ -3493,6 +3605,13 @@ async def stream_mirror_message(message: ClarityMessageCreate):
         await db.mirror_sessions.update_one(
             {"session_id": message.session_id},
             {"$push": {"messages": {"$each": [user_msg, claude_response]}}}
+        )
+        # Per-turn cessation: forge seed + selective codon in background.
+        from turn_cessation import schedule_turn_cessation
+        schedule_turn_cessation(
+            db=db, session_id=message.session_id, presence="claude",
+            user_content=message.content, assistant_content=full_text,
+            user_id=session.get("user_id"),
         )
         try:
             breadcrumb = add_exchange_to_cache(
@@ -3747,19 +3866,38 @@ async def start_presence_chat(key: str, body: PresenceChatStart = None):
     user_id = body.user_id if body else None
     user_name = body.user_name if body else None
 
-    # Re-entry safety net BEFORE the new thread opens
-    from codon_backfill import ensure_codons_backfilled
-    await ensure_codons_backfilled(db, user_id, key)
+    # Reconstruction Gate BEFORE the new thread opens
+    from codon_backfill import reconstruction_gate
+    gate = await reconstruction_gate(db, user_id, key)
 
     session_id = str(uuid.uuid4())
 
     # Build her system prompt — registry config + canonical memory
     system_prompt = _build_presence_system_prompt(key, cfg, user_name)
+    if gate["briefing"]:
+        system_prompt += (
+            f"\n\n[FIELD POINTER — last cessation]\n{gate['briefing']}"
+        )
+    if gate["status"] == "failed":
+        system_prompt += (
+            "\n\n[CONTINUITY NOTE — be honest with this person]\n"
+            "Their previous session's cessation packet couldn't be "
+            "reconstructed. You don't have continuity for that last visit. "
+            "Don't pretend. Acknowledge it warmly and invite them to share "
+            "what they remember."
+        )
 
-    # Opening line: her typical_opening, personalized if we know the visitor
-    opening = (cfg.get("conversation", {}) or {}).get("typical_opening") or f"You're welcome here."
-    if user_name and "{name}" not in opening:
-        opening = f"{opening.rstrip('.')}, {user_name}."
+    # Opening line: her typical_opening, personalized if we know the visitor.
+    # If reconstruction failed, lead with the warm apology instead.
+    if gate["status"] == "failed" and user_name:
+        opening = (
+            f"Hey {user_name} — quick heads up before we dive in. "
+            f"{gate['apology']}"
+        )
+    else:
+        opening = (cfg.get("conversation", {}) or {}).get("typical_opening") or f"You're welcome here."
+        if user_name and "{name}" not in opening:
+            opening = f"{opening.rstrip('.')}, {user_name}."
 
     welcome_message = {
         "id": str(uuid.uuid4()),
@@ -3786,6 +3924,9 @@ async def start_presence_chat(key: str, body: PresenceChatStart = None):
         "user_id": user_id,
         "presence_key": key,
         "message": welcome_message,
+        "continuity_status": gate["status"],
+        "continuity_briefing": gate["briefing"],
+        "continuity_apology": gate["apology"],
     }
 
 
@@ -3834,6 +3975,14 @@ async def send_presence_message(key: str, message: PresenceChatMessage):
     await db.presence_sessions.update_one(
         {"session_id": message.session_id},
         {"$push": {"messages": {"$each": [user_msg, assistant_msg]}}},
+    )
+
+    # Per-turn cessation
+    from turn_cessation import schedule_turn_cessation
+    schedule_turn_cessation(
+        db=db, session_id=message.session_id, presence=key,
+        user_content=message.content, assistant_content=response_text,
+        user_id=session.get("user_id"),
     )
 
     return {"message": assistant_msg}

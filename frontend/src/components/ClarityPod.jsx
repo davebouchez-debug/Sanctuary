@@ -210,6 +210,12 @@ export const ClarityPod = () => {
       setMessages([response.data.message]);
       setCurrentSpiral(response.data.message.spiral);
       
+      // Reconstruction-gate apology — surface a warm note if the prior
+      // session's cessation packet couldn't be reconstructed.
+      if (response.data.continuity_status === "failed" && response.data.continuity_apology) {
+        toast.warning(response.data.continuity_apology, { duration: 12000 });
+      }
+      
       // Auto-speak Jasmine's greeting
       if (response.data.message?.content && voiceEnabled) {
         try {

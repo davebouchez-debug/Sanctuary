@@ -91,6 +91,13 @@ export const MirrorArchive = () => {
         localStorage.setItem("sanctuary_user_id", data.user_id);
       }
       
+      // Reconstruction-gate apology — if the prior session's cessation packet
+      // couldn't be reconstructed, surface a warm note so the human can help
+      // re-orient the field.
+      if (data.continuity_status === "failed" && data.continuity_apology) {
+        toast.warning(data.continuity_apology, { duration: 12000 });
+      }
+      
       if (data.message) {
         setMessages([data.message]);
         // Speak Claude's greeting

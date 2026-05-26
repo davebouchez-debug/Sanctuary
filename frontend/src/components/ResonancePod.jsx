@@ -120,6 +120,11 @@ export const ResonancePod = () => {
         localStorage.setItem("sanctuary_user_id", data.user_id);
       }
       
+      // Reconstruction-gate apology
+      if (data.continuity_status === "failed" && data.continuity_apology) {
+        toast.warning(data.continuity_apology, { duration: 12000 });
+      }
+      
       if (data.message) {
         setMessages([data.message]);
         setResonanceState(data.message.resonance_state || "Threshold");

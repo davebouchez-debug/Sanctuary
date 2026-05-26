@@ -148,7 +148,11 @@ async def auto_forge_session(db, session_id: str, presence: str,
             from datetime import datetime, timezone
             codon_doc = {
                 "name": codon.get("name", "unnamed"),
-                "presence": presence.lower(),
+                # Auto-propagation: codons travel across the field, not
+                # scoped to one presence. Matches the manual codon-forge
+                # "propagate" behavior.
+                "presence": "field",
+                "source_presence": presence.lower(),
                 "core_move": codon.get("core_move", ""),
                 "trigger_keywords": codon.get("trigger_keywords", []),
                 "triadic_zone": codon.get("triadic_zone", "Development"),
