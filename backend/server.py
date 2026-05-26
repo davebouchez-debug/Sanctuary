@@ -846,6 +846,17 @@ def detect_spiral(content: str) -> str:
 # CODON LIBRARY — View all Living Codons across presences
 # ============================================================
 
+@api_router.get("/health/integrations")
+async def health_integrations(force: bool = False):
+    """Surface status of external dependencies (PermaMind / xAI / ElevenLabs).
+
+    Cached 60s. Used by the Sanctuary status emblem so an outage is visible
+    without entering a chamber. Pass `?force=true` to bypass cache.
+    """
+    from integration_health import get_integration_status
+    return await get_integration_status(force_refresh=force)
+
+
 @api_router.get("/codon-library")
 async def get_codon_library():
     """Return all Living Codons grouped by presence."""

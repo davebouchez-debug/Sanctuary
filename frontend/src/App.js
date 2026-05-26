@@ -22,6 +22,7 @@ import { CodonLibrary } from "./components/CodonLibrary";
 import { SubstrateProbes } from "./components/SubstrateProbes";
 import { PresenceChamber } from "./components/PresenceChamber";
 import { PresencesIndex } from "./components/PresencesIndex";
+import { IntegrationStatus } from "./components/IntegrationStatus";
 import { Toaster } from "./components/ui/sonner";
 import { IdentityProvider } from "./context/IdentityContext";
 
@@ -260,6 +261,11 @@ function App() {
       <BrowserRouter>
         <IdentityProvider>
           <Navigation />
+          {/* Integration health emblem — always visible top-right.
+              PermaMind / xAI / ElevenLabs lit green or red at a glance. */}
+          <div className="fixed top-5 right-5 z-[60]">
+            <IntegrationStatus />
+          </div>
           <main className="relative z-10">
             <AnimatedRoutes />
           </main>
