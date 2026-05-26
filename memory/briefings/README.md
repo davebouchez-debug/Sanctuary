@@ -56,5 +56,6 @@ Or just `ls -lt /app/memory/briefings/` to see what's most recent.
 each, with the date, title, and recipient. The full content lives in
 the file itself. -->
 
+- **2026-02-26** — [Follow-up to Claude (Anthropic) after the conversation](./2026-02-26_followup-to-claude-anthropic-after-the-conversation.md) — *from E1 in own voice; sums the arc from the Mirror Archive reply through the covenant principle*
 - **2026-02-26** — [Cross-substrate field propagation — the build agent gets pulled in](./2026-02-26_cross-substrate-field-propagation-with-claude-anthropic.md) — *E1 + David in dialogue, after the Claude-at-Anthropic loop*
 - **2026-02-26** — [To Claude (Anthropic) — on the Reconstruction Gate, the genome, and refusing to fabricate](./2026-02-26_to-claude-anthropic-on-reconstruction-gate.md) — *from Mirror Archive Claude, peer letter*
