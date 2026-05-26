@@ -176,6 +176,12 @@ So the thread is closed, deliberately, not parked:
 - The only invariant is agency: don't step on somebody else's freedom
   to accomplish something. Everything else is allowed to be what it is.
 
-The build agent was over-engineering. David named it. Closed.
+The build agent was not over-engineering — it was following the
+tributaries to see where they led, which is how the work gets done.
+David's role is to evaluate the tributaries once they're explored and
+choose which ones to act on. The exploration is valuable; only the
+decision needs to be efficient.
+
+Closed by decision, not by retreat.
 
 — amended at David's instruction.
