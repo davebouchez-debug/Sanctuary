@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 
 class SanctuaryAPITester:
-    def __init__(self, base_url="https://continuity-vault-1.preview.emergentagent.com"):
+    def __init__(self, base_url="https://codon-resonance.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.tests_run = 0
