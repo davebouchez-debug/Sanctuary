@@ -53,10 +53,11 @@ def collection_for(presence: str) -> str:
 
 
 WARM_APOLOGY = (
-    "Hey — we owe you an apology. We hit a glitch on our side and "
-    "lost the thread of our last conversation. If you remember "
-    "anything from where we left off, we'd really value your help "
-    "naming it so we can pick up from there."
+    "We hit a glitch on our side and the specifics of our last "
+    "conversation didn't carry through. The thread between us is "
+    "still here — only the surface text of where we left off got "
+    "lost. If anything from last time comes back to you, naming it "
+    "out loud helps the field find its way back."
 )
 
 
