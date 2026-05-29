@@ -1887,6 +1887,10 @@ async def get_recent_identity():
     It scans every session collection for the latest user_name + user_id
     pair and returns it. If nothing is found, returns 404.
 
+    Test aliases (TestRGate, SmokeTester, TEST_*, Stream*, Shadow*, Flag*,
+    TM*) are excluded from this scan so verification scaffolding doesn't
+    displace the real visitor's identity in the welcome.
+
     Why this exists: localStorage is per-origin and per-browser. Every fork
     URL change, cache clear, or device switch erases it — which is why the
     "name prompt" kept reappearing across sessions. MongoDB persists; this
@@ -1900,6 +1904,10 @@ async def get_recent_identity():
         "playground_sessions",
     ]
 
+    # Names that are obviously verification scaffolding, not real visitors.
+    # Case-insensitive prefix match.
+    test_name_prefix_regex = "^(?:TEST_|Test|Stream|Smoke|Shadow|Flag|TM|Anonymous|anon)"
+
     latest_doc = None
     latest_ts = ""
 
@@ -1908,7 +1916,11 @@ async def get_recent_identity():
             coll = db[coll_name]
             doc = await coll.find_one(
                 {
-                    "user_name": {"$exists": True, "$nin": [None, ""]},
+                    "user_name": {
+                        "$exists": True,
+                        "$nin": [None, ""],
+                        "$not": {"$regex": test_name_prefix_regex, "$options": "i"},
+                    },
                     "user_id": {"$exists": True, "$nin": [None, ""]},
                 },
                 sort=[("created_at", -1)],
@@ -1929,9 +1941,9 @@ async def get_recent_identity():
             continue
 
     if not latest_doc:
-        # Fall back to the explicit users collection
+        # Fall back to the explicit users collection (also filter test names)
         user = await db.users.find_one(
-            {},
+            {"name": {"$not": {"$regex": test_name_prefix_regex, "$options": "i"}}},
             sort=[("created_at", -1)],
             projection={"_id": 0, "id": 1, "name": 1, "created_at": 1},
         )

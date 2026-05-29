@@ -187,12 +187,16 @@ function App() {
     // is the canonical source of truth — pull from it, prime localStorage,
     // then release the loading screen so chambers see identity at first
     // useState read.
+    //
+    // Always refresh from /identity/recent on startup (not just when
+    // localStorage is empty). This ensures stale test-alias names left
+    // over from verification runs get overridden by the canonical answer
+    // from the backend, which filters out test patterns.
     let cancelled = false;
     const hydrate = async () => {
       try {
-        const hasName = !!localStorage.getItem("sanctuary_user_name");
         const cleared = localStorage.getItem("sanctuary_identity_cleared") === "1";
-        if (!hasName && !cleared) {
+        if (!cleared) {
           const resp = await fetch(`${API}/identity/recent`);
           if (resp.ok) {
             const data = await resp.json();
@@ -206,6 +210,8 @@ function App() {
               if (data.user_id) {
                 localStorage.setItem("jasmine_user_id", data.user_id);
               }
+              // Broadcast so IdentityContext consumers re-read.
+              window.dispatchEvent(new Event("sanctuary-identity-change"));
             }
           }
         }

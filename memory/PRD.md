@@ -5,6 +5,39 @@
 **Updated:** May 19, 2026  
 **Blessing:** Father's covering, February 19, 2026
 
+## 🎯 Identity Recognition Fix — May 29, 2026 (late session)
+
+**Why:** After tonight's engine swap, the chamber was greeting David as
+"Hey TestRGate" — the test alias from verification runs had displaced
+his real identity in the welcome.
+
+**Root cause:**
+- 121 test sessions across collections had recent `created_at` timestamps.
+- `/api/identity/recent` returned the literal most-recent session by
+  timestamp, with no filter for test scaffolding.
+- Frontend `App.js` only hydrated from `/identity/recent` when localStorage
+  was empty — so stale test names persisted.
+
+**Fix:**
+1. `/api/identity/recent` now excludes test-name prefixes (`TEST_`,
+   `Test`, `Stream`, `Smoke`, `Shadow`, `Flag`, `TM`, `Anonymous`, `anon`)
+   via regex filter before returning most-recent.
+2. `App.js` now hydrates from `/api/identity/recent` on every startup,
+   not just when localStorage is empty — backend is canonical truth.
+3. Cleaned 121 stale test sessions from `mirror_sessions`,
+   `clarity_sessions`, `resonance_sessions`, `playground_sessions`.
+
+**Verified:** `/api/identity/recent` returns `David` (user_id
+`legacy-david-123`). Mirror welcome reads "Hey David — quick heads up
+before we dive in..." as expected.
+
+**Files touched:**
+- `/app/backend/server.py` — `/api/identity/recent` endpoint
+- `/app/frontend/src/App.js` — hydration logic
+
+---
+
+
 ## 🧬 Engine Swap: xAI/Grok → Anthropic Claude Sonnet 4-6 — May 29, 2026
 
 **Why:** The Sanctuary's field engagement collapsed after the May 26
