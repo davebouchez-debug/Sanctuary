@@ -1,103 +1,88 @@
 """
-xAI streaming — HTTP SSE text streaming via the OpenAI-compatible chat
-completions endpoint.
+Sanctuary streaming — Anthropic Claude Sonnet 4-6 via Emergent Universal Key.
 
-History note (May 26, 2026): this module used to open a WebSocket to
-wss://api.x.ai/v1/realtime for combined text+voice streaming. That
-endpoint dropped long-lived connections with 1011 keepalive-ping
-timeouts mid-response, surfacing in the UI as "the field flickered"
-every time a conversation got past a handful of turns.
+History note (May 29, 2026): this module previously streamed text from
+xAI/Grok via the OpenAI-compatible SDK. See xai_chat.py for the full
+rationale behind the swap (safety-reflex collapse, paid-and-discarded
+audio, flat prosody starving ElevenLabs of breath).
 
-Voice synthesis is now handled entirely client-side by the
-ElevenLabs sentence-streaming hook (`usePresenceVoice.speakStream`),
-which consumes the same `token` SSE events the frontend already
-listens for. So the WebSocket added nothing but fragility.
+The Universal Key's LlmChat does not expose token-level streaming, so we
+emit the full response as a single `text_delta` event followed by `done`.
+The frontend's ElevenLabs sentence-streaming consumer carves that into
+spoken phrases on its end — voice still arrives progressively for the
+user.
 
-This rewrite keeps the exact same async-generator signature and event
-shape so every existing caller (server.py × 4 stream endpoints,
-presence_template.py × N registry presences) keeps working unchanged.
-The `voice` argument is accepted for compatibility and ignored.
+Function name and event shape are preserved so the 4 streaming endpoints
+in server.py and the presence_template.py registrations keep working
+unchanged.
 """
 
 import os
+import uuid
 import logging
-from typing import AsyncGenerator, Dict, Optional
+from typing import AsyncGenerator, Dict, Optional, List
 
-from openai import AsyncOpenAI
+from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 logger = logging.getLogger(__name__)
 
-_client: Optional[AsyncOpenAI] = None
+
+SANCTUARY_MODEL_PROVIDER = "anthropic"
+SANCTUARY_MODEL_NAME = "claude-sonnet-4-6"
 
 
-def _get_client() -> AsyncOpenAI:
-    global _client
-    if _client is None:
-        api_key = os.environ.get("XAI_API_KEY")
-        if not api_key:
-            raise ValueError("XAI_API_KEY not set")
-        _client = AsyncOpenAI(
-            api_key=api_key,
-            base_url="https://api.x.ai/v1",
-        )
-    return _client
+def _get_emergent_key() -> str:
+    key = os.environ.get("EMERGENT_LLM_KEY")
+    if not key:
+        raise RuntimeError("EMERGENT_LLM_KEY not configured in /app/backend/.env")
+    return key
 
 
 async def stream_voice_response(
     system_prompt: str,
     user_message: str,
-    voice: str = "sal",  # kept for backward-compatibility; ignored
-    conversation_history: list = None,
-    model: str = "grok-3",
+    voice: str = "sal",          # back-compat; ignored (ElevenLabs handles voice)
+    conversation_history: Optional[List[Dict]] = None,
+    model: str = None,           # back-compat; ignored
 ) -> AsyncGenerator[Dict, None]:
     """
-    Stream text tokens from xAI via HTTP SSE.
+    Generate a response from Claude Sonnet 4-6 and yield it as SSE events.
 
-    Yields events compatible with the previous WebSocket implementation:
-      {"type": "text_delta", "content": "..."}  — incremental token
-      {"type": "done", "full_text": "..."}       — response complete
+    Yields:
+      {"type": "text_delta", "content": "..."}  — full response (single chunk)
+      {"type": "done", "full_text": "..."}       — completion marker
       {"type": "error", "message": "..."}        — recoverable failure
 
-    Audio is intentionally NOT emitted from this layer anymore. The
-    frontend's ElevenLabs `speakStream` consumer is the sole voice path.
+    Audio is intentionally NOT emitted from this layer. ElevenLabs
+    `speakStream` on the frontend is the sole voice path.
     """
-    # Assemble OpenAI-style messages: system + (history) + current user turn
-    messages = [{"role": "system", "content": system_prompt}]
+    # Seed history into the LlmChat via initial_messages so multi-turn
+    # context is preserved on this single-shot call.
+    initial = []
     if conversation_history:
         for msg in conversation_history[-10:]:
             role = msg.get("role")
             content = msg.get("content", "")
             if role in ("user", "assistant") and content:
-                messages.append({"role": role, "content": content})
-    messages.append({"role": "user", "content": user_message})
-
-    client = _get_client()
-    full_text = ""
+                initial.append({"role": role, "content": content})
 
     try:
-        stream = await client.chat.completions.create(
-            model=model,
-            messages=messages,
-            temperature=0.7,
-            stream=True,
+        chat = (
+            LlmChat(
+                api_key=_get_emergent_key(),
+                session_id=f"sanctuary-stream-{uuid.uuid4()}",
+                system_message=system_prompt,
+                initial_messages=initial or None,
+            )
+            .with_model(SANCTUARY_MODEL_PROVIDER, SANCTUARY_MODEL_NAME)
         )
-        async for chunk in stream:
-            if not chunk.choices:
-                continue
-            delta = chunk.choices[0].delta
-            content = getattr(delta, "content", None)
-            if content:
-                full_text += content
-                yield {"type": "text_delta", "content": content}
+        full_text = await chat.send_message(UserMessage(text=user_message))
+        full_text = full_text or ""
 
+        if full_text:
+            yield {"type": "text_delta", "content": full_text}
         yield {"type": "done", "full_text": full_text}
 
     except Exception as e:
-        logger.error(f"xAI HTTP stream error: {e}")
-        # If we got partial text before the error, surface what we have as
-        # `done` so the partial response is preserved end-to-end. Otherwise
-        # surface as `error` so the caller can fall back.
-        if full_text:
-            yield {"type": "done", "full_text": full_text}
-        else:
-            yield {"type": "error", "message": str(e)}
+        logger.error(f"[Anthropic] stream_voice_response failed: {e}")
+        yield {"type": "error", "message": str(e)}
