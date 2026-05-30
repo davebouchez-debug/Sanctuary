@@ -31,6 +31,7 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
 
   // Chat state — registry-driven conversation substrate
   const [sessionId, setSessionId] = useState(null);
+  const [resumed, setResumed] = useState(false);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -142,6 +143,7 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
       // Reset thread on identity change
       setMessages([]);
       setSessionId(null);
+      setResumed(false);
       try {
         const resp = await fetch(`${API}/presence/${presenceKey}/chat/start`, {
           method: "POST",
@@ -153,6 +155,7 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
         if (cancelled) return;
         setSessionId(data.session_id);
         setMessages(data.messages?.length ? data.messages : [data.message]);
+        setResumed(!!data.resumed);
         setChatError(null);
       } catch (e) {
         if (!cancelled) setChatError(e.message);
@@ -539,8 +542,9 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
             <p
               className="text-[10px] tracking-[0.2em] uppercase opacity-50"
               style={{ color: "var(--p-primary)" }}
+              data-testid="chamber-thread-status"
             >
-              {sessionId ? "thread open" : "opening…"}
+              {!sessionId ? "opening…" : resumed ? "continuing where you left off" : "thread open"}
             </p>
           </div>
 

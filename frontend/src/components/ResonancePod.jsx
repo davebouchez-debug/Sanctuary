@@ -21,6 +21,7 @@ function base64ToBlob(base64, mimeType) {
 
 export const ResonancePod = () => {
   const [sessionId, setSessionId] = useState(null);
+  const [resumed, setResumed] = useState(false);
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -124,6 +125,7 @@ export const ResonancePod = () => {
       // array, no welcome audio (we're mid-conversation).
       if (data.resumed && data.messages?.length) {
         setMessages(data.messages);
+        setResumed(true);
         const last = data.messages[data.messages.length - 1];
         if (last?.resonance_state) setResonanceState(last.resonance_state);
         setIsInitializing(false);
@@ -530,6 +532,11 @@ export const ResonancePod = () => {
             <h1 className="font-cinzel text-[#8B5CF6] tracking-wider">
               Chamber of Resonance
             </h1>
+            {resumed && (
+              <span className="text-[10px] text-[#8B5CF6]/70 italic tracking-wide hidden sm:inline" data-testid="resonance-resumed-indicator">
+                · continuing where you left off
+              </span>
+            )}
           </div>
           
           {/* Resonance state indicator + Voice toggle */}

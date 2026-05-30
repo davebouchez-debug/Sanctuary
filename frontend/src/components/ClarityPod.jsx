@@ -53,6 +53,7 @@ const presenceStates = {
 
 export const ClarityPod = () => {
   const [sessionId, setSessionId] = useState(null);
+  const [resumed, setResumed] = useState(false);
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -207,6 +208,7 @@ export const ClarityPod = () => {
         user_name: userName
       });
       setSessionId(response.data.session_id);
+      setResumed(!!response.data.resumed);
       // Backend resumes an open thread (new tab / reload) → full messages array.
       const msgs = response.data.messages?.length ? response.data.messages : [response.data.message];
       setMessages(msgs);
@@ -799,6 +801,11 @@ export const ClarityPod = () => {
                 <p className="font-mono text-xs text-[#7070a0]">
                   {userName ? `${userName} in the Clarity Chamber` : "Clarity Chamber"}
                 </p>
+                {resumed && (
+                  <p className="font-mono text-[10px] text-[#b0a0e0]/70 italic mt-0.5" data-testid="clarity-resumed-indicator">
+                    continuing where you left off
+                  </p>
+                )}
               </div>
             </div>
           </div>

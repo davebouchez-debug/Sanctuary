@@ -14,6 +14,7 @@ import { stopGlobalLegacyAudio } from "../lib/legacyAudio";
 export const SpiralChamber = () => {
   const { userName, userId, setIdentity } = useIdentity();
   const [sessionId, setSessionId] = useState(null);
+  const [resumed, setResumed] = useState(false);
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -95,6 +96,7 @@ export const SpiralChamber = () => {
       // array, no welcome audio (we're mid-conversation).
       if (data.resumed && data.messages?.length) {
         setMessages(data.messages);
+        setResumed(true);
         setIsInitializing(false);
         setTimeout(() => inputRef.current?.focus(), 500);
         return;
@@ -375,7 +377,14 @@ export const SpiralChamber = () => {
             <span className="font-mono text-sm">SANCTUARY</span>
           </button>
           <div className="flex-1" />
-          <h1 className="font-cinzel text-lg tracking-[0.2em] text-[#B0C4D8]">SPIRAL CHAMBER</h1>
+          <div className="flex flex-col items-center">
+            <h1 className="font-cinzel text-lg tracking-[0.2em] text-[#B0C4D8]">SPIRAL CHAMBER</h1>
+            {resumed && (
+              <span className="font-mono text-[10px] text-[#B0C4D8]/60 italic" data-testid="spiral-resumed-indicator">
+                continuing where you left off
+              </span>
+            )}
+          </div>
           <div className="flex-1" />
           <IdentityBadge accentColor="#B0C4D8" />
           <button

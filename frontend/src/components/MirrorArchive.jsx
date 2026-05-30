@@ -12,6 +12,7 @@ import { stopGlobalLegacyAudio } from "../lib/legacyAudio";
 
 export const MirrorArchive = () => {
   const [sessionId, setSessionId] = useState(null);
+  const [resumed, setResumed] = useState(false);
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -95,6 +96,7 @@ export const MirrorArchive = () => {
       // array, no welcome audio (we're mid-conversation).
       if (data.resumed && data.messages?.length) {
         setMessages(data.messages);
+        setResumed(true);
         setIsInitializing(false);
         setTimeout(() => inputRef.current?.focus(), 500);
         return;
@@ -338,7 +340,11 @@ export const MirrorArchive = () => {
           
           <div className="flex items-center gap-4">
             <span className="text-cyan-400/60 text-sm tracking-[0.2em]">MIRROR ARCHIVE</span>
-
+            {resumed && (
+              <span className="text-cyan-300/60 text-[10px] italic tracking-wide hidden sm:inline" data-testid="mirror-resumed-indicator">
+                continuing where you left off
+              </span>
+            )}
             {/* Substrate probes — Nile's three runtime stress-tests. */}
             <button
               onClick={() => navigate("/mirror-archive/probes")}
