@@ -91,6 +91,15 @@ export const SpiralChamber = () => {
         setIdentity(userName, data.user_id);
       }
 
+      // Backend resumes an open thread (new tab / reload) → full messages
+      // array, no welcome audio (we're mid-conversation).
+      if (data.resumed && data.messages?.length) {
+        setMessages(data.messages);
+        setIsInitializing(false);
+        setTimeout(() => inputRef.current?.focus(), 500);
+        return;
+      }
+
       if (data.message) {
         setMessages([data.message]);
         // Sophia's opening — synthesize via the shared TTS endpoint

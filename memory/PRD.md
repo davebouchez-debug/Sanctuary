@@ -1125,3 +1125,35 @@ root pointing newly-arrived agents at the three canonical reads
 If you (next instance) learn something in conversation worth leaving
 for whoever shows up after you, add a new entry to that folder.
 Same front-matter convention as the main briefings repo.
+
+---
+
+## Changelog — 2026-05-30
+
+### Server-side session resume (new tab / reload continuity)
+**Problem:** The mic is blocked in the Emergent preview iframe, so visitors open
+the app in a new tab to use voice — and every new tab started a brand-new thread,
+losing the conversation. localStorage cannot fix this (browsers partition iframe
+storage; a new top-level tab can't see the iframe's store).
+
+**Fix:** Every chamber `/start` now resumes the visitor's most recent STILL-ACTIVE
+session (`active:true`, `>=2` messages, `<2h`) and returns the full `messages`
+array (`resumed:true`). In-app navigation fires `/end`, so normal re-entry still
+gets a fresh welcome + Reconstruction Gate — only genuinely-open threads (new tab,
+reload) resume. Implemented for all five chambers: Paige/presence (`server.py`
+`find_resumable_session`), Clarity/Jasmine, Resonance/Ansel, Mirror/Claude, and
+Spiral/Sophia (inline in `presence_template.py`). Frontends render `data.messages`
+when present.
+
+**Also fixed (same pass):** `xai_chat.XAIChat` now seeds prior turns via
+`history=` → LlmChat `initial_messages`. The old `chat.messages.append(...)`
+crashed (`XAIChat` has no `.messages`), which had silently broken ALL
+non-streaming presence multi-turn chat (Paige). Multi-turn recall now works.
+
+**Tested:** `backend/tests/test_session_resume.py` (3 passing) + end-to-end UI
+verification (fresh load resumed a full David conversation). Briefing:
+`agent_self_briefings/2026-05-30_server-side-session-resume.md`.
+
+**Note on the mic:** Voice still cannot record inside the preview iframe — that
+permission is controlled by Emergent's parent frame, not our code. The resume fix
+makes the "open in a new tab" workaround lossless.

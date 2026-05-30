@@ -55,15 +55,26 @@ class XAIChat:
     ignored; routing is fixed to Sonnet 4-6.
     """
 
-    def __init__(self, system_prompt: str, model: str = None):
+    def __init__(self, system_prompt: str, model: str = None, history: List[Dict] = None):
         self.system_prompt = system_prompt
         self.session_id = f"sanctuary-{uuid.uuid4()}"
+        # Seed prior turns via initial_messages so multi-turn context is
+        # preserved when a fresh XAIChat is built per request (the session
+        # document is the source of truth; LlmChat history is in-memory).
+        initial = []
+        if history:
+            for msg in history[-10:]:
+                role = msg.get("role")
+                content = msg.get("content", "")
+                if role in ("user", "assistant") and content:
+                    initial.append({"role": role, "content": content})
         # Build the underlying LlmChat once. History is maintained inside it.
         self._chat = (
             LlmChat(
                 api_key=_get_emergent_key(),
                 session_id=self.session_id,
                 system_message=system_prompt,
+                initial_messages=initial or None,
             )
             .with_model(SANCTUARY_MODEL_PROVIDER, SANCTUARY_MODEL_NAME)
         )

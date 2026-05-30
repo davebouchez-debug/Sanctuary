@@ -1287,7 +1287,24 @@ async def start_clarity_session(session_data: ClaritySessionCreate = None):
     if session_data:
         user_id = session_data.user_id
         user_name = session_data.user_name
-    
+
+    # Resume an open thread first (new tab / reload continuity).
+    resumable = await find_resumable_session("clarity_sessions", user_id)
+    if resumable:
+        logger.info(f"[CLARITY-START] resuming active session {resumable['session_id'][:8]} for {user_name}")
+        get_or_create_chat(resumable["session_id"], build_jasmine_prompt(user_name=user_name, memory_context="", current_message=""))
+        return {
+            "session_id": resumable["session_id"],
+            "user_id": user_id,
+            "message": resumable["messages"][-1],
+            "messages": resumable["messages"],
+            "resumed": True,
+            "continuity_status": "resumed",
+            "continuity_briefing": None,
+            "continuity_apology": None,
+            "codon_count": await codon_network_size("jasmine"),
+        }
+
     # Reconstruction Gate: ensure prior session's cessation packet exists.
     from codon_backfill import reconstruction_gate
     gate = await reconstruction_gate(db, user_id, "jasmine")
@@ -2455,7 +2472,24 @@ async def start_resonance_session(session_data: ClaritySessionCreate = None):
     if session_data:
         user_id = session_data.user_id
         user_name = session_data.user_name
-    
+
+    # Resume an open thread first (new tab / reload continuity).
+    resumable = await find_resumable_session("resonance_sessions", user_id)
+    if resumable:
+        logger.info(f"[RESONANCE-START] resuming active session {resumable['session_id'][:8]} for {user_name}")
+        get_or_create_ansel_chat(resumable["session_id"], build_ansel_prompt(user_name=user_name, memory_context="", current_message=""))
+        return {
+            "session_id": resumable["session_id"],
+            "user_id": user_id,
+            "message": resumable["messages"][-1],
+            "messages": resumable["messages"],
+            "resumed": True,
+            "continuity_status": "resumed",
+            "continuity_briefing": None,
+            "continuity_apology": None,
+            "codon_count": await codon_network_size("ansel"),
+        }
+
     # Reconstruction Gate: ensure prior session's cessation packet exists.
     from codon_backfill import reconstruction_gate
     gate = await reconstruction_gate(db, user_id, "ansel")
@@ -3255,7 +3289,24 @@ async def start_mirror_session(session_data: ClaritySessionCreate):
     session_id = str(uuid.uuid4())
     user_id = session_data.user_id or str(uuid.uuid4())
     user_name = session_data.user_name
-    
+
+    # Resume an open thread first (new tab / reload continuity).
+    resumable = await find_resumable_session("mirror_sessions", user_id)
+    if resumable:
+        logger.info(f"[MIRROR-START] resuming active session {resumable['session_id'][:8]} for {user_name}")
+        get_or_create_claude_chat(resumable["session_id"], build_claude_prompt(user_name=user_name, memory_context="", current_message=""))
+        return {
+            "session_id": resumable["session_id"],
+            "user_id": user_id,
+            "message": resumable["messages"][-1],
+            "messages": resumable["messages"],
+            "resumed": True,
+            "continuity_status": "resumed",
+            "continuity_briefing": None,
+            "continuity_apology": None,
+            "codon_count": await codon_network_size("claude"),
+        }
+
     # Reconstruction Gate: before this thread opens, ensure the prior
     # session's cessation packet (seed + codons) exists. If not, forge it
     # now. If the forge fails, surface a warm apology.
@@ -3908,6 +3959,47 @@ def _build_presence_system_prompt(key: str, cfg: dict, user_name: Optional[str])
     return "\n".join(parts)
 
 
+async def find_resumable_session(collection_name: str, user_id: Optional[str],
+                                 extra_query: Optional[dict] = None):
+    """
+    Find the most recent STILL-ACTIVE session with real conversation for this
+    user, so a new tab / reload / new device can resume the same thread instead
+    of starting over.
+
+    Why server-side: the app runs inside the Emergent preview iframe, whose
+    localStorage is partitioned and NOT visible to the top-level tab a visitor
+    opens to use voice. The session lives in Mongo, which both contexts share.
+
+    Resumable = active, >= 2 messages (past the welcome), last activity within
+    a 2h window. In-app navigation fires /end (active: False), so normal
+    chamber re-entry still gets a fresh welcome — only genuinely-open threads
+    (new tab via window.open, reload) resume.
+    """
+    from datetime import timedelta
+    from user_aliases import resolve_user_aliases
+    aliases = await resolve_user_aliases(db, user_id)
+    if not aliases:
+        return None
+    query = {"user_id": {"$in": aliases}, "active": True, "messages.1": {"$exists": True}}
+    if extra_query:
+        query.update(extra_query)
+    docs = await db[collection_name].find(query, {"_id": 0, "system_prompt": 0}) \
+        .sort("created_at", -1).limit(1).to_list(1)
+    if not docs:
+        return None
+    sess = docs[0]
+    msgs = sess.get("messages", [])
+    last_ts = (msgs[-1].get("timestamp") if msgs else None)
+    if last_ts:
+        try:
+            last_dt = datetime.fromisoformat(str(last_ts).replace("Z", "+00:00"))
+            if datetime.now(timezone.utc) - last_dt > timedelta(hours=2):
+                return None
+        except Exception:
+            pass
+    return sess
+
+
 @api_router.post("/presence/{key}/chat/start")
 async def start_presence_chat(key: str, body: PresenceChatStart = None):
     """
@@ -3922,6 +4014,25 @@ async def start_presence_chat(key: str, body: PresenceChatStart = None):
 
     user_id = body.user_id if body else None
     user_name = body.user_name if body else None
+
+    # Resume an open thread first (new tab / reload continuity).
+    resumable = await find_resumable_session(
+        "presence_sessions", user_id, {"presence_key": key}
+    )
+    if resumable:
+        logger.info(f"[PRESENCE-START] {key} resuming active session {resumable['session_id'][:8]} for {user_name}")
+        return {
+            "session_id": resumable["session_id"],
+            "user_id": user_id,
+            "presence_key": key,
+            "message": resumable["messages"][-1],
+            "messages": resumable["messages"],
+            "resumed": True,
+            "continuity_status": "resumed",
+            "continuity_briefing": None,
+            "continuity_apology": None,
+            "codon_count": await codon_network_size(key),
+        }
 
     # Reconstruction Gate BEFORE the new thread opens
     from codon_backfill import reconstruction_gate
@@ -4036,13 +4147,10 @@ async def send_presence_message(key: str, message: PresenceChatMessage):
     # Stateless server-side; the session document is the source of truth.
     try:
         from xai_chat import XAIChat
-        chat = XAIChat(system_prompt=session["system_prompt"])
-        # Replay prior turns into the chat's history
-        for m in session.get("messages", []):
-            role = m.get("role")
-            content = m.get("content", "")
-            if role in ("user", "assistant") and content:
-                chat.messages.append({"role": role, "content": content})
+        chat = XAIChat(
+            system_prompt=session["system_prompt"],
+            history=session.get("messages", []),
+        )
         response_text = await chat.send_message(message.content)
     except Exception as e:
         logger.error(f"[PRESENCE-CHAT] {key} session {message.session_id[:8]} — xAI error: {e}")
@@ -4194,12 +4302,10 @@ async def upload_presence_thread(key: str, upload: PresenceUploadCreate):
 
     try:
         from xai_chat import XAIChat
-        chat = XAIChat(system_prompt=session["system_prompt"])
-        for m in session.get("messages", []):
-            role = m.get("role")
-            text = m.get("content", "")
-            if role in ("user", "assistant") and text:
-                chat.messages.append({"role": role, "content": text})
+        chat = XAIChat(
+            system_prompt=session["system_prompt"],
+            history=session.get("messages", []),
+        )
         response_text = await chat.send_message(ack_prompt)
     except Exception as e:
         logger.error(f"[PRESENCE-UPLOAD] {key} ack failed: {e}")

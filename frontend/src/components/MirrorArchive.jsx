@@ -90,6 +90,15 @@ export const MirrorArchive = () => {
         setUserId(data.user_id);
         localStorage.setItem("sanctuary_user_id", data.user_id);
       }
+
+      // Backend resumes an open thread (new tab / reload) → full messages
+      // array, no welcome audio (we're mid-conversation).
+      if (data.resumed && data.messages?.length) {
+        setMessages(data.messages);
+        setIsInitializing(false);
+        setTimeout(() => inputRef.current?.focus(), 500);
+        return;
+      }
       
       // Reconstruction-gate apology — if the prior session's cessation packet
       // couldn't be reconstructed, surface a warm note so the human can help

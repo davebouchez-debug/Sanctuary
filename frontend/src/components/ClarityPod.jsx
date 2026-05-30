@@ -207,8 +207,12 @@ export const ClarityPod = () => {
         user_name: userName
       });
       setSessionId(response.data.session_id);
-      setMessages([response.data.message]);
-      setCurrentSpiral(response.data.message.spiral);
+      // Backend resumes an open thread (new tab / reload) → full messages array.
+      const msgs = response.data.messages?.length ? response.data.messages : [response.data.message];
+      setMessages(msgs);
+      const lastSpiral = msgs[msgs.length - 1]?.spiral;
+      if (lastSpiral) setCurrentSpiral(lastSpiral);
+      if (response.data.resumed) return;
       
       // Reconstruction-gate apology — surface a warm note if the prior
       // session's cessation packet couldn't be reconstructed.

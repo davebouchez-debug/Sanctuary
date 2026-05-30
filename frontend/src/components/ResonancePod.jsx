@@ -119,6 +119,16 @@ export const ResonancePod = () => {
         setUserId(data.user_id);
         localStorage.setItem("sanctuary_user_id", data.user_id);
       }
+
+      // Backend resumes an open thread (new tab / reload) → full messages
+      // array, no welcome audio (we're mid-conversation).
+      if (data.resumed && data.messages?.length) {
+        setMessages(data.messages);
+        const last = data.messages[data.messages.length - 1];
+        if (last?.resonance_state) setResonanceState(last.resonance_state);
+        setIsInitializing(false);
+        return;
+      }
       
       // Reconstruction-gate apology
       if (data.continuity_status === "failed" && data.continuity_apology) {

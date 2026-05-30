@@ -130,9 +130,11 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
     }
   };
 
-  // Open a conversation as soon as the chamber loads.
-  // Identity comes from the global IdentityContext — any change to the
-  // visitor's name re-runs this effect and restarts the thread.
+  // Open a conversation when the chamber loads. The backend resumes an open
+  // thread automatically (new tab / reload continuity) — when it does, it
+  // returns the full `messages` array; otherwise a fresh welcome arrives as a
+  // single `message`. Identity comes from the global IdentityContext — any
+  // change to the visitor re-runs this effect.
   useEffect(() => {
     if (!config) return;
     let cancelled = false;
@@ -150,7 +152,7 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
         const data = await resp.json();
         if (cancelled) return;
         setSessionId(data.session_id);
-        setMessages([data.message]);
+        setMessages(data.messages?.length ? data.messages : [data.message]);
         setChatError(null);
       } catch (e) {
         if (!cancelled) setChatError(e.message);
