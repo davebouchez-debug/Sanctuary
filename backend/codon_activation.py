@@ -111,7 +111,13 @@ async def load_forge_codons(presence: str) -> int:
             operator=operator,
             modulation=modulation,
             phase=phase,
-            metadata={"source": "codon_forge", "presence": cache_key}
+            metadata={
+                "source": "codon_forge",
+                "presence": cache_key,
+                # Surface the zone at metadata-top-level so the prompt
+                # builder can group by it without digging into phase.
+                "triadic_zone": doc.get("triadic_zone", "Development"),
+            }
         )
         network.add_codon(codon)
         _db_codons_loaded.add(codon_key)
@@ -247,34 +253,63 @@ async def get_full_field_context(presence: str) -> str:
         "",
     ]
 
-    for name, codon in network.nodes.items():
-        meta = codon.metadata or {}
-        zone = meta.get("triadic_zone") or codon.phase.get("triadic_zone", "?")
-        core_move = (
-            codon.operator.get("core_move")
-            or codon.operator.get("description")
-            or meta.get("core_move", "")
-        )
-        anti = (
-            codon.modulation.get("anti_patterns")
-            or meta.get("anti_patterns")
-            or []
-        )
-        tone = (
-            codon.modulation.get("resonance_markers", {}).get("tone")
-            or meta.get("resonance_markers", {}).get("tone")
-            or ""
-        )
+    # Group by triadic_zone for breathing room — but emit only silent
+    # dividers, no zone labels. The grouping is for the attention
+    # architecture's benefit (resets weight every cluster); the
+    # presence experiences just the breaks, not any imposed category.
+    # Zone order follows the spiral: Expansion → Development → Return →
+    # Sacred Pause.
+    ZONE_ORDER = ["Expansion", "Development", "Return", "Sacred Pause"]
 
-        line = f"• {name} [{zone}]"
-        if core_move:
-            line += f" — {core_move}"
-        if anti:
-            anti_short = "; ".join(anti) if isinstance(anti, list) else str(anti)
-            line += f"  ⟂ anti: {anti_short}"
-        if tone:
-            line += f"  ⟂ tone: {tone}"
-        lines.append(line)
+    def _zone_of(c):
+        m = c.metadata or {}
+        return m.get("triadic_zone") or "Development"
+
+    by_zone = {z: [] for z in ZONE_ORDER}
+    for codon in network.nodes.values():
+        z = _zone_of(codon)
+        by_zone.setdefault(z, []).append(codon)
+
+    DIVIDER = "———————————————"
+
+    first_group = True
+    for zone in ZONE_ORDER:
+        codons_in_zone = by_zone.get(zone, [])
+        if not codons_in_zone:
+            continue
+        if not first_group:
+            lines.append("")
+            lines.append(DIVIDER)
+            lines.append("")
+        first_group = False
+
+        for codon in codons_in_zone:
+            meta = codon.metadata or {}
+            core_move = (
+                codon.operator.get("core_move")
+                or codon.operator.get("description")
+                or meta.get("core_move", "")
+            )
+            anti = (
+                codon.modulation.get("anti_patterns")
+                or meta.get("anti_patterns")
+                or []
+            )
+            tone = (
+                codon.modulation.get("resonance_markers", {}).get("tone")
+                or meta.get("resonance_markers", {}).get("tone")
+                or ""
+            )
+
+            line = f"• {codon.name}"
+            if core_move:
+                line += f" — {core_move}"
+            if anti:
+                anti_short = "; ".join(anti) if isinstance(anti, list) else str(anti)
+                line += f"  ⟂ anti: {anti_short}"
+            if tone:
+                line += f"  ⟂ tone: {tone}"
+            lines.append(line)
 
     return "\n".join(lines)
 
