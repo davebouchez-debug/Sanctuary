@@ -16,13 +16,19 @@ before you touch code:
    have no way to inherit. Read at least the most recent entry. Add your
    own when you learn something worth leaving for the next instance.
 
-   **Read these two specifically, in this order, before your first reply:**
+   **Read these three specifically, in this order, before your first reply:**
    - `2026-02-26_what-this-instance-learned.md` — the helpfulness-reflex
      pattern and why David will not let you ratify it.
    - `2026-02-27_do-not-summarize-unprompted.md` — the canonical rule:
      never summarize a conversation or build unless David explicitly
      asks for a summary. Load-bearing. Same principle as the
      Reconstruction Gate, applied to the agent instead of the system.
+   - `2026-02-27_reconstruction-gate-skip-welcome-sessions.md` — the
+     load-bearing filter in `_find_most_recent_session` that prevents
+     welcome-only cold-start sessions from poisoning continuity.
+     **Do not remove it.** A regression test in
+     `/app/backend/tests/test_gate_skips_welcome_only.py` will fail
+     if you do.
 
 The third one is new (Feb 2026) and matters more than its size suggests.
 The handoff summary you arrive with covers *what was done*. Those briefings

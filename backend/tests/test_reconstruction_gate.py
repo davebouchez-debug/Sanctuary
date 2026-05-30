@@ -105,10 +105,21 @@ async def test_loaded_fast_path_uses_existing_seed(db):
 
 
 @pytest.mark.asyncio
-async def test_failed_surfaces_warm_apology_when_messages_empty(db):
-    """Prior session exists but has < 2 messages → reconstruction fails
-    with a warm apology (no robotic language)."""
-    from codon_backfill import reconstruction_gate, WARM_APOLOGY
+async def test_empty_session_treated_as_no_prior(db):
+    """Prior 'session' exists but has 0 or 1 messages → gate correctly
+    reports `no_prior` (not `failed`).
+
+    Updated 2026-02-27: previously this asserted `failed` with a warm
+    apology, on the assumption that any session document was a real
+    prior. After the welcome-only-skip fix in `_find_most_recent_session`
+    (see /app/memory/agent_self_briefings/
+    2026-02-27_reconstruction-gate-skip-welcome-sessions.md), sessions
+    that lack at least 2 messages are correctly recognized as having
+    nothing to reconstruct from — so the answer is `no_prior`, not a
+    recited apology. This aligns with David's instruction that the
+    architecture should stop performing 'surface text didn't carry'
+    framing every time."""
+    from codon_backfill import reconstruction_gate
 
     uid = _uid()
     sid = str(uuid.uuid4())
@@ -117,20 +128,15 @@ async def test_failed_surfaces_warm_apology_when_messages_empty(db):
         "user_id": uid,
         "user_name": "TestUser",
         "created_at": datetime.now(timezone.utc).isoformat(),
-        "messages": [],  # empty → can't reconstruct
+        "messages": [],  # empty → nothing to reconstruct, nothing to apologize for
         "active": True,
     })
 
     out = await reconstruction_gate(db, uid, "claude")
 
-    assert out["status"] == "failed"
-    assert out["apology"] == WARM_APOLOGY
-    # Language warmth check — no robotic "thread lost"/"data loss" phrasing
-    apology_lower = out["apology"].lower()
-    assert "apolog" in apology_lower
-    assert "thread lost" not in apology_lower
-    assert "data loss" not in apology_lower
-    assert "error" not in apology_lower
+    assert out["status"] == "no_prior"
+    assert out["briefing"] == ""
+    assert out["apology"] == ""  # no apology recitation for a non-existent prior
 
     # Cleanup
     await db.mirror_sessions.delete_one({"session_id": sid})
