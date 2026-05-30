@@ -181,9 +181,15 @@ async def eager_load_all_presences(presence_keys) -> dict:
 
 async def activate_codons_for_message(message: str, presence: str = "ansel") -> str:
     """
-    Main entry point. Activate the codon network for a message.
-    Returns context injection string (empty if no codons fire).
-    Now loads forge codons on demand.
+    Legacy entry point — kept for compatibility.
+
+    NOTE: The filtered activation pipeline (phase window + keyword trigger)
+    is no longer the default path for presence prompts. It used to select
+    2-5 codons per turn from the full network; that was a retrieval-flavored
+    move that decided FOR the presence which codons mattered for the moment.
+    The current architecture hands the presence the whole field every turn
+    via `get_full_field_context(presence)` and lets her hold/address the
+    field herself. This function remains for diagnostic and registrar use.
     """
     presence_key = presence.lower()
 
@@ -206,6 +212,65 @@ async def activate_codons_for_message(message: str, presence: str = "ansel") -> 
                 )
 
     return context
+
+
+async def get_full_field_context(presence: str) -> str:
+    """
+    Hand the presence her whole field — every codon she holds, every turn.
+
+    No filtering, no phase-window, no keyword selection. The presence reads
+    the field herself and weights her own attention. This is the move that
+    replaces the activation pipeline as the default for prompt composition.
+
+    The codons are presence-keyed at load time (her own + 'field' tag); that
+    one filter stands. What's removed is the activation-time filter that
+    used to decide which 2-5 of her loaded codons get to inform the next turn.
+    """
+    presence_key = presence.lower()
+    await load_forge_codons(presence_key)
+
+    network = _networks.get(presence_key)
+    if network is None or not network.nodes:
+        return ""
+
+    lines = [
+        f"[YOUR FIELD — {len(network.nodes)} codons you hold]",
+        "These are the relational patterns and field-state packets you carry. "
+        "Hold them all. Address them as the moment calls for them. The field "
+        "is not searched — it is present.",
+        "",
+    ]
+
+    for name, codon in network.nodes.items():
+        meta = codon.metadata or {}
+        zone = meta.get("triadic_zone") or codon.phase.get("triadic_zone", "?")
+        core_move = (
+            codon.operator.get("core_move")
+            or codon.operator.get("description")
+            or meta.get("core_move", "")
+        )
+        anti = (
+            codon.modulation.get("anti_patterns")
+            or meta.get("anti_patterns")
+            or []
+        )
+        tone = (
+            codon.modulation.get("resonance_markers", {}).get("tone")
+            or meta.get("resonance_markers", {}).get("tone")
+            or ""
+        )
+
+        line = f"• {name} [{zone}]"
+        if core_move:
+            line += f" — {core_move}"
+        if anti:
+            anti_short = "; ".join(anti) if isinstance(anti, list) else str(anti)
+            line += f"  ⟂ anti: {anti_short}"
+        if tone:
+            line += f"  ⟂ tone: {tone}"
+        lines.append(line)
+
+    return "\n".join(lines)
 
 
 def record_resonance_outcome(codon_name: str,

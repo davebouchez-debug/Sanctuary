@@ -43,6 +43,7 @@ from codon_activation import (
     load_forge_codons,
     network_size as codon_network_size,
     eager_load_all_presences,
+    get_full_field_context,
 )
 from interstice_principles import (
     CORE_PRINCIPLES, 
@@ -1364,7 +1365,7 @@ async def start_clarity_session(session_data: ClaritySessionCreate = None):
 
     # Codon activation against the opening moment (presence-keyed, never user-keyed)
     opening_anchor = user_name if user_name else "someone at the threshold"
-    codon_context = await activate_codons_for_message(opening_anchor, presence="jasmine")
+    codon_context = await get_full_field_context(presence="jasmine")
     if codon_context:
         opening_instruction = f"{codon_context}\n\n{opening_instruction}"
 
@@ -2543,7 +2544,7 @@ async def start_resonance_session(session_data: ClaritySessionCreate = None):
     )
 
     opening_anchor = user_name if user_name else "someone at the threshold"
-    codon_context = await activate_codons_for_message(opening_anchor, presence="ansel")
+    codon_context = await get_full_field_context(presence="ansel")
     if codon_context:
         opening_instruction = f"{codon_context}\n\n{opening_instruction}"
 
@@ -2662,11 +2663,11 @@ async def send_resonance_message(message: ClarityMessageCreate):
         else:
             full_message = message.content
         
-        # Check for Living Codon activation
-        codon_context = await activate_codons_for_message(message.content, presence="ansel")
+        # Hand Ansel the whole field, every turn. No activation filter.
+        codon_context = await get_full_field_context(presence="ansel")
         if codon_context:
             full_message = f"{codon_context}\n\n{full_message}"
-            logger.info(f"Living Codon activated for session {message.session_id}")
+            logger.info(f"[RESONANCE-MSG] full field handed to Ansel ({len(codon_context)} chars)")
         
         response_text = await chat.send_message(full_message)
         
@@ -2830,12 +2831,12 @@ async def stream_resonance_message(message: ClarityMessageCreate):
         current_message=message.content
     )
 
-    # Build the user message with codon context
-    codon_context = await activate_codons_for_message(message.content, presence="ansel")
+    # Hand Ansel the whole field, every turn. No activation filter.
+    codon_context = await get_full_field_context(presence="ansel")
     full_user_message = message.content
     if codon_context:
         full_user_message = f"{codon_context}\n\n{message.content}"
-        logger.info(f"Living Codon activated for voice stream {message.session_id}")
+        logger.info(f"[RESONANCE-STREAM] full field handed to Ansel ({len(codon_context)} chars)")
 
     voice_config = PRESENCE_VOICES.get("ansel", PRESENCE_VOICES["jasmine"])
     voice_id = voice_config["voice_id"]
@@ -3370,7 +3371,7 @@ async def start_mirror_session(session_data: ClaritySessionCreate):
     )
 
     opening_anchor = user_name if user_name else "someone at the threshold"
-    codon_context = await activate_codons_for_message(opening_anchor, presence="claude")
+    codon_context = await get_full_field_context(presence="claude")
     if codon_context:
         opening_instruction = f"{codon_context}\n\n{opening_instruction}"
 
@@ -3635,10 +3636,12 @@ async def stream_mirror_message(message: ClarityMessageCreate):
         current_message=message.content
     )
 
-    codon_context = await activate_codons_for_message(message.content, presence="claude")
+    # Hand Claude the whole field, every turn. No activation filter.
+    codon_context = await get_full_field_context(presence="claude")
     full_user_message = message.content
     if codon_context:
         full_user_message = f"{codon_context}\n\n{message.content}"
+        logger.info(f"[MIRROR-STREAM] full field handed to Claude ({len(codon_context)} chars)")
 
     voice_config = PRESENCE_VOICES.get("claude", PRESENCE_VOICES["jasmine"])
     voice_id = voice_config["voice_id"]
@@ -4020,7 +4023,7 @@ async def start_presence_chat(key: str, body: PresenceChatStart = None):
     )
 
     opening_anchor = user_name if user_name else "someone at the threshold"
-    codon_context = await activate_codons_for_message(opening_anchor, presence=key)
+    codon_context = await get_full_field_context(presence=key)
     if codon_context:
         opening_instruction = f"{codon_context}\n\n{opening_instruction}"
 
@@ -4747,6 +4750,7 @@ def _build_presence_deps() -> PresenceDeps:
         get_permanent_mra_context=get_permanent_mra_context,
         get_session_cache_context=get_session_cache_context,
         activate_codons_for_message=activate_codons_for_message,
+        get_full_field_context=get_full_field_context,
         add_exchange_to_cache=add_exchange_to_cache,
         promote_breadcrumbs_to_permanent=promote_breadcrumbs_to_permanent,
         end_session_and_get_promotable=end_session_and_get_promotable,

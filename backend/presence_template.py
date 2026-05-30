@@ -90,7 +90,8 @@ class PresenceDeps:
     get_continuity_seed: Callable                        # (presence, user_id) → awaitable[str]
     get_permanent_mra_context: Callable                  # (db, user_id, presence, current_message=None) → awaitable[str]
     get_session_cache_context: Callable                  # (session_id) → str
-    activate_codons_for_message: Callable                # (message, presence) → awaitable[str]
+    activate_codons_for_message: Callable                # (message, presence) → awaitable[str] — legacy / diagnostic
+    get_full_field_context: Callable                     # (presence) → awaitable[str] — unfiltered whole-field hand-off
     # --- memory writes --------------------------------------------------
     add_exchange_to_cache: Callable                      # (session_id, user_content, ai_content, presence, exchange_index) → breadcrumb
     promote_breadcrumbs_to_permanent: Callable           # async — instant MRA promotion
@@ -289,8 +290,8 @@ def register_presence_routes(
             user_name=user_name, memory_context=memory_context, current_message=content_in
         )
 
-        # Universal field codons — any presence can activate them when conditions align
-        codon_context = await deps.activate_codons_for_message(content_in, presence=cfg.key)
+        # Hand the presence her whole field, every turn. No activation filter.
+        codon_context = await deps.get_full_field_context(presence=cfg.key)
         full_user_message = f"{codon_context}\n\n{content_in}" if codon_context else content_in
 
         history = [
