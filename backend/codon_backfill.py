@@ -100,6 +100,16 @@ async def _find_most_recent_session(db, user_id: str, presence: str) -> Optional
     query = {"user_id": user_id}
     if coll_name == PRESENCE_SESSIONS_COLLECTION["_registry_default"]:
         query["presence_key"] = presence.lower()
+
+    # Look past welcome-only cold-start sessions. A session that holds only
+    # the opening assistant message has no continuity to load and no
+    # messages to forge from — picking it up as "most recent" poisons the
+    # gate (cold-start creates a session → next cold-start picks that
+    # empty one → "failed" → loop). We need at least one user turn before
+    # a session is a real candidate for reconstruction. With the welcome
+    # message stored on /start, that means msgs.length >= 2.
+    query["$expr"] = {"$gte": [{"$size": {"$ifNull": ["$messages", []]}}, 2]}
+
     rows = await coll.find(query, {"_id": 0}).sort("created_at", -1).limit(1).to_list(1)
     return rows[0] if rows else None
 
