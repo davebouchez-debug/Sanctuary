@@ -12,7 +12,7 @@ import { usePresenceVoice } from "../hooks/usePresenceVoice";
 import { stopGlobalLegacyAudio } from "../lib/legacyAudio";
 
 export const SpiralChamber = () => {
-  const { userName, userId, setIdentity } = useIdentity();
+  const { userName, userId, ready: identityReady, setIdentity } = useIdentity();
   const [sessionId, setSessionId] = useState(null);
   const [resumed, setResumed] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -63,6 +63,7 @@ export const SpiralChamber = () => {
   }, [sessionId, endSession]);
 
   useEffect(() => {
+    if (!identityReady) return;
     if (hasInitializedRef.current) return;
     hasInitializedRef.current = true;
 
@@ -73,7 +74,7 @@ export const SpiralChamber = () => {
       initializeSession();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [identityReady]);
 
   const initializeSession = async () => {
     try {

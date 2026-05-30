@@ -49,4 +49,25 @@ still runs the Reconstruction Gate + fresh welcome. Only genuinely-open threads
 (`XAIChat` has no `.messages`), silently breaking ALL non-streaming presence
 multi-turn chat. Do not reintroduce `chat.messages`.
 
-Regression: `backend/tests/test_session_resume.py`.
+Regression: `backend/tests/test_session_resume.py` and the full-sweep script
+`backend/tests/test_all_chambers_integration.py` (48 checks across all 5 chambers).
+
+---
+
+## UPDATE 2026-05-30b — Identity-ready gate (resume reliability)
+
+Resume was matching on `user_id`, but chambers were calling `/start` **before**
+App.js finished hydrating identity from `/api/identity/recent` (the 5s splash
+safety can release early on slow loads). Result: `/start` fired with
+`user_id=null`, created a throwaway session, and never resumed the visitor's
+real thread. The testing agent caught this — "thread open" instead of
+"continuing where you left off" after reload.
+
+**Fix:** `IdentityContext` now exposes a `ready` flag. App.js sets
+`window.__sanctuaryHydrated = true` and broadcasts `sanctuary-identity-change`
+synchronously *before* releasing the splash. Every chamber's start/init effect
+is gated on `ready`, so the thread opens exactly once with the settled identity.
+Verified end-to-end: Paige (non-stream) and Clarity (stream) both restore the
+transcript + show the indicator after a fresh load. Do not remove the `ready`
+gate from the chamber init effects.
+

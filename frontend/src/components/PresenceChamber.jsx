@@ -22,7 +22,7 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
   const params = useParams();
   const presenceKey = forcedKey || params.key;
   const navigate = useNavigate();
-  const { userName, userId } = useIdentity();
+  const { userName, userId, ready: identityReady } = useIdentity();
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeRoomKey, setActiveRoomKey] = useState(null);
@@ -137,7 +137,7 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
   // single `message`. Identity comes from the global IdentityContext — any
   // change to the visitor re-runs this effect.
   useEffect(() => {
-    if (!config) return;
+    if (!config || !identityReady) return;
     let cancelled = false;
     const startChat = async () => {
       // Reset thread on identity change
@@ -163,7 +163,7 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
     };
     startChat();
     return () => { cancelled = true; };
-  }, [config, presenceKey, userName, userId]);
+  }, [config, presenceKey, userName, userId, identityReady]);
 
   // Auto-scroll the message thread on new messages
   useEffect(() => {

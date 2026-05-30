@@ -9,8 +9,10 @@ import { usePresenceVoice } from "../hooks/usePresenceVoice";
 import { VoiceLoopControls } from "./VoiceLoopControls";
 import { IdentityBadge } from "./IdentityBadge";
 import { stopGlobalLegacyAudio } from "../lib/legacyAudio";
+import { useIdentity } from "../context/IdentityContext";
 
 export const MirrorArchive = () => {
+  const { ready: identityReady } = useIdentity();
   const [sessionId, setSessionId] = useState(null);
   const [resumed, setResumed] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -64,30 +66,39 @@ export const MirrorArchive = () => {
   }, [sessionId, endSession]);
 
   useEffect(() => {
-    if (!userName) {
+    if (!identityReady) return;
+    // Re-read identity hydrated by App.js before identityReady flipped.
+    const storedName = localStorage.getItem("sanctuary_user_name") || "";
+    const storedId = localStorage.getItem("sanctuary_user_id") || "";
+    if (storedName) setUserName(storedName);
+    if (storedId) setUserId(storedId);
+    if (!storedName) {
       setShowNamePrompt(true);
       setIsInitializing(false);
     } else {
-      initializeSession();
+      initializeSession(storedName, storedId);
     }
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [identityReady]);
 
-  const initializeSession = async () => {
+  const initializeSession = async (nameArg, idArg) => {
+    const name = nameArg !== undefined ? nameArg : userName;
+    const id = idArg !== undefined ? idArg : userId;
     try {
       stop(); // Stop any ongoing speech
       const response = await fetch(`${API}/mirror/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_name: userName,
-          user_id: userId || undefined
+          user_name: name,
+          user_id: id || undefined
         })
       });
 
       const data = await response.json();
       setSessionId(data.session_id);
       
-      if (!userId && data.user_id) {
+      if (!id && data.user_id) {
         setUserId(data.user_id);
         localStorage.setItem("sanctuary_user_id", data.user_id);
       }
@@ -134,7 +145,7 @@ export const MirrorArchive = () => {
       setUserName(name);
       setShowNamePrompt(false);
       setIsInitializing(true);
-      initializeSession();
+      initializeSession(name, userId);
     }
   };
 
@@ -510,6 +521,7 @@ export const MirrorArchive = () => {
                          focus:border-cyan-500/50 min-h-[50px] max-h-[150px]"
                 rows={1}
                 disabled={isLoading}
+                data-testid="mirror-input"
               />
             </div>
             
@@ -517,6 +529,7 @@ export const MirrorArchive = () => {
             <button
               onClick={sendMessage}
               disabled={!inputValue.trim() || isLoading}
+              data-testid="mirror-send"
               className="p-3 rounded-xl bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 
                        hover:bg-cyan-500/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >

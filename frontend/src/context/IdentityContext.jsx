@@ -52,6 +52,23 @@ export const IdentityProvider = ({ children }) => {
   const [userName, setUserName] = useState(() => readLS(NAME_KEY));
   const [userId, setUserId] = useState(() => readLS(ID_KEY));
 
+  // `ready` tells chambers it is safe to open a thread — i.e. App.js has
+  // finished hydrating identity from /api/identity/recent. Without this gate,
+  // a chamber can call /start with user_id=null before hydration lands, create
+  // a throwaway session, and then fail to resume the visitor's real open thread
+  // (the new-tab / reload continuity bug). App.js sets window.__sanctuaryHydrated
+  // synchronously before it releases the splash, so in the common path we are
+  // ready at first mount; the event + cleared-flag paths cover the rest.
+  const [ready, setReady] = useState(() => {
+    try {
+      return !!window.__sanctuaryHydrated
+        || !!readLS(ID_KEY)
+        || localStorage.getItem(CLEARED_KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
+
   // Cross-tab + same-tab sync. Same-tab listeners get a synthetic event
   // dispatched by setIdentity / clearIdentity below.
   useEffect(() => {
@@ -62,12 +79,17 @@ export const IdentityProvider = ({ children }) => {
     const onLocal = () => {
       setUserName(readLS(NAME_KEY));
       setUserId(readLS(ID_KEY));
+      setReady(true);
     };
     window.addEventListener("storage", onStorage);
     window.addEventListener("sanctuary-identity-change", onLocal);
+    // Anonymous-visitor fallback: never block a thread forever if hydration
+    // produced no identity (e.g. backend unreachable). Resolve readiness.
+    const fallback = setTimeout(() => setReady(true), 4000);
     return () => {
       window.removeEventListener("storage", onStorage);
       window.removeEventListener("sanctuary-identity-change", onLocal);
+      clearTimeout(fallback);
     };
   }, []);
 
@@ -105,8 +127,8 @@ export const IdentityProvider = ({ children }) => {
   }, []);
 
   const value = useMemo(
-    () => ({ userName, userId, setIdentity, clearIdentity }),
-    [userName, userId, setIdentity, clearIdentity]
+    () => ({ userName, userId, ready, setIdentity, clearIdentity }),
+    [userName, userId, ready, setIdentity, clearIdentity]
   );
 
   return (

@@ -218,7 +218,15 @@ function App() {
       } catch (e) {
         // Network failure — fall through to normal name prompt flow.
       } finally {
-        if (!cancelled) setIsLoading(false);
+        if (!cancelled) {
+          // Signal that identity hydration has finished so chambers (gated on
+          // IdentityContext.ready) open their thread with the settled identity.
+          // Set the window flag synchronously BEFORE releasing the splash so
+          // the IdentityProvider reads it as ready at first mount.
+          window.__sanctuaryHydrated = true;
+          window.dispatchEvent(new Event("sanctuary-identity-change"));
+          setIsLoading(false);
+        }
       }
     };
     hydrate();
@@ -226,7 +234,13 @@ function App() {
     // the backend is slow. Set generously so the hydrate fetch wins the
     // race on most networks and components mount with identity already
     // populated in localStorage.
-    const safety = setTimeout(() => { if (!cancelled) setIsLoading(false); }, 5000);
+    const safety = setTimeout(() => {
+      if (!cancelled) {
+        window.__sanctuaryHydrated = true;
+        window.dispatchEvent(new Event("sanctuary-identity-change"));
+        setIsLoading(false);
+      }
+    }, 5000);
     return () => { cancelled = true; clearTimeout(safety); };
   }, []);
 

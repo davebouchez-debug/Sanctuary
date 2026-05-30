@@ -1157,3 +1157,17 @@ verification (fresh load resumed a full David conversation). Briefing:
 **Note on the mic:** Voice still cannot record inside the preview iframe — that
 permission is controlled by Emergent's parent frame, not our code. The resume fix
 makes the "open in a new tab" workaround lossless.
+
+### Identity-ready gate (resume reliability) — 2026-05-30b
+Chambers were calling `/start` before App.js finished hydrating identity from
+`/api/identity/recent`, so resume matched against `user_id=null` and never
+restored the thread. Added an `IdentityContext.ready` flag (App.js sets
+`window.__sanctuaryHydrated` + broadcasts before releasing the splash); every
+chamber start/init effect is gated on it. Resume now fires once with the settled
+identity. Also added `codon_count` to the presence-template start/resume
+responses, `data-testid`s to Mirror's input/send, and the "continuing where you
+left off" indicator to all five chamber headers.
+
+**Full sweep:** `backend/tests/test_all_chambers_integration.py` — 48/48 pass
+(start, codon load, 3-turn in-session memory, resume, TTS, STT round-trip) across
+Jasmine/Clarity, Ansel/Resonance, Claude/Mirror, Sophia/Spiral, Paige.

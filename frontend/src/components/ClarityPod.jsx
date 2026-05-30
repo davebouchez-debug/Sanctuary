@@ -11,6 +11,7 @@ import { usePresenceVoice } from "../hooks/usePresenceVoice";
 import { VoiceLoopControls } from "./VoiceLoopControls";
 import { IdentityBadge } from "./IdentityBadge";
 import { stopGlobalLegacyAudio } from "../lib/legacyAudio";
+import { useIdentity } from "../context/IdentityContext";
 
 function base64ToBlob(base64, mimeType) {
   const byteCharacters = atob(base64);
@@ -52,6 +53,7 @@ const presenceStates = {
 };
 
 export const ClarityPod = () => {
+  const { ready: identityReady } = useIdentity();
   const [sessionId, setSessionId] = useState(null);
   const [resumed, setResumed] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -136,6 +138,7 @@ export const ClarityPod = () => {
   // Canonical keys: sanctuary_user_id / sanctuary_user_name
   // Legacy keys (migrated in): jasmine_user_id / jasmine_user_name
   useEffect(() => {
+    if (!identityReady) return;
     let storedUserId = localStorage.getItem("sanctuary_user_id");
     let storedUserName = localStorage.getItem("sanctuary_user_name");
     // One-time migration from legacy jasmine_* keys
@@ -154,7 +157,7 @@ export const ClarityPod = () => {
       setUserName(storedUserName);
       setShowIdentityModal(false);
     }
-  }, []);
+  }, [identityReady]);
 
   // Helper — write identity to both canonical and legacy keys
   const storeIdentity = (id, name) => {

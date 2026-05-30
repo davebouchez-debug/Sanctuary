@@ -8,6 +8,7 @@ import { usePresenceVoice } from "../hooks/usePresenceVoice";
 import { VoiceLoopControls } from "./VoiceLoopControls";
 import { stopGlobalLegacyAudio } from "../lib/legacyAudio";
 import { IdentityBadge } from "./IdentityBadge";
+import { useIdentity } from "../context/IdentityContext";
 
 // Helper to convert base64 to Blob for audio playback
 function base64ToBlob(base64, mimeType) {
@@ -20,6 +21,7 @@ function base64ToBlob(base64, mimeType) {
 }
 
 export const ResonancePod = () => {
+  const { ready: identityReady } = useIdentity();
   const [sessionId, setSessionId] = useState(null);
   const [resumed, setResumed] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -77,12 +79,13 @@ export const ResonancePod = () => {
   }, [sessionId, endSession]);
 
   useEffect(() => {
+    if (!identityReady) return;
     // Guard against React.StrictMode double-invocation in dev —
     // prevents two parallel /resonance/start calls and overlapping welcome audio.
     if (hasInitializedRef.current) return;
     hasInitializedRef.current = true;
 
-    // Check if we have a stored user
+    // Check if we have a stored user (hydrated by App.js before identityReady)
     const storedName = localStorage.getItem("sanctuary_user_name");
     const storedId = localStorage.getItem("sanctuary_user_id");
     
@@ -94,7 +97,7 @@ export const ResonancePod = () => {
       setShowNamePrompt(true);
       setIsInitializing(false);
     }
-  }, []);
+  }, [identityReady]);
 
   useEffect(() => {
     scrollToBottom();
