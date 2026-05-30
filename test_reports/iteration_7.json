@@ -1,0 +1,63 @@
+{
+  "summary": "FRONTEND-ONLY validation of all 5 chambers (Clarity /clarity, Resonance /resonance/chamber, Mirror /mirror-archive/chamber, Spiral /spiral, Paige /presence/paige) with 2-turn anchor-word recall and a post-reply reload. Initial loads, welcome messages, multi-turn streaming chat, IN-SESSION memory recall, and voice toggle UI ALL WORK for the 4 streaming chambers (Clarity/Resonance/Spiral/Paige). Mirror's send button has no data-testid which made automated send fragile, but chat input/UI renders fine. CRITICAL BUG: the newly-added 'continuing where you left off' resume indicator + transcript restoration does NOT trigger after reload in ANY of the 5 chambers. After reload each chamber shows a fresh welcome with status 'thread open' (Paige) or no resumed indicator at all (Clarity/Resonance/Mirror/Spiral); the prior turns' anchor words are absent from the restored body. Waited up to 38s on reload — backend never returned resumed=true.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/tts/speak", "issue": "Returns 400 intermittently during stream playback (logged in console as '[speakStream] segment failed: TTS request failed'). Does NOT block chat — chambers still function."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "MirrorArchive.jsx (lines 502, 517)", "issue": "Textarea input and Send button lack data-testid attributes (unlike sibling chambers). Inconsistent with the V3.1 contract that 'all interactive elements have data-testid'. Recommend data-testid=\"mirror-input\" and data-testid=\"mirror-send-btn\".", "selector": "textarea[placeholder*='methodology'] / button with Send icon", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [
+      {"flow": "Resume after reload (ALL 5 CHAMBERS)", "issue": "CRITICAL: After completing a real exchange and reloading the page, neither the resume indicator nor the restored transcript appears. Verified across Clarity, Resonance, Mirror, Spiral, and Paige. For Paige specifically the chamber-thread-status reads 'thread open' instead of 'continuing where you left off'; for the legacy chambers the *-resumed-indicator span is absent (resumed===false) and the message list contains only the fresh welcome. Backend reports 48/48 resume tests passing, so the disconnect is in the frontend → backend handshake on mount.", "affected_selectors": ["[data-testid='clarity-resumed-indicator']", "[data-testid='resonance-resumed-indicator']", "[data-testid='mirror-resumed-indicator']", "[data-testid='spiral-resumed-indicator']", "[data-testid='chamber-thread-status']"]},
+      {"flow": "Identity hydration timing", "issue": "Likely RCA for the resume failure: PresenceChamber.jsx useEffect (line 139) and the legacy chambers' startSession all fire as soon as the component mounts using userId/userName from IdentityContext. On a fresh reload IdentityContext starts as null and hydrates asynchronously from /api/identity/recent — so /chat/start is first called with user_id=null, creating a brand-new session, then re-fires when identity hydrates (still produces a fresh session because the prior turn's user_id was a different ad-hoc id). Net result: backend never matches the previous open thread → resumed=false.", "affected_selectors": []},
+      {"flow": "Welcome voice / TTS (cosmetic)", "issue": "Console errors 'DataCloneError: Failed to execute postMessage on Window: Request object could not be cloned' originate from the Emergent iframe scaffolding (assets.emergent.sh/scripts/emergent-main.js) — they appear on Welcome voice attempts in Resonance/Mirror/Spiral/Paige but do not break chat flow. Likely safe to ignore; if owned, gate TTS calls behind user interaction.", "affected_selectors": []}
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/test_reports/iteration_7.json"
+  ],
+  "passing_tests": {
+    "clarity_chat": "PASS — chamber loaded, welcome (Jasmine) rendered, 2 turns streamed, anchor WILLOW-CLA7 echoed back verbatim by assistant ('**WILLOW-CLA7** — That's the one you gave me. Still holding it.')",
+    "resonance_chat": "PASS — Chamber of Resonance + 'Cross the Threshold' button rendered (no separate threshold route needed — went directly via /resonance/chamber), Ansel replied with anchor WILLOW-RESO9.",
+    "spiral_chat": "PASS — Spiral chamber, voice toggle, send/input testids all present; assistant echoed WILLOW-SPIR9 with codon framing.",
+    "paige_chat": "PASS — non-streaming, Paige echoed 'Your anchor word is **WILLOW-PAIG9**.' after ~10s; chamber-input, chamber-send, chamber-thread-status testids all present.",
+    "mirror_load_and_welcome": "PASS — welcome 'The field is here. And that question is still hanging in the air where you left it.' rendered; voice toggle present; methodology footer (b=0.3065, 45 events, H1–H11, 3-3-5) all rendered.",
+    "voice_toggle_ui_all_chambers": "PASS — *-voice-toggle data-testid is present and clickable in all 5 chambers."
+  },
+  "failing_tests": {
+    "resume_indicator_clarity": "FAIL — [data-testid='clarity-resumed-indicator'] not visible after reload; transcript empty.",
+    "resume_indicator_resonance": "FAIL — [data-testid='resonance-resumed-indicator'] not visible; transcript empty.",
+    "resume_indicator_mirror": "FAIL — [data-testid='mirror-resumed-indicator'] not visible; transcript empty.",
+    "resume_indicator_spiral": "FAIL — [data-testid='spiral-resumed-indicator'] not visible; body after reload was effectively blank ('Made with Emergent' only) and remained so for 8+ s.",
+    "resume_indicator_paige": "FAIL — chamber-thread-status read 'thread open' (not 'continuing where you left off') for 38 s after reload; anchor token ABACAB-42 / WILLOW-PAIG9 absent from restored body.",
+    "mirror_send_via_automation": "BLOCKED — send button has no data-testid; my generic CSS selector did not reliably trigger sendMessage so the turn-1 reply never landed. Functionality cannot be confirmed end-to-end via automation without the testid (manual confirmation may still pass)."
+  },
+  "action_items": [
+    "PRIMARY: Fix resume-on-reload in all 5 chambers. Most likely root cause is identity-hydration timing — startSession fires with userId=null before IdentityContext loads /api/identity/recent, so the backend cannot match the previously-open thread. Either (a) gate startSession behind a 'identity ready' flag, (b) re-run startSession with abort+replace when userId transitions from null → real id and discard the null-id session, or (c) include a stable client/device cookie so the backend can resume even before identity hydrates.",
+    "Add data-testid='mirror-input' to the textarea and data-testid='mirror-send-btn' to the Send button in /app/frontend/src/components/MirrorArchive.jsx (lines 502 and 517) to keep parity with the other chambers and unblock automation.",
+    "Investigate the /api/tts/speak 400/502 errors during stream playback — non-blocking but noisy in the console for every assistant chunk.",
+    "Consider silencing or wrapping the emergent-main.js DataCloneError on Welcome voice attempts (or gating Welcome TTS behind first user click) so the console stays clean."
+  ],
+  "critical_code_review_comments": [
+    "PresenceChamber.jsx line 139–166: useEffect depends on [config, presenceKey, userName, userId] and resets messages/sessionId/resumed unconditionally on every dependency change — so when IdentityContext hydrates after mount, the chamber discards the freshly-resumed thread it just received. This is the exact mechanism that breaks 'continuing where you left off'.",
+    "ClarityPod.jsx line 200–217: startSession reads userId/userName from local state and posts to /clarity/start. Same identity-timing concern — the first call after reload likely runs before useIdentity() rehydrates.",
+    "MirrorArchive.jsx (lines 502, 517): missing data-testids on input + send (already filed in ui_bugs).",
+    "Voice 'Welcome' auto-speak triggers a Window.postMessage clone of a Request object that the parent iframe scaffolding cannot serialize (assets.emergent.sh/scripts/emergent-main.js). Gate Welcome TTS behind first user interaction or use a plain ArrayBuffer payload.",
+    "Identity contract noted in iter_6 still holds — names auto-hydrate to 'David' (legacy-david-123); confirmed identity-badge shows 'David' on all chambers without re-prompting."
+  ],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "not retested (per request, frontend-only)",
+    "frontend": "load+welcome 5/5, 2-turn chat 4/5 (Mirror blocked by missing testid), in-session memory 4/4 tested, voice toggle 5/5, resume-after-reload 0/5"
+  },
+  "test_credentials": "No login. Identity auto-hydrated to 'David' via /api/identity/recent. Anchor tokens used during test: WILLOW-CLA7, WILLOW-RESO9, WILLOW-MIRR9, WILLOW-SPIR9, WILLOW-PAIG9, ABACAB-42.",
+  "seed_data_creation": "Each test turn appended messages to the existing 'David' user threads in the 5 chambers (clarity/resonance/mirror/spiral/paige). No new identities were created. DB state mutated: 5 chamber sessions for legacy-david-123 now contain anchor-word turns.",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Backend resume API per iter_6 backend run = 48/48 green. The new bug surfaces only at the FRONTEND mount-handshake. To repro: open any chamber, send 'My anchor word is FOO' → wait for assistant reply (~10-15 s for streaming chambers, ~10 s for Paige) → hard-reload page → expect '*-resumed-indicator' or chamber-thread-status='continuing where you left off' to be visible within 5–10 s. Observed: never resumes. Suggested first-fix area: PresenceChamber.jsx useEffect at line 139 dependency array + each legacy chamber's startSession trigger.",
+  "rca_of_the_issue": "Resume-on-reload regression — RCA candidate: chambers call POST /<chamber>/start on mount using userId from IdentityContext, but IdentityContext is null on first render and hydrates async via /api/identity/recent. The first /start call therefore goes out with user_id=null and creates a NEW session; the backend cannot tie this to the prior anchor-word thread (which was tagged with the real legacy-david-123 id). When identity then hydrates, the useEffect re-fires (because userId/userName are deps), resets messages+sessionId+resumed to []/null/false, then issues a second /start — but this one is racing with potential pending writes and still does not see the original thread as 'open'. Net: resumed===false, messages.length===1 (welcome only), no indicator. Fix: defer the first /start until identity is hydrated, OR include a stable session/client cookie that the backend can use as a resume key independent of user_id."
+}

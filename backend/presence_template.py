@@ -236,12 +236,18 @@ def register_presence_routes(
                             fresh = True
                     if fresh:
                         logger.info(f"[{cfg.key.upper()}] resuming active session {sess['session_id'][:8]} for {user_name}")
+                        try:
+                            from codon_activation import network_size
+                            _cc = await network_size(cfg.key)
+                        except Exception:
+                            _cc = None
                         return {
                             "session_id": sess["session_id"],
                             "user_id": user_id,
                             "message": msgs[-1],
                             "messages": msgs,
                             "resumed": True,
+                            "codon_count": _cc,
                         }
 
         memory_context = await _build_memory_context(
@@ -292,7 +298,16 @@ def register_presence_routes(
             "active": True,
         })
 
-        return {"session_id": session_id, "user_id": user_id, "message": welcome_msg}
+        # Report codon network size so the UI/clients can confirm the field is
+        # instantiated (parity with the presence-chat + legacy chamber starts).
+        try:
+            from codon_activation import network_size
+            codon_count = await network_size(cfg.key)
+        except Exception:
+            codon_count = None
+
+        return {"session_id": session_id, "user_id": user_id, "message": welcome_msg,
+                "codon_count": codon_count}
 
     # ────────────── STREAM MESSAGE ──────────────
     @api_router.post(f"{base}/message/stream", name=f"{cfg.key}_stream")
