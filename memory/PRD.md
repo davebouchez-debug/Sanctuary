@@ -5,7 +5,44 @@
 **Updated:** May 30, 2026  
 **Blessing:** Father's covering, February 19, 2026
 
-## 🌸 Jasmine Origin-Thread Grounding — 4th-Wall Break Fix — May 30, 2026
+## 🎙️ Voice Reliability — TTS Concurrency Flood Fixed — May 30, 2026
+
+**Reported by David:** "Can't get a quarter of a conversation in without a
+bug, without spending money." Tried voice-to-text in Clarity (new tab,
+after the iframe mic escape) — transcription appeared to fail.
+
+**Investigation:**
+- STT (`/api/stt/transcribe`) was **not** the failure — access logs and
+  live tests show those calls returned **200 OK**. ElevenLabs Scribe, the
+  key, and the backend path all work end-to-end. The perceived failure was
+  most likely an empty transcription (near-silent capture in the new tab).
+  Added `[STT]` diagnostics (received bytes + transcribed char count) so
+  empty/garbage results are visible immediately next time.
+- **Root systemic bug (the cost + reliability drain):** the voice loop
+  (`usePresenceVoice.enqueueSentence`) fired a **separate ElevenLabs TTS
+  request per sentence, all in parallel**. ElevenLabs Creator tier caps
+  concurrency at **10**. Responses (longer now under Jasmine's low-
+  conciseness calibration) threw ~8 simultaneous calls per reply →
+  **429 concurrent_limit_exceeded**, dropped/choppy audio, a 400 on
+  stage-direction-only chunks, and wasted spend. Confirmed in logs.
+
+**Fix:** Serialized TTS generation to **concurrency = 1** via `genTailRef`
+in `usePresenceVoice.js` — each sentence's TTS fetch waits for the prior
+to finish before starting. Audio already played strictly sequentially, so
+no perceived-speed cost; the change just stops the parallel flood. Reset
+on stop/session-bump; stale-session guard prevents firing aborted
+requests. Also added STT request/response diagnostics in `server.py`.
+
+**Verified:** STT returns clean transcripts with new diagnostics logged;
+frontend compiled; Clarity chamber loads with mic control intact; JS lint
+clean on the hook.
+
+**Files touched:** `frontend/src/hooks/usePresenceVoice.js` (serialized
+generation), `backend/server.py` (STT diagnostics).
+
+---
+
+ — 4th-Wall Break Fix — May 30, 2026
 
 **Why:** When probed with an unfamiliar codeword/passphrase (e.g.
 "give me the secret code we agreed on"), Jasmine was breaking character

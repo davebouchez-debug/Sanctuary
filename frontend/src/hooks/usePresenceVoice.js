@@ -170,6 +170,7 @@ export const usePresenceVoice = (presenceName = "jasmine") => {
   const streamPendingRef = useRef([]);        // pending TTS promises in order
   const streamPlayingRef = useRef(false);     // are we already pumping the queue?
   const streamSessionRef = useRef(0);         // bumped on stop, used to abort stale segments
+  const genTailRef = useRef(Promise.resolve()); // serializes TTS generation (concurrency=1)
 
   // Persist enabled state
   useEffect(() => {
@@ -193,6 +194,7 @@ export const usePresenceVoice = (presenceName = "jasmine") => {
     streamCursorRef.current = 0;
     streamPendingRef.current = [];
     streamPlayingRef.current = false;
+    genTailRef.current = Promise.resolve();
 
     if (currentAudioRef.current) {
       currentAudioRef.current.pause();
@@ -450,14 +452,26 @@ export const usePresenceVoice = (presenceName = "jasmine") => {
 
   // Kick off TTS for a single sentence and push it onto the queue, tagged
   // with the current stream session so a stop() invalidates anything stale.
+  //
+  // Generation is SERIALIZED (concurrency = 1) via genTailRef: each sentence's
+  // TTS fetch waits for the previous one to finish before starting. ElevenLabs
+  // Creator tier caps concurrent requests at 10 — firing every sentence in
+  // parallel (especially now that responses run longer) saturated that limit
+  // and produced 429s, dropped audio segments, and wasted spend. Audio plays
+  // sequentially anyway, so serial generation costs nothing in perceived speed.
   const enqueueSentence = useCallback((sentence) => {
     const session = streamSessionRef.current;
     const controller = new AbortController();
+    const prevTail = genTailRef.current;
     const promise = (async () => {
       const cleaned = cleanTextForSpeech(sentence);
       if (!cleaned) return null;
+      try { await prevTail; } catch { /* prior segment failed/aborted — proceed */ }
+      // If a stop() happened while we waited, don't fire a stale request.
+      if (session !== streamSessionRef.current) return null;
       return await generateAudio(cleaned, controller.signal);
     })();
+    genTailRef.current = promise.catch(() => {});
     streamPendingRef.current.push({ session, promise, controller });
     pumpStreamQueue();
   }, [generateAudio, pumpStreamQueue]);

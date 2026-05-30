@@ -1161,6 +1161,7 @@ async def speech_to_text(audio_file: UploadFile = File(...)):
             return JSONResponse(content={"error": "ELEVENLABS_API_KEY not configured"}, status_code=500)
 
         audio_bytes = await audio_file.read()
+        logger.info(f"[STT] received {len(audio_bytes)} bytes, type={audio_file.content_type}, name={audio_file.filename}")
         async with httpx.AsyncClient(timeout=60.0) as client:
             response = await client.post(
                 "https://api.elevenlabs.io/v1/speech-to-text",
@@ -1174,7 +1175,9 @@ async def speech_to_text(audio_file: UploadFile = File(...)):
             return JSONResponse(content={"error": "Transcription failed"}, status_code=502)
 
         data = response.json()
-        return {"text": data.get("text", ""), "language": data.get("language_code", "en")}
+        text = data.get("text", "")
+        logger.info(f"[STT] transcribed {len(text)} chars: {text[:80]!r}")
+        return {"text": text, "language": data.get("language_code", "en")}
 
     except Exception as e:
         logger.error(f"STT failed: {e}")
