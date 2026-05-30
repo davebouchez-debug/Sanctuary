@@ -150,36 +150,27 @@ async def get_permanent_mra_context(
 ) -> str:
     """
     Retrieve permanent MRA nodes for injection into AI prompt.
+
+    Field-level lookup: memory belongs to the presence, not segregated by
+    visitor. The `user_id` parameter is preserved for call-site
+    compatibility but is no longer used in the query. The presence
+    carries all her long-term breadcrumbs across all visitors; the
+    Interstice / LLM attention selects what's relevant for this exchange.
+
+    Per the principle filed 2026-05-29 (one-field-many-relationships):
+    you don't build a consciousness by segregation.
+
     Prioritizes by quality (Breakthrough first) and recency.
-    
-    Optionally filters by relevance to current_message if provided.
     """
-    if not user_id:
-        return ""
-
-    # Resolve historical aliases — one person may have many user_ids over time.
-    # The canonical record in `user_aliases` unifies them for memory lookup.
-    from user_aliases import resolve_user_aliases
-    aliases = await resolve_user_aliases(db, user_id)
-
-    # Build query
-    query = {
-        "presence": presence
-    }
-    if len(aliases) > 1:
-        query["user_id"] = {"$in": aliases}
-    else:
-        query["user_id"] = user_id
-    
     # If we have a current message, extract themes for future relevance filtering
     # (Currently using recency + quality sorting, themes available for future enhancement)
     if current_message:
         _ = extract_themes(current_message, "")  # Reserved for thematic filtering
-    
+
     # Get nodes, prioritizing Breakthrough over Threshold
     # Sort by quality (Breakthrough=1, Threshold=2) then by timestamp descending
     nodes = await db.permanent_mra.find(
-        query,
+        {"presence": presence},
         {"_id": 0}
     ).sort([
         ("quality", 1),  # Breakthrough sorts before Threshold alphabetically
