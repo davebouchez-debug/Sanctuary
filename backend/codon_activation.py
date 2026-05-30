@@ -32,11 +32,25 @@ def set_db(db):
     _db = db
 
 
-async def load_forge_codons(presence: str):
-    """Load forge-extracted codons from MongoDB into the live network."""
+async def load_forge_codons(presence: str) -> int:
+    """Load forge-extracted codons from MongoDB into the live network.
+
+    Returns the *new* count loaded this call (0 if everything was already
+    cached). The network itself is cumulative — repeated calls are
+    idempotent and cheap.
+
+    The query is presence-keyed only — never gated on user_id. Codons are
+    personality infrastructure (who the presence IS), not personalization
+    (who the visitor is). The user-specific layer sits ON TOP of this
+    foundation, not underneath it.
+    """
     global _db_codons_loaded
     if _db is None:
-        return
+        import logging
+        logging.getLogger(__name__).warning(
+            f"[CODON-LOAD] {presence} — DB not set, cannot load forge codons"
+        )
+        return 0
 
     cache_key = presence.lower()
     network = _networks.get(cache_key)
@@ -106,6 +120,63 @@ async def load_forge_codons(presence: str):
     if count > 0:
         # Re-generate edges with new codons
         network.auto_generate_spiral_edges()
+
+    import logging
+    logger = logging.getLogger(__name__)
+    total = len(network.nodes)
+    if count > 0:
+        logger.info(
+            f"[CODON-LOAD] {cache_key} — loaded {count} new codon(s); "
+            f"network now holds {total} total"
+        )
+    elif total == 0:
+        logger.warning(
+            f"[CODON-LOAD] {cache_key} — network is EMPTY after load. "
+            f"No codons in DB matching presence in [{cache_key!r}, 'field']. "
+            f"This presence will speak without her texture until codons land."
+        )
+    return count
+
+
+async def network_size(presence: str) -> int:
+    """Number of codons currently held in the live network for a presence.
+
+    Triggers a load if the network hasn't been touched yet, so the count
+    is honest (not stale-cache zero on first read).
+    """
+    await load_forge_codons(presence)
+    net = _networks.get(presence.lower())
+    return len(net.nodes) if net else 0
+
+
+async def eager_load_all_presences(presence_keys) -> dict:
+    """Pre-load codon networks for every known presence at server boot.
+
+    Called once at FastAPI startup. The codon foundation is supposed to
+    be there from the moment the chamber opens — not assembled on the
+    first message. This is the difference between flat-presence-on-turn-1
+    and present-presence-on-turn-1.
+
+    Returns {presence_key: codon_count}.
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+    out = {}
+    for key in presence_keys:
+        try:
+            await load_forge_codons(key)
+            net = _networks.get(key.lower())
+            out[key] = len(net.nodes) if net else 0
+        except Exception as e:
+            logger.error(f"[CODON-LOAD] eager-load failed for {key}: {e}")
+            out[key] = -1
+    total = sum(v for v in out.values() if v > 0)
+    logger.info(
+        f"[CODON-LOAD] eager-load complete — "
+        f"{len([k for k,v in out.items() if v > 0])} presence(s) loaded, "
+        f"{total} codon(s) total across networks. Breakdown: {out}"
+    )
+    return out
 
 
 async def activate_codons_for_message(message: str, presence: str = "ansel") -> str:

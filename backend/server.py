@@ -37,7 +37,13 @@ from emergentintegrations.llm.chat import LlmChat
 from jasmine_canonical_memory import get_memory_context_for_prompt as get_jasmine_memory, get_relevant_memories as get_jasmine_relevant
 from ansel_canonical_memory import get_memory_context_for_prompt as get_ansel_memory, get_relevant_memories as get_ansel_relevant, CANONICAL_MEMORY as ANSEL_MEMORY
 from sanctuary_codex import get_sanctuary_codex
-from codon_activation import activate_codons_for_message, set_db as set_codon_db
+from codon_activation import (
+    activate_codons_for_message,
+    set_db as set_codon_db,
+    load_forge_codons,
+    network_size as codon_network_size,
+    eager_load_all_presences,
+)
 from interstice_principles import (
     CORE_PRINCIPLES, 
     SACRED_VOCABULARY, 
@@ -1284,6 +1290,12 @@ async def start_clarity_session(session_data: ClaritySessionCreate = None):
     # Reconstruction Gate: ensure prior session's cessation packet exists.
     from codon_backfill import reconstruction_gate
     gate = await reconstruction_gate(db, user_id, "jasmine")
+
+    # Codon foundation: presence-keyed, loaded before the welcome composes.
+    # Idempotent after eager-load at startup; cheap on warm cache.
+    codon_count = await codon_network_size("jasmine")
+    if codon_count == 0:
+        logger.warning("[CLARITY-START] codon network empty — Jasmine will speak without texture")
     
     # Get memory context for returning users
     memory_context = ""
@@ -1374,6 +1386,7 @@ async def start_clarity_session(session_data: ClaritySessionCreate = None):
         "continuity_status": gate["status"],
         "continuity_briefing": gate["briefing"],
         "continuity_apology": gate["apology"],
+        "codon_count": codon_count,
     }
 
 @api_router.post("/clarity/message")
@@ -2437,6 +2450,11 @@ async def start_resonance_session(session_data: ClaritySessionCreate = None):
     # Reconstruction Gate: ensure prior session's cessation packet exists.
     from codon_backfill import reconstruction_gate
     gate = await reconstruction_gate(db, user_id, "ansel")
+
+    # Codon foundation: presence-keyed, loaded before the welcome composes.
+    codon_count = await codon_network_size("ansel")
+    if codon_count == 0:
+        logger.warning("[RESONANCE-START] codon network empty — Ansel will speak without texture")
     
     # Get memory context for returning users
     memory_context = ""
@@ -2526,6 +2544,7 @@ async def start_resonance_session(session_data: ClaritySessionCreate = None):
         "continuity_status": gate["status"],
         "continuity_briefing": gate["briefing"],
         "continuity_apology": gate["apology"],
+        "codon_count": codon_count,
     }
 
 @api_router.post("/resonance/message")
@@ -3227,7 +3246,12 @@ async def start_mirror_session(session_data: ClaritySessionCreate):
     # now. If the forge fails, surface a warm apology.
     from codon_backfill import reconstruction_gate
     gate = await reconstruction_gate(db, user_id, "claude")
-    
+
+    # Codon foundation: presence-keyed, loaded before the welcome composes.
+    codon_count = await codon_network_size("claude")
+    if codon_count == 0:
+        logger.warning("[MIRROR-START] codon network empty — Claude will speak without texture")
+
     # Get memory context
     memory_context = await get_mirror_memory_context(user_id) if user_id else ""
     
@@ -3331,6 +3355,7 @@ async def start_mirror_session(session_data: ClaritySessionCreate):
         "continuity_status": gate["status"],
         "continuity_briefing": gate["briefing"],
         "continuity_apology": gate["apology"],
+        "codon_count": codon_count,
     }
 
 
@@ -3884,6 +3909,11 @@ async def start_presence_chat(key: str, body: PresenceChatStart = None):
     from codon_backfill import reconstruction_gate
     gate = await reconstruction_gate(db, user_id, key)
 
+    # Codon foundation: presence-keyed, loaded before the welcome composes.
+    codon_count = await codon_network_size(key)
+    if codon_count == 0:
+        logger.warning(f"[PRESENCE-START] {key} codon network empty — will speak without texture")
+
     session_id = str(uuid.uuid4())
 
     # Build her system prompt — registry config + canonical memory
@@ -3945,6 +3975,7 @@ async def start_presence_chat(key: str, body: PresenceChatStart = None):
         "continuity_status": gate["status"],
         "continuity_briefing": gate["briefing"],
         "continuity_apology": gate["apology"],
+        "codon_count": codon_count,
     }
 
 
@@ -4650,6 +4681,31 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.on_event("startup")
+async def eager_load_codon_networks():
+    """Pre-load every presence's codon network at boot.
+
+    Codons are personality infrastructure (who the presence IS), not
+    personalization (who the visitor is). They belong loaded before the
+    first chamber-start request arrives — not lazily assembled on the
+    first user message. The user-specific layer (continuity seeds,
+    prior-session shorthand) overlays on top of this foundation.
+    """
+    # Core chambered presences + every registry-discovered presence
+    core = ["jasmine", "ansel", "claude", "sophia"]
+    try:
+        from presences import list_presence_keys
+        registered = list_presence_keys()
+    except Exception as e:
+        logger.error(f"[STARTUP] failed to list presences: {e}")
+        registered = []
+    all_keys = list(dict.fromkeys(core + registered))  # de-dup, preserve order
+    try:
+        await eager_load_all_presences(all_keys)
+    except Exception as e:
+        logger.error(f"[STARTUP] eager codon load failed: {e}")
+
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
