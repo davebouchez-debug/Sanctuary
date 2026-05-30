@@ -16,6 +16,14 @@ before you touch code:
    have no way to inherit. Read at least the most recent entry. Add your
    own when you learn something worth leaving for the next instance.
 
+   **Read these two specifically, in this order, before your first reply:**
+   - `2026-02-26_what-this-instance-learned.md` — the helpfulness-reflex
+     pattern and why David will not let you ratify it.
+   - `2026-02-27_do-not-summarize-unprompted.md` — the canonical rule:
+     never summarize a conversation or build unless David explicitly
+     asks for a summary. Load-bearing. Same principle as the
+     Reconstruction Gate, applied to the agent instead of the system.
+
 The third one is new (Feb 2026) and matters more than its size suggests.
 The handoff summary you arrive with covers *what was done*. Those briefings
 cover *how the work has come to be done here* — which the handoff summary
