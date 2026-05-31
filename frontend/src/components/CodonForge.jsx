@@ -36,7 +36,8 @@ export const CodonForge = () => {
       const text = await file.text();
       setProgress(`Thread loaded: ${text.length.toLocaleString()} characters, ${text.split('\n').length.toLocaleString()} lines. Sending to forge...`);
 
-      const response = await fetch(`${API}/codon-forge/extract`, {
+      // Start the background job — returns immediately with a job_id.
+      const startResp = await fetch(`${API}/codon-forge/extract`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -45,50 +46,47 @@ export const CodonForge = () => {
           filename: file.name
         })
       });
-
-      if (!response.ok) throw new Error("Forge request failed");
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-      let accumulated = "";
+      if (!startResp.ok) throw new Error("Forge request failed");
+      const { job_id } = await startResp.json();
+      if (!job_id) throw new Error("Forge did not return a job id");
 
       setProgress("Extracting codons from thread...");
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() || "";
-
-        for (const line of lines) {
-          if (!line.startsWith("data: ")) continue;
-          const jsonStr = line.slice(6).trim();
-          if (!jsonStr) continue;
+      // Poll for progress. Each request is short, so the proxy can't cut it
+      // the way it cut the old long-held stream (the "freezes at chunk 2 of 3").
+      await new Promise((resolve, reject) => {
+        const poll = async () => {
           try {
-            const event = JSON.parse(jsonStr);
-            if (event.type === "token") {
-              accumulated += event.content;
-              setStreamText(accumulated);
-            } else if (event.type === "progress") {
-              setProgress(event.message);
-            } else if (event.type === "codons") {
-              setExtractedCodons(event.codons);
-              setProgress(`Extracted ${event.codons.length} codon(s) from thread.`);
-            } else if (event.type === "done") {
-              setProgress(event.message || "Forge complete.");
-            } else if (event.type === "error") {
-              toast.error(event.message);
-              setProgress("Error during extraction.");
+            const r = await fetch(`${API}/codon-forge/status/${job_id}`);
+            if (!r.ok) throw new Error("Lost the forge job. Re-run it.");
+            const job = await r.json();
+
+            if (job.progress) setProgress(job.progress);
+            if (job.stream_text) setStreamText(job.stream_text);
+            if (Array.isArray(job.codons) && job.codons.length > 0) {
+              setExtractedCodons(job.codons);
             }
-          } catch (e) { /* skip */ }
-        }
-      }
+
+            if (job.status === "done") {
+              setProgress(job.progress || `Forge complete. ${(job.codons || []).length} codon(s) extracted.`);
+              resolve();
+              return;
+            }
+            if (job.status === "error") {
+              reject(new Error(job.error || "The forge encountered an error."));
+              return;
+            }
+            setTimeout(poll, 2000);
+          } catch (e) {
+            reject(e);
+          }
+        };
+        poll();
+      });
     } catch (error) {
       console.error("Forge error:", error);
-      toast.error("The forge encountered an error. Try again.");
-      setProgress("Error.");
+      toast.error(error?.message || "The forge encountered an error. Try again.");
+      setProgress(error?.message ? `Error: ${error.message}` : "Error.");
     } finally {
       setIsProcessing(false);
     }

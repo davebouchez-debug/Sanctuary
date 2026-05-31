@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
+import asyncio
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
@@ -930,68 +931,115 @@ Example output format:
 Now read this thread and extract the Living Codons:
 """
 
+# In-memory store for background Codon Forge jobs (job_id -> state dict).
+# Ephemeral by design: if the backend restarts mid-forge the job is lost and
+# the user simply re-runs it. No durability needed for a one-shot extraction.
+FORGE_JOBS: Dict[str, Dict[str, Any]] = {}
+
+
 @api_router.post("/codon-forge/extract")
 async def extract_codons(request: CodonForgeRequest):
-    """Extract Living Codons from a conversation thread via streaming."""
-    from xai_chat import XAIChat
+    """Start a Codon Forge job in the background and return a job_id to poll.
 
+    The forge runs multiple expensive LLM calls (one per ~120K-char chunk),
+    which can take minutes. Holding a single SSE/HTTP connection open for that
+    long does not survive the ingress proxy (it cuts the connection after a
+    short window — the 'freezes at chunk 2 of 3' failure). Instead we run the
+    work as a background task and let the client poll /codon-forge/status,
+    so every request stays short and proxy-safe.
+    """
     thread_text = request.thread_text
     line_count = thread_text.count('\n') + 1
     char_count = len(thread_text)
 
-    logger.info(f"[CODON FORGE] Processing {request.filename}: {char_count} chars, {line_count} lines for {request.presence}")
+    logger.info(f"[CODON FORGE] Queued {request.filename}: {char_count} chars, {line_count} lines for {request.presence}")
 
-    # For very large threads, chunk and summarize key moments first
-    MAX_CONTEXT = 120000  # ~120K chars safe for grok-3's 131K token window
+    MAX_CONTEXT = 120000  # ~120K chars per chunk
     if char_count > MAX_CONTEXT:
-        # Split into chunks and process each
-        chunks = []
-        for i in range(0, char_count, MAX_CONTEXT):
-            chunks.append(thread_text[i:i + MAX_CONTEXT])
+        chunks = [thread_text[i:i + MAX_CONTEXT] for i in range(0, char_count, MAX_CONTEXT)]
     else:
         chunks = [thread_text]
 
-    async def event_stream():
-        yield f"data: {json.dumps({'type': 'progress', 'message': f'Processing {request.filename}: {char_count:,} chars, {line_count:,} lines in {len(chunks)} chunk(s)'})}\n\n"
+    job_id = str(uuid.uuid4())
+    FORGE_JOBS[job_id] = {
+        "status": "running",          # running | done | error
+        "progress": f"Processing {request.filename}: {char_count:,} chars, {line_count:,} lines in {len(chunks)} chunk(s)",
+        "stream_text": "",
+        "codons": [],
+        "error": None,
+        "filename": request.filename,
+        "presence": request.presence,
+        "total_chunks": len(chunks),
+        "chunks_done": 0,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
 
-        all_codons = []
+    asyncio.create_task(_run_forge_job(job_id, request, chunks))
+    return {"job_id": job_id, "total_chunks": len(chunks)}
 
-        for chunk_idx, chunk in enumerate(chunks):
-            if len(chunks) > 1:
-                yield f"data: {json.dumps({'type': 'progress', 'message': f'Processing chunk {chunk_idx + 1} of {len(chunks)}...'})}\n\n"
 
-            chat = XAIChat(system_prompt=CODON_EXTRACTION_PROMPT, model="grok-3")
-            full_response = ""
+@api_router.get("/codon-forge/status/{job_id}")
+async def forge_status(job_id: str):
+    """Poll the state of a background forge job."""
+    job = FORGE_JOBS.get(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Forge job not found (it may have expired). Re-run the forge.")
+    return job
 
-            try:
-                async for token in chat.stream_message(f"Thread for {request.presence} (file: {request.filename}, chunk {chunk_idx + 1}/{len(chunks)}):\n\n{chunk}"):
-                    full_response += token
-                    yield f"data: {json.dumps({'type': 'token', 'content': token})}\n\n"
-            except Exception as e:
-                logger.error(f"[CODON FORGE] Stream error: {e}")
-                yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
-                continue
 
-            # Parse codons from the response
-            try:
-                # Find JSON array in response
-                json_start = full_response.find('[')
-                json_end = full_response.rfind(']') + 1
-                if json_start >= 0 and json_end > json_start:
-                    codons_json = full_response[json_start:json_end]
-                    parsed = json.loads(codons_json)
-                    if isinstance(parsed, list):
-                        all_codons.extend(parsed)
-            except json.JSONDecodeError as e:
-                logger.error(f"[CODON FORGE] JSON parse error: {e}")
-                yield f"data: {json.dumps({'type': 'progress', 'message': f'Note: Could not parse structured codons from chunk {chunk_idx + 1}. Raw output preserved above.'})}\n\n"
+async def _run_forge_job(job_id: str, request: CodonForgeRequest, chunks: list):
+    """Background worker: process each chunk, accumulating codons + raw output."""
+    from xai_chat import XAIChat
 
-        if all_codons:
-            yield f"data: {json.dumps({'type': 'codons', 'codons': all_codons})}\n\n"
+    job = FORGE_JOBS[job_id]
+    all_codons = []
+    accumulated_text = ""
 
-        yield f"data: {json.dumps({'type': 'done', 'message': f'Forge complete. {len(all_codons)} codon(s) extracted from {request.filename}.'})}\n\n"
+    for chunk_idx, chunk in enumerate(chunks):
+        job["progress"] = f"Processing chunk {chunk_idx + 1} of {len(chunks)}..."
 
-    return StreamingResponse(event_stream(), media_type="text/event-stream")
+        chat = XAIChat(system_prompt=CODON_EXTRACTION_PROMPT, model="grok-3")
+        try:
+            full_response = await chat.send_message(
+                f"Thread for {request.presence} (file: {request.filename}, "
+                f"chunk {chunk_idx + 1}/{len(chunks)}):\n\n{chunk}"
+            ) or ""
+        except Exception as e:
+            msg = str(e)
+            logger.error(f"[CODON FORGE] Error on chunk {chunk_idx + 1}: {msg}")
+            # Surface the real cause to the UI — especially the LLM-key budget
+            # ceiling, which otherwise looks like a silent freeze.
+            if "Budget has been exceeded" in msg or "budget" in msg.lower():
+                job["status"] = "error"
+                job["error"] = ("Your Emergent LLM key budget was exceeded mid-forge. "
+                                "Add balance (Profile → Universal Key → Add Balance, or enable "
+                                "auto top-up) and re-run the forge.")
+                return
+            job["error"] = f"Chunk {chunk_idx + 1} failed: {msg}"
+            job["chunks_done"] = chunk_idx + 1
+            continue
+
+        if full_response:
+            accumulated_text += full_response + "\n\n"
+            job["stream_text"] = accumulated_text.strip()
+
+        try:
+            json_start = full_response.find('[')
+            json_end = full_response.rfind(']') + 1
+            if json_start >= 0 and json_end > json_start:
+                parsed = json.loads(full_response[json_start:json_end])
+                if isinstance(parsed, list):
+                    all_codons.extend(parsed)
+                    job["codons"] = all_codons
+        except json.JSONDecodeError as e:
+            logger.error(f"[CODON FORGE] JSON parse error on chunk {chunk_idx + 1}: {e}")
+
+        job["chunks_done"] = chunk_idx + 1
+
+    job["codons"] = all_codons
+    job["status"] = "done"
+    job["progress"] = f"Forge complete. {len(all_codons)} codon(s) extracted from {request.filename}."
+    logger.info(f"[CODON FORGE] Job {job_id} complete: {len(all_codons)} codons from {request.filename}")
 
 
 @api_router.post("/codon-forge/save")

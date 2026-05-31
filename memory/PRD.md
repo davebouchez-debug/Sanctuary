@@ -5,7 +5,58 @@
 **Updated:** May 30, 2026  
 **Blessing:** Father's covering, February 19, 2026
 
-## 🚨 Backend Down — Bootstrap-Gate Staleness Timer-Bomb — May 31, 2026
+## 🔨 Codon Forge — Freeze Fixed (Background Jobs) + LLM Budget Surfaced — May 31, 2026
+
+**Reported by David:** "The Forge freezes mid-process — 'Processing chunk 2
+of 3', same place every time. You didn't fix anything." (After the
+bootstrap-gate backend-down fix earlier the same day.)
+
+**Diagnosis — TWO distinct causes:**
+1. **Ingress cut the long-held stream.** The forge held ONE SSE/HTTP
+   connection open for the entire multi-minute, multi-chunk job. The
+   Kubernetes ingress proxy cuts a single connection after a short window,
+   so the stream died mid-job — the "freezes at chunk 2 of 3". (Confirmed:
+   on localhost all chunks processed; through the external ingress the
+   connection died at ~18s. Keepalives + `X-Accel-Buffering` did NOT save
+   it — the proxy kills the long total-duration request regardless.)
+2. **Emergent LLM key budget exhausted.** Chunks were also failing with
+   `litellm.BadRequestError: Budget has been exceeded! Current cost
+   39.10, Max budget 39.001`. Large 120K-char chunks are expensive Claude
+   calls; with the key out of budget they fail instantly. A small
+   single-chunk thread still works (cheap); large threads fail. This is the
+   real blocker for David's big reconstructions (e.g. the 295K-char Paige
+   history).
+
+**Fix:**
+- **Forge converted from streaming → background job + polling.**
+  `POST /codon-forge/extract` now launches an async background task and
+  returns `{job_id}` immediately; the client polls
+  `GET /codon-forge/status/{job_id}` every 2s. Every request is short, so
+  the ingress can't cut it. In-memory `FORGE_JOBS` store (ephemeral; re-run
+  on backend restart). Frontend `CodonForge.jsx` rewritten from SSE-reader
+  to start-then-poll.
+- **Budget error surfaced, not swallowed.** When a chunk hits the budget
+  ceiling, the job ends with `status:"error"` and an actionable message:
+  *"Your Emergent LLM key budget was exceeded mid-forge. Add balance
+  (Profile → Universal Key → Add Balance, or enable auto top-up) and
+  re-run."* — instead of a silent freeze.
+
+**Verified through the external ingress:** small thread → job runs, polls,
+`done`, 1 codon. Large 521K/5-chunk thread → polling survives (no proxy
+cut) and correctly reports the budget error on chunk 1 with the actionable
+message. Frontend compiles; lint clean on changed files.
+
+**USER ACTION REQUIRED:** Add balance to the Emergent LLM (Universal) key —
+large forges will keep failing until then. This is also the likely source
+of intermittent presence/voice failures ("spending money / nothing works").
+
+**Files touched:** `backend/server.py` (background-job forge endpoints +
+`FORGE_JOBS`), `frontend/src/components/CodonForge.jsx` (poll instead of
+stream).
+
+---
+
+
 
 **Reported by David:** "The Codon Forge is not working — nothing works on
 this platform." Every API call was failing (connection refused / "preview
