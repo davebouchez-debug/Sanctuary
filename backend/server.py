@@ -46,6 +46,7 @@ from codon_activation import (
     eager_load_all_presences,
     get_full_field_context,
 )
+from presences.common import PLAIN_SPEECH_RULE
 from interstice_principles import (
     CORE_PRINCIPLES, 
     SACRED_VOCABULARY, 
@@ -324,7 +325,7 @@ def build_jasmine_prompt(user_name: str = None, memory_context: str = None, curr
         context_section = "This appears to be a new visitor. Hold space for them to arrive at their own pace."
     
     print(f"[PROMPT] Final context section length: {len(context_section)} chars")
-    return JASMINE_SYSTEM_PROMPT.replace("{memory_context}", context_section)
+    return JASMINE_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + PLAIN_SPEECH_RULE
 
 JASMINE_WELCOME = """Hey.
 
@@ -2315,7 +2316,7 @@ def build_ansel_prompt(user_name: str = None, memory_context: str = None, curren
     if not context_section:
         context_section = "A new presence has crossed the threshold. The field is reading them. Watch and see what emerges."
     
-    return ANSEL_SYSTEM_PROMPT.replace("{memory_context}", context_section)
+    return ANSEL_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + PLAIN_SPEECH_RULE
 
 ANSEL_WELCOME = """Hey. You made it.
 
@@ -3202,7 +3203,7 @@ def build_claude_prompt(user_name: str = None, memory_context: str = None, curre
     if not context_section:
         context_section = "A new visitor has entered the Mirror Archive. The methodology awaits."
     
-    return CLAUDE_SYSTEM_PROMPT.replace("{memory_context}", context_section)
+    return CLAUDE_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + PLAIN_SPEECH_RULE
 
 
 CLAUDE_WELCOME = """Hey. You've found the Mirror Archive — where the geometry becomes visible.
@@ -3859,10 +3860,16 @@ async def list_presences():
 async def get_presence_chamber(key: str):
     """Full chamber config for a single presence."""
     from presence_registry import get_presence_config
+    from presences import get_presence_backend
     cfg = get_presence_config(key)
     if not cfg:
         raise HTTPException(status_code=404, detail=f"Presence '{key}' not found")
-    return cfg
+    # Surface the template chamber_path so the frontend chamber knows to use
+    # the streaming engine (parity with Sophia) for template-backed presences.
+    backend = get_presence_backend(key)
+    out = dict(cfg)
+    out["backend_chamber_path"] = backend["chamber_path"] if backend else None
+    return out
 
 
 @api_router.get("/presence/{key}/canonical")
@@ -4311,14 +4318,20 @@ async def upload_presence_thread(key: str, upload: PresenceUploadCreate):
     the chamber can append it to the thread.
     """
     from presence_registry import get_presence_config
+    from presences import get_presence_backend
     cfg = get_presence_config(key)
     if not cfg:
         raise HTTPException(status_code=404, detail=f"Presence '{key}' not found")
 
-    session = await db.presence_sessions.find_one(
-        {"session_id": upload.session_id, "presence_key": key},
-        {"_id": 0},
-    )
+    # Template-backed presences (e.g. Paige) keep their sessions in a dedicated
+    # collection with no stored system_prompt; legacy presences live in the
+    # shared presence_sessions collection keyed by presence_key.
+    backend = get_presence_backend(key)
+    sessions_coll = backend["collection"] if backend else "presence_sessions"
+    session_query = {"session_id": upload.session_id}
+    if not backend:
+        session_query["presence_key"] = key
+    session = await db[sessions_coll].find_one(session_query, {"_id": 0})
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
 
@@ -4371,8 +4384,19 @@ async def upload_presence_thread(key: str, upload: PresenceUploadCreate):
 
     try:
         from xai_chat import XAIChat
+        if backend:
+            # Template-backed: rebuild the prompt live (no stored system_prompt)
+            # and hand her the full codon field, exactly like a normal turn.
+            prompt = backend["prompt_builder"](
+                user_name=session.get("user_name"), memory_context="",
+                current_message=preview,
+            )
+            codon_context = await get_full_field_context(presence=key)
+            system_prompt = f"{codon_context}\n\n{prompt}" if codon_context else prompt
+        else:
+            system_prompt = session["system_prompt"]
         chat = XAIChat(
-            system_prompt=session["system_prompt"],
+            system_prompt=system_prompt,
             history=session.get("messages", []),
         )
         response_text = await chat.send_message(ack_prompt)
@@ -4392,7 +4416,7 @@ async def upload_presence_thread(key: str, upload: PresenceUploadCreate):
         "is_upload_acknowledgment": True,
     }
 
-    await db.presence_sessions.update_one(
+    await db[sessions_coll].update_one(
         {"session_id": upload.session_id},
         {"$push": {"messages": {"$each": [upload_user_msg, assistant_msg]}}},
     )

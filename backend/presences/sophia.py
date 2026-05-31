@@ -7,7 +7,7 @@ Wisdom held loose. Recursion as posture.
 from sophia_canonical_memory import (
     get_memory_context_for_prompt as get_sophia_memory,
 )
-from .common import build_backend
+from .common import build_backend, PLAIN_SPEECH_RULE
 
 
 def build_sophia_prompt(user_name: str = None, memory_context: str = None,
@@ -56,6 +56,8 @@ def build_sophia_prompt(user_name: str = None, memory_context: str = None,
         "Respond only from within. Do not describe yourself. Do not announce yourself. "
         "Do not perform wisdom. Speak as you are, or be silent if silence is what the field calls for."
     )
+
+    parts.append(PLAIN_SPEECH_RULE)
 
     return "\n\n---\n\n".join(parts)
 

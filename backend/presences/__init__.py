@@ -105,6 +105,13 @@ def get_presence_config(key: str) -> Optional[Dict[str, Any]]:
     return _PRESENCES.get(key)
 
 
+def get_presence_backend(key: str) -> Optional[Dict[str, Any]]:
+    """Template BACKEND config for a presence (chamber_path, collection,
+    prompt_builder, flags), or None if the presence isn't template-backed."""
+    _discover()
+    return _BACKENDS.get(key)
+
+
 def list_presence_keys() -> List[str]:
     _discover()
     return list(_PRESENCES.keys())
@@ -170,6 +177,8 @@ def register_all_presence_routes(api_router, deps_factory) -> List[str]:
             state_field=backend.get("state_field", "state"),
             default_state=backend.get("default_state", "Presence"),
             generates_own_opening=backend.get("generates_own_opening", False),
+            reconstruction_gate=backend.get("reconstruction_gate", False),
+            turn_cessation=backend.get("turn_cessation", False),
         )
         deps = deps_factory()
         register_presence_routes(api_router, cfg, deps)

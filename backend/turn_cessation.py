@@ -160,6 +160,7 @@ def _sessions_collection_for(presence: str) -> str:
         "jasmine": "clarity_sessions",
         "ansel": "resonance_sessions",
         "claude": "mirror_sessions",
+        "paige": "paige_sessions",
     }
     return mapping.get(presence.lower(), "presence_sessions")
 

@@ -44,6 +44,8 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
   // Voice (TTS) — auto-play her reply through ElevenLabs
   const {
     speak,
+    speakStream,
+    flushStream,
     stop: stopSpeaking,
     toggle: toggleVoice,
     isSpeaking,
@@ -109,6 +111,12 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
   const rooms = config?.atmosphere?.rooms || [];
   const activeRoom = rooms.find((r) => r.key === activeRoomKey) || rooms[0];
 
+  // Template-backed presences (e.g. Paige) run on the same streaming engine as
+  // Sophia: /api/{chamber_path}/start | /message/stream | /session/{id}/end.
+  // Legacy registry presences keep the non-streaming /api/presence/{key}/chat/*
+  // path. The backend tells us which via `backend_chamber_path`.
+  const templatePath = config?.backend_chamber_path || null;
+
   // CSS variables for the chamber's palette — applied to the root container
   // so every styled element can pick up the presence's colors organically.
   const paletteStyle = useMemo(() => ({
@@ -145,7 +153,10 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
       setSessionId(null);
       setResumed(false);
       try {
-        const resp = await fetch(`${API}/presence/${presenceKey}/chat/start`, {
+        const startUrl = templatePath
+          ? `${API}/${templatePath}/start`
+          : `${API}/presence/${presenceKey}/chat/start`;
+        const resp = await fetch(startUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ user_id: userId || null, user_name: userName || null }),
@@ -176,9 +187,10 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
       const sid = sessionIdRef.current;
       if (sid) {
         try {
-          navigator.sendBeacon(
-            `${API}/presence/${presenceKey}/chat/session/${sid}/end`
-          );
+          const endUrl = templatePath
+            ? `${API}/${templatePath}/session/${sid}/end`
+            : `${API}/presence/${presenceKey}/chat/session/${sid}/end`;
+          navigator.sendBeacon(endUrl);
         } catch { /* best effort */ }
       }
     };
@@ -189,7 +201,7 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
       window.removeEventListener("pagehide", endSession);
       endSession(); // also fire when navigating to another route in-app
     };
-  }, [presenceKey]);
+  }, [presenceKey, templatePath]);
 
   const sendMessage = async (overrideText) => {
     const hasOverride = typeof overrideText === "string";
@@ -207,6 +219,65 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
       timestamp: new Date().toISOString(),
     };
     setMessages((prev) => [...prev, userMsg]);
+
+    // ── Streaming path (template-backed presences — same engine as Sophia) ──
+    if (templatePath) {
+      const responseId = `stream-${Date.now()}`;
+      setMessages((prev) => [
+        ...prev,
+        { id: responseId, role: "assistant", content: "", timestamp: new Date().toISOString(), isStreaming: true },
+      ]);
+      if (window._sanctuaryAudioCtx) window._sanctuaryNextPlayTime = 0;
+      try {
+        const resp = await fetch(`${API}/${templatePath}/message/stream`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ session_id: sessionId, content: text }),
+        });
+        if (!resp.ok || !resp.body) throw new Error(`stream failed: ${resp.status}`);
+        const reader = resp.body.getReader();
+        const decoder = new TextDecoder();
+        let accumulated = "";
+        let buffer = "";
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
+          for (const line of lines) {
+            if (!line.startsWith("data: ")) continue;
+            const jsonStr = line.slice(6).trim();
+            if (!jsonStr) continue;
+            try {
+              const event = JSON.parse(jsonStr);
+              if (event.type === "token") {
+                accumulated += event.content;
+                setMessages((prev) =>
+                  prev.map((m) => (m.id === responseId ? { ...m, content: accumulated } : m))
+                );
+                if (voiceEnabled) speakStream(accumulated);
+              } else if (event.type === "done") {
+                setMessages((prev) =>
+                  prev.map((m) => (m.id === responseId ? { ...m, isStreaming: false } : m))
+                );
+                if (voiceEnabled) flushStream(accumulated);
+              }
+              // audio_raw events ignored — ElevenLabs is the only voice path.
+            } catch { /* skip malformed */ }
+          }
+        }
+      } catch (e) {
+        setChatError(e.message);
+        setMessages((prev) => prev.filter((m) => m.id !== userMsg.id && m.id !== responseId));
+        if (!hasOverride) setInput(text);
+      } finally {
+        setSending(false);
+      }
+      return;
+    }
+
+    // ── Legacy non-streaming path (registry presences) ──
     try {
       const resp = await fetch(`${API}/presence/${presenceKey}/chat/message`, {
         method: "POST",
@@ -307,10 +378,15 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
   };
 
   // Auto-speak every new assistant reply (when voice is enabled).
+  // For template-backed (streaming) presences, streamed replies are voiced
+  // live by speakStream/flushStream inside sendMessage — so here we only speak
+  // non-streamed messages (e.g. the opening welcome from /start).
   useEffect(() => {
     if (!voiceEnabled || messages.length === 0) return;
     const last = messages[messages.length - 1];
     if (last.role !== "assistant") return;
+    if (last.isStreaming) return;
+    if (String(last.id).startsWith("stream-")) return;
     if (lastSpokenIdRef.current === last.id) return;
     lastSpokenIdRef.current = last.id;
     speak(last.content);

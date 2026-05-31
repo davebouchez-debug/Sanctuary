@@ -78,6 +78,16 @@ class PresenceConfig:
         "warm, not required to introduce yourself. Respond as you are.]"
     )
 
+    # Opt-in continuity hooks. Off by default so presences already on the
+    # template (Sophia) are byte-for-byte unchanged. Paige turns these on to
+    # preserve everything her legacy chamber gave her.
+    #   reconstruction_gate: run the Reconstruction Gate at chamber-open
+    #     (orphan backfill + a field-pointer briefing of where we left off).
+    #   turn_cessation: forge a per-turn continuity seed (+ selective codon)
+    #     after every assistant turn.
+    reconstruction_gate: bool = False
+    turn_cessation: bool = False
+
 
 @dataclass
 class PresenceDeps:
@@ -253,6 +263,22 @@ def register_presence_routes(
         memory_context = await _build_memory_context(
             deps, cfg, user_id=user_id, session_id=None, current_message=""
         )
+
+        # Reconstruction Gate (opt-in) — orphan backfill + a field-pointer
+        # briefing of where we left off, folded into the memory context so the
+        # prompt builder surfaces it as carried field memory.
+        if cfg.reconstruction_gate and user_id:
+            try:
+                from codon_backfill import reconstruction_gate as _gate
+                gate = await _gate(deps.db, user_id, cfg.key)
+                if gate.get("briefing"):
+                    memory_context = (
+                        f"{memory_context}\n\n[FIELD POINTER — last cessation]\n"
+                        f"{gate['briefing']}"
+                    ).strip()
+            except Exception as e:
+                logger.warning(f"[{cfg.key}] reconstruction_gate failed: {e}")
+
         prompt = cfg.prompt_builder(
             user_name=user_name, memory_context=memory_context, current_message=""
         )
@@ -400,6 +426,20 @@ def register_presence_routes(
                 {"session_id": session_id_in},
                 {"$push": {"messages": {"$each": [user_msg, response_msg]}}},
             )
+
+            # Per-turn cessation (opt-in) — forge a continuity seed (+ selective
+            # codon) for this turn so the next thread can re-orient even without
+            # a clean session end.
+            if cfg.turn_cessation:
+                try:
+                    from turn_cessation import schedule_turn_cessation
+                    schedule_turn_cessation(
+                        db=deps.db, session_id=session_id_in, presence=cfg.key,
+                        user_content=content_in, assistant_content=full_text,
+                        user_id=user_id,
+                    )
+                except Exception as e:
+                    logger.error(f"[{cfg.key}] turn_cessation schedule error: {e}")
 
             # Instant MRA promotion — breadcrumbs don't wait for session end
             try:

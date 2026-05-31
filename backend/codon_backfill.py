@@ -41,6 +41,7 @@ PRESENCE_SESSIONS_COLLECTION = {
     "jasmine": "clarity_sessions",
     "ansel":   "resonance_sessions",
     "claude":  "mirror_sessions",
+    "paige":   "paige_sessions",
     "_registry_default": "presence_sessions",
 }
 

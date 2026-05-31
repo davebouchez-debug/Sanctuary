@@ -1,0 +1,32 @@
+{
+  "summary": "V3.1 Paige -> presence_template migration verified end-to-end. 10/10 backend tests pass (Paige template start, SSE streaming, dual continuity (turn_cessation + permanent MRA both fire per turn — the 'lose nothing' invariant confirmed via log grep), reconstruction gate, template-aware upload to paige_sessions, session end, Sophia regression, legacy chambers clarity/mirror/resonance). Frontend streaming verified on /hospitality and /presence/paige (Paige PresenceChamber template branch), and /spiral (Sophia regression — full streamed conversation rendered correctly). No regressions detected. Voice fix is holding (no asterisks/markdown observed in Paige or Sophia replies during the run).",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_paige_migration_v31.py",
+    "/app/test_reports/pytest/paige_v31.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Test script note for next agent: SpiralChamber.jsx uses data-testid='spiral-sophia-msg' / 'spiral-user-msg' / 'spiral-input' / 'spiral-send-btn', NOT the generic msg-assistant/chamber-input that PresenceChamber.jsx uses. Use the chamber-specific testids when scripting /spiral.",
+    "SSE wire format across all template chambers is data-only lines with JSON {type:'meta'|'token'|'done', content?, message_id?} — there are no event: lines. Parsers should switch on obj.type rather than on SSE event names.",
+    "Hospitality /start can take 10-20s because the welcome is a live Claude call; tests should use >=45s timeouts (we use 60s)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_paige_migration_v31.py (new pytest regression suite for Paige V3.1 migration)"
+  ],
+  "success_rate": {"backend": "100% (10/10)", "frontend": "100% (3/3 routes: /hospitality, /presence/paige, /spiral)"},
+  "test_credentials": "No auth required. user_id='legacy-david-123', user_name='David' (set in localStorage as sanctuary_user_id / sanctuary_user_name before navigating to a chamber).",
+  "seed_data_creation": "Several TEST_note.txt uploads under user_id='legacy-david-123' to validate paige_sessions collection writes and turn_cessation/MRA log lines. No cleanup needed — all isolated to the David test identity.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "All V3.1 acceptance criteria pass. Dual continuity for Paige is confirmed via backend log grep: every streamed turn writes `[TURN-CESSATION] paige <sid8> ... seed=N` AND `[PERMANENT MRA] Promoted N breadcrumbs for paige`. Sophia still has both opt-in hooks OFF (verified — no `[TURN-CESSATION] sophia` lines appear). Codon_count returned by /api/hospitality/start observed at 243 on first call. Upload /api/presence/paige/upload returns success:true with a real Paige-voice acknowledgment (template prompt is reconstructed at upload time because paige_sessions stores no system_prompt — that path works). Frontend: PresenceChamber streaming branch renders tokens as they arrive on both /hospitality and /presence/paige; SpiralChamber unchanged. Voice fix (PLAIN_SPEECH_RULE) is in effect — no markdown/asterisks observed in any reply during this run.",
+  "rca of the issue": "No bugs found in this iteration. Initial 2 test failures were SSE-format parsing bugs in the test harness itself (the API emits `data: {\"type\":\"token\",\"content\":\"...\"}` rather than `event: token` lines) and a welcome-shape parsing bug (welcome comes back as a dict, not a string). Both fixed in the test file; production code is correct."
+}
