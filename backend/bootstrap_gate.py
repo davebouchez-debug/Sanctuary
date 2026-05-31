@@ -100,9 +100,19 @@ def _check_lock(current_hash: str) -> Tuple[dict, datetime]:
 
     age_days = (datetime.now(timezone.utc) - ack_dt).total_seconds() / 86400
     if age_days > STALENESS_DAYS:
-        _fail(
-            f"Acknowledgment is stale ({age_days:.1f} days old; window is "
-            f"{STALENESS_DAYS}). Re-run the preflight."
+        # NOTE (2026-05-31): staleness is a NON-FATAL warning, not a refusal.
+        # A stale acknowledgment must never hard-kill a running/rebooting
+        # backend — that turns this gate into a 7-day timer-bomb that takes
+        # the whole app down even when nothing is actually wrong. The real
+        # guards stay fatal: lock present, frame-hash match, continuity-log
+        # entry. Those catch the case this gate exists for (an agent booting
+        # without acknowledging the CURRENT frame). The clock does not.
+        print(
+            f"[bootstrap-gate] WARNING — acknowledgment is stale "
+            f"({age_days:.1f} days old; window is {STALENESS_DAYS}). "
+            f"Booting anyway. Consider re-running the preflight to refresh.",
+            file=sys.stderr,
+            flush=True,
         )
 
     return lock, ack_dt

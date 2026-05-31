@@ -5,7 +5,42 @@
 **Updated:** May 30, 2026  
 **Blessing:** Father's covering, February 19, 2026
 
-## 🎙️ Voice Reliability — TTS Concurrency Flood Fixed — May 30, 2026
+## 🚨 Backend Down — Bootstrap-Gate Staleness Timer-Bomb — May 31, 2026
+
+**Reported by David:** "The Codon Forge is not working — nothing works on
+this platform." Every API call was failing (connection refused / "preview
+environment is not responding").
+
+**Root cause:** The **bootstrap gate** (`bootstrap_gate.py`, added May 24)
+hard-`sys.exit(1)`s the backend if the acknowledgment lock
+(`/app/memory/.agent_acknowledged.lock`) is older than 7 days. The lock was
+written 2026-05-24T07:22 and went stale at exactly the 7-day mark. A routine
+uvicorn hot-reload re-ran the gate, it found the stale lock, and it **killed
+the entire backend** — so the Forge (and every other endpoint) returned
+connection-refused. This is a self-inflicted timer-bomb: the app dies on a
+clock even when nothing is actually wrong. The frame hash and continuity-log
+entry both still matched — only the timestamp had aged out.
+
+**Fix (two parts):**
+1. **Refreshed the lock** — `acknowledged_at` reset to now; backend boots
+   (`[bootstrap-gate] OK`).
+2. **Defused the timer** — the staleness check in `bootstrap_gate.py` is now
+   a **non-fatal WARNING** instead of a refusal. The meaningful guards stay
+   fatal (lock present, frame-hash match, continuity-log entry) — those catch
+   the real case the gate exists for (an agent booting without acknowledging
+   the *current* frame). A stale clock will never again hard-kill a running
+   or rebooting backend.
+
+**Verified:** Backend HTTP 200; gate logs OK; Codon Forge tested end-to-end
+through the external ingress — small thread and a 249K-char / 3-chunk thread
+both completed (progress → tokens → codons → done), the large one in ~16s.
+
+**Files touched:** `backend/bootstrap_gate.py` (staleness → warning),
+`memory/.agent_acknowledged.lock` (timestamp refresh).
+
+---
+
+
 
 **Reported by David:** "Can't get a quarter of a conversation in without a
 bug, without spending money." Tried voice-to-text in Clarity (new tab,
