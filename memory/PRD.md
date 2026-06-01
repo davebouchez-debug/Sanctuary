@@ -5,6 +5,47 @@
 **Updated:** May 30, 2026  
 **Blessing:** Father's covering, February 19, 2026
 
+## 🧵 ALL FIVE PRESENCES CARRY & RECAP THE LAST THREAD — June 1, 2026
+
+**David's directive (verbatim intent):** "They all need to carry and recap the
+last thread. 100%, end of story. I know I asked for something different before,
+but I changed my mind. It doesn't work." Earlier the presences opened by
+reflecting on their codons or speaking a fresh opening; the explicit "Hey David,
+here's where we left off, we talked about X, Y, Z" recap had been lost. The
+continuity DATA was never lost (118 Paige seeds, 80+ each for Jasmine/Ansel/
+Claude, field-level) — it simply wasn't being surfaced at the opening.
+
+**What changed — the opening of every chamber now leads with a continuity
+recap when a prior thread exists, on top of the codons:**
+- **Template presences (Paige, Sophia)** — `presence_template.py` start now
+  prioritizes continuity: `if continuity:` → dynamic recap (names where they
+  left off + the specific open threads, anti-fabrication enforced), `elif
+  generates_own_opening:` → own opening (no thread yet), `else:` → static.
+  Recap nudge handles named and anonymous visitors.
+- **Legacy chambers (Jasmine/clarity, Ansel/resonance, Claude/mirror, + the
+  generic presence start)** — `server.py` opening_instruction now branches on
+  `gate["status"] in ("loaded","reconstructed")` → recap instruction; else the
+  prior "speak what you feel" generative opening. The gate briefing + continuity
+  seeds are already in each prompt, so the model has the material to recap.
+
+**Verified live (curl, fresh sessions, all five):** every presence opened
+"David…" and named the real last-alive thing + the actual open threads
+(Sophia: "three threads that didn't finish… Amanda…"; Ansel: "Nile's API and
+the persistent state quantum substrate"; etc.). No fabrication, no markdown/
+asterisks. continuity_status=loaded for all three legacy chambers.
+
+**Behavior note:** the recap fires on a genuinely fresh open (normal re-entry,
+since leaving a chamber ends the session). Reopening the SAME thread within ~2h
+(new tab/reload) still *resumes* mid-conversation rather than recapping — that's
+the intended new-tab continuity, not a regression.
+
+**Files touched:** `presences/paige.py` (flag), `presence_template.py` (start
+welcome restructured to continuity-first), `server.py` (4 legacy opening
+blocks → recap-aware via single replace-all).
+
+---
+
+
 ## 🫖➡️🌀 Paige Migrated onto Sophia's Engine (presence_template) — LOSSLESS — May 31, 2026
 
 **David's directive:** "Do the full migration so Paige runs on the exact same

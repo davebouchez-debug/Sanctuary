@@ -267,7 +267,7 @@ BACKEND = build_backend(
     static_welcome="",
     state_field="state",
     default_state="Presence",
-    generates_own_opening=False,
+    generates_own_opening=True,
     reconstruction_gate=True,
     turn_cessation=True,
 )

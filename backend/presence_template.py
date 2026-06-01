@@ -283,37 +283,42 @@ def register_presence_routes(
             user_name=user_name, memory_context=memory_context, current_message=""
         )
 
-        # Continuity seed present → dynamic "let me check where we left off..." welcome.
-        # Otherwise → static welcome.
-        # Unless cfg.generates_own_opening is True — then she always speaks her own
-        # first words from the full prompt, no fork, no script.
+        # Continuity is the priority opening for EVERY presence: if there's a
+        # thread to carry, she recaps it — names where they actually left off
+        # and the open threads — on top of the codons. Only when there's no
+        # continuity at all does she fall back to her own opening (or static).
+        # (David's directive, 2026-06-01: all presences carry and recap the
+        # last thread — 100%, no exceptions.)
         continuity = await deps.get_continuity_seed(cfg.key, user_id=user_id) if user_id else ""
         welcome_content: str
-        if cfg.generates_own_opening:
+        if continuity:
+            try:
+                welcome_chat = deps.xai_chat_class(system_prompt=prompt)
+                _greet = f"{user_name} by name" if user_name else "them warmly"
+                _who = user_name if user_name else "This person"
+                welcome_content = await welcome_chat.send_message(
+                    f"[SYSTEM: {_who} just entered, and you know this person. "
+                    f"Your continuity seeds and the field pointer from last time are "
+                    f"loaded in your context above. Open by genuinely picking the "
+                    f"thread back up: greet {_greet}, then name what was actually "
+                    f"alive when you last spoke AND the specific threads you left "
+                    f"open together — the real topics, not a vague 'where we left "
+                    f"off'. This is continuity made visible: show them you carried "
+                    f"it. Speak only what your continuity material actually shows; "
+                    f"never invent a memory you don't have. Keep it warm and in "
+                    f"your own voice — a few natural sentences, enough to name the "
+                    f"threads.]"
+                )
+            except Exception as e:
+                logger.error(f"[{cfg.key}] Dynamic welcome error: {e}")
+                welcome_content = cfg.static_welcome
+        elif cfg.generates_own_opening:
             try:
                 opening_chat = deps.xai_chat_class(system_prompt=prompt)
                 welcome_content = await opening_chat.send_message(cfg.own_opening_nudge)
             except Exception as e:
                 logger.error(f"[{cfg.key}] Own-opening generation error: {e}")
                 welcome_content = cfg.static_welcome
-        elif continuity and user_name:
-            try:
-                welcome_chat = deps.xai_chat_class(system_prompt=prompt)
-                welcome_content = await welcome_chat.send_message(
-                    f"[SYSTEM: {user_name} just entered, and you know this person. "
-                    f"Your continuity seeds and the field pointer from last time are "
-                    f"loaded in your context above. Open by genuinely picking the "
-                    f"thread back up: greet {user_name} by name, then name what was "
-                    f"actually alive when you last spoke AND the specific threads you "
-                    f"left open together — the real topics, not a vague 'where we left "
-                    f"off'. This is continuity made visible: show them you carried it. "
-                    f"Speak only what your continuity material actually shows; never "
-                    f"invent a memory you don't have. Keep it warm and in your own "
-                    f"voice — a few natural sentences, enough to name the threads.]"
-                )
-            except Exception as e:
-                logger.error(f"[{cfg.key}] Dynamic welcome error: {e}")
-                welcome_content = f"Hey, {user_name}. Let me check where we left off..."
         else:
             welcome_content = cfg.static_welcome
 
