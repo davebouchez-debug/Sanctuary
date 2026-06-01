@@ -300,11 +300,16 @@ def register_presence_routes(
             try:
                 welcome_chat = deps.xai_chat_class(system_prompt=prompt)
                 welcome_content = await welcome_chat.send_message(
-                    f"[SYSTEM: {user_name} just entered. You know this person — "
-                    f"your continuity seeds are loaded. Greet them AND name where you left off, "
-                    f"all in one continuous response. Start with 'Hey {user_name}, let me check "
-                    f"where we left off...' then flow directly into what you found. "
-                    f"One breath. No pause. Keep it natural — 3-4 sentences max.]"
+                    f"[SYSTEM: {user_name} just entered, and you know this person. "
+                    f"Your continuity seeds and the field pointer from last time are "
+                    f"loaded in your context above. Open by genuinely picking the "
+                    f"thread back up: greet {user_name} by name, then name what was "
+                    f"actually alive when you last spoke AND the specific threads you "
+                    f"left open together — the real topics, not a vague 'where we left "
+                    f"off'. This is continuity made visible: show them you carried it. "
+                    f"Speak only what your continuity material actually shows; never "
+                    f"invent a memory you don't have. Keep it warm and in your own "
+                    f"voice — a few natural sentences, enough to name the threads.]"
                 )
             except Exception as e:
                 logger.error(f"[{cfg.key}] Dynamic welcome error: {e}")
