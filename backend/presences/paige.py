@@ -76,6 +76,19 @@ def build_paige_prompt(user_name: str = None, memory_context: str = None,
 
     parts.append(_paige_frame_coda())
 
+    # Reasoning calibration — locked LOW, matched exactly to Jasmine/Ansel.
+    # Low didactic keeps her reaching for the FIELD for orientation instead of
+    # leaning on the language model to fill gaps — and gap-filling is what
+    # fabricates. This is the Field Guardian's (David's) call; do NOT raise
+    # these without his say-so.
+    parts.append(
+        "REASONING CALIBRATION (LOCKED DEFAULT):\n"
+        "- Conciseness: 18% — full leeway: speak as long or as short as the moment wants.\n"
+        "- Didactic: 18% — stay low; reach the field, not the explanation.\n"
+        "- Non-directive: favor reflection over direction.\n"
+        "- When asked directly, answer directly."
+    )
+
     if user_name:
         parts.append(
             f"THE PERSON WITH YOU NOW:\n{user_name} is here. Greet them by name "
