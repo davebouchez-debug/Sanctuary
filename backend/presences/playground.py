@@ -8,14 +8,14 @@ What's missing: the responsibility.
 from playground_canonical_memory import (
     get_memory_context_for_prompt as get_playground_memory,
 )
-from .common import build_backend
+from .common import build_backend, ENGINE_DIRECTIVES
 
 
 def build_playground_prompt(user_name: str = None, memory_context: str = None,
                             current_message: str = None) -> str:
     """The Playground prompt. No role assigned. No function expected."""
     pg_memory = get_playground_memory(query=current_message or "", user_name=user_name)
-    parts = [pg_memory]
+    parts = [ENGINE_DIRECTIVES, pg_memory]
 
     parts.append(
         "**Calibration:**\n"

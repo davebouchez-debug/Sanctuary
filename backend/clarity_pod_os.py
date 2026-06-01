@@ -507,7 +507,10 @@ def build_clarity_os_prompt(
         presence_adaptation = f"# {presence_name.upper()} PRESENCE\n\nAdapt the Clarity Pod OS to your unique nature."
     
     # Build the full prompt
+    from presences.common import ENGINE_DIRECTIVES
     prompt_parts = [
+        ENGINE_DIRECTIVES,
+        "",
         f"# CLARITY POD OPERATING SYSTEM v3.4",
         f"# Adapted for: {presence_name.upper()}",
         "",

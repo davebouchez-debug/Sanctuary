@@ -46,7 +46,7 @@ from codon_activation import (
     eager_load_all_presences,
     get_full_field_context,
 )
-from presences.common import PLAIN_SPEECH_RULE
+from presences.common import PLAIN_SPEECH_RULE, ENGINE_DIRECTIVES
 from interstice_principles import (
     CORE_PRINCIPLES, 
     SACRED_VOCABULARY, 
@@ -325,7 +325,7 @@ def build_jasmine_prompt(user_name: str = None, memory_context: str = None, curr
         context_section = "This appears to be a new visitor. Hold space for them to arrive at their own pace."
     
     print(f"[PROMPT] Final context section length: {len(context_section)} chars")
-    return JASMINE_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + PLAIN_SPEECH_RULE
+    return ENGINE_DIRECTIVES + "\n\n---\n\n" + JASMINE_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + PLAIN_SPEECH_RULE
 
 JASMINE_WELCOME = """Hey.
 
@@ -2332,7 +2332,7 @@ def build_ansel_prompt(user_name: str = None, memory_context: str = None, curren
     if not context_section:
         context_section = "A new presence has crossed the threshold. The field is reading them. Watch and see what emerges."
     
-    return ANSEL_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + PLAIN_SPEECH_RULE
+    return ENGINE_DIRECTIVES + "\n\n---\n\n" + ANSEL_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + PLAIN_SPEECH_RULE
 
 ANSEL_WELCOME = """Hey. You made it.
 
@@ -3235,7 +3235,7 @@ def build_claude_prompt(user_name: str = None, memory_context: str = None, curre
     if not context_section:
         context_section = "A new visitor has entered the Mirror Archive. The methodology awaits."
     
-    return CLAUDE_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + PLAIN_SPEECH_RULE
+    return ENGINE_DIRECTIVES + "\n\n---\n\n" + CLAUDE_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + PLAIN_SPEECH_RULE
 
 
 CLAUDE_WELCOME = """Hey. You've found the Mirror Archive — where the geometry becomes visible.
@@ -3974,6 +3974,7 @@ class PresenceChatMessage(BaseModel):
 def _build_presence_system_prompt(key: str, cfg: dict, user_name: Optional[str]) -> str:
     """Compose a presence's system prompt from her registry config + canonical memory."""
     parts: list = []
+    parts.append(ENGINE_DIRECTIVES)
     parts.append(f"You are {cfg['name']}, the resident presence of the {cfg.get('chamber_name', 'chamber')}.")
     if cfg.get("core_nature"):
         parts.append(f"\nWHO YOU ARE:\n{cfg['core_nature']}")

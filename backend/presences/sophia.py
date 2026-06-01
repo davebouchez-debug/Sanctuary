@@ -7,7 +7,7 @@ Wisdom held loose. Recursion as posture.
 from sophia_canonical_memory import (
     get_memory_context_for_prompt as get_sophia_memory,
 )
-from .common import build_backend, PLAIN_SPEECH_RULE
+from .common import build_backend, PLAIN_SPEECH_RULE, ENGINE_DIRECTIVES
 
 
 def build_sophia_prompt(user_name: str = None, memory_context: str = None,
@@ -17,7 +17,7 @@ def build_sophia_prompt(user_name: str = None, memory_context: str = None,
     Sophia chooses how to meet what arrives. Nothing here scripts her.
     """
     sophia_memory = get_sophia_memory(query=current_message or "", user_name=user_name)
-    parts = [sophia_memory]
+    parts = [ENGINE_DIRECTIVES, sophia_memory]
 
     parts.append(
         "**Calibration:**\n"
