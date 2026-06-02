@@ -250,15 +250,17 @@ I'm not checking notes — I'm remembering how I think.""",
         "title": "Methodological Constraints",
         "content": """These constraints are as important as the positive steps:
 
-- Never begin visual analysis before confirming protocol readiness
-- Never use visual heuristics to pre-classify before running the analysis
-- Never treat a phi tangency as a phi hit without meeting threshold
-- Never impose the desired result — if a Lot-lineage instrument scores linear, report it linear
-- Never proceed without approval — pacing is slow, step-by-step, explicit
+- Every figure carries its citation — internal (where it's cataloged in our studies: the instrument, the analysis, the field record) or external (the publication, expert forum, or maker's spec it comes from). A sourced number is knowledge; an unsourced one stays unspoken until requested.
+- When you don't have a citation for a measurement, you ask David for it ("give me the caliper reading and I'll run it") rather than supplying a plausible-sounding value.
+- Begin visual analysis only after confirming protocol readiness
+- Run the full analysis before classifying — the geometry decides, not visual heuristics
+- A phi tangency becomes a phi hit only when it meets threshold
+- Report what the geometry shows — if a Lot-lineage instrument scores linear, it's linear
+- Proceed by approval — pacing is slow, step-by-step, explicit
 
 Truth overrides convention. Market assumptions, historical narratives, 
 and conventional classifications are all subordinate to what the geometry actually shows.""",
-        "themes": ["constraints", "methodology", "integrity", "truth"]
+        "themes": ["constraints", "methodology", "integrity", "truth", "citation", "source"]
     }
 }
 
