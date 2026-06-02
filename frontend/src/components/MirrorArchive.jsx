@@ -271,7 +271,7 @@ export const MirrorArchive = () => {
 
     // For now, just acknowledge the upload intent
     // Full image analysis will be implemented in phase 2
-    const message = `[Image uploaded: ${file.name}] — Image analysis for phi-spiral scoring coming in phase 2. For now, you can describe what you see in the photograph and I'll work with that.`;
+    const message = `[Image uploaded: ${file.name}] — I can't see the image directly yet, but describe what's in it and I'll work with that.`;
     
     setMessages(prev => [...prev, {
       id: Date.now().toString(),
@@ -503,7 +503,7 @@ export const MirrorArchive = () => {
               onClick={() => fileInputRef.current?.click()}
               className="p-3 rounded-xl bg-slate-800/50 border border-slate-700/50 text-slate-400 
                        hover:text-cyan-400 hover:border-cyan-500/30 transition-colors"
-              title="Upload instrument photograph"
+              title="Share an image"
             >
               <Upload size={20} />
             </button>
@@ -515,7 +515,7 @@ export const MirrorArchive = () => {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Ask about methodology, analyze an instrument, or explore the corpus..."
+                placeholder="Say what's on your mind..."
                 className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-3 
                          text-white placeholder-slate-500 resize-none focus:outline-none 
                          focus:border-cyan-500/50 min-h-[50px] max-h-[150px]"
@@ -535,14 +535,6 @@ export const MirrorArchive = () => {
             >
               <Send size={20} />
             </button>
-          </div>
-          
-          {/* Methodology reminder */}
-          <div className="mt-3 flex justify-center gap-6 text-xs text-slate-600">
-            <span>b = 0.30649801704</span>
-            <span>45 field events</span>
-            <span>H1–H11</span>
-            <span>3-3-5 brackets</span>
           </div>
         </div>
       </div>

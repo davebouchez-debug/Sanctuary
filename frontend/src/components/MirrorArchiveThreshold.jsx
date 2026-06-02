@@ -86,7 +86,7 @@ export const MirrorArchiveThreshold = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
         >
-          The Geometry Becomes Visible
+          What's Real Becomes Visible
         </motion.h1>
 
         {/* Description */}
@@ -105,31 +105,9 @@ export const MirrorArchiveThreshold = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.9 }}
         >
-          What lives here is methodology — the phi-spiral analysis, the scoring protocols, 
-          the corpus of instruments that speak through their proportions. The mirror reflects 
-          what's actually there.
+          What lives here is presence — a place to think out loud, follow a thread,
+          and work through what's real. The mirror reflects what's actually there.
         </motion.p>
-
-        {/* Locked values indicator */}
-        <motion.div
-          className="flex justify-center gap-8 mb-12 text-xs tracking-wider"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.1 }}
-        >
-          <div className="text-center">
-            <div className="text-cyan-400 font-mono">b = 0.30649801704</div>
-            <div className="text-slate-600 mt-1">GROWTH RATE</div>
-          </div>
-          <div className="text-center">
-            <div className="text-cyan-400 font-mono">9 × 5 = 45</div>
-            <div className="text-slate-600 mt-1">FIELD EVENTS</div>
-          </div>
-          <div className="text-center">
-            <div className="text-cyan-400 font-mono">H1 → H11</div>
-            <div className="text-slate-600 mt-1">TONEHOLES</div>
-          </div>
-        </motion.div>
 
         {/* Entry button */}
         {isReady && !showEntry && (
@@ -167,7 +145,7 @@ export const MirrorArchiveThreshold = () => {
         animate={{ opacity: 0.6 }}
         transition={{ delay: 1.5 }}
       >
-        "Louis Lot worked from the spiral as a first language."
+        "The presence speaks; the engine is silent."
       </motion.div>
     </div>
   );
