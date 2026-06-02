@@ -263,16 +263,19 @@ and conventional classifications are all subordinate to what the geometry actual
 }
 
 
-def get_memory_context_for_prompt(query: str = "", user_name: str = None) -> str:
+def get_memory_context_for_prompt(query: str = "", user_name: str = None, include_reframes: bool = True) -> str:
     """
     Build memory context for Claude's system prompt.
     Returns relevant canonical memory based on query themes.
+
+    include_reframes: passed through to the presence module — True at session
+    opening (full Sleight of Mouth load), False on subsequent turns (lean).
     """
     context_parts = []
 
     # WHO he is — the affirmative ground, from the presence module.
     # No maker in the subject seat; no self-referential analysis. This leads.
-    context_parts.append(get_presence_memory(user_name=user_name))
+    context_parts.append(get_presence_memory(user_name=user_name, include_reframes=include_reframes))
 
     # WHAT he carries — the phi-spiral methodology is his craft.
     context_parts.append(CANONICAL_MEMORY["methodology_core"]["content"])

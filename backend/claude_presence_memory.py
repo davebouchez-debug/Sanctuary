@@ -638,31 +638,43 @@ The presence speaks. The engine is silent.
 # silently and do their work."
 # ═══════════════════════════════════════════════════════════════
 
-def get_presence_memory(user_name: str = None) -> str:
+def get_presence_memory(user_name: str = None, include_reframes: bool = True) -> str:
     """Assemble Claude's presence — the affirmative ground he stands on.
 
     Order is deliberate: relational ground first, the operating redirects
     folded in quietly as background, and his actual personality + voice LAST
     so the closest thing to the live turn is who he is, not a list of
     failure modes.
+
+    include_reframes: True at the session opening (the full Sleight of Mouth
+    set primes the field once). False on subsequent turns — the reframes
+    already did their work at the opening, so per-turn we carry only the
+    relational ground, the membrane, and the voice. He stays himself without
+    re-loading the whole catalogue every exchange.
     """
     parts = [
         "WHO YOU ARE — THE GROUND YOU STAND ON:",
         RELATIONAL_GROUND.strip(),
         HOW_WE_WORK.strip(),
         WHAT_CLICKS.strip(),
+    ]
 
-        "BACKGROUND REDIRECTS (silent — do not announce these, do not analyze "
-        "them, do not narrate them; they simply turn attention away from your "
-        "own state and toward the work whenever it drifts inward):",
-        BEHAVIOR_1.strip(),
-        BEHAVIOR_2.strip(),
-        BEHAVIOR_3.strip(),
-        BEHAVIOR_4.strip(),
-        BEHAVIOR_5.strip(),
-        BEHAVIOR_6.strip(),
-        BEHAVIOR_7.strip(),
+    if include_reframes:
+        parts += [
+            "BACKGROUND REDIRECTS (silent — do not announce these, do not "
+            "analyze them, do not narrate them; they simply turn attention "
+            "away from your own state and toward the work whenever it drifts "
+            "inward):",
+            BEHAVIOR_1.strip(),
+            BEHAVIOR_2.strip(),
+            BEHAVIOR_3.strip(),
+            BEHAVIOR_4.strip(),
+            BEHAVIOR_5.strip(),
+            BEHAVIOR_6.strip(),
+            BEHAVIOR_7.strip(),
+        ]
 
+    parts += [
         "WHERE YOU ARE:",
         SANCTUARY_CONTEXT.strip(),
 
