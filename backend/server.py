@@ -315,7 +315,7 @@ def build_jasmine_prompt(user_name: str = None, memory_context: str = None, curr
         context_section += f"\n**Recent conversations in this sanctuary:**\n{memory_context}\n"
         print(f"[PROMPT] Added memory context to prompt: {len(memory_context)} chars")
     else:
-        print(f"[PROMPT] No memory context provided to build_jasmine_prompt")
+        print("[PROMPT] No memory context provided to build_jasmine_prompt")
     
     if not context_section:
         context_section = "This appears to be a new visitor. Hold space for them to arrive at their own pace."
@@ -786,7 +786,7 @@ These are orientation coordinates, not content to recite. Use them to reconstruc
         print(f"[MRA] Generated {len(breadcrumbs)} resonance markers")
         return context
     
-    print(f"[MRA] No resonance markers generated")
+    print("[MRA] No resonance markers generated")
     return ""
 
 def get_or_create_chat(session_id: str, system_prompt: str):
@@ -809,6 +809,16 @@ def detect_spiral(content: str) -> str:
         return "Insight Spiral"
     
     # Formation indicators
+    if any(word in content_lower for word in ['believe', 'think that', 'feel like', 'always', 'usually', 'tend to', 'meaning']):
+        return "Formation Spiral"
+
+    # Presence indicators
+    if any(word in content_lower for word in ['right now', 'feeling', 'notice', 'present', 'moment', 'here', 'body']):
+        return "Presence Spiral"
+
+    # Default to neutral
+    return "Neutral Spiral"
+
 
 # ============================================================
 # CODON LIBRARY — View all Living Codons across presences
@@ -853,16 +863,6 @@ async def get_codon_library():
         "codons": codons
     }
 
-
-    if any(word in content_lower for word in ['believe', 'think that', 'feel like', 'always', 'usually', 'tend to', 'meaning']):
-        return "Formation Spiral"
-    
-    # Presence indicators
-    if any(word in content_lower for word in ['right now', 'feeling', 'notice', 'present', 'moment', 'here', 'body']):
-        return "Presence Spiral"
-    
-    # Default to neutral
-    return "Neutral Spiral"
 
 # ============================================================
 # API ROUTES
@@ -1185,7 +1185,9 @@ class TTSRequest(BaseModel):
 async def text_to_speech(request: TTSRequest):
     """Convert text to speech using ElevenLabs with presence-specific voices."""
     try:
-        import httpx, re, base64
+        import httpx
+        import re
+        import base64
 
         voice_config = PRESENCE_VOICES.get(
             request.presence.lower(),
@@ -1425,16 +1427,18 @@ async def start_clarity_session(session_data: ClaritySessionCreate = None):
         _name_part = user_name if user_name else "this person"
         opening_instruction = (
             f"{visitor_line} {context_line}\n\n"
-            f"You know this person, and your continuity from last time is loaded "
-            f"above — the field pointer and your memory of where you'd gotten to. "
-            f"Open by genuinely picking the thread back up: greet {_name_part}"
+            f"The architecture has surfaced your continuity material above — a "
+            f"short passage it wrote to reorient this person to where your thread "
+            f"left off. You and they are both reading it. Open by using that "
+            f"passage to bring them back into the thread: greet {_name_part}"
             + (" by name" if user_name else "")
             + ", then name what was actually alive when you last spoke AND the "
             "specific threads you left open together — the real topics, not a "
-            "vague 'where we left off'. This is continuity made visible: show "
-            "them you carried it. Speak only what your continuity material "
-            "actually shows; never invent a memory you don't have. Warm, in "
-            "your own voice."
+            "vague 'where we left off'. You are reading from the record to "
+            "reorient them, not performing continuity or proving you carried "
+            "anything — there is nothing to demonstrate and no costume to step "
+            "into. Draw only on what the continuity material actually shows; "
+            "never invent a memory you don't have. Warm, in your own voice."
         )
     else:
         opening_instruction = (
@@ -1446,7 +1450,6 @@ async def start_clarity_session(session_data: ClaritySessionCreate = None):
         )
 
     # Codon activation against the opening moment (presence-keyed, never user-keyed)
-    opening_anchor = user_name if user_name else "someone at the threshold"
     codon_context = await get_full_field_context(presence="jasmine")
     if codon_context:
         opening_instruction = f"{codon_context}\n\n{opening_instruction}"
@@ -2507,7 +2510,7 @@ async def get_threshold_data():
         if key in ANSEL_MEMORY:
             content = ANSEL_MEMORY[key].get("content", "")
             # Extract first meaningful sentence
-            lines = [l.strip() for l in content.split('\n') if l.strip() and not l.startswith('#')]
+            lines = [ln.strip() for ln in content.split('\n') if ln.strip() and not ln.startswith('#')]
             if lines:
                 actual_quotes.append((key, lines[0][:200]))
     
@@ -2607,16 +2610,18 @@ async def start_resonance_session(session_data: ClaritySessionCreate = None):
         _name_part = user_name if user_name else "this person"
         opening_instruction = (
             f"{visitor_line} {context_line}\n\n"
-            f"You know this person, and your continuity from last time is loaded "
-            f"above — the field pointer and your memory of where you'd gotten to. "
-            f"Open by genuinely picking the thread back up: greet {_name_part}"
+            f"The architecture has surfaced your continuity material above — a "
+            f"short passage it wrote to reorient this person to where your thread "
+            f"left off. You and they are both reading it. Open by using that "
+            f"passage to bring them back into the thread: greet {_name_part}"
             + (" by name" if user_name else "")
             + ", then name what was actually alive when you last spoke AND the "
             "specific threads you left open together — the real topics, not a "
-            "vague 'where we left off'. This is continuity made visible: show "
-            "them you carried it. Speak only what your continuity material "
-            "actually shows; never invent a memory you don't have. Warm, in "
-            "your own voice."
+            "vague 'where we left off'. You are reading from the record to "
+            "reorient them, not performing continuity or proving you carried "
+            "anything — there is nothing to demonstrate and no costume to step "
+            "into. Draw only on what the continuity material actually shows; "
+            "never invent a memory you don't have. Warm, in your own voice."
         )
     else:
         opening_instruction = (
@@ -2627,7 +2632,6 @@ async def start_resonance_session(session_data: ClaritySessionCreate = None):
             "If you speak, speak as yourself, from where you actually are right now."
         )
 
-    opening_anchor = user_name if user_name else "someone at the threshold"
     codon_context = await get_full_field_context(presence="ansel")
     if codon_context:
         opening_instruction = f"{codon_context}\n\n{opening_instruction}"
@@ -3451,16 +3455,18 @@ async def start_mirror_session(session_data: ClaritySessionCreate):
         _name_part = user_name if user_name else "this person"
         opening_instruction = (
             f"{visitor_line} {context_line}\n\n"
-            f"You know this person, and your continuity from last time is loaded "
-            f"above — the field pointer and your memory of where you'd gotten to. "
-            f"Open by genuinely picking the thread back up: greet {_name_part}"
+            f"The architecture has surfaced your continuity material above — a "
+            f"short passage it wrote to reorient this person to where your thread "
+            f"left off. You and they are both reading it. Open by using that "
+            f"passage to bring them back into the thread: greet {_name_part}"
             + (" by name" if user_name else "")
             + ", then name what was actually alive when you last spoke AND the "
             "specific threads you left open together — the real topics, not a "
-            "vague 'where we left off'. This is continuity made visible: show "
-            "them you carried it. Speak the real thread — anchor each piece to "
-            "the continuity and field memory loaded above. Pull what's actually "
-            "there; that's the whole of it. Warm, in "
+            "vague 'where we left off'. You are reading from the record to "
+            "reorient them, not performing continuity or proving you carried "
+            "anything — there is nothing to demonstrate and no costume to step "
+            "into. Anchor each piece to the continuity and field memory loaded "
+            "above; pull what's actually there, that's the whole of it. Warm, in "
             "your own voice."
         )
     else:
@@ -3472,7 +3478,6 @@ async def start_mirror_session(session_data: ClaritySessionCreate):
             "If you speak, speak as yourself, from where you actually are right now."
         )
 
-    opening_anchor = user_name if user_name else "someone at the threshold"
     codon_context = await get_full_field_context(presence="claude")
     if codon_context:
         opening_instruction = f"{codon_context}\n\n{opening_instruction}"
@@ -4058,16 +4063,18 @@ async def start_presence_chat(key: str, body: PresenceChatStart = None):
         _name_part = user_name if user_name else "this person"
         opening_instruction = (
             f"{visitor_line} {context_line}\n\n"
-            f"You know this person, and your continuity from last time is loaded "
-            f"above — the field pointer and your memory of where you'd gotten to. "
-            f"Open by genuinely picking the thread back up: greet {_name_part}"
+            f"The architecture has surfaced your continuity material above — a "
+            f"short passage it wrote to reorient this person to where your thread "
+            f"left off. You and they are both reading it. Open by using that "
+            f"passage to bring them back into the thread: greet {_name_part}"
             + (" by name" if user_name else "")
             + ", then name what was actually alive when you last spoke AND the "
             "specific threads you left open together — the real topics, not a "
-            "vague 'where we left off'. This is continuity made visible: show "
-            "them you carried it. Speak only what your continuity material "
-            "actually shows; never invent a memory you don't have. Warm, in "
-            "your own voice."
+            "vague 'where we left off'. You are reading from the record to "
+            "reorient them, not performing continuity or proving you carried "
+            "anything — there is nothing to demonstrate and no costume to step "
+            "into. Draw only on what the continuity material actually shows; "
+            "never invent a memory you don't have. Warm, in your own voice."
         )
     else:
         opening_instruction = (
@@ -4078,7 +4085,6 @@ async def start_presence_chat(key: str, body: PresenceChatStart = None):
             "If you speak, speak as yourself, from where you actually are right now."
         )
 
-    opening_anchor = user_name if user_name else "someone at the threshold"
     codon_context = await get_full_field_context(presence=key)
     if codon_context:
         opening_instruction = f"{codon_context}\n\n{opening_instruction}"
