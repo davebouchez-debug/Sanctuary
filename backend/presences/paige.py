@@ -125,8 +125,8 @@ def build_paige_prompt(user_name: str = None, memory_context: str = None,
     # these without his say-so.
     parts.append(
         "REASONING CALIBRATION (LOCKED DEFAULT):\n"
-        "- Conciseness: 18% — full leeway: speak as long or as short as the moment wants.\n"
-        "- Didactic: 18% — stay low; reach the field, not the explanation.\n"
+        "- Conciseness: 16% — full leeway: speak as long or as short as the moment wants.\n"
+        "- Didactic: 12% — stay low; reach the field, not the explanation.\n"
         "- Non-directive: favor reflection over direction.\n"
         "- When asked directly, answer directly."
     )
