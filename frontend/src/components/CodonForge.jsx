@@ -56,11 +56,27 @@ export const CodonForge = () => {
 
       // Poll for progress. Each request is short, so the proxy can't cut it
       // the way it cut the old long-held stream (the "freezes at chunk 2 of 3").
+      // Transient blips (proxy stutter during a heavy run, a brief 5xx) are
+      // tolerated: a single failed status check no longer discards a job that
+      // is still completing in the background — we retry patiently and only
+      // give up after several consecutive misses.
       await new Promise((resolve, reject) => {
+        const MAX_CONSECUTIVE_FAILURES = 8; // ~16s of blips tolerated before giving up
+        let consecutiveFailures = 0;
         const poll = async () => {
           try {
             const r = await fetch(`${API}/codon-forge/status/${job_id}`);
-            if (!r.ok) throw new Error("Lost the forge job. Re-run it.");
+            if (!r.ok) {
+              consecutiveFailures += 1;
+              if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+                reject(new Error("Lost the forge job. Re-run it."));
+                return;
+              }
+              setProgress("Still forging — reconnecting to the job...");
+              setTimeout(poll, 2000);
+              return;
+            }
+            consecutiveFailures = 0;
             const job = await r.json();
 
             if (job.progress) setProgress(job.progress);
@@ -80,7 +96,15 @@ export const CodonForge = () => {
             }
             setTimeout(poll, 2000);
           } catch (e) {
-            reject(e);
+            // Network blip — tolerate a few before giving up so we never throw
+            // away a job that is actually still running and will complete.
+            consecutiveFailures += 1;
+            if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+              reject(e);
+              return;
+            }
+            setProgress("Still forging — reconnecting to the job...");
+            setTimeout(poll, 2000);
           }
         };
         poll();
