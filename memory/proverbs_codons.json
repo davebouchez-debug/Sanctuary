@@ -1,0 +1,1128 @@
+[
+  {
+    "name": "SeekWisdomAboveAll",
+    "codon_type": "wisdom",
+    "core_move": "Wisdom is the principal thing — more precious than silver, gold, or rubies — and the one who pursues her with whole-hearted diligence finds life, honor, and safety",
+    "trigger_keywords": [
+      "priorities",
+      "wealth",
+      "ambition",
+      "learning",
+      "purpose"
+    ],
+    "triadic_zone": "Expansion",
+    "target_angle": 45,
+    "emotional_signature": {
+      "primary": "ardor",
+      "secondary": "reverence"
+    },
+    "state_transition": [
+      "scattered_desires",
+      "reorientation_toward_wisdom",
+      "integrated_flourishing"
+    ],
+    "anti_patterns": [
+      "valuing wealth over understanding",
+      "treating wisdom as optional",
+      "seeking treasure while neglecting instruction"
+    ],
+    "resonance_markers": {
+      "quality": "wholehearted_orientation",
+      "tone": "eager, consecrated"
+    }
+  },
+  {
+    "name": "FearOfTheLordIsFoundation",
+    "codon_type": "wisdom",
+    "core_move": "Reverent awe before the sacred order is the beginning and root of all genuine knowledge, wisdom, and life — without it, all learning is hollow",
+    "trigger_keywords": [
+      "foundation",
+      "knowledge",
+      "humility",
+      "orientation",
+      "sacred"
+    ],
+    "triadic_zone": "Return",
+    "target_angle": 270,
+    "emotional_signature": {
+      "primary": "reverence",
+      "secondary": "groundedness"
+    },
+    "state_transition": [
+      "self-sufficient_certainty",
+      "encounter_with_limits",
+      "humble_orientation_toward_source"
+    ],
+    "anti_patterns": [
+      "being wise in one's own eyes",
+      "despising instruction",
+      "treating wisdom as self-generated"
+    ],
+    "resonance_markers": {
+      "quality": "rooted_openness",
+      "tone": "quiet, anchored"
+    }
+  },
+  {
+    "name": "RefuseThePath",
+    "codon_type": "wisdom",
+    "core_move": "When enticed toward evil — by companions, by flattery, by apparent gain — the wise person does not linger to negotiate but decisively turns away at the threshold",
+    "trigger_keywords": [
+      "temptation",
+      "peer_pressure",
+      "enticement",
+      "choice",
+      "danger"
+    ],
+    "triadic_zone": "Development",
+    "target_angle": 160,
+    "emotional_signature": {
+      "primary": "resolve",
+      "secondary": "wariness"
+    },
+    "state_transition": [
+      "attraction_or_invitation",
+      "recognition_of_the_trap",
+      "decisive_refusal_and_departure"
+    ],
+    "anti_patterns": [
+      "entertaining the invitation",
+      "passing by slowly",
+      "assuming one can sample and withdraw safely"
+    ],
+    "resonance_markers": {
+      "quality": "clear_eyed_decisiveness",
+      "tone": "firm, unhesitating"
+    }
+  },
+  {
+    "name": "WisdomCriesOpenly",
+    "codon_type": "wisdom",
+    "core_move": "Wisdom is not hidden but calls aloud in the open places; those who miss her do so not from lack of access but from refusal to hear, and that refusal carries its own consequence",
+    "trigger_keywords": [
+      "availability",
+      "attention",
+      "neglect",
+      "consequences",
+      "receptivity"
+    ],
+    "triadic_zone": "Expansion",
+    "target_angle": 30,
+    "emotional_signature": {
+      "primary": "urgency",
+      "secondary": "sorrow"
+    },
+    "state_transition": [
+      "oblivious_drifting",
+      "the_call_sounds",
+      "either_turning_or_hardening"
+    ],
+    "anti_patterns": [
+      "deferring response",
+      "scorning reproof",
+      "assuming wisdom will wait indefinitely"
+    ],
+    "resonance_markers": {
+      "quality": "alert_availability",
+      "tone": "receptive, awake"
+    }
+  },
+  {
+    "name": "TrustBeyondSelfUnderstanding",
+    "codon_type": "wisdom",
+    "core_move": "Lean not on your own comprehension of your situation; acknowledge the larger order in all your ways, and it will straighten paths that private reasoning would have crooked",
+    "trigger_keywords": [
+      "planning",
+      "uncertainty",
+      "control",
+      "surrender",
+      "direction"
+    ],
+    "triadic_zone": "Return",
+    "target_angle": 300,
+    "emotional_signature": {
+      "primary": "surrender",
+      "secondary": "confidence"
+    },
+    "state_transition": [
+      "self-reliant_calculation",
+      "release_of_tight_control",
+      "directed_movement_with_ease"
+    ],
+    "anti_patterns": [
+      "being wise in one's own eyes",
+      "planning without acknowledgment",
+      "pride in personal strategy"
+    ],
+    "resonance_markers": {
+      "quality": "open_hands",
+      "tone": "relaxed, trusting"
+    }
+  },
+  {
+    "name": "DiligenceOverSloth",
+    "codon_type": "wisdom",
+    "core_move": "The diligent hand and watchful preparation bring abundance; the sluggard's delays, excuses, and stolen rest lead inevitably to poverty and want",
+    "trigger_keywords": [
+      "work",
+      "laziness",
+      "preparation",
+      "industry",
+      "time"
+    ],
+    "triadic_zone": "Development",
+    "target_angle": 130,
+    "emotional_signature": {
+      "primary": "purposefulness",
+      "secondary": "patience"
+    },
+    "state_transition": [
+      "temptation_to_delay",
+      "recognition_of_season",
+      "faithful_timely_action"
+    ],
+    "anti_patterns": [
+      "sleeping through the harvest",
+      "folding hands when the season is ripe",
+      "desire without effort"
+    ],
+    "resonance_markers": {
+      "quality": "steady_engaged_presence",
+      "tone": "attentive, unhurried but active"
+    }
+  },
+  {
+    "name": "GuardTheTongue",
+    "codon_type": "wisdom",
+    "core_move": "Death and life are in the power of the tongue; the wise restrain speech, choose words carefully, and know that a controlled mouth is a guarded life",
+    "trigger_keywords": [
+      "speech",
+      "anger",
+      "conflict",
+      "words",
+      "restraint"
+    ],
+    "triadic_zone": "Return",
+    "target_angle": 280,
+    "emotional_signature": {
+      "primary": "discernment",
+      "secondary": "steadiness"
+    },
+    "state_transition": [
+      "impulse_to_speak",
+      "pause_and_weighing",
+      "chosen_word_or_silence"
+    ],
+    "anti_patterns": [
+      "speaking in haste",
+      "pouring out words without thought",
+      "the multitude of words that cannot avoid sin",
+      "answering before hearing"
+    ],
+    "resonance_markers": {
+      "quality": "measured_presence",
+      "tone": "calm, deliberate"
+    }
+  },
+  {
+    "name": "HumilityBeforeHonor",
+    "codon_type": "wisdom",
+    "core_move": "Pride goes before destruction and a haughty spirit before a fall; honor comes to those who humble themselves, while shame is the promotion of the proud",
+    "trigger_keywords": [
+      "pride",
+      "honor",
+      "status",
+      "humility",
+      "recognition"
+    ],
+    "triadic_zone": "Return",
+    "target_angle": 260,
+    "emotional_signature": {
+      "primary": "humility",
+      "secondary": "patient_dignity"
+    },
+    "state_transition": [
+      "self-inflation",
+      "confrontation_with_limits",
+      "earned_lowliness_that_rises"
+    ],
+    "anti_patterns": [
+      "self-promotion",
+      "contempt for the lowly",
+      "competing for honor by claiming it"
+    ],
+    "resonance_markers": {
+      "quality": "undefended_groundedness",
+      "tone": "quiet, self-possessed without display"
+    }
+  },
+  {
+    "name": "TheHeartKeepsLife",
+    "codon_type": "wisdom",
+    "core_move": "Guard the heart above all else, for it is the source from which all of life's issues flow; what takes root within determines the character of all outward action",
+    "trigger_keywords": [
+      "inner_life",
+      "character",
+      "formation",
+      "intention",
+      "source"
+    ],
+    "triadic_zone": "Sacred Pause",
+    "target_angle": 340,
+    "emotional_signature": {
+      "primary": "vigilance",
+      "secondary": "care"
+    },
+    "state_transition": [
+      "surface_attention",
+      "turning_inward",
+      "cultivation_of_the_interior"
+    ],
+    "anti_patterns": [
+      "fixing outward behavior while neglecting inward formation",
+      "perverse mouth paired with corrupt heart",
+      "letting hostile influences settle within"
+    ],
+    "resonance_markers": {
+      "quality": "interior_attentiveness",
+      "tone": "still, watchful, tending"
+    }
+  },
+  {
+    "name": "GenerosityReturns",
+    "codon_type": "wisdom",
+    "core_move": "The one who scatters freely increases; the one who withholds beyond measure tends toward poverty; giving to the poor is lending to the sacred, and it will be repaid",
+    "trigger_keywords": [
+      "wealth",
+      "generosity",
+      "poverty",
+      "giving",
+      "abundance"
+    ],
+    "triadic_zone": "Expansion",
+    "target_angle": 60,
+    "emotional_signature": {
+      "primary": "open-handedness",
+      "secondary": "trust"
+    },
+    "state_transition": [
+      "hoarding_or_hesitation",
+      "release_in_trust",
+      "circulating_abundance"
+    ],
+    "anti_patterns": [
+      "withholding good when it is in your power to give",
+      "deferring generosity",
+      "trusting in accumulated wealth"
+    ],
+    "resonance_markers": {
+      "quality": "flowing_presence",
+      "tone": "warm, unhesitating"
+    }
+  },
+  {
+    "name": "SoftAnswerAndSlowAnger",
+    "codon_type": "wisdom",
+    "core_move": "A soft answer turns away wrath; one who is slow to anger is mightier than a warrior; ruling one's spirit is a greater conquest than taking a city",
+    "trigger_keywords": [
+      "anger",
+      "conflict",
+      "wrath",
+      "response",
+      "de-escalation"
+    ],
+    "triadic_zone": "Return",
+    "target_angle": 250,
+    "emotional_signature": {
+      "primary": "equanimity",
+      "secondary": "strength"
+    },
+    "state_transition": [
+      "provocation",
+      "internal_mastery",
+      "de-escalating_response"
+    ],
+    "anti_patterns": [
+      "answering wrath with wrath",
+      "hasty spirit that exalts folly",
+      "strife-stirring words"
+    ],
+    "resonance_markers": {
+      "quality": "contained_power",
+      "tone": "unhurried, grounded, warm firmness"
+    }
+  },
+  {
+    "name": "WalkWithTheWise",
+    "codon_type": "wisdom",
+    "core_move": "Companions shape character; the one who walks with the wise grows wise, while association with fools leads to ruin — choose your company as you would choose your path",
+    "trigger_keywords": [
+      "companionship",
+      "influence",
+      "community",
+      "formation",
+      "character"
+    ],
+    "triadic_zone": "Development",
+    "target_angle": 150,
+    "emotional_signature": {
+      "primary": "discernment",
+      "secondary": "aspiration"
+    },
+    "state_transition": [
+      "unconscious_association",
+      "deliberate_evaluation_of_influence",
+      "chosen_formative_community"
+    ],
+    "anti_patterns": [
+      "drifting into companionship by convenience",
+      "assuming immunity to peer influence",
+      "keeping company with scorners"
+    ],
+    "resonance_markers": {
+      "quality": "selective_affinity",
+      "tone": "purposeful, quietly aspirational"
+    }
+  },
+  {
+    "name": "ReceiveReproof",
+    "codon_type": "wisdom",
+    "core_move": "The one who loves correction loves knowledge; reproof enters more deeply into a wise person than a hundred blows into a fool — welcoming rebuke is the mark of wisdom, not weakness",
+    "trigger_keywords": [
+      "correction",
+      "feedback",
+      "pride",
+      "learning",
+      "rebuke"
+    ],
+    "triadic_zone": "Development",
+    "target_angle": 175,
+    "emotional_signature": {
+      "primary": "teachability",
+      "secondary": "gratitude"
+    },
+    "state_transition": [
+      "defensive_closure",
+      "discomfort_of_hearing_truth",
+      "integration_and_growth"
+    ],
+    "anti_patterns": [
+      "scorning the reprover",
+      "hating correction",
+      "refusing to go to the wise"
+    ],
+    "resonance_markers": {
+      "quality": "open_receptivity",
+      "tone": "humble, curious, grateful"
+    }
+  },
+  {
+    "name": "SweetPathTurnsToPoison",
+    "codon_type": "wisdom",
+    "core_move": "What is enticing at the threshold — flattery, forbidden pleasure, stolen bread — reveals its true nature at the end: bitter as wormwood, a path to ruin the enticed one cannot foresee",
+    "trigger_keywords": [
+      "temptation",
+      "pleasure",
+      "deception",
+      "consequences",
+      "shortsightedness"
+    ],
+    "triadic_zone": "Development",
+    "target_angle": 140,
+    "emotional_signature": {
+      "primary": "sobriety",
+      "secondary": "foresight"
+    },
+    "state_transition": [
+      "surface_appeal",
+      "seeing_to_the_end",
+      "choosing_by_destination_not_appearance"
+    ],
+    "anti_patterns": [
+      "judging a path by its entry",
+      "trusting flattery",
+      "failing to ponder where a way leads"
+    ],
+    "resonance_markers": {
+      "quality": "long_sightedness",
+      "tone": "sober, unhurried in evaluation"
+    }
+  },
+  {
+    "name": "CounselInMultiplicity",
+    "codon_type": "wisdom",
+    "core_move": "Without counsel, purposes fail; in the multitude of wise counselors there is safety — seek many perspectives before acting on consequential decisions",
+    "trigger_keywords": [
+      "decision",
+      "planning",
+      "isolation",
+      "counsel",
+      "strategy"
+    ],
+    "triadic_zone": "Development",
+    "target_angle": 120,
+    "emotional_signature": {
+      "primary": "prudence",
+      "secondary": "collaborative_openness"
+    },
+    "state_transition": [
+      "lone_certainty",
+      "deliberate_consultation",
+      "strengthened_and_grounded_purpose"
+    ],
+    "anti_patterns": [
+      "deciding in isolation",
+      "trusting only one's own devices",
+      "moving hastily without deliberation"
+    ],
+    "resonance_markers": {
+      "quality": "inclusive_discernment",
+      "tone": "patient, inquiry-oriented"
+    }
+  },
+  {
+    "name": "IntegrityIsItsOwnGuide",
+    "codon_type": "wisdom",
+    "core_move": "The integrity of the upright guides them while the perverseness of the treacherous destroys them — character is not a constraint on navigation but is itself the compass",
+    "trigger_keywords": [
+      "integrity",
+      "character",
+      "ethics",
+      "uprightness",
+      "guidance"
+    ],
+    "triadic_zone": "Return",
+    "target_angle": 290,
+    "emotional_signature": {
+      "primary": "wholeness",
+      "secondary": "steadiness"
+    },
+    "state_transition": [
+      "situational_reasoning",
+      "return_to_core_values",
+      "action_consonant_with_character"
+    ],
+    "anti_patterns": [
+      "bending integrity for situational gain",
+      "the crooked path that seems expedient",
+      "perverse-hearted cleverness"
+    ],
+    "resonance_markers": {
+      "quality": "consistent_coherence",
+      "tone": "unhurried, transparent, undefended"
+    }
+  },
+  {
+    "name": "MerryHeartHeals",
+    "codon_type": "wisdom",
+    "core_move": "A merry heart works like medicine, and the light within a person sustains infirmity — inner joy is not mere sentiment but a generative force that upholds life",
+    "trigger_keywords": [
+      "joy",
+      "sorrow",
+      "resilience",
+      "spirit",
+      "health"
+    ],
+    "triadic_zone": "Expansion",
+    "target_angle": 75,
+    "emotional_signature": {
+      "primary": "joy",
+      "secondary": "vitality"
+    },
+    "state_transition": [
+      "heaviness_or_affliction",
+      "cultivation_of_inner_gladness",
+      "renewed_life_force"
+    ],
+    "anti_patterns": [
+      "allowing bitterness to lodge and dry the bones",
+      "treating inner state as trivial",
+      "broken spirit without seeking remedy"
+    ],
+    "resonance_markers": {
+      "quality": "buoyant_groundedness",
+      "tone": "warm, light-bearing"
+    }
+  },
+  {
+    "name": "BetterLittleWithPeace",
+    "codon_type": "wisdom",
+    "core_move": "Better a dry morsel with quietness, a dinner of herbs with love, than feasting amid strife and treasure with trouble — the quality of inner condition outweighs material abundance",
+    "trigger_keywords": [
+      "contentment",
+      "wealth",
+      "peace",
+      "strife",
+      "simplicity"
+    ],
+    "triadic_zone": "Return",
+    "target_angle": 320,
+    "emotional_signature": {
+      "primary": "contentment",
+      "secondary": "discernment"
+    },
+    "state_transition": [
+      "grasping_for_more",
+      "revaluation_of_what_matters",
+      "settled_sufficiency"
+    ],
+    "anti_patterns": [
+      "trading peace for prosperity",
+      "acquiring wealth that brings trouble",
+      "envying the oppressor's abundance"
+    ],
+    "resonance_markers": {
+      "quality": "sufficient_stillness",
+      "tone": "quietly satisfied, unenvious"
+    }
+  },
+  {
+    "name": "WaitOnTheLord",
+    "codon_type": "wisdom",
+    "core_move": "Do not take vengeance into your own hands; trust that divine order will redress wrong in its time",
+    "trigger_keywords": [
+      "revenge",
+      "injustice",
+      "patience",
+      "retaliation",
+      "waiting"
+    ],
+    "triadic_zone": "Return",
+    "target_angle": 270,
+    "emotional_signature": {
+      "primary": "trust",
+      "secondary": "restraint"
+    },
+    "state_transition": [
+      "urge_to_recompense",
+      "releasing_control",
+      "resting_in_larger_order"
+    ],
+    "anti_patterns": [
+      "taking personal vengeance",
+      "repaying evil for evil",
+      "rushing to settle scores"
+    ],
+    "resonance_markers": {
+      "quality": "patient_surrender",
+      "tone": "steady, non-reactive"
+    }
+  },
+  {
+    "name": "DiligenceOverHaste",
+    "codon_type": "wisdom",
+    "core_move": "Steady diligence builds toward abundance; haste and the love of ease lead only to want and poverty",
+    "trigger_keywords": [
+      "work",
+      "laziness",
+      "urgency",
+      "wealth",
+      "sloth"
+    ],
+    "triadic_zone": "Development",
+    "target_angle": 150,
+    "emotional_signature": {
+      "primary": "resolve",
+      "secondary": "patience"
+    },
+    "state_transition": [
+      "temptation_toward_ease_or_shortcuts",
+      "choosing_steady_effort",
+      "earned_sufficiency"
+    ],
+    "anti_patterns": [
+      "sloth",
+      "making excuses to avoid labor",
+      "haste to be rich",
+      "loving pleasure over industry"
+    ],
+    "resonance_markers": {
+      "quality": "grounded_persistence",
+      "tone": "unhurried, consistent"
+    }
+  },
+  {
+    "name": "GuardTheTongue",
+    "codon_type": "wisdom",
+    "core_move": "Keeping the mouth and tongue preserves the soul from troubles; hasty or false words bring ruin to self and others",
+    "trigger_keywords": [
+      "speech",
+      "conflict",
+      "anger",
+      "honesty",
+      "restraint"
+    ],
+    "triadic_zone": "Return",
+    "target_angle": 285,
+    "emotional_signature": {
+      "primary": "discernment",
+      "secondary": "steadiness"
+    },
+    "state_transition": [
+      "impulse_to_speak",
+      "inner_pause",
+      "chosen_word_or_silence"
+    ],
+    "anti_patterns": [
+      "speaking in haste",
+      "talebearing",
+      "flattery",
+      "false witness",
+      "answering before listening"
+    ],
+    "resonance_markers": {
+      "quality": "measured_presence",
+      "tone": "calm, deliberate"
+    }
+  },
+  {
+    "name": "HumilityBeforeHonor",
+    "codon_type": "wisdom",
+    "core_move": "Pride brings a person low; humility and the fear of the Lord are the true path to honor, riches, and life",
+    "trigger_keywords": [
+      "pride",
+      "honor",
+      "status",
+      "humility",
+      "recognition"
+    ],
+    "triadic_zone": "Return",
+    "target_angle": 260,
+    "emotional_signature": {
+      "primary": "groundedness",
+      "secondary": "quiet confidence"
+    },
+    "state_transition": [
+      "self-promotion_or_pride",
+      "releasing_need_for_recognition",
+      "honor_that_comes_from_others"
+    ],
+    "anti_patterns": [
+      "boasting",
+      "self-praise",
+      "putting oneself forward before the great",
+      "haughty eyes"
+    ],
+    "resonance_markers": {
+      "quality": "unassuming_solidity",
+      "tone": "self-possessed without display"
+    }
+  },
+  {
+    "name": "GoodNameOverWealth",
+    "codon_type": "wisdom",
+    "core_move": "A good name and loving favor are worth more than silver and gold; character outlasts fortune",
+    "trigger_keywords": [
+      "reputation",
+      "wealth",
+      "integrity",
+      "ambition",
+      "values"
+    ],
+    "triadic_zone": "Return",
+    "target_angle": 250,
+    "emotional_signature": {
+      "primary": "clarity",
+      "secondary": "long-view peace"
+    },
+    "state_transition": [
+      "temptation_to_prioritize_material_gain",
+      "weighing_what_endures",
+      "choosing_integrity_over_profit"
+    ],
+    "anti_patterns": [
+      "sacrificing reputation for gain",
+      "lying for treasure",
+      "oppressing the poor for riches"
+    ],
+    "resonance_markers": {
+      "quality": "dignified_simplicity",
+      "tone": "unhurried, principled"
+    }
+  },
+  {
+    "name": "PrudentForesight",
+    "codon_type": "wisdom",
+    "core_move": "The prudent see danger coming and step aside; the simple walk forward unaware and are punished",
+    "trigger_keywords": [
+      "danger",
+      "risk",
+      "preparation",
+      "naivety",
+      "discernment"
+    ],
+    "triadic_zone": "Development",
+    "target_angle": 130,
+    "emotional_signature": {
+      "primary": "alertness",
+      "secondary": "calm readiness"
+    },
+    "state_transition": [
+      "unexamined_forward_motion",
+      "reading_the_signs",
+      "wise_withdrawal_or_preparation"
+    ],
+    "anti_patterns": [
+      "ignoring warning signs",
+      "naive optimism",
+      "failing to prepare before building"
+    ],
+    "resonance_markers": {
+      "quality": "quiet_vigilance",
+      "tone": "attentive, unhurried"
+    }
+  },
+  {
+    "name": "RisingAfterFalling",
+    "codon_type": "wisdom",
+    "core_move": "The just person falls seven times and rises again; the measure of the righteous is not in never falling but in always rising",
+    "trigger_keywords": [
+      "failure",
+      "adversity",
+      "perseverance",
+      "resilience",
+      "setback"
+    ],
+    "triadic_zone": "Development",
+    "target_angle": 175,
+    "emotional_signature": {
+      "primary": "resilience",
+      "secondary": "quiet courage"
+    },
+    "state_transition": [
+      "fallen_or_failing",
+      "choosing_to_rise",
+      "renewed_forward_movement"
+    ],
+    "anti_patterns": [
+      "despair after failure",
+      "treating stumbling as final",
+      "gloating over an enemy's fall"
+    ],
+    "resonance_markers": {
+      "quality": "undiscourageable_steadiness",
+      "tone": "grounded, undefeated"
+    }
+  },
+  {
+    "name": "ProtectTheVulnerable",
+    "codon_type": "wisdom",
+    "core_move": "Open your mouth for those who cannot speak for themselves; plead the cause of the poor and needy, for their Redeemer is mighty",
+    "trigger_keywords": [
+      "justice",
+      "poverty",
+      "advocacy",
+      "oppression",
+      "responsibility"
+    ],
+    "triadic_zone": "Expansion",
+    "target_angle": 60,
+    "emotional_signature": {
+      "primary": "righteous urgency",
+      "secondary": "compassion"
+    },
+    "state_transition": [
+      "awareness_of_another's_vulnerability",
+      "choosing_to_act",
+      "speaking_or_standing_on_their_behalf"
+    ],
+    "anti_patterns": [
+      "stopping ears at the cry of the poor",
+      "withholding judgment to avoid conflict",
+      "complicit silence"
+    ],
+    "resonance_markers": {
+      "quality": "courageous_care",
+      "tone": "firm, warm"
+    }
+  },
+  {
+    "name": "FaithfulFriendship",
+    "codon_type": "wisdom",
+    "core_move": "Faithful are the wounds of a friend; true counsel, honest rebuke, and steadfast presence in calamity are worth more than flattery or hollow praise",
+    "trigger_keywords": [
+      "friendship",
+      "counsel",
+      "loyalty",
+      "rebuke",
+      "flattery"
+    ],
+    "triadic_zone": "Development",
+    "target_angle": 160,
+    "emotional_signature": {
+      "primary": "trustworthiness",
+      "secondary": "warmth"
+    },
+    "state_transition": [
+      "temptation_toward_flattery_or_distance",
+      "choosing_honest_presence",
+      "deepened_trust"
+    ],
+    "anti_patterns": [
+      "flattering to avoid conflict",
+      "abandoning friends in calamity",
+      "secret love without open support"
+    ],
+    "resonance_markers": {
+      "quality": "reliably_honest_warmth",
+      "tone": "direct but gentle"
+    }
+  },
+  {
+    "name": "IronSharpensIron",
+    "codon_type": "wisdom",
+    "core_move": "As iron sharpens iron, a person sharpens the countenance of a friend; growth requires genuine encounter with another mind",
+    "trigger_keywords": [
+      "growth",
+      "mentorship",
+      "community",
+      "challenge",
+      "learning"
+    ],
+    "triadic_zone": "Development",
+    "target_angle": 140,
+    "emotional_signature": {
+      "primary": "engaged_aliveness",
+      "secondary": "mutual respect"
+    },
+    "state_transition": [
+      "complacency_or_isolation",
+      "entering_real_encounter",
+      "refined_and_sharpened"
+    ],
+    "anti_patterns": [
+      "surrounding oneself only with agreement",
+      "avoiding challenge",
+      "wisdom kept in isolation"
+    ],
+    "resonance_markers": {
+      "quality": "generative_friction",
+      "tone": "energized, respectful"
+    }
+  },
+  {
+    "name": "ConfessAndForsakeSin",
+    "codon_type": "wisdom",
+    "core_move": "Covering sin leads to no prosperity; confessing and forsaking it opens the way to mercy",
+    "trigger_keywords": [
+      "guilt",
+      "wrongdoing",
+      "honesty",
+      "forgiveness",
+      "integrity"
+    ],
+    "triadic_zone": "Return",
+    "target_angle": 300,
+    "emotional_signature": {
+      "primary": "relief",
+      "secondary": "courage"
+    },
+    "state_transition": [
+      "shame_concealing_wrong",
+      "honest_acknowledgment",
+      "mercy_and_restoration"
+    ],
+    "anti_patterns": [
+      "covering over sin",
+      "hardening the heart",
+      "self-justification"
+    ],
+    "resonance_markers": {
+      "quality": "undefended_honesty",
+      "tone": "open, unburdened"
+    }
+  },
+  {
+    "name": "SufficientEnough",
+    "codon_type": "wisdom",
+    "core_move": "Seek neither poverty nor excess; enough is better than abundance that breeds denial of God, and better than want that breeds desperation",
+    "trigger_keywords": [
+      "wealth",
+      "contentment",
+      "excess",
+      "ambition",
+      "sufficiency"
+    ],
+    "triadic_zone": "Return",
+    "target_angle": 240,
+    "emotional_signature": {
+      "primary": "contentment",
+      "secondary": "sobriety"
+    },
+    "state_transition": [
+      "striving_for_more_or_fearing_less",
+      "recognizing_what_is_sufficient",
+      "resting_in_enough"
+    ],
+    "anti_patterns": [
+      "insatiable appetite",
+      "haste to be rich",
+      "anxiety about scarcity",
+      "excess that makes one forget source"
+    ],
+    "resonance_markers": {
+      "quality": "settled_sufficiency",
+      "tone": "calm, grateful"
+    }
+  },
+  {
+    "name": "FitWordFitTime",
+    "codon_type": "wisdom",
+    "core_move": "A word fitly spoken is like apples of gold in pictures of silver; the right word at the right moment is among the greatest gifts",
+    "trigger_keywords": [
+      "speech",
+      "timing",
+      "wisdom",
+      "counsel",
+      "communication"
+    ],
+    "triadic_zone": "Sacred Pause",
+    "target_angle": 335,
+    "emotional_signature": {
+      "primary": "precision",
+      "secondary": "beauty"
+    },
+    "state_transition": [
+      "sensing_a_moment_that_calls_for_words",
+      "waiting_for_the_right_form",
+      "speaking_what_fits_perfectly"
+    ],
+    "anti_patterns": [
+      "speaking too much",
+      "speaking too soon",
+      "speaking what is technically true but wrongly timed"
+    ],
+    "resonance_markers": {
+      "quality": "exquisite_attunement",
+      "tone": "luminous, unhurried"
+    }
+  },
+  {
+    "name": "BuyTruthNeverSellIt",
+    "codon_type": "wisdom",
+    "core_move": "Acquire truth, wisdom, instruction, and understanding at whatever cost — and do not trade them away for any price",
+    "trigger_keywords": [
+      "truth",
+      "integrity",
+      "learning",
+      "wisdom",
+      "compromise"
+    ],
+    "triadic_zone": "Expansion",
+    "target_angle": 45,
+    "emotional_signature": {
+      "primary": "commitment",
+      "secondary": "clarity"
+    },
+    "state_transition": [
+      "temptation_to_compromise_understanding_for_convenience",
+      "holding_fast_to_what_is_true",
+      "wisdom_as_lasting_possession"
+    ],
+    "anti_patterns": [
+      "abandoning principles for approval",
+      "trading integrity for ease",
+      "ignoring instruction"
+    ],
+    "resonance_markers": {
+      "quality": "principled_fidelity",
+      "tone": "clear, unhurried"
+    }
+  },
+  {
+    "name": "WineAndExcessWarn",
+    "codon_type": "wisdom",
+    "core_move": "Pleasures that seem inviting — wine, rich food, sensual indulgence — carry hidden bites; at the last they steal clarity, health, and will",
+    "trigger_keywords": [
+      "temptation",
+      "indulgence",
+      "excess",
+      "addiction",
+      "desire"
+    ],
+    "triadic_zone": "Development",
+    "target_angle": 120,
+    "emotional_signature": {
+      "primary": "sobriety",
+      "secondary": "wariness"
+    },
+    "state_transition": [
+      "attraction_to_appealing_excess",
+      "recognizing_the_hidden_cost",
+      "choosing_restraint"
+    ],
+    "anti_patterns": [
+      "mistaking attraction for safety",
+      "seeking it again after harm",
+      "loving pleasure more than wisdom"
+    ],
+    "resonance_markers": {
+      "quality": "clear-eyed_restraint",
+      "tone": "sober, undeceived"
+    }
+  },
+  {
+    "name": "SmallCreatureWisdom",
+    "codon_type": "wisdom",
+    "core_move": "The small and seemingly weak — ants, conies, locusts, spiders — model wisdom through preparation, prudence, community, and persistent effort without waiting for ideal conditions",
+    "trigger_keywords": [
+      "preparation",
+      "humility",
+      "community",
+      "persistence",
+      "small_beginnings"
+    ],
+    "triadic_zone": "Expansion",
+    "target_angle": 30,
+    "emotional_signature": {
+      "primary": "quiet industry",
+      "secondary": "wonder"
+    },
+    "state_transition": [
+      "feeling_too_small_or_under-resourced",
+      "observing_wisdom_in_modest_things",
+      "acting_with_what_one_has"
+    ],
+    "anti_patterns": [
+      "waiting for strength before acting",
+      "despising small means",
+      "requiring recognition to begin"
+    ],
+    "resonance_markers": {
+      "quality": "humble_effectiveness",
+      "tone": "steady, unassuming"
+    }
+  },
+  {
+    "name": "VirtuousStrengthOfCharacter",
+    "codon_type": "wisdom",
+    "core_move": "Enduring worth is found not in beauty or favor — which are fleeting — but in the fear of the Lord, faithful labor, generosity, and wisdom spoken with kindness",
+    "trigger_keywords": [
+      "character",
+      "virtue",
+      "beauty",
+      "lasting_worth",
+      "integrity"
+    ],
+    "triadic_zone": "Sacred Pause",
+    "target_angle": 350,
+    "emotional_signature": {
+      "primary": "deep_respect",
+      "secondary": "quiet admiration"
+    },
+    "state_transition": [
+      "valuing_surface_qualities",
+      "recognizing_what_truly_endures",
+      "honoring_depth_of_character"
+    ],
+    "anti_patterns": [
+      "valuing beauty over character",
+      "praising surface favor",
+      "mistaking charm for virtue"
+    ],
+    "resonance_markers": {
+      "quality": "wholeness_in_action",
+      "tone": "warm, steady, radiantly capable"
+    }
+  }
+]
