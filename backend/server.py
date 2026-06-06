@@ -120,6 +120,8 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 set_codon_db(db)
+import person_bio as _person_bio
+_person_bio.set_db(db)
 
 # Golden Ratio Constants are now imported from sanctuary_core.py
 
@@ -692,9 +694,26 @@ async def _append_council_context(combined_memory: str, user_id: Optional[str],
             current_message=current_message,
         )
         if extra:
-            return combined_memory + "\n" + extra
+            combined_memory = combined_memory + "\n" + extra
     except Exception as e:
         logger.warning(f"[council] {current_presence}: cross_presence_context failed: {e}")
+    return await _append_person_bio(combined_memory, user_id)
+
+
+async def _append_person_bio(combined_memory: str, user_id: Optional[str],
+                             user_name: Optional[str] = None) -> str:
+    """Append the running per-person bio (reference to re-orient to who this
+    is and what's been building with them). Additive; the field stays whole.
+    Silently no-ops if there's no bio yet."""
+    if not user_id:
+        return combined_memory
+    try:
+        from person_bio import get_person_bio_context
+        bio = await get_person_bio_context(user_id, user_name=user_name)
+        if bio:
+            return combined_memory + "\n\n" + bio
+    except Exception as e:
+        logger.warning(f"[bio] person_bio failed: {e}")
     return combined_memory
 
 
@@ -1402,7 +1421,9 @@ async def start_clarity_session(session_data: ClaritySessionCreate = None):
         # where she is with the field she has. If a thread is genuinely
         # missing, she'll discover that in conversation the way anyone would.
         pass
-    
+
+    combined_memory = await _append_person_bio(combined_memory, user_id, user_name)
+
     jasmine_prompt = build_jasmine_prompt(
         user_name=user_name, 
         memory_context=combined_memory,
@@ -2591,6 +2612,8 @@ async def start_resonance_session(session_data: ClaritySessionCreate = None):
         # missing, she'll discover that in conversation the way anyone would.
         pass
     
+    combined_memory = await _append_person_bio(combined_memory, user_id, user_name)
+
     ansel_prompt = build_ansel_prompt(
         user_name=user_name,
         memory_context=combined_memory,
@@ -3440,6 +3463,8 @@ async def start_mirror_session(session_data: ClaritySessionCreate):
         # missing, she'll discover that in conversation the way anyone would.
         pass
     
+    combined_memory = await _append_person_bio(combined_memory, user_id, user_name)
+
     claude_prompt = build_claude_prompt(
         user_name=user_name,
         memory_context=combined_memory,

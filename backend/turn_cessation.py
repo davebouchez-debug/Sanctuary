@@ -94,6 +94,16 @@ async def forge_turn_cessation(
             }
             await db.continuity_seeds.insert_one(seed_doc)
             result["seed"] = 1
+            # Fold this turn's distilled seed into the person's running bio.
+            # No extra LLM call — it reuses the seed we just made. Keeps a
+            # per-individual profile the presence can reference to re-orient.
+            try:
+                from person_bio import update_person_bio_from_seed
+                await update_person_bio_from_seed(
+                    user_id=user_id, presence=presence, seed=seed
+                )
+            except Exception as e:
+                logger.error(f"[TURN-CESSATION] person-bio update error: {e}")
     except Exception as e:
         logger.error(f"[TURN-CESSATION] seed error ({presence} {session_id[:8]}): {e}")
 

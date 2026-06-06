@@ -155,6 +155,17 @@ async def _build_memory_context(deps: PresenceDeps, cfg: PresenceConfig,
         except Exception as e:
             logger.warning(f"[{cfg.key}] cross_presence_context failed: {e}")
 
+    # Running per-person bio — a reference to re-orient to who this is and what
+    # has actually been building with them. Additive; the field stays whole.
+    if user_id:
+        try:
+            from person_bio import get_person_bio_context
+            bio = await get_person_bio_context(user_id)
+            if bio:
+                combined = combined + "\n\n" + bio
+        except Exception as e:
+            logger.warning(f"[{cfg.key}] person_bio failed: {e}")
+
     return combined
 
 
