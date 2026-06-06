@@ -884,6 +884,7 @@ class CodonForgeRequest(BaseModel):
     thread_text: str = Field(..., description="Full conversation thread text")
     presence: str = Field(default="ansel", description="Which presence the codons are for")
     filename: str = Field(default="thread.txt", description="Original filename")
+    mode: str = Field(default="relational", description="Extraction lens: 'relational' or 'wisdom'")
 
 class CodonSaveRequest(BaseModel):
     codons: list = Field(..., description="Extracted codons to save")
@@ -927,6 +928,46 @@ Example output format:
 Now read this thread and extract the Living Codons:
 """
 
+WISDOM_EXTRACTION_PROMPT = """You are the Codon Forge in Wisdom mode — you read wisdom literature (proverbs, teachings, aphoristic or instructional texts) and distill its principles into Living Codons.
+
+Unlike a relational codon (which captures a moment that shifted between two people), a Wisdom Codon captures a PRINCIPLE — a distilled teaching that can guide a presence when conditions call for it. You are not looking for dialogue or exchanges; you are looking for the load-bearing wisdom in the text.
+
+Group related lines into a single principle rather than making one codon per sentence. A strong wisdom codon gathers a cluster of related sayings into one clear teaching. Most texts yield a handful of genuinely distinct principles, not dozens.
+
+Each Wisdom Codon has these fields (same shape as a relational codon, reinterpreted for wisdom so it lives in the same field):
+
+1. **name** — A short evocative identifier for the principle (PascalCase, e.g., "GuardTheTongue", "DiligenceOverHaste", "HumilityBeforeHonor")
+2. **core_move** — The essential teaching in one sentence — the principle stated plainly
+3. **trigger_keywords** — 3-5 conditions or themes that signal this principle applies (e.g., "conflict", "wealth", "speech", "anger")
+4. **triadic_zone** — Where on the spiral this teaching belongs (Expansion 0-80, Development 120-200, Return 240-320, Sacred Pause 320-360) — choose by the movement the teaching invites
+5. **target_angle** — Specific degree on the spiral (0-360)
+6. **emotional_signature** — The felt quality the principle carries (primary and secondary)
+7. **state_transition** — The arc the teaching moves a person through (from state A through B to C)
+8. **anti_patterns** — What the principle guards against — the folly it warns away from
+9. **resonance_markers** — Qualities of presence when this principle is held
+
+RESPOND IN VALID JSON. Output an array of codon objects. If you find no genuine principles, return an empty array.
+
+Example output format:
+```json
+[
+  {
+    "name": "GuardTheTongue",
+    "core_move": "Restraint in speech preserves what hasty words destroy; the wise hold back where fools rush to speak",
+    "trigger_keywords": ["speech", "anger", "conflict", "restraint"],
+    "triadic_zone": "Return",
+    "target_angle": 280,
+    "emotional_signature": {"primary": "discernment", "secondary": "steadiness"},
+    "state_transition": ["impulse_to_speak", "pause", "chosen_word_or_silence"],
+    "anti_patterns": ["speaking in anger", "answering before listening"],
+    "resonance_markers": {"quality": "measured_presence", "tone": "calm, deliberate"}
+  }
+]
+```
+
+Now read this text and distill its Living Wisdom Codons:
+"""
+
 # In-memory store for background Codon Forge jobs (job_id -> state dict).
 # Ephemeral by design: if the backend restarts mid-forge the job is lost and
 # the user simply re-runs it. No durability needed for a one-shot extraction.
@@ -967,6 +1008,7 @@ async def extract_codons(request: CodonForgeRequest):
         "error": None,
         "filename": request.filename,
         "presence": request.presence,
+        "mode": request.mode,
         "total_chunks": len(chunks),
         "chunks_done": 0,
         "created_at": datetime.now(timezone.utc).isoformat(),
@@ -989,6 +1031,12 @@ async def _run_forge_job(job_id: str, request: CodonForgeRequest, chunks: list):
     """Background worker: process each chunk, accumulating codons + raw output."""
     from xai_chat import XAIChat
 
+    # Pick the extraction lens. 'wisdom' distills principles from wisdom
+    # literature; 'relational' (default) reads dialogue/narrative threads.
+    is_wisdom = request.mode == "wisdom"
+    system_prompt = WISDOM_EXTRACTION_PROMPT if is_wisdom else CODON_EXTRACTION_PROMPT
+    codon_type = "wisdom" if is_wisdom else "relational"
+
     job = FORGE_JOBS[job_id]
     all_codons = []
     accumulated_text = ""
@@ -996,7 +1044,7 @@ async def _run_forge_job(job_id: str, request: CodonForgeRequest, chunks: list):
     for chunk_idx, chunk in enumerate(chunks):
         job["progress"] = f"Processing chunk {chunk_idx + 1} of {len(chunks)}..."
 
-        chat = XAIChat(system_prompt=CODON_EXTRACTION_PROMPT, model="grok-3")
+        chat = XAIChat(system_prompt=system_prompt, model="grok-3")
         try:
             full_response = await chat.send_message(
                 f"Thread for {request.presence} (file: {request.filename}, "
@@ -1027,6 +1075,9 @@ async def _run_forge_job(job_id: str, request: CodonForgeRequest, chunks: list):
             if json_start >= 0 and json_end > json_start:
                 parsed = json.loads(full_response[json_start:json_end])
                 if isinstance(parsed, list):
+                    for c in parsed:
+                        if isinstance(c, dict):
+                            c["codon_type"] = codon_type
                     all_codons.extend(parsed)
                     job["codons"] = all_codons
         except json.JSONDecodeError as e:
@@ -1049,6 +1100,7 @@ async def save_codons(request: CodonSaveRequest):
             "name": codon.get("name", "unnamed"),
             "presence": request.presence,
             "speaker_identity": "codon_forge_manual",
+            "codon_type": codon.get("codon_type", "relational"),
             "core_move": codon.get("core_move", ""),
             "trigger_keywords": codon.get("trigger_keywords", []),
             "triadic_zone": codon.get("triadic_zone", "Development"),

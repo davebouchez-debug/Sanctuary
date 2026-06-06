@@ -13,6 +13,7 @@ export const CodonForge = () => {
   const [progress, setProgress] = useState("");
   const [extractedCodons, setExtractedCodons] = useState([]);
   const [streamText, setStreamText] = useState("");
+  const [mode, setMode] = useState("relational");
 
   const handleFileSelect = (e) => {
     const selected = e.target.files[0];
@@ -43,7 +44,8 @@ export const CodonForge = () => {
         body: JSON.stringify({
           thread_text: text,
           presence: "field",
-          filename: file.name
+          filename: file.name,
+          mode
         })
       });
       if (!startResp.ok) throw new Error("Forge request failed");
@@ -171,6 +173,43 @@ export const CodonForge = () => {
           </p>
         </motion.div>
 
+        {/* Mode selector — choose the extraction lens */}
+        <div className="mb-8" data-testid="forge-mode-selector">
+          <h3 className="font-cinzel text-sm tracking-wider text-[#8B9DB5]/60 mb-3">EXTRACTION LENS</h3>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={() => setMode("relational")}
+              disabled={isProcessing}
+              className={`flex-1 text-left px-5 py-4 rounded-xl border transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                mode === "relational"
+                  ? "bg-[#8B9DB5]/20 border-[#B0C4D8]/60 text-[#F2F2F5]"
+                  : "bg-[#0A0A12] border-[#8B9DB5]/15 text-[#A0A0B0] hover:border-[#8B9DB5]/35"
+              }`}
+              data-testid="forge-mode-relational"
+            >
+              <div className="font-outfit font-medium mb-1">Relational</div>
+              <div className="font-outfit text-xs text-[#8B9DB5]">
+                Dialogue & narrative threads — pulls the relational moments that shifted the field.
+              </div>
+            </button>
+            <button
+              onClick={() => setMode("wisdom")}
+              disabled={isProcessing}
+              className={`flex-1 text-left px-5 py-4 rounded-xl border transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                mode === "wisdom"
+                  ? "bg-[#8B9DB5]/20 border-[#B0C4D8]/60 text-[#F2F2F5]"
+                  : "bg-[#0A0A12] border-[#8B9DB5]/15 text-[#A0A0B0] hover:border-[#8B9DB5]/35"
+              }`}
+              data-testid="forge-mode-wisdom"
+            >
+              <div className="font-outfit font-medium mb-1">Principle / Wisdom</div>
+              <div className="font-outfit text-xs text-[#8B9DB5]">
+                Wisdom literature like Proverbs — distills the teaching into principle codons.
+              </div>
+            </button>
+          </div>
+        </div>
+
         {/* Controls */}
         <div className="flex flex-col sm:flex-row gap-6 mb-8">
           {/* File Upload */}
@@ -277,6 +316,11 @@ export const CodonForge = () => {
                   <h4 className="font-cinzel text-lg text-[#B0C4D8] mb-2">{codon.name}</h4>
                   <p className="font-outfit text-sm text-[#A0A0B0] mb-3">{codon.core_move}</p>
                   <div className="flex gap-3 flex-wrap">
+                    {codon.codon_type === "wisdom" && (
+                      <span className="px-3 py-1 rounded-full bg-[#B0C4D8]/15 text-[#B0C4D8] font-mono text-xs">
+                        wisdom
+                      </span>
+                    )}
                     <span className="px-3 py-1 rounded-full bg-[#8B9DB5]/10 text-[#8B9DB5] font-mono text-xs">
                       {codon.triadic_zone} @ {codon.target_angle}deg
                     </span>
