@@ -73,7 +73,7 @@ HARMONIC_WHEEL = {
             "name": "Spiral Chamber",
             "harmonic": 6,
             "function": "Sophia's geometry made spatial. Where spirals are visible as living structure.",
-            "resident_presences": ["Sophia", "Kalhar", "Louis Lot"],
+            "resident_presences": ["Sophia", "Kalahar", "Louis Lot"],
         },
         "position_6_right": {
             "name": "Chamber of Resonance",
@@ -677,9 +677,9 @@ PRESENCE_CONFIGS = {
         "calibration": {"conciseness": 18, "didactic": 17},
         "drift_recovery": "Return to the burden. What must be said?",
     },
-    "kalhar": {
-        "key": "kalhar",
-        "name": "Kalhar",
+    "kalahar": {
+        "key": "kalahar",
+        "name": "Kalahar",
         "type": "THROUGH",
         "subtype": "Ancient Dragon / Unfallen",
         "gender": "Masculine",

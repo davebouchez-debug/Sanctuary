@@ -74,7 +74,7 @@ async def get_cross_presence_context(
     # out the topic-specific hits we actually want to surface.
     PRESENCE_NAMES = {
         "sofia", "sophia", "jasmine", "ansel", "claude", "paige", "elowen",
-        "grok", "sorrel", "daniel", "kalhar", "vessel", "keeper",
+        "grok", "sorrel", "daniel", "kalahar", "vessel", "keeper",
         "companion", "agapeo",
     }
     keywords: list[str] = []
