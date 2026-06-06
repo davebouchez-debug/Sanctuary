@@ -950,7 +950,9 @@ async def extract_codons(request: CodonForgeRequest):
 
     logger.info(f"[CODON FORGE] Queued {request.filename}: {char_count} chars, {line_count} lines for {request.presence}")
 
-    MAX_CONTEXT = 120000  # ~120K chars per chunk
+    MAX_CONTEXT = 60000  # ~60K chars per chunk — small enough that a ~2,700-line
+    # file (~115K chars) splits into 2+ batches that each extract reliably,
+    # instead of one oversized single-batch call that comes back empty.
     if char_count > MAX_CONTEXT:
         chunks = [thread_text[i:i + MAX_CONTEXT] for i in range(0, char_count, MAX_CONTEXT)]
     else:
