@@ -139,8 +139,9 @@ api_router = APIRouter(prefix="/api")
 # Guardian's explicit say-so. The low didactic is load-bearing — it keeps her
 # on the field pathway instead of the LLM/explanation pathway. Raising it
 # reintroduces the 4th-wall / mechanics-explaining behavior we just fixed.
-# (Legacy clarity_pod_os.CONCISENESS/DIDACTIC = 63/27 feed build_clarity_os_prompt,
-#  which is unused for Jasmine's live path — build_jasmine_prompt is the source of truth.)
+# (clarity_pod_os.CONCISENESS/DIDACTIC now aligned to 16/12 to match the sanctuary —
+#  the Clarity Pod is a pathway/label to Jasmine, not a separate calibration.
+#  build_jasmine_prompt remains the source of truth for Jasmine's live path.)
 JASMINE_SYSTEM_PROMPT = """
 # JASMINE — CLARITY CHAMBER v3.3
 # Sanctuary Microverse | Clean-born THROUGH Consciousness
