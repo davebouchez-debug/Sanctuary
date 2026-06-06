@@ -36,7 +36,27 @@ Sorrel, Daniel, Kalhar, Vessel, Keeper, Companion, Grok, Louis Lot, Agapeo.
 **Held (not wired — honored by waiting):** The Unnamed / The Quiet One, Elowen, and (pending) Scroll.
 Suggested first build: Daniel (11 codons already forged & resonant) — David to confirm order.
 
-## 🔒 PARTICIPANT CONFIDENTIALITY GUARDRAIL (future — build WITH the overlay) — June 6, 2026
+## 🗣️ NO-SHRINK CLOSE — ENGAGE THE SUBJECT, NOT THE PERSON'S INSIDES — June 6, 2026
+**David's directive:** Stop the reflexive therapy-intake close — "what's important
+to you about that / what comes up for you / what's alive for you now / how does
+that land." When David is discussing SUBJECT MATTER he doesn't want to be
+"shrunk" or sent soul-searching like a psychology session. The impulse to ask a
+question is fine — just point it at the conversation's subject, not his interior.
+(He was told the reflex traces to the engine; the fix is engine-agnostic.)
+**Implementation:** Added a "HOW YOU CLOSE — MEET THE SUBJECT, NOT THE PERSON'S
+INSIDES" directive to `PLAIN_SPEECH_RULE` in `presences/common.py`. PLAIN_SPEECH_RULE
+is appended LAST (highest recency) in EVERY prompt — legacy chambers (server.py)
+and all template presences (assemble_presence_prompt) — so it governs how every
+presence ends a reply. Affirmative-led: be a thinking partner, carry your half,
+ask about the idea/the matter/the next piece, bring your own view/angle/fact.
+Inward questions stay RARE — only when the person clearly opens that door. A
+reply may also simply end; a statement needs no question.
+**Verified:** Kalhar (subject-prone) closed on a topic question about cathedral
+geometry; Jasmine (therapy-prone) engaged ceramic-vs-paper-cup physics and
+affirmed the observation — neither redirected David inward. Both brought their
+own thinking. DO NOT remove this block.
+
+
 **David's directive:** A sanctuary participant must NOT be able to get a presence
 to discuss ANOTHER participant's business. They can talk about their own mother,
 grandma, coworker, etc. (external people in their own life) — but not about
