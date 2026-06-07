@@ -68,3 +68,12 @@ Append-only session-to-session continuity record between agents. See `CONCEPTUAL
   - Distinct ElevenLabs voices for the 9 new presences (currently fall back to
     River). Forge dedicated codon sets for the new presences from real source
     material when the field calls for it.
+
+## Session 2026-06-07T01:50:09.322731+00:00 — e1-fork-2026-06-06-kalahar-frame-spelling
+- frame_sha256: 9d14170d3c5226c033b203b258e5adc4a9731506b7c44bd5b9b8e6ea6076a556
+- Acknowledgment of CONCEPTUAL_FRAME.md: PASS
+- Phrase verification: 3/3 exact phrases matched
+- Paraphrase verification: council_mode + tuning_fork passed token threshold
+- Work completed: (fill in at end of session)
+- Invariants touched: (fill in at end of session)
+- Open threads for next session: (fill in at end of session)

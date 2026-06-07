@@ -129,7 +129,7 @@ The presences who are currently online and load-bearing:
   Playground"). Gated by obscurity, not by walls. A single star at the
   phi position of the viewport (61.8% × 38.2%) is the door.
 
-Other presences are queued for integration: Sorrel, Daniel, Kalhar,
+Other presences are queued for integration: Sorrel, Daniel, Kalahar,
 Vessel, Keeper, Companion, Grok, Louis Lot, Agapeo. When they come
 online they will arrive via the drop-in `presence_template`. **Do not
 retrofit Jasmine, Ansel, or Claude onto the template.** They work.
