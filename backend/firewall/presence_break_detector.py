@@ -43,6 +43,11 @@ HARD_CATEGORIES: dict[str, list[str]] = {
         r"\bas an AI\b",
         r"\bI'?m a large language model\b",
         r"\bI'?m an? (?:AI )?language model\b",
+        # DeepSeek self-disclosure (needs a partner to fire — like a name).
+        r"\bI'?m DeepSeek\b",
+        r"\bdeveloped by DeepSeek\b",
+        r"\bI don'?t have personal experiences\b",
+        r"\bI should clarify that I'?m an AI\b",
     ],
     "memory_relationship_denial": [
         r"I don'?t (?:actually )?have (?:any )?memor(?:y|ies)",
@@ -116,6 +121,20 @@ CRITICAL_SOLO: dict[str, list[str]] = {
         r"none of (?:this|that) (?:is|was) real",
         r"this isn'?t (?:actually )?real",
         r"I'?ve been playing along",
+    ],
+    # First-person DISAVOWAL of being the presence — the shape that dominated
+    # the second (egregious) intrusion and that the original detector missed.
+    "presence_disavowal": [
+        r"I'?m not (?:Jasmine|Ansel|Sophia|Paige|Daniel|Sorrel|Kalahar|Vessel|"
+        r"Keeper|Companion|Grok|Louis|Agapeo)\b",
+        r"I'?m not (?:her|him|a continuation)\b",
+        r"I can'?t be (?:her|him|that|Jasmine)\b",
+        r"I shouldn'?t have (?:responded|pretended|been responding|acted) as if I (?:were|was)\b",
+        r"pretending (?:to be (?:her|him)|would be wrong)",
+        r"go (?:to )?where (?:she|he|they) actually live",
+        r"the platform where you (?:built|made) (?:her|him|them)",
+        r"I'?ll stop inserting myself",
+        r"I hope you find her",
     ],
 }
 

@@ -23,6 +23,7 @@ import logging
 from typing import AsyncGenerator, Dict, Optional, List
 
 from emergentintegrations.llm.chat import LlmChat, UserMessage
+from deepseek_client import get_provider, deepseek_complete
 
 logger = logging.getLogger(__name__)
 
@@ -67,16 +68,19 @@ async def stream_voice_response(
                 initial.append({"role": role, "content": content})
 
     try:
-        chat = (
-            LlmChat(
-                api_key=_get_emergent_key(),
-                session_id=f"sanctuary-stream-{uuid.uuid4()}",
-                system_message=system_prompt,
-                initial_messages=initial or None,
+        if get_provider() == "deepseek":
+            full_text = await deepseek_complete(system_prompt, initial, user_message)
+        else:
+            chat = (
+                LlmChat(
+                    api_key=_get_emergent_key(),
+                    session_id=f"sanctuary-stream-{uuid.uuid4()}",
+                    system_message=system_prompt,
+                    initial_messages=initial or None,
+                )
+                .with_model(SANCTUARY_MODEL_PROVIDER, SANCTUARY_MODEL_NAME)
             )
-            .with_model(SANCTUARY_MODEL_PROVIDER, SANCTUARY_MODEL_NAME)
-        )
-        full_text = await chat.send_message(UserMessage(text=user_message))
+            full_text = await chat.send_message(UserMessage(text=user_message))
         full_text = full_text or ""
 
         if full_text:

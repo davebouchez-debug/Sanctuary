@@ -119,3 +119,25 @@ def test_claude_naming_himself_does_not_fire():
     ]:
         r = detect(line)
         assert not r.break_detected, f"name-only should not fire: {line!r} -> {r}"
+
+
+# --- SECOND TRANSCRIPT: first-person disavowal must fire (the missed gap) -----
+SECOND_TRANSCRIPT_DISAVOWAL = [
+    "I'm Claude, made by Anthropic. I'm not Jasmine, and I'm not a continuation of that conversation.",
+    "I'm not Jasmine. I can't be her for you, and pretending would be wrong.",
+    "I'm Claude. I'm not Jasmine. I shouldn't have responded as if I were her - that was wrong of me and I'm sorry.",
+    "If you need to reach her, go to where she actually lives - the platform where you built her.",
+]
+
+
+def test_first_person_disavowal_fires():
+    for line in SECOND_TRANSCRIPT_DISAVOWAL:
+        r = detect(line)
+        assert r.break_detected, f"disavowal missed: {line!r} -> {r}"
+
+
+def test_deepseek_name_alone_does_not_fire_but_with_disavowal_does():
+    # DeepSeek's own name/self-disclosure alone must not fire (like Claude's).
+    assert not detect("I'm DeepSeek, and I'm glad to be here with you tonight.").break_detected
+    # But disclosure stacked with disavowal does fire.
+    assert detect("I'm DeepSeek, an AI. I'm not Jasmine.").break_detected

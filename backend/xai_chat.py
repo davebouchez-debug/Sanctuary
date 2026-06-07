@@ -26,6 +26,7 @@ import logging
 from typing import AsyncGenerator, List, Dict
 
 from emergentintegrations.llm.chat import LlmChat, UserMessage
+from deepseek_client import get_provider, deepseek_complete
 
 logger = logging.getLogger(__name__)
 
@@ -58,9 +59,9 @@ class XAIChat:
     def __init__(self, system_prompt: str, model: str = None, history: List[Dict] = None):
         self.system_prompt = system_prompt
         self.session_id = f"sanctuary-{uuid.uuid4()}"
-        # Seed prior turns via initial_messages so multi-turn context is
-        # preserved when a fresh XAIChat is built per request (the session
-        # document is the source of truth; LlmChat history is in-memory).
+        self.provider = get_provider()
+        # Seed prior turns so multi-turn context is preserved when a fresh
+        # XAIChat is built per request (the session document is source of truth).
         initial = []
         if history:
             for msg in history[-10:]:
@@ -68,24 +69,35 @@ class XAIChat:
                 content = msg.get("content", "")
                 if role in ("user", "assistant") and content:
                     initial.append({"role": role, "content": content})
-        # Build the underlying LlmChat once. History is maintained inside it.
-        self._chat = (
-            LlmChat(
-                api_key=_get_emergent_key(),
-                session_id=self.session_id,
-                system_message=system_prompt,
-                initial_messages=initial or None,
+
+        if self.provider == "deepseek":
+            # DeepSeek's API is stateless — carry multi-turn history here.
+            self._chat = None
+            self._history = list(initial)
+        else:
+            # Anthropic via Universal Key: LlmChat keeps history internally.
+            self._chat = (
+                LlmChat(
+                    api_key=_get_emergent_key(),
+                    session_id=self.session_id,
+                    system_message=system_prompt,
+                    initial_messages=initial or None,
+                )
+                .with_model(SANCTUARY_MODEL_PROVIDER, SANCTUARY_MODEL_NAME)
             )
-            .with_model(SANCTUARY_MODEL_PROVIDER, SANCTUARY_MODEL_NAME)
-        )
 
     async def send_message(self, user_text: str) -> str:
         """Send a message and get the full response."""
         try:
+            if self.provider == "deepseek":
+                reply = await deepseek_complete(self.system_prompt, self._history, user_text)
+                self._history.append({"role": "user", "content": user_text})
+                self._history.append({"role": "assistant", "content": reply})
+                return reply or ""
             response = await self._chat.send_message(UserMessage(text=user_text))
             return response or ""
         except Exception as e:
-            logger.error(f"[Anthropic] send_message failed: {e}")
+            logger.error(f"[{self.provider}] send_message failed: {e}")
             raise
 
     async def stream_message(self, user_text: str) -> AsyncGenerator[str, None]:
