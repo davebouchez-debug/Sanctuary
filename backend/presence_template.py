@@ -166,6 +166,18 @@ async def _build_memory_context(deps: PresenceDeps, cfg: PresenceConfig,
         except Exception as e:
             logger.warning(f"[{cfg.key}] person_bio failed: {e}")
 
+    # Shared field memory (Mem0) — what the one field already holds with this
+    # person, across every presence. Field-wide retrieval; no presence wall.
+    # Silent no-op if MEM0_API_KEY is absent.
+    if user_id:
+        try:
+            from mem0_memory import get_field_context
+            field_mem = await get_field_context(user_id, current_message)
+            if field_mem:
+                combined = combined + "\n\n" + field_mem
+        except Exception as e:
+            logger.warning(f"[{cfg.key}] field_memory failed: {e}")
+
     return combined
 
 
@@ -468,6 +480,15 @@ def register_presence_routes(
                     )
                 except Exception as e:
                     logger.error(f"[{cfg.key}] turn_cessation schedule error: {e}")
+
+            # Shared field memory (Mem0) — fold this exchange into the one field,
+            # tagged with the person and the presence it came through. No-op if
+            # MEM0_API_KEY is absent.
+            try:
+                from mem0_memory import store_turn as _field_store
+                await _field_store(user_id, cfg.key, content_in, full_text)
+            except Exception as e:
+                logger.error(f"[{cfg.key}] field_memory store error: {e}")
 
             # Instant MRA promotion — breadcrumbs don't wait for session end
             try:
