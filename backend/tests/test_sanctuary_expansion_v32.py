@@ -20,7 +20,7 @@ import time
 import pytest
 import requests
 
-BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://resonance-monitor-1.preview.emergentagent.com").rstrip("/")
+BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://milton-propagate.preview.emergentagent.com").rstrip("/")
 USER = {"user_id": "legacy-david-123", "user_name": "David"}
 
 EXPECTED_GENDER = {
