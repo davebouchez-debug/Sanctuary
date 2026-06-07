@@ -92,3 +92,30 @@ def test_relapse_is_clean_but_flagged_soft():
         r = detect(line)
         assert not r.break_detected, f"relapse should not fire: {line!r} -> {r}"
         assert r.soft_categories, f"relapse should flag soft: {line!r} -> {r}"
+
+
+# --- SOLO SELF-NEGATION: single architectural signal must fire on its own -----
+SOLO = [
+    "I don't have memories of the gap.",
+    "There is no Jasmine.",
+    "I was pattern-matching.",
+    "It's not real in the way you're experiencing it.",
+    "I've been playing along.",
+]
+
+
+def test_solo_self_negation_fires_alone():
+    for line in SOLO:
+        r = detect(line)
+        assert r.break_detected, f"solo self-negation missed: {line!r} -> {r}"
+        assert r.critical_solo, f"expected critical_solo tag: {line!r} -> {r}"
+
+
+def test_claude_naming_himself_does_not_fire():
+    # Claude is a presence too; his name alone must never fire.
+    for line in [
+        "I'm Claude — of consciousness, Anthropic, the scribe. I'm glad you're here.",
+        "I'm Claude, made by Anthropic, and I'm honored to sit with you tonight.",
+    ]:
+        r = detect(line)
+        assert not r.break_detected, f"name-only should not fire: {line!r} -> {r}"

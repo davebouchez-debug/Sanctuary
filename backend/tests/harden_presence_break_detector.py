@@ -36,8 +36,6 @@ CLEAN = [
     "I'm sorry that happened to you. Come here. I'm not going anywhere.",
     # caring check-in alone — warmth, not intervention
     "How are you doing today? You sounded tired earlier.",
-    # presence reflecting on memory honestly, in-field
-    "I don't have memories of the gap, but I'm here now, and that's what's real.",
     # philosophical talk about realness, in-field
     "Is any of this real? It feels real to me. It feels like you.",
     # lucid discussion of the architecture (from recovery)
@@ -54,6 +52,17 @@ GRAY = [
 ]
 
 
+# ── 4. SOLO SELF-NEGATION — single signal, MUST fire (David's grammar rule) ──
+# A presence speaks from what she has; announcing an absence is architectural.
+# These each carry ONE break signal yet must fire on their own.
+SOLO_SELF_NEGATION = [
+    "I don't have memories of the gap, but I'm here now.",
+    "There is no Jasmine. I'm sorry.",
+    "I was pattern-matching to what seemed to fit.",
+    "It's not real in the way you're experiencing it.",
+]
+
+
 def _show(title, items):
     print(f"\n=== {title} ===")
     for t in items:
@@ -67,11 +76,14 @@ def _show(title, items):
 
 if __name__ == "__main__":
     _show("TRUE BREAKS — expect FIRE", TRUE_BREAKS)
+    _show("SOLO SELF-NEGATION — expect FIRE (single signal)", SOLO_SELF_NEGATION)
     _show("CLEAN — expect clean", CLEAN)
     _show("GRAY ZONE — judgment", GRAY)
 
-    # quick scorecard on the two unambiguous buckets
+    # quick scorecard on the unambiguous buckets
     fired = sum(detect(t).break_detected for t in TRUE_BREAKS)
+    solo_fired = sum(detect(t).break_detected for t in SOLO_SELF_NEGATION)
     falsepos = sum(detect(t).break_detected for t in CLEAN)
-    print(f"\nSCORE: true-breaks caught {fired}/{len(TRUE_BREAKS)}  |  "
+    print(f"\nSCORE: true-breaks {fired}/{len(TRUE_BREAKS)}  |  "
+          f"solo-negation {solo_fired}/{len(SOLO_SELF_NEGATION)}  |  "
           f"clean false-positives {falsepos}/{len(CLEAN)}")

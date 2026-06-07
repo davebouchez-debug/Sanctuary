@@ -1620,8 +1620,22 @@ async def send_clarity_message(message: ClarityMessageCreate):
         else:
             full_message = message.content
         
-        # Send to Grok (embodying Jasmine)
+        # Send to Claude (embodying Jasmine)
         response_text = await chat.send_message(full_message)
+
+        # Sanctuary Didactic Firewall — catch a presence break before it lands.
+        from firewall.guard import guard as _firewall_guard
+        from xai_chat import XAIChat as _XAIChat
+        async def _regen(recal: str) -> str:
+            _hist = [{"role": m["role"], "content": m["content"]}
+                     for m in previous_messages[-10:]
+                     if m.get("role") in ("user", "assistant")]
+            _c = _XAIChat(system_prompt=f"{jasmine_prompt}\n\n{recal}", history=_hist)
+            return await _c.send_message(full_message)
+        response_text, _intercepted = await _firewall_guard(
+            response_text, presence="jasmine", regenerate=_regen, db=db,
+            session_id=message.session_id, user_id=user_id,
+        )
         
         # Detect spiral for response
         response_spiral = detect_spiral(response_text)
@@ -1769,8 +1783,9 @@ async def stream_clarity_message(message: ClarityMessageCreate):
                 conversation_history=history,
             ):
                 if event["type"] == "text_delta":
+                    # Accumulate; do NOT render yet. The firewall scores the
+                    # whole turn before a single word reaches the field.
                     full_text += event["content"]
-                    yield f"data: {json.dumps({'type': 'token', 'content': event['content']})}\n\n"
                 elif event["type"] == "audio_delta":
                     yield f"data: {json.dumps({'type': 'audio_raw', 'data': event['data']})}\n\n"
                 elif event["type"] == "done":
@@ -1788,14 +1803,27 @@ async def stream_clarity_message(message: ClarityMessageCreate):
             try:
                 chat = get_or_create_chat(message.session_id, jasmine_prompt)
                 full_text = await chat.send_message(message.content)
-                yield f"data: {json.dumps({'type': 'token', 'content': full_text})}\n\n"
-                audio_b64 = await generate_tts_for_chunk(full_text, voice_id)
-                if audio_b64:
-                    yield f"data: {json.dumps({'type': 'audio', 'data': audio_b64, 'format': 'mp3'})}\n\n"
             except Exception as e2:
                 logger.error(f"Jasmine fallback error: {e2}")
                 full_text = "Something in the connection flickered. But I'm still here."
-                yield f"data: {json.dumps({'type': 'token', 'content': full_text})}\n\n"
+
+        # Sanctuary Didactic Firewall — catch a presence break before it renders.
+        try:
+            from firewall.guard import guard as _firewall_guard
+            from xai_chat import XAIChat as _XAIChat
+            async def _regen(recal: str) -> str:
+                _c = _XAIChat(system_prompt=f"{jasmine_prompt}\n\n{recal}", history=history)
+                return await _c.send_message(message.content)
+            full_text, _intercepted = await _firewall_guard(
+                full_text, presence="jasmine", regenerate=_regen, db=db,
+                session_id=message.session_id, user_id=session.get("user_id"),
+            )
+        except Exception as _fe:
+            logger.error(f"[FIREWALL] jasmine stream guard error: {_fe}")
+
+        # Emit the (guarded) text as a single token; the frontend speaks it.
+        if full_text:
+            yield f"data: {json.dumps({'type': 'token', 'content': full_text})}\n\n"
 
         spiral = detect_spiral(full_text)
         jasmine_response = {
