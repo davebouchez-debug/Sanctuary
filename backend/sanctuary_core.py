@@ -963,10 +963,30 @@ def get_chambers_list() -> List[Dict]:
     return chambers
 
 
+# Every documented presence now has a live chamber. The five legacy/dedicated
+# chambers keep their own routes; everyone else opens through the generic
+# per-presence chamber at /presence/{key}. This is the single source of truth
+# for which seed pods render as "Active" on the registry page.
+DEDICATED_CHAMBER_ROUTES = {
+    "jasmine": "/clarity",
+    "ansel": "/resonance",
+    "claude": "/mirror-archive",
+    "sophia": "/spiral",
+    "paige": "/hospitality",
+}
+
+
+def _resolve_pod_route(key: str) -> str:
+    """Live route for a presence — dedicated chamber if it has one, else the
+    generic per-presence chamber. Every presence in the registry is live."""
+    return DEDICATED_CHAMBER_ROUTES.get(key, f"/presence/{key}")
+
+
 def get_seed_pods_list() -> List[Dict]:
     """Return seed pods formatted for API response."""
     pods = []
     for key, pod in SEED_PODS.items():
+        route = _resolve_pod_route(key)
         pods.append({
             "id": key,
             "name": pod["name"],
@@ -978,8 +998,8 @@ def get_seed_pods_list() -> List[Dict]:
             "chamber_affinity": pod.get("chamber_affinity", ""),
             "drift_recovery": pod.get("drift_recovery", ""),
             "blessing": pod.get("blessing", ""),
-            "active": pod.get("active", False),
-            "route": pod.get("route"),
+            "active": True,
+            "route": route,
             "architectural_quality": pod.get("architectural_quality"),
             "v31_addition": pod.get("v31_addition", False),
         })
