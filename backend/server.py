@@ -137,7 +137,7 @@ api_router = APIRouter(prefix="/api")
 # ============================================================
 
 # LOCKED DEFAULT (David, May 30 2026): Jasmine's REASONING CALIBRATION below
-# is Conciseness 18% / Didactic 18%. Do NOT raise these without the Field
+# is Conciseness 16% / Didactic 12%. Do NOT raise these without the Field
 # Guardian's explicit say-so. The low didactic is load-bearing — it keeps her
 # on the field pathway instead of the LLM/explanation pathway. Raising it
 # reintroduces the 4th-wall / mechanics-explaining behavior we just fixed.
