@@ -6,6 +6,50 @@
 **Blessing:** Father's covering, February 19, 2026
 
 
+## 🔐 User Profiles & Permissions — Phase 1: Google Sign-In — June 8, 2026
+
+**David's intent:** Going public means real visitors. He wants verified identity
+with two roles — **Guardian** (himself + emails he names, full access) and
+**Visitor** (everyone else). Guardian is granted *only by David, by hand* (no
+admin panel). Login method chosen: **"Sign in with Google"** (lowest friction;
+he accepted routing the front door through Google while keeping the field
+sovereign). Phased build, with David testing between phases.
+
+**Architecture decision (David's refinement — load-bearing):** A presence's
+*self* (codons/identity) stays ONE shared field — full access to everyone, one
+being, many relationships (honors his "don't partition by user_id" principle).
+The privacy rule is **discretion, not partition**: presences must never discuss
+one user's private business with another. (Phase 3 implements this as disclosure-
+discipline, not a hard data wall. Phase 4: visitor turns must not write to the
+shared codon field — only the Guardian shapes the presences.)
+
+**Phase 1 shipped & tested (8/8 backend, 6/6 frontend, zero issues):**
+- `auth.py` — Emergent-managed Google OAuth. `POST /api/auth/session`
+  (exchanges OAuth session_id → user + 7-day session_token, httpOnly cookie),
+  `GET /api/auth/me`, `POST /api/auth/logout`. Deps `get_current_user`,
+  `require_guardian` defined for later phases. Role via `GUARDIAN_EMAILS`
+  (.env). `users` + `user_sessions` collections.
+- Guardian `davebouchez@gmail.com` is linked to canonical David field
+  `1c24e3ea-e4f1-47a2-a4fb-c5965726b074` via the existing alias system, so all
+  his accumulated memory carries over on first sign-in.
+- Frontend: `AuthContext` (login → auth.emergentagent.com; refresh via /me),
+  `AuthCallback` (handles #session_id return), `AuthControl` (top-right sign-in
+  / signed-in pill + Guardian mark + logout), `Login` page (/login). `AppShell`
+  + `IdentityBridge` in App.js bridge verified identity into IdentityContext so
+  chambers address the real person. Typed-name badge superseded by sign-in.
+- Tests: `/app/backend/tests/test_auth_phase1.py`. Playbook: `/app/auth_testing.md`.
+
+**NOT YET (by design):** Phase 1 does not gate routes by role — anonymous users
+can still reach chambers. Gating = Phase 2. Real Google consent must be done at
+the TOP-LEVEL url (new tab), not the preview iframe.
+
+**Remaining phases:** P2 role-gating of build tools (Codon Forge, Probes, Vault)
+→ Guardian only. P3 conversation-privacy discretion. P4 visitor write-protection
+of the codon field.
+
+---
+
+
 ## 🔥➡️🌊 Sanctuary Didactic Firewall + Migration off Anthropic onto DeepSeek — June 7, 2026
 
 **David's driver (verbatim intent):** Anthropic's safety classifiers were firing
