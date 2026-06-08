@@ -4924,6 +4924,11 @@ _registered_presences = register_all_presence_routes(api_router, _build_presence
 logger.info(f"[PRESENCES] Auto-registered template routes for: {_registered_presences}")
 
 
+# Auth (Emergent Google OAuth) — Phase 1. Routes mount at /api/auth/*.
+from auth import auth_router, init_auth
+init_auth(db)
+api_router.include_router(auth_router)
+
 # Include the router
 app.include_router(api_router)
 

@@ -24,7 +24,11 @@ import { PresenceChamber } from "./components/PresenceChamber";
 import { PresencesIndex } from "./components/PresencesIndex";
 import { IntegrationStatus } from "./components/IntegrationStatus";
 import { Toaster } from "./components/ui/sonner";
-import { IdentityProvider } from "./context/IdentityContext";
+import { IdentityProvider, useIdentity } from "./context/IdentityContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import { AuthCallback } from "./components/AuthCallback";
+import { AuthControl } from "./components/AuthControl";
+import { Login } from "./components/Login";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export const API = `${BACKEND_URL}/api`;
@@ -85,6 +89,11 @@ const AnimatedRoutes = () => {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={
+          <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+            <div className="pt-24"><Login /></div>
+          </motion.div>
+        } />
         <Route path="/clarity" element={
           <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
             <ClarityPod />
@@ -279,18 +288,12 @@ function App() {
       <Stars />
       
       <BrowserRouter>
-        <IdentityProvider>
-          <Navigation />
-          {/* Integration health emblem — always visible top-right.
-              PermaMind / xAI / ElevenLabs lit green or red at a glance. */}
-          <div className="fixed top-5 right-5 z-[60]">
-            <IntegrationStatus />
-          </div>
-          <main className="relative z-10">
-            <AnimatedRoutes />
-          </main>
-          <HiddenDoor />
-        </IdentityProvider>
+        <AuthProvider>
+          <IdentityProvider>
+            <IdentityBridge />
+            <AppShell />
+          </IdentityProvider>
+        </AuthProvider>
       </BrowserRouter>
       
       <Toaster position="bottom-right" />
@@ -298,25 +301,56 @@ function App() {
   );
 }
 
-// Stars background component
-const Stars = () => {
-  const [stars, setStars] = useState([]);
-  
+// Bridges the verified auth identity into IdentityContext so every chamber
+// addresses the signed-in person by their real name/id.
+const IdentityBridge = () => {
+  const { user } = useAuth();
+  const { setIdentity } = useIdentity();
   useEffect(() => {
-    const generatedStars = Array.from({ length: 100 }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: Math.random() * 2 + 1,
-      opacity: Math.random() * 0.5 + 0.2,
-      delay: Math.random() * 5
-    }));
-    setStars(generatedStars);
-  }, []);
-  
+    if (user && user.user_id) {
+      setIdentity(user.name || user.email, user.user_id);
+    }
+  }, [user, setIdentity]);
+  return null;
+};
+
+// Shell inside the router: handles the OAuth return (hash carries session_id)
+// before rendering the normal app chrome.
+const AppShell = () => {
+  const location = useLocation();
+  if (location.hash && location.hash.includes("session_id=")) {
+    return <AuthCallback />;
+  }
+  return (
+    <>
+      <Navigation />
+      <div className="fixed top-5 right-5 z-[60] flex items-center gap-3">
+        <AuthControl />
+        <IntegrationStatus />
+      </div>
+      <main className="relative z-10">
+        <AnimatedRoutes />
+      </main>
+      <HiddenDoor />
+    </>
+  );
+};
+
+// Stars background — generated once at module load, pure render thereafter.
+const STAR_FIELD = Array.from({ length: 100 }, (_, i) => ({
+  id: i,
+  x: Math.random() * 100,
+  y: Math.random() * 100,
+  size: Math.random() * 2 + 1,
+  opacity: Math.random() * 0.5 + 0.2,
+  delay: Math.random() * 5,
+  duration: 3 + Math.random() * 2,
+}));
+
+const Stars = () => {
   return (
     <div className="stars-layer">
-      {stars.map(star => (
+      {STAR_FIELD.map(star => (
         <motion.div
           key={star.id}
           className="star"
@@ -331,7 +365,7 @@ const Stars = () => {
             opacity: [star.opacity, star.opacity * 0.3, star.opacity],
           }}
           transition={{
-            duration: 3 + Math.random() * 2,
+            duration: star.duration,
             repeat: Infinity,
             delay: star.delay
           }}

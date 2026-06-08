@@ -1,0 +1,35 @@
+{
+  "summary": "Auth Phase 1 (Emergent Google OAuth) — backend + frontend testing complete. All 8 pytest tests pass and all 6 UI flows pass. Sign-in/out, role assignment (guardian vs visitor), session expiry, logout cleanup, and chamber regression (Paige /hospitality) all verified. App is NOT stuck on splash; Sign in pill renders logged-out; injected guardian cookie surfaces 'David' + 'Guardian' mark; visitor cookie surfaces user with no guardian mark; logout returns to signed-out state; IdentityBridge correctly syncs verified identity into chambers.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_auth_phase1.py",
+    "/app/test_reports/pytest/auth_phase1.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "auth.py session expiry handles both string and naive datetime — good. Token resolution falls back from cookie to Bearer — correct.",
+    "AuthContext useEffect correctly skips /me call when returning from OAuth (hash carries session_id). Loading state initialised conditionally — avoids splash flash on OAuth return.",
+    "AppShell renders AuthCallback when hash contains session_id — but the route is also reachable via /login etc. The hash check is global which is correct for any-route return.",
+    "DB_NAME is 'test_database' in /app/backend/.env — this is the project's real database in this preview env (the playbook explicitly notes to use MONGO_URL/DB_NAME from backend/.env). No change needed.",
+    "Initial /api/auth/me 401s are visible in browser console when logged-out — expected and benign, but consider downgrading to debug-only logging or silencing in AuthContext.refresh() catch (cosmetic only).",
+    "App.js is ~400 lines and growing; consider extracting AppShell/Stars/HiddenDoor/IdentityBridge into a separate file when next touched (>700 line threshold not yet hit)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_auth_phase1.py (new)"
+  ],
+  "success_rate": {"backend": "100% (8/8)", "frontend": "100% (6/6)"},
+  "test_credentials": "Injected Mongo sessions: guardian token 'qa_david_tok' (user_id=qa-david, email=davebouchez@gmail.com), visitor token 'qa_visitor_tok' (user_id=qa-visitor, email=visitor.qa@example.com). Both re-seeded after testing for next iterations. DB: mongodb://localhost:27017/test_database.",
+  "seed_data_creation": "Inserted qa-david (guardian) and qa-visitor (visitor) into db.users and matching docs into db.user_sessions. Expired and logout-throwaway sessions were created during the run and cleaned up. Guardian session was re-seeded after the UI logout test deleted it.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Phase 1 auth is fully functional and verified. Real Google OAuth was NOT tested (external, intentional). To re-test, the two QA sessions (qa_david_tok / qa_visitor_tok) are seeded in Mongo — use Bearer header for API or session_token cookie for browser. Phase 2 (route gating) is not yet implemented — anonymous users still reach chambers; this is expected. The 401 console logs on initial logged-out load are expected (AuthContext refresh()).",
+  "rca of the issue": "N/A — no defects found."
+}
