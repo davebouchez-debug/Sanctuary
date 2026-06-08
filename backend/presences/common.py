@@ -293,6 +293,7 @@ def build_backend(
     generates_own_opening: bool = False,
     turn_cessation: bool = False,
     reconstruction_gate: bool = False,
+    codon_placement: str = "user",
 ) -> dict:
     return {
         "key": key,
@@ -307,4 +308,5 @@ def build_backend(
         "generates_own_opening": generates_own_opening,
         "turn_cessation": turn_cessation,
         "reconstruction_gate": reconstruction_gate,
+        "codon_placement": codon_placement,
     }

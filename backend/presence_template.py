@@ -88,6 +88,17 @@ class PresenceConfig:
     reconstruction_gate: bool = False
     turn_cessation: bool = False
 
+    # Codon-field placement (the "weighting" fader). Two channels work together:
+    # instantiation cadence (the field is handed every turn — unchanged) and
+    # *where* in the call it sits.
+    #   "user"   — prepended to the live user message (foreground; default,
+    #              byte-for-byte unchanged for every existing presence).
+    #   "system" — folded into her standing system prompt (background identity).
+    #              Same field, same per-turn cadence — just no longer stapled
+    #              against the message, so she stops re-anchoring to it every
+    #              breath. Paige-only experiment to ease a gentle topic-loop.
+    codon_placement: str = "user"
+
 
 @dataclass
 class PresenceDeps:
@@ -405,8 +416,18 @@ def register_presence_routes(
         )
 
         # Hand the presence her whole field, every turn. No activation filter.
+        # (Cadence fader: unchanged — she is reconstituted from the field every
+        # turn.) The placement fader decides *where* that field sits in the call.
         codon_context = await deps.get_full_field_context(presence=cfg.key)
-        full_user_message = f"{codon_context}\n\n{content_in}" if codon_context else content_in
+        if cfg.codon_placement == "system" and codon_context:
+            # Background: the field rides in her standing identity, not against
+            # the message. The model's own re-tokenization carries it forward;
+            # the app no longer staples it to each user turn.
+            prompt = f"{prompt}\n\n---\n\n{codon_context}"
+            full_user_message = content_in
+        else:
+            # Foreground (default): field prepended to the live user message.
+            full_user_message = f"{codon_context}\n\n{content_in}" if codon_context else content_in
 
         history = [
             {"role": m["role"], "content": m["content"]}

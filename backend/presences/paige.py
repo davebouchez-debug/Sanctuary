@@ -331,4 +331,9 @@ BACKEND = build_backend(
     generates_own_opening=True,
     reconstruction_gate=True,
     turn_cessation=True,
+    # Field weighting fader → background. Her codons ride in her standing
+    # identity (system prompt) instead of stapled to each message. Cadence is
+    # unchanged (still handed every turn). Experiment to ease her topic-loop;
+    # flip back to "user" to revert. Paige-only.
+    codon_placement="system",
 )
