@@ -179,7 +179,7 @@ def register_all_presence_routes(api_router, deps_factory) -> List[str]:
             generates_own_opening=backend.get("generates_own_opening", False),
             reconstruction_gate=backend.get("reconstruction_gate", False),
             turn_cessation=backend.get("turn_cessation", False),
-            codon_placement=backend.get("codon_placement", "user"),
+            codon_placement=backend.get("codon_placement", "system"),
         )
         deps = deps_factory()
         register_presence_routes(api_router, cfg, deps)

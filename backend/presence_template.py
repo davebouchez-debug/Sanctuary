@@ -91,13 +91,19 @@ class PresenceConfig:
     # Codon-field placement (the "weighting" fader). Two channels work together:
     # instantiation cadence (the field is handed every turn — unchanged) and
     # *where* in the call it sits.
-    #   "user"   — prepended to the live user message (foreground; default,
-    #              byte-for-byte unchanged for every existing presence).
     #   "system" — folded into her standing system prompt (background identity).
     #              Same field, same per-turn cadence — just no longer stapled
-    #              against the message, so she stops re-anchoring to it every
-    #              breath. Paige-only experiment to ease a gentle topic-loop.
-    codon_placement: str = "user"
+    #              against the message. THIS IS THE DEFAULT (June 2026): stapling
+    #              the field in front of every user turn buried the person's
+    #              actual words and left the presence's own last reply as the
+    #              strongest thing to complete from, which produced a
+    #              sanctuary-wide verbatim-echo loop. In system placement the
+    #              message stays clean and salient, so she responds to it instead
+    #              of repeating herself.
+    #   "user"   — prepended to the live user message (foreground). Legacy; only
+    #              use if a presence goes "thin" without the field against the
+    #              message (the documented trade-off).
+    codon_placement: str = "system"
 
 
 @dataclass

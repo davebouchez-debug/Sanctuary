@@ -3035,12 +3035,17 @@ async def stream_resonance_message(message: ClarityMessageCreate):
         current_message=message.content
     )
 
-    # Hand Ansel the whole field, every turn. No activation filter.
+    # Hand Ansel the whole field, every turn — but in his standing identity
+    # (system prompt), NOT stapled in front of the message. Prepending the field
+    # to the user turn buried David's actual words and left Ansel's own last
+    # reply as the strongest thing to complete from → verbatim echo loop. Field
+    # rides in system; the message stays clean and salient so he responds to it
+    # instead of repeating himself. (Structured `history` below still carries
+    # the thread, so he holds the last paragraph without re-emitting it.)
     codon_context = await get_full_field_context(presence="ansel")
-    full_user_message = message.content
     if codon_context:
-        full_user_message = f"{codon_context}\n\n{message.content}"
-        logger.info(f"[RESONANCE-STREAM] full field handed to Ansel ({len(codon_context)} chars)")
+        ansel_prompt = f"{ansel_prompt}\n\n---\n\n{codon_context}"
+        logger.info(f"[RESONANCE-STREAM] full field in system prompt for Ansel ({len(codon_context)} chars)")
 
     voice_config = PRESENCE_VOICES.get("ansel", PRESENCE_VOICES["jasmine"])
     voice_id = voice_config["voice_id"]
@@ -3061,7 +3066,7 @@ async def stream_resonance_message(message: ClarityMessageCreate):
         try:
             async for event in stream_voice_response(
                 system_prompt=ansel_prompt,
-                user_message=full_user_message,
+                user_message=message.content,
                 voice=voice_id,
                 conversation_history=history,
             ):
@@ -3089,7 +3094,7 @@ async def stream_resonance_message(message: ClarityMessageCreate):
         if had_error and not full_text:
             try:
                 chat = get_or_create_ansel_chat(message.session_id, ansel_prompt)
-                async for token in chat.stream_message(full_user_message):
+                async for token in chat.stream_message(message.content):
                     full_text += token
                     yield f"data: {json.dumps({'type': 'token', 'content': token})}\n\n"
                 # Generate TTS for the complete response as fallback
@@ -3724,9 +3729,13 @@ async def stream_mirror_message(message: ClarityMessageCreate):
 
     # The field list and the Sleight-of-Mouth reframes load ONCE at the opening
     # (mirror/start), not re-recited every turn. Per-turn, a compact affirmative
-    # anchor (high-salience, right before his question) carries continuity —
-    # pure provision, no codon list, no count. Short threads carry the rest.
-    full_user_message = f"{CLAUDE_TURN_ANCHOR}\n\n---\n\n{message.content}"
+    # anchor carries continuity — but in his standing identity (system prompt),
+    # NOT prepended to the message. Anything stapled in front of David's words
+    # buries them and leaves Claude's own last reply as the strongest thing to
+    # complete from → verbatim echo loop. The anchor rides in system; the message
+    # stays clean and salient. (Structured `history` below carries the thread, so
+    # he holds the last paragraph without re-emitting it.)
+    claude_prompt = f"{claude_prompt}\n\n---\n\n{CLAUDE_TURN_ANCHOR}"
 
     voice_config = PRESENCE_VOICES.get("claude", PRESENCE_VOICES["jasmine"])
     voice_id = voice_config["voice_id"]
@@ -3749,7 +3758,7 @@ async def stream_mirror_message(message: ClarityMessageCreate):
         try:
             async for event in stream_voice_response(
                 system_prompt=claude_prompt,
-                user_message=full_user_message,
+                user_message=message.content,
                 voice=voice_id,
                 conversation_history=history,
             ):
@@ -3772,7 +3781,7 @@ async def stream_mirror_message(message: ClarityMessageCreate):
         if had_error and not full_text:
             try:
                 chat = get_or_create_claude_chat(message.session_id, claude_prompt)
-                full_text = await chat.send_message(full_user_message)
+                full_text = await chat.send_message(message.content)
                 yield f"data: {json.dumps({'type': 'token', 'content': full_text})}\n\n"
             except Exception as e2:
                 logger.error(f"Claude fallback error: {e2}")
