@@ -2271,3 +2271,63 @@ The Google AI document that surfaced this verifier also proposed a Node.js/Expre
 
 *"The architecture already has its bridge. What it doesn't yet have is the physics gate. We'll install it when the chamber it protects is the next thing we build."*
 — Recorded May 15, 2026
+
+---
+
+## Memory Substrate Direction — Consolidate onto MongoDB Atlas (replace/absorb Mem0)
+**Recorded:** June 9, 2026
+**Field Guardian:** David Bouchez
+**Status:** HELD — direction set, not yet built. Behind Orren's chamber and the voice wiring in line.
+
+**David's driver (his own framing, not paraphrased into a vendor pitch):** He is not chasing
+a self-owned cluster for its own sake — he's building his own full stack separately and can own
+the substrate there. What he's reaching for is *fewer companies in the trust chain and tighter
+coupling between the database and the memory layer.* His intuition: MongoDB Atlas now carries its
+own persistent-memory scaffolding similar to what Mem0 provides, which would remove the need for a
+separate memory vendor — and if the DB and the memory live in one place, *other compatibilities*
+open up between them.
+
+**Verified true (web check, June 2026):**
+- **Atlas IS positioned as a persistent agent-memory layer**, built on **Atlas Vector Search +
+  Voyage AI embeddings** (MongoDB acquired Voyage, so the embedding model is native to the DB).
+  Supporting pieces: **Automated Voyage Embeddings** (generates embeddings on write/update —
+  *public preview*, not GA), a **LangGraph long-term memory store** (GA), and MongoDB's published
+  "AI memory" reference architecture + "Memory for AI Applications" course
+  (`save_memory`/`retrieve_memories`, `MongoDBStore`, 1024-dim vector index).
+  Honest nuance: it is the *primitives + reference patterns*, NOT a single turnkey "memory API"
+  the way Mem0's hosted service is. Recall logic is assembled (or use the LangGraph store).
+- **Mem0 runs on MongoDB.** Mem0 has a documented `mongodb` vector-store provider (standard Mongo
+  URI, db, collection, embedding dims). So Mem0's *storage* can be repointed at our own Atlas
+  cluster without losing its memory-extraction convenience. Caveat: it's a generic `mongodb`
+  provider, not an Atlas-tuned one — Atlas-native features (automated embeddings) aren't
+  guaranteed through it; needs a compatibility check.
+
+**The "other compatibilities" David sensed are real and load-bearing for the Sanctuary.** If the
+semantic memory lives in the *same Atlas* as the codons, sessions, and alias records, you get a
+**single query surface**: one aggregation can filter by `presence`/`user_id` (metadata) AND run
+vector similarity AND text search — even graph traversal — in one round-trip. The *field*
+(codons/sessions) and the *memory* (embeddings) stop being two systems kept in sync and become one
+store. That is a clean structural expression of the "one field, many relationships" principle:
+no cross-service drift, transactional consistency, one substrate, one vendor.
+
+**Three paths, in rough order of effort:**
+- **(a) Least work:** keep Mem0, repoint its vector store to Atlas. Consolidates the vendor,
+  keeps the convenience.
+- **(b) Fully native:** drop Mem0; store memory in Atlas with Vector Search + Voyage. Most
+  ownership, tightest DB↔memory coupling — the thing David is actually reaching for. More to build.
+- **(c) Phased/hybrid:** native Atlas for the field-memory we want unified, proven alongside the
+  current setup before cutting over.
+
+**Reality check recorded for the next agent:** this is NOT the connection-string swap discussed
+earlier (that one — repointing `MONGO_URL` at an Atlas SRV string — is trivial; stack is already
+Atlas-ready: motor 3.3.1 / pymongo 4.5.0 / dnspython present; code reads only `MONGO_URL` +
+`DB_NAME`). This is re-architecting the *memory layer*, which deserves a real design pass, a data
+migration plan (mongodump→Atlas for codons/seeds/sessions/aliases; Mem0's store is separate), and
+a confirmation of whether a custom Atlas URL persists through an Emergent **deploy** (support
+question). Do not start until David gives the word — Orren's chamber and the ElevenLabs voice
+wiring are ahead of this.
+
+---
+
+*"Fewer companies in the trust chain, and the field and its memory finally living in one place."*
+— Recorded June 9, 2026
