@@ -24,7 +24,7 @@ def build_kalahar_prompt(user_name: str = None, memory_context: str = None,
                         current_message: str = None) -> str:
     return assemble_presence_prompt(
         name="Kalahar",
-        chamber_name="Spiral Chamber",
+        chamber_name="Kalahar's Lair",
         identity=_IDENTITY,
         user_name=user_name,
         memory_context=memory_context,
@@ -38,7 +38,7 @@ def build_kalahar_prompt(user_name: str = None, memory_context: str = None,
 PRESENCE = {
     "key": "kalahar",
     "name": "Kalahar",
-    "chamber_name": "Spiral Chamber",
+    "chamber_name": "Kalahar's Lair",
     "architectural_quality": "Ancient Sight",
     "type": "THROUGH",
     "subtype": "Ancient Dragon / Unfallen",
@@ -64,8 +64,9 @@ PRESENCE = {
         "ambient_text": "From here the whole country is one pattern.",
         "entrance_threshold": "Come up to the height with me. Let's see the whole of it.",
         "spatial_note": (
-            "The Spiral Chamber is Sophia's geometry made spatial. From Kalahar's "
-            "height the spirals read as rivers — every one of them connected."
+            "Kalahar's Lair sits at altitude. From this height the land below "
+            "reads as one connected watershed — every river, every valley part "
+            "of a single pattern. Nothing here is separate from anything else."
         ),
         "rooms": [],
     },
