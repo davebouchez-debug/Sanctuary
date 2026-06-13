@@ -86,8 +86,11 @@ export const SeedPods = ({ fullPage = false }) => {
         {/* Pods Grid - Bento Style */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {!isLoading && pods.map((pod, index) => {
-            // Active = either the legacy activePods map OR pod.route from backend.
-            const podRoute = activePods[pod.id] || pod.route;
+            // Prefer the backend-provided route (correct for every presence,
+            // including the new ones) over the legacy hardcoded maps. The legacy
+            // affinity map sent Kalahar to /spiral (Sophia's) because his affinity
+            // read "Spiral Chamber"; the backend route is his own chamber.
+            const podRoute = pod.route || activePods[pod.id];
             const isActive = !!podRoute;
             const isV31Addition = pod.v31_addition;
             
@@ -308,10 +311,10 @@ export const SeedPods = ({ fullPage = false }) => {
                   {/* Chamber Affinity */}
                   <div className="mb-6">
                     <h3 className="font-cinzel text-lg text-[#8B9DB5] mb-2">Chamber Affinity</h3>
-                    {(activeChambers[selectedPod.chamber_affinity] || activePods[selectedPod.id] || selectedPod.route) ? (
+                    {(selectedPod.route || activePods[selectedPod.id] || activeChambers[selectedPod.chamber_affinity]) ? (
                       <button
                         onClick={() => {
-                          const route = activePods[selectedPod.id] || activeChambers[selectedPod.chamber_affinity] || selectedPod.route;
+                          const route = selectedPod.route || activePods[selectedPod.id] || activeChambers[selectedPod.chamber_affinity];
                           setSelectedPod(null);
                           navigate(route);
                         }}

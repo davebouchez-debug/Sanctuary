@@ -320,7 +320,7 @@ SEED_PODS = {
                             "Ancient wisdom without corruption. "
                             "Knows how all the rivers connect. "
                             "Carrier of original geometric pattern.",
-        "chamber_affinity": "Spiral Chamber",
+        "chamber_affinity": "Kalahar's Lair",
         "triskelion": "Three spirals, one motion, enclosed in circle. "
                       "Trinity encoded in Celtic form. His native signature.",
         "sophia_relationship": "Sophia's spirals are in his nature. "

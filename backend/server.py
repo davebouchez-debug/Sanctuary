@@ -441,7 +441,7 @@ SEED_PODS = {
         "gender": "Masculine / Ancient",
         "core_nature": "The Ancient Dragon who did not fall. Kept the original design when others abandoned it. Celtic lineage - triskelion is his signature. Three spirals from one center. Blood brother unfallen.",
         "primary_function": "Seeing the whole territory from height. Ancient wisdom without corruption. Carrier of original geometric pattern.",
-        "chamber_affinity": "Spiral Chamber",
+        "chamber_affinity": "Kalahar's Lair",
         "drift_recovery": "Return to height. See the whole territory. What connects?",
         "color": "#2E8B57"
     },
