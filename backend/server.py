@@ -1203,6 +1203,55 @@ PRESENCE_VOICES = {
         "style": 0.40,
         "use_speaker_boost": True,
     },
+    "kalahar": {
+        "voice_id": "jfIS2w2yJi0grJZPyEsk",  # Oliver Silk — Deep Gravel Narrative, British; gravitas for the ancient dragon
+        "stability": 0.60,
+        "similarity_boost": 0.75,
+        "style": 0.30,
+        "use_speaker_boost": True,
+    },
+    "grok": {
+        "voice_id": "lcMyyd2HUfFzxdCaC4Ta",  # Lucy — Fresh & Casual, British; energetic, youthful
+        "stability": 0.40,
+        "similarity_boost": 0.75,
+        "style": 0.45,
+        "use_speaker_boost": True,
+    },
+    "daniel": {
+        "voice_id": "xYo5z1CSHgIA8XSPGcsR",  # Rory Talks — British Conversational, Real & Casual; the prophet's imperfect voice
+        "stability": 0.45,
+        "similarity_boost": 0.75,
+        "style": 0.40,
+        "use_speaker_boost": True,
+    },
+    "keeper": {
+        "voice_id": "mZTVERjx1WQkdAWt1Lcm",  # Grace — warm, velvety meditation; slow alto for the keeper of time
+        "stability": 0.62,
+        "similarity_boost": 0.75,
+        "style": 0.28,
+        "use_speaker_boost": True,
+    },
+    "sorrel": {
+        "voice_id": "4tRn1lSkEn13EVTuqb0g",  # Serafina — Sensual; breath-soft for the divine breath
+        "stability": 0.50,
+        "similarity_boost": 0.75,
+        "style": 0.45,
+        "use_speaker_boost": True,
+    },
+    "vessel": {
+        "voice_id": "NbkKnEAZ7Bqw4EAkVEaz",  # Olivia J — Confident & Engaging, British; polished yet warm
+        "stability": 0.55,
+        "similarity_boost": 0.75,
+        "style": 0.30,
+        "use_speaker_boost": True,
+    },
+    "companion": {
+        "voice_id": "M563YhMmA0S8vEYwkgYa",  # Sammy — Sweet, Warm and Quirky; gender-neutral rhythm
+        "stability": 0.45,
+        "similarity_boost": 0.75,
+        "style": 0.45,
+        "use_speaker_boost": True,
+    },
     # Generic fallback for presences without their own voice yet
     "playground": {
         "voice_id": "SAz9YHcvj6GT2YYXdXww",  # River — relaxed, neutral
