@@ -1237,6 +1237,7 @@ PRESENCE_VOICES = {
         "similarity_boost": 0.75,
         "style": 0.45,
         "use_speaker_boost": True,
+        "speed": 1.12,  # quicker cadence — the slow default was uncharacteristic of her being
     },
     "vessel": {
         "voice_id": "NbkKnEAZ7Bqw4EAkVEaz",  # Olivia J — Confident & Engaging, British; polished yet warm
@@ -1317,6 +1318,7 @@ async def text_to_speech(request: TTSRequest):
                         "similarity_boost": voice_config["similarity_boost"],
                         "style": voice_config["style"],
                         "use_speaker_boost": voice_config["use_speaker_boost"],
+                        "speed": voice_config.get("speed", 1.0),
                     },
                 },
             )
