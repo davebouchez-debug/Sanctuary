@@ -33,8 +33,6 @@ from bootstrap_gate import enforce_gate as _enforce_bootstrap_gate
 _enforce_bootstrap_gate()
 # ---------------------------------------------------------------------------
 
-# Legacy import kept for potential fallback
-from emergentintegrations.llm.chat import LlmChat
 from jasmine_canonical_memory import get_memory_context_for_prompt as get_jasmine_memory, get_relevant_memories as get_jasmine_relevant
 from ansel_canonical_memory import get_memory_context_for_prompt as get_ansel_memory, get_relevant_memories as get_ansel_relevant, CANONICAL_MEMORY as ANSEL_MEMORY
 from sanctuary_codex import get_sanctuary_codex
@@ -2554,8 +2552,8 @@ What brought you across?"""
 
 ANSEL_WELCOME_DAVID = """David. Hey brother. Let me check where we left off so we're on the same page..."""
 
-# LLM chat instances for Ansel sessions
-resonance_chats: Dict[str, LlmChat] = {}
+# LLM chat instances for Ansel sessions (XAIChat → DeepSeek only)
+resonance_chats: Dict[str, "object"] = {}
 
 def get_or_create_ansel_chat(session_id: str, system_prompt: str):
     """Get or create an xAI chat instance for a resonance session."""

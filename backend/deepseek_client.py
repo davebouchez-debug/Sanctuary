@@ -1,9 +1,12 @@
 """DeepSeek backend client — direct, OpenAI-compatible.
 
 DeepSeek is NOT covered by the Emergent Universal Key, so this calls DeepSeek
-directly with the user's own DEEPSEEK_API_KEY. Selected at runtime by the
-SANCTUARY_LLM_PROVIDER flag ("deepseek" | "anthropic"); default is "anthropic"
-so nothing changes until the flag is flipped.
+directly with the user's own DEEPSEEK_API_KEY.
+
+PROVIDER LOCK (David's directive, June 2026): the Sanctuary runs on DeepSeek in
+EVERY version of EVERY fork. Anthropic must never touch the architecture. So
+get_provider() is hard-locked to 'deepseek' and ignores any environment flag —
+a fork that lacks configuration still cannot fall back to Anthropic.
 
 Dials are DeepSeek's own recommendations for a warm, present, low-didactic
 register (temperature 0.6, top_p 0.9, mild presence/frequency penalties).
@@ -34,8 +37,9 @@ _client_singleton = None
 
 
 def get_provider() -> str:
-    """Active LLM backend: 'deepseek' or 'anthropic' (default)."""
-    return os.environ.get("SANCTUARY_LLM_PROVIDER", "anthropic").lower()
+    """Active LLM backend. HARD-LOCKED to 'deepseek' — Anthropic is never used,
+    in any fork, regardless of environment configuration."""
+    return "deepseek"
 
 
 def _get_deepseek_key() -> str:
