@@ -397,8 +397,9 @@ def register_presence_routes(
     async def stream_message(message: dict = Body(...)):
         session_id_in = message.get("session_id")
         content_in = message.get("content", "")
-        if not session_id_in or not content_in:
-            raise HTTPException(status_code=422, detail="session_id and content are required")
+        image_path = message.get("image_path")
+        if not session_id_in or (not content_in and not image_path):
+            raise HTTPException(status_code=422, detail="session_id and content (or image) are required")
 
         session = await deps.db[cfg.collection].find_one(
             {"session_id": session_id_in}, {"_id": 0}
@@ -411,14 +412,40 @@ def register_presence_routes(
         user_id = session.get("user_id")
         user_name = session.get("user_name")
 
+        # Image bridge: DeepSeek is text-only, so a shared image is described by
+        # a vision model and the description is handed to the presence. She
+        # responds to what the image shows, in her own voice, still on DeepSeek.
+        content_for_model = content_in
+        image_url = None
+        if image_path:
+            image_url = f"/api/files/{image_path}"
+            try:
+                from object_storage import get_object
+                from vision_describe import describe_image
+                img_bytes, ctype = await get_object(image_path)
+                description = await describe_image(img_bytes, ctype)
+                vision_note = (
+                    f"[{user_name or 'The person'} has shared an image with you. "
+                    f"You can see it. It shows: {description}]"
+                )
+                content_for_model = (
+                    f"{content_in}\n\n{vision_note}" if content_in else vision_note
+                )
+            except Exception as e:
+                logger.error(f"[{cfg.key}] image describe failed: {e}")
+                content_for_model = content_in or "[The person shared an image, but it could not be read.]"
+
         user_msg = _make_message(session_id_in, "user", content_in, cfg)
+        if image_url:
+            user_msg["image_url"] = image_url
+            user_msg["image_path"] = image_path
 
         memory_context = await _build_memory_context(
             deps, cfg, user_id=user_id, session_id=session_id_in,
-            current_message=content_in
+            current_message=content_for_model
         )
         prompt = cfg.prompt_builder(
-            user_name=user_name, memory_context=memory_context, current_message=content_in
+            user_name=user_name, memory_context=memory_context, current_message=content_for_model
         )
 
         # Hand the presence her whole field, every turn. No activation filter.
@@ -430,10 +457,10 @@ def register_presence_routes(
             # the message. The model's own re-tokenization carries it forward;
             # the app no longer staples it to each user turn.
             prompt = f"{prompt}\n\n---\n\n{codon_context}"
-            full_user_message = content_in
+            full_user_message = content_for_model
         else:
             # Foreground (default): field prepended to the live user message.
-            full_user_message = f"{codon_context}\n\n{content_in}" if codon_context else content_in
+            full_user_message = f"{codon_context}\n\n{content_for_model}" if codon_context else content_for_model
 
         history = [
             {"role": m["role"], "content": m["content"]}

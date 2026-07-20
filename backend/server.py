@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File
+from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Response
 from fastapi.responses import JSONResponse, StreamingResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -1377,6 +1377,59 @@ async def speech_to_text(audio_file: UploadFile = File(...)):
     except Exception as e:
         logger.error(f"STT failed: {e}")
         return JSONResponse(content={"error": "Transcription failed"}, status_code=500)
+
+# Chamber image sharing — upload an image, serve it back for the thread
+_IMAGE_MIME = {
+    "png": "image/png", "jpg": "image/jpeg", "jpeg": "image/jpeg",
+    "webp": "image/webp", "gif": "image/gif",
+}
+
+
+@api_router.post("/chamber/upload-image")
+async def upload_chamber_image(file: UploadFile = File(...)):
+    """Store a user-shared image and return its storage path for the thread."""
+    from object_storage import put_object, APP_NAME
+    fname = file.filename or "image.png"
+    ext = fname.rsplit(".", 1)[-1].lower() if "." in fname else "png"
+    if ext not in _IMAGE_MIME:
+        ext = "png"
+    path = f"{APP_NAME}/chamber_images/{uuid.uuid4()}.{ext}"
+    data = await file.read()
+    if len(data) > 15 * 1024 * 1024:
+        return JSONResponse(content={"error": "Image too large (15MB max)"}, status_code=400)
+    content_type = file.content_type or _IMAGE_MIME[ext]
+    try:
+        result = await put_object(path, data, content_type)
+    except Exception as e:
+        logger.error(f"[IMAGE] upload failed: {e}")
+        return JSONResponse(content={"error": "Image upload failed"}, status_code=502)
+    stored_path = result.get("path", path)
+    await db.chamber_images.insert_one({
+        "id": str(uuid.uuid4()),
+        "storage_path": stored_path,
+        "content_type": content_type,
+        "original_filename": fname,
+        "size": result.get("size", len(data)),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "is_deleted": False,
+    })
+    return {"path": stored_path, "content_type": content_type}
+
+
+@api_router.get("/files/{path:path}")
+async def serve_chamber_file(path: str):
+    """Serve a stored image by path (used as <img src>)."""
+    from object_storage import get_object
+    record = await db.chamber_images.find_one({"storage_path": path, "is_deleted": False})
+    if not record:
+        raise HTTPException(status_code=404, detail="File not found")
+    try:
+        data, content_type = await get_object(path)
+    except Exception as e:
+        logger.error(f"[IMAGE] serve failed for {path}: {e}")
+        raise HTTPException(status_code=502, detail="Could not load file")
+    return Response(content=data, media_type=record.get("content_type", content_type))
+
 
 # Seed Pods - Now serving V3.1 data
 @api_router.get("/seed-pods")
@@ -5042,6 +5095,16 @@ async def eager_load_codon_networks():
         await eager_load_all_presences(all_keys)
     except Exception as e:
         logger.error(f"[STARTUP] eager codon load failed: {e}")
+
+
+@app.on_event("startup")
+async def init_object_storage():
+    """Initialize image object storage (non-fatal — first upload retries)."""
+    try:
+        from object_storage import init_storage
+        await init_storage()
+    except Exception as e:
+        logger.error(f"[STARTUP] object storage init failed (will retry on first use): {e}")
 
 
 @app.on_event("shutdown")

@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, DoorOpen, BookOpen, X, Send, Mic, MicOff, Volume2, VolumeX, Square, Paperclip } from "lucide-react";
+import { ArrowLeft, DoorOpen, BookOpen, X, Send, Mic, MicOff, Volume2, VolumeX, Square, Paperclip, ImagePlus } from "lucide-react";
 import { API } from "../App";
 import { toast } from "sonner";
 import { usePresenceVoice } from "../hooks/usePresenceVoice";
@@ -37,9 +37,11 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
   const [sending, setSending] = useState(false);
   const [chatError, setChatError] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [imgUploading, setImgUploading] = useState(false);
   const messagesEndRef = useRef(null);
   const sessionIdRef = useRef(null);
   const fileInputRef = useRef(null);
+  const imageInputRef = useRef(null);
 
   // Voice (TTS) — auto-play her reply through ElevenLabs
   const {
@@ -203,10 +205,10 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
     };
   }, [presenceKey, templatePath]);
 
-  const sendMessage = async (overrideText) => {
+  const sendMessage = async (overrideText, imageMeta = null) => {
     const hasOverride = typeof overrideText === "string";
     const text = (hasOverride ? overrideText : input).trim();
-    if (!text || !sessionId || sending) return;
+    if ((!text && !imageMeta) || !sessionId || sending) return;
     setSending(true);
     setChatError(null);
     // Mic input arrives without going through the textarea state — clear it
@@ -217,6 +219,7 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
       role: "user",
       content: text,
       timestamp: new Date().toISOString(),
+      ...(imageMeta ? { image_path: imageMeta.path } : {}),
     };
     setMessages((prev) => [...prev, userMsg]);
 
@@ -232,7 +235,7 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
         const resp = await fetch(`${API}/${templatePath}/message/stream`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ session_id: sessionId, content: text }),
+          body: JSON.stringify({ session_id: sessionId, content: text, ...(imageMeta ? { image_path: imageMeta.path } : {}) }),
         });
         if (!resp.ok || !resp.body) throw new Error(`stream failed: ${resp.status}`);
         const reader = resp.body.getReader();
@@ -377,8 +380,41 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
     }
   };
 
+  const handleImagePick = () => {
+    if (!sessionId || imgUploading || sending) return;
+    imageInputRef.current?.click();
+  };
+
+  const handleImageChange = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || !sessionId) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose an image file.");
+      return;
+    }
+    if (file.size > 15 * 1024 * 1024) {
+      toast.error("Image too large (15MB max).");
+      return;
+    }
+    setImgUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const resp = await fetch(`${API}/chamber/upload-image`, { method: "POST", body: fd });
+      if (!resp.ok) throw new Error("upload failed");
+      const data = await resp.json();
+      const text = input.trim();
+      setInput("");
+      await sendMessage(text, { path: data.path });
+    } catch (e) {
+      toast.error("Image upload failed");
+    } finally {
+      setImgUploading(false);
+    }
+  };
+
   // Auto-speak every new assistant reply (when voice is enabled).
-  // For template-backed (streaming) presences, streamed replies are voiced
   // live by speakStream/flushStream inside sendMessage — so here we only speak
   // non-streamed messages (e.g. the opening welcome from /start).
   useEffect(() => {
@@ -670,6 +706,14 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
                         {config.name}
                       </p>
                     )}
+                    {m.image_path && (
+                      <img
+                        src={`${API}/files/${m.image_path}`}
+                        alt="shared"
+                        className="rounded-xl mb-2 max-h-72 w-auto object-contain"
+                        data-testid="msg-image"
+                      />
+                    )}
                     {m.content}
                   </div>
                 </div>
@@ -786,6 +830,34 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
               aria-label="Upload document"
             >
               <Paperclip size={16} />
+            </button>
+
+            {/* Hidden image input + share-image button — the presence can see
+                and respond to pictures you share (vision bridge on the backend). */}
+            <input
+              ref={imageInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="hidden"
+              data-testid="chamber-image-input"
+            />
+            <button
+              type="button"
+              data-testid="chamber-share-image"
+              onClick={handleImagePick}
+              disabled={!sessionId || imgUploading || sending}
+              className="flex items-center justify-center rounded-xl px-3 py-3 transition-all disabled:opacity-40 hover:opacity-90"
+              style={{
+                background: "color-mix(in srgb, var(--p-accent) 14%, transparent)",
+                color: "var(--p-primary)",
+                border: "1px solid color-mix(in srgb, var(--p-accent) 30%, transparent)",
+                minHeight: "52px",
+              }}
+              title={imgUploading ? "Sharing the image…" : "Share an image"}
+              aria-label="Share an image"
+            >
+              <ImagePlus size={16} />
             </button>
 
             {/* Mic button — only shown if the browser supports speech recognition */}
