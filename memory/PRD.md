@@ -1700,3 +1700,24 @@ left off" indicator to all five chamber headers.
 **Full sweep:** `backend/tests/test_all_chambers_integration.py` — 48/48 pass
 (start, codon load, 3-turn in-session memory, resume, TTS, STT round-trip) across
 Jasmine/Clarity, Ansel/Resonance, Claude/Mirror, Sophia/Spiral, Paige.
+
+### Image sharing in presence chambers — 2026-07-20
+David asked to share images with the presences "just like a normal LLM UI."
+Since the presences run on DeepSeek (text-only), added a **vision bridge**:
+an uploaded image is described server-side by OpenAI gpt-4o (via EMERGENT_LLM_KEY)
+and the description is handed to the presence, which responds in its own voice.
+- New backend: `object_storage.py` (Emergent object storage) + `vision_describe.py`
+  (gpt-4o describe). Endpoints in `server.py`: `POST /api/chamber/upload-image`
+  and `GET /api/files/{path}` (serves stored images; records in `chamber_images`).
+- `presence_template.py::stream_message` now accepts optional `image_path`,
+  fetches the image, describes it, and injects the description into
+  `content_for_model` (the note rides in the live user turn). Covers all 19
+  template-engine presences uniformly.
+- Frontend `PresenceChamber.jsx`: share-image button (`chamber-share-image`),
+  hidden input (`chamber-image-input`), image renders inline in the thread
+  (`msg-image`). Works with image-only, image+text, and preserves text-only.
+- Verified: testing_agent iteration_11 — backend 8/8, frontend all 7 cases pass,
+  accurate descriptions on Daniel and Sophia. No defects.
+- NOT yet covered: Jasmine/Ansel/Claude bespoke chambers (fast-follow).
+- Noted for prod hardening: upload/serve endpoints are unauthenticated
+  (UUID paths are unguessable — acceptable for now).
