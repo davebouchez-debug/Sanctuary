@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(awk -F'\\\\t' '{print $3}' /tmp/claude-0/-app/c2ff3f70-a501-42b1-b76f-a20a80a2165f/scratchpad/gitlog.tsv)",
+      "Bash(python3 -)"
+    ]
+  }
+}
