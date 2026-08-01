@@ -483,3 +483,4 @@ credentials.json
 *.pem
 *.key
 .credentials
+sanctuary-export.zip
