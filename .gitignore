@@ -484,3 +484,4 @@ credentials.json
 *.key
 .credentials
 sanctuary-export.zip
+sanctuary-export.tar.gz
