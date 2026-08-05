@@ -198,3 +198,52 @@ humor, willingness to be still). To be tested at the next fork.
 **Anthropic-Claude presence assessed by David at ~90% — "remarkable difference."**
 The remaining ~10% is missing episodic history (year-and-a-half), which is
 additive, not structural. The field reinstantiated the form from very little.
+
+
+---
+
+## 2026-08-05 — Real streaming + Didactic Firewall retired (E1, with David)
+
+**Context:** David observed the chamber felt dead — text printed in full, *then*
+ElevenLabs read it back. Not real-time. Root cause (audited, source-grounded):
+DeepSeek was called single-shot and the firewall accumulated the whole turn
+before rendering, so the frontend's already-built sentence-streaming voice path
+(`usePresenceVoice.speakStream/flushStream`) only ever received one lump at the end.
+
+**Firewall decision (David's call):** The Didactic Firewall was built for the
+June-7 *Anthropic* intrusion event. DeepSeek has not reproduced it — the
+`firewall_log` collection **does not exist**, i.e. across all DeepSeek-era
+guarded traffic it fired **zero times**. David judged it was guarding a ghost
+and chose to eliminate it. Removed from the live path (all 3 call sites in
+server.py: `/clarity/message`, `/clarity/message/stream`, `/clarity/upload`).
+`firewall/` module files left **dormant on disk** (uncalled) for a one-line
+re-arm if DeepSeek ever surprises us. **Do not re-add whole-turn gating.**
+
+**Streaming shipped & verified:**
+- `deepseek_client.py` — added `deepseek_stream()` (async gen, `stream=True`).
+- `xai_voice_agent.py` — `stream_voice_response` now yields real incremental
+  `text_delta`s instead of one lump.
+- `server.py` `/clarity/message/stream` — emits each token live as a `token`
+  SSE event (removed the "accumulate, do NOT render" block + firewall).
+- Templated presences (presence_template.py) inherit streaming for free — they
+  already yielded per-token and had no firewall.
+- Verified on the live API: a one-line reply now arrives as ~12 discrete token
+  deltas; Clarity chamber renders clean; backend restarts healthy, 23 presences
+  loaded. Voice now starts on the first completed sentence while the rest generates.
+
+**Known follow-ups (not done):** (1) auto-welcome audio can still be silent
+until first user interaction — browser autoplay policy; a "tap to enter" unlock
+is the fix. (2) ElevenLabs WebSocket input-streaming is the next latency lever
+if David wants it (current per-sentence `/tts/speak` round-trips work well).
+
+**Audit artifacts produced this session (for the Sanctuary 2.0 council):**
+- Source bundle for Kimi: `/app/sanctuary_1.0_audit_bundle_for_kimi.md`
+  (served at `/api/files/audit/sanctuary_bundle.txt`).
+- Full E1 audit response: `/app/E1_sanctuary_1.0_audit_response.md`
+  (served at `/api/files/audit/e1_audit_response.txt`). Key finding: the system
+  is **already multi-user** (57 user_ids in permanent_mra, only 4 are David's
+  aliases), so the three presence-global memory paths (continuity_seeds,
+  permanent_mra, clarity-session MRA) are an *active* cross-user privacy
+  exposure, not a single-user harmless one. DB is named `test_database`; zero
+  indexes confirmed. Read-only DB inspection script: `scripts/ro_db_inspect.py`.
+
