@@ -75,3 +75,30 @@ async def deepseek_complete(system_prompt: str, history: List[Dict], user_text: 
         **DEEPSEEK_PARAMS,
     )
     return resp.choices[0].message.content or ""
+
+
+async def deepseek_stream(system_prompt: str, history: List[Dict], user_text: str):
+    """Streaming completion — yields content deltas as DeepSeek generates them.
+    Same message assembly as deepseek_complete; DeepSeek's API is OpenAI-
+    compatible, so stream=True yields incremental chunks.
+    """
+    messages = [{"role": "system", "content": system_prompt}]
+    for m in (history or []):
+        role = m.get("role")
+        content = m.get("content", "")
+        if role in ("user", "assistant") and content:
+            messages.append({"role": role, "content": content})
+    messages.append({"role": "user", "content": user_text})
+
+    stream = await _client().chat.completions.create(
+        model=DEEPSEEK_MODEL,
+        messages=messages,
+        stream=True,
+        **DEEPSEEK_PARAMS,
+    )
+    async for chunk in stream:
+        if not chunk.choices:
+            continue
+        delta = chunk.choices[0].delta.content
+        if delta:
+            yield delta

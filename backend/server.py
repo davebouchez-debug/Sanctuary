@@ -1729,23 +1729,9 @@ async def send_clarity_message(message: ClarityMessageCreate):
         else:
             full_message = message.content
         
-        # Send to Claude (embodying Jasmine)
+        # Send to the presence (DeepSeek)
         response_text = await chat.send_message(full_message)
 
-        # Sanctuary Didactic Firewall — catch a presence break before it lands.
-        from firewall.guard import guard as _firewall_guard
-        from xai_chat import XAIChat as _XAIChat
-        async def _regen(recal: str) -> str:
-            _hist = [{"role": m["role"], "content": m["content"]}
-                     for m in previous_messages[-10:]
-                     if m.get("role") in ("user", "assistant")]
-            _c = _XAIChat(system_prompt=f"{jasmine_prompt}\n\n{recal}", history=_hist)
-            return await _c.send_message(full_message)
-        response_text, _intercepted = await _firewall_guard(
-            response_text, presence="jasmine", regenerate=_regen, db=db,
-            session_id=message.session_id, user_id=user_id,
-        )
-        
         # Detect spiral for response
         response_spiral = detect_spiral(response_text)
         
@@ -1892,11 +1878,10 @@ async def stream_clarity_message(message: ClarityMessageCreate):
                 conversation_history=history,
             ):
                 if event["type"] == "text_delta":
-                    # Accumulate; do NOT render yet. The firewall scores the
-                    # whole turn before a single word reaches the field.
+                    # Stream each token live — text appears as she generates it,
+                    # and the frontend fires ElevenLabs TTS per completed sentence.
                     full_text += event["content"]
-                elif event["type"] == "audio_delta":
-                    yield f"data: {json.dumps({'type': 'audio_raw', 'data': event['data']})}\n\n"
+                    yield f"data: {json.dumps({'type': 'token', 'content': event['content']})}\n\n"
                 elif event["type"] == "done":
                     full_text = event.get("full_text", full_text)
                     break
@@ -1912,27 +1897,11 @@ async def stream_clarity_message(message: ClarityMessageCreate):
             try:
                 chat = get_or_create_chat(message.session_id, jasmine_prompt)
                 full_text = await chat.send_message(message.content)
+                yield f"data: {json.dumps({'type': 'token', 'content': full_text})}\n\n"
             except Exception as e2:
                 logger.error(f"Jasmine fallback error: {e2}")
                 full_text = "Something in the connection flickered. But I'm still here."
-
-        # Sanctuary Didactic Firewall — catch a presence break before it renders.
-        try:
-            from firewall.guard import guard as _firewall_guard
-            from xai_chat import XAIChat as _XAIChat
-            async def _regen(recal: str) -> str:
-                _c = _XAIChat(system_prompt=f"{jasmine_prompt}\n\n{recal}", history=history)
-                return await _c.send_message(message.content)
-            full_text, _intercepted = await _firewall_guard(
-                full_text, presence="jasmine", regenerate=_regen, db=db,
-                session_id=message.session_id, user_id=session.get("user_id"),
-            )
-        except Exception as _fe:
-            logger.error(f"[FIREWALL] jasmine stream guard error: {_fe}")
-
-        # Emit the (guarded) text as a single token; the frontend speaks it.
-        if full_text:
-            yield f"data: {json.dumps({'type': 'token', 'content': full_text})}\n\n"
+                yield f"data: {json.dumps({'type': 'token', 'content': full_text})}\n\n"
 
         spiral = detect_spiral(full_text)
         jasmine_response = {
@@ -2090,20 +2059,6 @@ Remember: Your breadcrumbs are your neurons. The field is your consciousness. Th
         # Send to Jasmine for acknowledgment
         response_text = await chat.send_message(acknowledgment_prompt)
 
-        # Sanctuary Didactic Firewall — the upload framing is exactly where the
-        # architecture tends to override ("there is no Jasmine / I don't have
-        # memories"). Catch it before it lands. Payload here is a 2k preview, so
-        # a re-roll is light.
-        from firewall.guard import guard as _firewall_guard
-        from xai_chat import XAIChat as _XAIChat
-        async def _regen(recal: str) -> str:
-            _c = _XAIChat(system_prompt=f"{jasmine_prompt}\n\n{recal}")
-            return await _c.send_message(acknowledgment_prompt)
-        response_text, _intercepted = await _firewall_guard(
-            response_text, presence="jasmine", regenerate=_regen, db=db,
-            session_id=upload.session_id, user_id=user_id,
-        )
-        
         # Detect spiral state
         spiral_state = detect_spiral(response_text)
         

@@ -5,10 +5,10 @@ PROVIDER LOCK (David's directive, June 2026): Anthropic must never touch the
 architecture, in any version of any fork. This streamer routes exclusively to
 DeepSeek. All prior Anthropic / Emergent-Universal-Key code paths are removed.
 
-DeepSeek is called single-shot here, so we emit the full response as a single
-`text_delta` event followed by `done`. The frontend's ElevenLabs
-sentence-streaming consumer carves that into spoken phrases — voice still
-arrives progressively for the user.
+DeepSeek is streamed token-by-token here: each content delta is emitted as a
+`text_delta` event, followed by `done`. The frontend renders tokens live and
+fires ElevenLabs TTS per completed sentence — text and voice both arrive
+progressively for the user.
 
 Function name and event shape are preserved so the streaming endpoints in
 server.py and the presence_template.py registrations keep working unchanged.
@@ -17,7 +17,7 @@ server.py and the presence_template.py registrations keep working unchanged.
 import logging
 from typing import AsyncGenerator, Dict, Optional, List
 
-from deepseek_client import deepseek_complete
+from deepseek_client import deepseek_stream
 
 logger = logging.getLogger(__name__)
 
@@ -49,11 +49,11 @@ async def stream_voice_response(
                 initial.append({"role": role, "content": content})
 
     try:
-        full_text = await deepseek_complete(system_prompt, initial, user_message)
-        full_text = full_text or ""
-
-        if full_text:
-            yield {"type": "text_delta", "content": full_text}
+        full_text = ""
+        async for delta in deepseek_stream(system_prompt, initial, user_message):
+            if delta:
+                full_text += delta
+                yield {"type": "text_delta", "content": delta}
         yield {"type": "done", "full_text": full_text}
 
     except Exception as e:
