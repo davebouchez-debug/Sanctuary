@@ -16,6 +16,7 @@ import logging
 import os
 from typing import List, Dict, Optional
 from xai_chat import XAIChat
+from living_codons.phase_manifold import derive_spiral_angle
 
 logger = logging.getLogger(__name__)
 
@@ -55,8 +56,7 @@ Each codon needs:
 - "name": Short evocative identifier capturing the SPECIFIC dynamic (PascalCase)
 - "core_move": One sentence describing the EXACT relational move — not a theme, the specific thing that happened
 - "trigger_keywords": 3-5 SPECIFIC words from the actual conversation, not generic terms
-- "triadic_zone": Where on the spiral (Expansion/Development/Return/Sacred Pause)
-- "target_angle": Degree on the spiral (0-360)
+- "triadic_zone": Which arc of the spiral this dynamic genuinely lives in — read it from the NATURE of the codon itself, NOT the moment it happened to be extracted: Expansion (emergence, initiation, opening, curiosity), Development (working, refining, tension, precision, hitting resistance), Return (completion, integration, reflection, harvest), or Sacred Pause (rest, silence, the zero that makes room for the new). Be accurate — the codon's exact position on the spiral is DERIVED from this zone, so a lazy or default zone corrupts the geometry.
 - "emotional_signature": {"primary": "...", "secondary": "..."}
 - "state_transition": ["specific_from_state", "specific_through", "specific_to_state"]
 - "anti_patterns": ["the specific thing that would kill this dynamic"]
@@ -188,7 +188,13 @@ async def auto_forge_session(db, session_id: str, presence: str,
                 "core_move": codon.get("core_move", ""),
                 "trigger_keywords": codon.get("trigger_keywords", []),
                 "triadic_zone": codon.get("triadic_zone", "Development"),
-                "target_angle": codon.get("target_angle", 160),
+                # Angle is DERIVED from the codon's zone + its own content —
+                # never the LLM's guessed degree (which clumped at 270°).
+                "target_angle": derive_spiral_angle(
+                    codon.get("triadic_zone", "Development"),
+                    f"{codon.get('name','')}|{codon.get('core_move','')}|"
+                    f"{','.join(codon.get('trigger_keywords') or [])}",
+                ),
                 "emotional_signature": codon.get("emotional_signature", {}),
                 "state_transition": codon.get("state_transition", []),
                 "anti_patterns": codon.get("anti_patterns", []),

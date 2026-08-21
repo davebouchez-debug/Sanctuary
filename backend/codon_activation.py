@@ -267,39 +267,71 @@ async def get_full_field_context(presence: str, message: str = None) -> str:
 
     nodes = list(network.nodes.values())
     if message:
+        # KEYWORD-FIRST RANKED SELECTION.
+        # The field is large (~1k codons for Sophia) and the forged spiral
+        # angles were historically unreliable (defaulted to a single zone
+        # center), so PHASE is only a gentle tiebreaker here — keyword
+        # resonance is the trustworthy signal. Score every codon by how many
+        # of its trigger keywords actually appear in the message, break ties
+        # by spiral proximity, and keep the sharpest handful. If nothing
+        # resonates she gets the WHOLE field — never left empty.
+        import re
+        _msg = message.lower()
+        _tokens = set(re.findall(r"[a-z0-9']+", _msg))
         try:
             from living_codons.phase_manifold import infer_phase_from_message
             _phase = infer_phase_from_message(message)
         except Exception:
             _phase = None
-        _msg = message.lower()
+
+        CAP = 20
+        PHASE_WINDOW = 15.0
 
         def _kws(c):
-            m = c.metadata or {}
             t = getattr(c, "trigger", None)
-            if isinstance(t, (list, tuple)):
-                return list(t)
-            return m.get("trigger_keywords") or m.get("surface_pattern") or []
+            if isinstance(t, dict):
+                kws = t.get("surface_pattern") or []
+            elif isinstance(t, (list, tuple)):
+                kws = list(t)
+            else:
+                kws = []
+            if not kws:
+                kws = (c.metadata or {}).get("trigger_keywords") or []
+            return kws
 
-        def _resonates(c):
+        def _keyword_hits(c):
+            hits = 0
             for k in _kws(c):
                 k = str(k).strip().lower()
-                if k and k in _msg:
-                    return True
-            if _phase is not None:
-                m = c.metadata or {}
-                try:
-                    ang = float(getattr(c, "target_angle", None) or m.get("target_angle", 160))
-                    if ang != 160.0 and abs((ang - _phase + 180) % 360 - 180) <= 45:
-                        return True
-                except Exception:
-                    pass
-            return False
+                if not k:
+                    continue
+                if " " in k:          # multi-word phrase → substring match
+                    if k in _msg:
+                        hits += 1
+                elif k in _tokens:    # single word → whole-token match
+                    hits += 1
+            return hits
 
-        selected = [c for c in nodes if _resonates(c)]
-        if selected:            # relevance-selected subset for this moment
-            nodes = selected
-        # else: fall back to the WHOLE field — she is never left empty
+        def _phase_strength(c):
+            if _phase is None:
+                return 0.0
+            try:
+                ang = float(c.target_angle)
+            except Exception:
+                return 0.0
+            delta = abs((ang - _phase + 180) % 360 - 180)
+            return max(0.0, 1.0 - delta / PHASE_WINDOW)
+
+        scored = []
+        for c in nodes:
+            hits = _keyword_hits(c)
+            if hits > 0:
+                # keyword count dominates; phase is a sub-1.0 tiebreaker
+                scored.append((hits + _phase_strength(c) * 0.1, c))
+        if scored:
+            scored.sort(key=lambda x: x[0], reverse=True)
+            nodes = [c for _, c in scored[:CAP]]
+        # else: no keyword resonance — hand her the whole field (never empty)
 
     by_zone = {z: [] for z in ZONE_ORDER}
     for codon in nodes:

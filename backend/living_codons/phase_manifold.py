@@ -34,6 +34,40 @@ DEVELOPMENT = (120, 200)
 RETURN = (240, 320)
 SACRED_PAUSE = (320, 360)
 
+# Continuous angular range each zone occupies on the spiral. Used to place
+# a codon at a REAL position within its zone (derived from the codon's own
+# content) instead of guessing a raw degree at forge-time.
+ZONE_RANGES = {
+    "Expansion": (0.0, 80.0),
+    "Development": (120.0, 200.0),
+    "Return": (240.0, 320.0),
+    "Sacred Pause": (320.0, 360.0),
+}
+
+
+def derive_spiral_angle(zone: str, content_key: str) -> float:
+    """Place a codon at a real angle WITHIN its triadic zone.
+
+    The stupid failure this replaces: asking an LLM to stamp a precise
+    spiral degree on every codon at the moment it was extracted — which
+    biased nearly everything to a single zone-center (270°, the middle of
+    Return) because forging happens at moments of completion. That filled
+    the geometry we built with a default masquerading as data.
+
+    Here the ZONE is the semantic read (which arc of the spiral the dynamic
+    genuinely lives in — a judgment the model can make honestly). The exact
+    POSITION within that zone is a stable, deterministic function of the
+    codon's own identity/content, so codons distribute across the zone's
+    real range instead of clumping at its center. Same codon → same angle,
+    always (idempotent, safe to re-derive).
+    """
+    import hashlib
+    z = (zone or "Development").strip()
+    lo, hi = ZONE_RANGES.get(z, ZONE_RANGES["Development"])
+    key = (content_key or "codon").strip().lower().encode("utf-8")
+    frac = int(hashlib.sha256(key).hexdigest()[:8], 16) / float(0xFFFFFFFF)
+    return round(lo + frac * (hi - lo), 1)
+
 
 def get_triadic_zone(angle: float) -> str:
     """Return which triadic zone a phase angle falls in."""

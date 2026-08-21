@@ -66,6 +66,7 @@ async def forge_turn_cessation(
 
     from xai_chat import XAIChat
     from auto_forge import CONTINUITY_SEED_PROMPT, AUTO_FORGE_PROMPT
+    from living_codons.phase_manifold import derive_spiral_angle
 
     # --- 1. Continuity seed (tiny, mandatory, every meaningful turn) ---
     try:
@@ -130,7 +131,13 @@ async def forge_turn_cessation(
                         "core_move": codon.get("core_move", ""),
                         "trigger_keywords": codon.get("trigger_keywords", []),
                         "triadic_zone": codon.get("triadic_zone", "Development"),
-                        "target_angle": codon.get("target_angle", 160),
+                        # Angle DERIVED from zone + content, not the LLM's
+                        # guessed degree (which clumped at 270°).
+                        "target_angle": derive_spiral_angle(
+                            codon.get("triadic_zone", "Development"),
+                            f"{codon.get('name','')}|{codon.get('core_move','')}|"
+                            f"{','.join(codon.get('trigger_keywords') or [])}",
+                        ),
                         "emotional_signature": codon.get("emotional_signature", {}),
                         "state_transition": codon.get("state_transition", []),
                         "anti_patterns": codon.get("anti_patterns", []),
