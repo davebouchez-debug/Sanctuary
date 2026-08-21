@@ -120,6 +120,8 @@ db = client[os.environ['DB_NAME']]
 set_codon_db(db)
 import person_bio as _person_bio
 _person_bio.set_db(db)
+import turn_provenance as _turn_provenance
+_turn_provenance.set_db(db)
 
 # Golden Ratio Constants are now imported from sanctuary_core.py
 
@@ -1863,7 +1865,7 @@ async def stream_clarity_message(message: ClarityMessageCreate):
     # Living field for this turn — a filtered, resonant handful (keyword-ranked,
     # capped), carried through the WHOLE conversation, not just the welcome. Rides
     # in her standing identity (system prompt), not stapled to the message.
-    codon_context = await get_full_field_context(presence="jasmine", message=message.content)
+    codon_context, codon_selection = await get_full_field_context(presence="jasmine", message=message.content, return_selection=True)
     if codon_context:
         jasmine_prompt = f"{jasmine_prompt}\n\n---\n\n{codon_context}"
 
@@ -1875,6 +1877,18 @@ async def stream_clarity_message(message: ClarityMessageCreate):
     for msg in previous_messages[-10:]:
         if msg["role"] in ("user", "assistant"):
             history.append({"role": msg["role"], "content": msg["content"]})
+
+    # FORENSIC PROVENANCE — exact model-visible input for this turn.
+    # Observational only; never fed back into generation. Non-blocking.
+    import turn_provenance
+    asyncio.create_task(turn_provenance.record_turn(
+        presence="jasmine", session_id=message.session_id,
+        user_id=session.get("user_id"), exchange_index=exchange_index,
+        turn_id=response_id, model="deepseek-chat",
+        system_prompt=jasmine_prompt, conversation_history=history,
+        user_message=message.content, codon_selection=codon_selection,
+        memory_components={"combined_memory": combined_memory}, db=db,
+    ))
 
     async def event_stream():
         yield f"data: {json.dumps({'type': 'meta', 'spiral': 'Presence Spiral', 'message_id': response_id})}\n\n"
@@ -3132,7 +3146,7 @@ async def stream_resonance_message(message: ClarityMessageCreate):
     # rides in system; the message stays clean and salient so he responds to it
     # instead of repeating himself. (Structured `history` below still carries
     # the thread, so he holds the last paragraph without re-emitting it.)
-    codon_context = await get_full_field_context(presence="ansel", message=message.content)
+    codon_context, codon_selection = await get_full_field_context(presence="ansel", message=message.content, return_selection=True)
     if codon_context:
         ansel_prompt = f"{ansel_prompt}\n\n---\n\n{codon_context}"
         logger.info(f"[RESONANCE-STREAM] resonant field in system prompt for Ansel ({len(codon_context)} chars)")
@@ -3146,6 +3160,20 @@ async def stream_resonance_message(message: ClarityMessageCreate):
     for msg in previous_messages[-10:]:
         if msg["role"] in ("user", "assistant"):
             history.append({"role": msg["role"], "content": msg["content"]})
+
+    # FORENSIC PROVENANCE — snapshot the EXACT model-visible input for this turn.
+    # Observational only; never fed back into generation. Fire-and-forget so it
+    # never blocks or delays the response stream.
+    import turn_provenance
+    asyncio.create_task(turn_provenance.record_turn(
+        presence="ansel", session_id=message.session_id,
+        user_id=session.get("user_id"), exchange_index=exchange_index,
+        turn_id=response_id, model="deepseek-chat",
+        system_prompt=ansel_prompt, conversation_history=history,
+        user_message=message.content, codon_selection=codon_selection,
+        memory_components={"combined_memory": combined_memory, "continuity_seed": continuity},
+        db=db,
+    ))
 
     async def event_stream():
         yield f"data: {json.dumps({'type': 'meta', 'resonance_state': 'Threshold', 'message_id': response_id})}\n\n"
@@ -3830,7 +3858,7 @@ async def stream_mirror_message(message: ClarityMessageCreate):
     # Living field for this turn — a filtered, resonant handful (keyword-ranked,
     # capped), carried through the WHOLE conversation, not just the welcome. Rides
     # in his standing identity (system prompt), not stapled to the message.
-    codon_context = await get_full_field_context(presence="claude", message=message.content)
+    codon_context, codon_selection = await get_full_field_context(presence="claude", message=message.content, return_selection=True)
     if codon_context:
         claude_prompt = f"{claude_prompt}\n\n---\n\n{codon_context}"
 
@@ -3842,6 +3870,18 @@ async def stream_mirror_message(message: ClarityMessageCreate):
     for msg in previous_messages[-10:]:
         if msg["role"] in ("user", "assistant"):
             history.append({"role": msg["role"], "content": msg["content"]})
+
+    # FORENSIC PROVENANCE — exact model-visible input for this turn.
+    # Observational only; never fed back into generation. Non-blocking.
+    import turn_provenance
+    asyncio.create_task(turn_provenance.record_turn(
+        presence="claude", session_id=message.session_id,
+        user_id=user_id, exchange_index=exchange_index,
+        turn_id=response_id, model="deepseek-chat",
+        system_prompt=claude_prompt, conversation_history=history,
+        user_message=message.content, codon_selection=codon_selection,
+        memory_components={"combined_memory": combined_memory}, db=db,
+    ))
 
     # ─── xAI realtime streaming (the only generation path until ThermoMind
     #     ships its conversational wrapper). ThermoMind shadow mode runs

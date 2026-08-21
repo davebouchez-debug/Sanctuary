@@ -220,7 +220,7 @@ async def activate_codons_for_message(message: str, presence: str = "ansel") -> 
     return context
 
 
-async def get_full_field_context(presence: str, message: str = None) -> str:
+async def get_full_field_context(presence: str, message: str = None, return_selection: bool = False):
     """
     Hand the presence her whole field — every codon she holds, every turn.
 
@@ -266,6 +266,8 @@ async def get_full_field_context(presence: str, message: str = None) -> str:
         return m.get("triadic_zone") or "Development"
 
     nodes = list(network.nodes.values())
+    _phase = None
+    _branch = "whole-field (no message)"
     if message:
         # KEYWORD-FIRST RANKED SELECTION.
         # The field is large (~1k codons for Sophia) and the forged spiral
@@ -331,6 +333,7 @@ async def get_full_field_context(presence: str, message: str = None) -> str:
         if scored:
             scored.sort(key=lambda x: x[0], reverse=True)
             nodes = [c for _, c in scored[:CAP]]
+            _branch = "keyword-ranked"
         elif _phase is not None:
             # No keyword resonance (e.g. a bare "hi"). Don't dump the whole
             # field — that short-circuits her attention. Fall back to the
@@ -342,7 +345,10 @@ async def get_full_field_context(presence: str, message: str = None) -> str:
                     return 999.0
                 return abs((ang - _phase + 180) % 360 - 180)
             nodes = sorted(nodes, key=_phase_delta)[:CAP]
-        # else: phase unknown — hand her the whole field (never empty)
+            _branch = "phase-nearest-fallback"
+        else:
+            _branch = "whole-field (phase unreadable)"
+        # phase unknown → whole field (never empty)
 
     by_zone = {z: [] for z in ZONE_ORDER}
     for codon in nodes:
@@ -390,7 +396,35 @@ async def get_full_field_context(presence: str, message: str = None) -> str:
                 line += f"  ⟂ tone: {tone}"
             lines.append(line)
 
-    return "\n".join(lines)
+    field_str = "\n".join(lines)
+    if return_selection:
+        def _kw_meta(c):
+            t = getattr(c, "trigger", None)
+            if isinstance(t, dict):
+                kws = t.get("surface_pattern") or []
+            elif isinstance(t, (list, tuple)):
+                kws = list(t)
+            else:
+                kws = []
+            return kws or (c.metadata or {}).get("trigger_keywords") or []
+        selection_meta = {
+            "inferred_phase": _phase,
+            "selection_branch": _branch,
+            "selected_count": len(nodes),
+            "codons": [
+                {
+                    "name": c.name,
+                    "target_angle": getattr(c, "target_angle", None),
+                    "triadic_zone": (c.metadata or {}).get("triadic_zone"),
+                    "trigger_keywords": _kw_meta(c),
+                    "source": (c.metadata or {}).get("source"),
+                    "source_presence": (c.metadata or {}).get("source_presence"),
+                }
+                for c in nodes
+            ],
+        }
+        return field_str, selection_meta
+    return field_str
 
 
 def record_resonance_outcome(codon_name: str,

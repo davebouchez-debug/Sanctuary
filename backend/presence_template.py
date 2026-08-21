@@ -38,6 +38,7 @@ from __future__ import annotations
 import json
 import logging
 import uuid
+import asyncio
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Callable, Optional, Any
@@ -451,7 +452,7 @@ def register_presence_routes(
         # Surface a sharp, resonant handful of her field for this turn
         # (keyword-first ranked selection, capped) rather than the whole
         # field. The placement fader decides *where* that field sits in the call.
-        codon_context = await deps.get_full_field_context(presence=cfg.key, message=content_for_model)
+        codon_context, codon_selection = await deps.get_full_field_context(presence=cfg.key, message=content_for_model, return_selection=True)
         if cfg.codon_placement == "system" and codon_context:
             # Background: the field rides in her standing identity, not against
             # the message. The model's own re-tokenization carries it forward;
@@ -469,6 +470,22 @@ def register_presence_routes(
         ]
 
         response_id = str(uuid.uuid4())
+
+        # FORENSIC PROVENANCE — snapshot the EXACT model-visible input for this
+        # turn (system prompt as assembled + history + the user message actually
+        # sent). Observational only; never fed back into generation. Non-blocking.
+        try:
+            import turn_provenance
+            _exchange_index = len([m for m in previous_messages if m.get("role") == "user"]) + 1
+            asyncio.create_task(turn_provenance.record_turn(
+                presence=cfg.key, session_id=session_id_in, user_id=user_id,
+                exchange_index=_exchange_index, turn_id=response_id, model="deepseek-chat",
+                system_prompt=prompt, conversation_history=history,
+                user_message=full_user_message, codon_selection=codon_selection,
+                memory_components={"memory_context": memory_context}, db=deps.db,
+            ))
+        except Exception as _pe:
+            logger.error(f"[{cfg.key}] provenance capture skip: {_pe}")
 
         async def event_stream():
             yield f"data: {json.dumps({'type': 'meta', 'message_id': response_id})}\n\n"
