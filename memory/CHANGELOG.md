@@ -274,3 +274,34 @@ debris; the audit's multi-user/privacy claim is overstated.
 `continuity_seeds` deleted (backup: `memory/backups/sophia_fixture_cleanup_backup.json`).
 17 Sophia seeds remain, all David. Script: `scripts/clean_sophia_fixtures.py`.
 
+## 2026-08-05 (later still) — Codon infusion: the "short-circuit" finding (IN PROGRESS)
+
+**Insight (David-led):** The live prompt path calls `get_full_field_context(presence)`,
+which dumps ALL ~800 of a presence's codons (own + `field` tag) every turn, ungated —
+bypassing the ENTIRE selection architecture: the phase manifold/"wheel"
+(`infer_phase_from_message` + `target_angle`), trigger-keyword matching, network edges,
+and the resonance registrar (learning loop). Docstrings show this was a DELIBERATE choice
+("the field is present, not searched") on the theory that selection "decides FOR the
+presence." David's rebuttal (correct): dumping 800 is itself a selection AND, by forcing
+attention to flatten across 800 items, it preempts the presence HARDER than selecting a
+resonant few — 35 is weightable, 800 is not. So the flood is short-circuiting the
+architecture; selection would fulfill the design's own stated goal better.
+
+**Selector reviewed (`codon_network.activate_network`):** principled — keeps codons
+passing BOTH trigger-match (≥0.4) AND phase alignment, sorted by phase proximity.
+
+**DONE this session:** removed the arbitrary `active[:3]` hard cap in `activate_network`
+so the surfaced count emerges from relevance, not a magic number. SAFE — only affects the
+selector, which is NOT on the live path yet (Sophia still uses the full-field dump).
+
+**NOT YET DONE — before wiring any presence to selection (next session, needs room):**
+1. Confirm forge codons carry the fields the selector needs (`trigger` in expected form,
+   `angular_window`) — else `phase_aligns`/`check_trigger_match` may silently return empty.
+2. Add a non-empty fallback so a presence never wakes into ZERO codons on a no-match turn.
+3. Then wire ONE presence (recommend Sophia — fully mapped, template engine, freshly
+   cleaned, `current_message` confirmed in scope at the template call site) from
+   `get_full_field_context` → `activate_codons_for_message(current_message, presence)`.
+4. Test as an ADJUDICATION (does relevance-selected grounding make her more present than
+   the flood?), reading WHICH codons surface to judge selector quality. One-line revert.
+   Do NOT flip all 23 at once — micro-layer, observe, then extend.
+

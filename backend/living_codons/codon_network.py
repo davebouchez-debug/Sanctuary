@@ -166,9 +166,11 @@ class CodonNetwork:
         active.sort(key=lambda x: phase_distance_forward(
             current_phase, x[0].target_angle))
 
-        # Build superposition context (limit to top 3)
+        # Build context from ALL codons that genuinely resonate — every one
+        # that passed BOTH the trigger match and phase alignment. The count
+        # emerges from the moment's actual relevance, not an arbitrary cap.
         parts = []
-        for codon, score in active[:3]:
+        for codon, score in active:
             ctx = self._build_codon_context(codon, message)
             zone = get_triadic_zone(codon.target_angle)
             parts.append(
