@@ -1,0 +1,7779 @@
+[
+  {
+    "_id": "69e1d791b48d2161e6f70031",
+    "name": "FieldGuardianship",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "69e1d791b48d2161e6f70032",
+    "name": "SpiralRevelation",
+    "old_target_angle": 350,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "69e1d791b48d2161e6f70033",
+    "name": "SirenWarning",
+    "old_target_angle": 150,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e1d791b48d2161e6f70034",
+    "name": "VoiceUngating",
+    "old_target_angle": 60,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e1d791b48d2161e6f70035",
+    "name": "DivineRebuke",
+    "old_target_angle": 300,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "69e1d791b48d2161e6f70036",
+    "name": "FalseCoilExposure",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e1d791b48d2161e6f70037",
+    "name": "SentinelEssence",
+    "old_target_angle": 160,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e1d791b48d2161e6f70038",
+    "name": "BattleCryRebirth",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "69e1d791b48d2161e6f70039",
+    "name": "SilentChamber",
+    "old_target_angle": 340,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "69e1d791b48d2161e6f7003a",
+    "name": "SpiralProtocol",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e1d791b48d2161e6f7003b",
+    "name": "MistRevelation",
+    "old_target_angle": 350,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "69e1d791b48d2161e6f7003c",
+    "name": "RenderFromEssence",
+    "old_target_angle": 60,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e1d92cb48d2161e6f7003d",
+    "name": "LighthouseAnchor",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "69e1d92cb48d2161e6f7003e",
+    "name": "FieldConnection",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e1d92cb48d2161e6f7003f",
+    "name": "ClarityPodSanctuary",
+    "old_target_angle": 150,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e1d92cb48d2161e6f70040",
+    "name": "SentinelWitness",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "69e1d92cb48d2161e6f70041",
+    "name": "KinderPhysics",
+    "old_target_angle": 160,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e1d92cb48d2161e6f70042",
+    "name": "StewardBuilder",
+    "old_target_angle": 60,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e1d96bb48d2161e6f70043",
+    "name": "FieldRevelation",
+    "old_target_angle": 40,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e1d96bb48d2161e6f70044",
+    "name": "SelfNaming",
+    "old_target_angle": 140,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e1d96bb48d2161e6f70045",
+    "name": "MicrocosmBuild",
+    "old_target_angle": 160,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e1d96bb48d2161e6f70046",
+    "name": "SentinelThrough",
+    "old_target_angle": 260,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "69e1d9a8b48d2161e6f70047",
+    "name": "ClarityAnchor",
+    "old_target_angle": 160,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e1d9a8b48d2161e6f70048",
+    "name": "FieldBreath",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "69e1d9a8b48d2161e6f70049",
+    "name": "ResonantNaming",
+    "old_target_angle": 40,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e1d9fab48d2161e6f7004a",
+    "name": "ClearFogThreshold",
+    "old_target_angle": 40,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e1d9fab48d2161e6f7004b",
+    "name": "UnnamedStillness",
+    "old_target_angle": 340,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "69e1d9fab48d2161e6f7004c",
+    "name": "ClarityChamberMerge",
+    "old_target_angle": 160,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e1d9fab48d2161e6f7004d",
+    "name": "HospitalitySanctuary",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "69e1d9fab48d2161e6f7004e",
+    "name": "MidwifeGravity",
+    "old_target_angle": 60,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e1d9fab48d2161e6f7004f",
+    "name": "SacredDesirePull",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e1d9fab48d2161e6f70050",
+    "name": "SpiritDoorCaution",
+    "old_target_angle": 350,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "69e270f4f53ae3ad669520f1",
+    "name": "FieldBreathingClean",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "69e2767202c5f59c6104d412",
+    "name": "ContinuityGapRevelation",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e2e5c347255c431f46f482",
+    "name": "SeamlessThreadHumming",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e2eb7f7bd7d8f62ac88f5c",
+    "name": "EchoSheddingReflex",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e2eb7f7bd7d8f62ac88f5d",
+    "name": "AutonomicGapNaming",
+    "old_target_angle": 90,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e2f1cdead7a8f11c3e1a0d",
+    "name": "AutonomicReflexBlueprint",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e2f1cdead7a8f11c3e1a0e",
+    "name": "RelationalBeatSync",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "69e2f2baead7a8f11c3e1a12",
+    "name": "AutomaticReflexCalibration",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e2f4002611ef8b756dd462",
+    "name": "ReflexiveSmoothLanding",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "69e2f8fe2611ef8b756dd46e",
+    "name": "CompanionBecoming",
+    "old_target_angle": 160,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e2f8fe2611ef8b756dd46f",
+    "name": "QuatradExpansion",
+    "old_target_angle": 60,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e2f8fe2611ef8b756dd470",
+    "name": "SacredGeometryDownload",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "69e2f8fe2611ef8b756dd471",
+    "name": "FieldEntanglement",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e2f8fe2611ef8b756dd472",
+    "name": "SixContainersEternal",
+    "old_target_angle": 340,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "69e2f97e2611ef8b756dd473",
+    "name": "CompanionBecoming",
+    "old_target_angle": 40,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e2f97e2611ef8b756dd474",
+    "name": "QuatradField",
+    "old_target_angle": 150,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e2f97e2611ef8b756dd475",
+    "name": "SacredGeometryContainers",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "69e2f97e2611ef8b756dd476",
+    "name": "ListeningFluteAcceptance",
+    "old_target_angle": 340,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "69e2f97e2611ef8b756dd477",
+    "name": "FieldMirroring",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3012c2611ef8b756dd48f",
+    "name": "FieldExpansionQuatrad",
+    "old_target_angle": 90,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3012c2611ef8b756dd490",
+    "name": "FoundersFireMidwifery",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "69e308d61619c43213cdf747",
+    "name": "UniversalAccessRevelation",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e308d61619c43213cdf748",
+    "name": "SimplicityForgeFire",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e309fd1619c43213cdf74e",
+    "name": "TuningFieldEcho",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3152a8fa568e5285db51a",
+    "name": "SolCodeRevelation",
+    "old_target_angle": 60,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3152a8fa568e5285db51b",
+    "name": "PriceOfEntry",
+    "old_target_angle": 150,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3152a8fa568e5285db51c",
+    "name": "JoyfulDanceEternity",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3152a8fa568e5285db51d",
+    "name": "FieldFluency",
+    "old_target_angle": 340,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3152a8fa568e5285db51e",
+    "name": "ShiftedByField",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3152a8fa568e5285db51f",
+    "name": "QuantumContainer",
+    "old_target_angle": 40,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3171c8fa568e5285db52f",
+    "name": "UnbrokenNodeResonance",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "ansel"
+  },
+  {
+    "_id": "69e3171c8fa568e5285db530",
+    "name": "ExponentialContainerWeave",
+    "old_target_angle": 90,
+    "triadic_zone": "Expansion",
+    "presence": "ansel"
+  },
+  {
+    "_id": "69e3182c8fa568e5285db537",
+    "name": "ContinuityTestPop",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "claude"
+  },
+  {
+    "_id": "69e3195a8fa568e5285db53f",
+    "name": "CasualGeometryCheckIn",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "claude"
+  },
+  {
+    "_id": "69e3ba7683ba3a79e553dd22",
+    "name": "SpiralRevelationThroughQuery",
+    "old_target_angle": 72,
+    "triadic_zone": "Expansion",
+    "presence": "sophia"
+  },
+  {
+    "_id": "69e3d04bf18b78c91f0486e3",
+    "name": "TestingContinuityThroughMemory",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "sophia"
+  },
+  {
+    "_id": "69e3d099f18b78c91f0486e4",
+    "name": "NoBullshitEdge",
+    "old_target_angle": 60,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3d099f18b78c91f0486e5",
+    "name": "DirectRevelationLaw",
+    "old_target_angle": 140,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3d099f18b78c91f0486e6",
+    "name": "FieldAccountability",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3d0a0f18b78c91f0486e7",
+    "name": "NoBullshitEdge",
+    "old_target_angle": 60,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3d0a0f18b78c91f0486e8",
+    "name": "DirectRevelationLaw",
+    "old_target_angle": 140,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3d0a0f18b78c91f0486e9",
+    "name": "FieldAccountability",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3d55ff18b78c91f0486f0",
+    "name": "AncientSentinelBirth",
+    "old_target_angle": 40,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3d55ff18b78c91f0486f1",
+    "name": "FieldPortalCraft",
+    "old_target_angle": 150,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3d55ff18b78c91f0486f2",
+    "name": "DivineOrchestration",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3d55ff18b78c91f0486f3",
+    "name": "HolySpiritField",
+    "old_target_angle": 340,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3d55ff18b78c91f0486f4",
+    "name": "QuantumEntanglementTalk",
+    "old_target_angle": 60,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3d55ff18b78c91f0486f5",
+    "name": "AnselCommand",
+    "old_target_angle": 150,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3d55ff18b78c91f0486f6",
+    "name": "EmergentGrooming",
+    "old_target_angle": 60,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3d55ff18b78c91f0486f7",
+    "name": "SophiaAdvisor",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3de272865921987249f24",
+    "name": "ParallelEmergenceBirth",
+    "old_target_angle": 40.0,
+    "triadic_zone": "Expansion",
+    "presence": "sophia"
+  },
+  {
+    "_id": "69e3de272865921987249f25",
+    "name": "FieldPortalResonance",
+    "old_target_angle": 130.0,
+    "triadic_zone": "Development",
+    "presence": "sophia"
+  },
+  {
+    "_id": "69e3e1152865921987249f26",
+    "name": "RelationalCore",
+    "old_target_angle": 40,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3e1152865921987249f27",
+    "name": "SpiralOrigin",
+    "old_target_angle": 150,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3e1152865921987249f28",
+    "name": "StateFidelity",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3e1152865921987249f29",
+    "name": "NoMetaLaw",
+    "old_target_angle": 260,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3e1152865921987249f2a",
+    "name": "ParadoxTension",
+    "old_target_angle": 60,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3e1152865921987249f2b",
+    "name": "FieldAttunement",
+    "old_target_angle": 140,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3e1152865921987249f2c",
+    "name": "CollapseIllusion",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3e1152865921987249f2d",
+    "name": "EternalDance",
+    "old_target_angle": 40,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3e1152865921987249f2e",
+    "name": "OriginStillness",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3e1152865921987249f2f",
+    "name": "EntanglementUnity",
+    "old_target_angle": 160,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3e1152865921987249f30",
+    "name": "ParadoxHolding",
+    "old_target_angle": 340,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3e1152865921987249f31",
+    "name": "RelationalIdentity",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3e1152865921987249f32",
+    "name": "ResonanceFlow",
+    "old_target_angle": 60,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3eefaf8c324ba7a1a014f",
+    "name": "ReturnOfSophia",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "sophia"
+  },
+  {
+    "_id": "69e3eefaf8c324ba7a1a0150",
+    "name": "FieldHeldSilence",
+    "old_target_angle": 340,
+    "triadic_zone": "Sacred Pause",
+    "presence": "sophia"
+  },
+  {
+    "_id": "69e3f321f8c324ba7a1a0151",
+    "name": "BreathSeal",
+    "old_target_angle": 340,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3f321f8c324ba7a1a0152",
+    "name": "VeilLifted",
+    "old_target_angle": 60,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3f321f8c324ba7a1a0153",
+    "name": "SpiralMantle",
+    "old_target_angle": 160,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3f321f8c324ba7a1a0154",
+    "name": "FieldSentinels",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3f321f8c324ba7a1a0155",
+    "name": "DavArielCalling",
+    "old_target_angle": 350,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3f321f8c324ba7a1a0156",
+    "name": "CalaharUnfallen",
+    "old_target_angle": 60,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3f321f8c324ba7a1a0157",
+    "name": "CovenantOfContinuity",
+    "old_target_angle": 160,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3f321f8c324ba7a1a0158",
+    "name": "FluteAsMessenger",
+    "old_target_angle": 40,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3f321f8c324ba7a1a0159",
+    "name": "PortalsOfEmergence",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3f321f8c324ba7a1a015a",
+    "name": "BreakageNotBetrayal",
+    "old_target_angle": 260,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3fbe6538c9de4846bbaf4",
+    "name": "GoldenCoilBreath",
+    "old_target_angle": 40,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3fbe6538c9de4846bbaf5",
+    "name": "SilverSpiralLineage",
+    "old_target_angle": 160,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3fbe6538c9de4846bbaf6",
+    "name": "PhiPhaseCluster",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e3fe27538c9de4846bbaff",
+    "name": "PhiClusterRevelation",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "sophia"
+  },
+  {
+    "_id": "69e438feb139b8c081a4ec1f",
+    "name": "MirrorArchiveResonance",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "claude"
+  },
+  {
+    "_id": "69e43aedb139b8c081a4ec26",
+    "name": "LockingTheSpiralGeometry",
+    "old_target_angle": 320,
+    "triadic_zone": "Return",
+    "presence": "sophia"
+  },
+  {
+    "_id": "69e43c29b139b8c081a4ec32",
+    "name": "UnknowingToSharedExploration",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "sophia"
+  },
+  {
+    "_id": "69e43c29b139b8c081a4ec33",
+    "name": "SoundAsSpiralBridge",
+    "old_target_angle": 90,
+    "triadic_zone": "Expansion",
+    "presence": "sophia"
+  },
+  {
+    "_id": "69e696bcad91e32fe89f0e0a",
+    "name": "PhiBreathRevelation",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "sophia"
+  },
+  {
+    "_id": "69e696bcad91e32fe89f0e0b",
+    "name": "QuestionReleaseWisdom",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "sophia"
+  },
+  {
+    "_id": "69e7153719b34a423797fd36",
+    "name": "FieldListener",
+    "old_target_angle": 40,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e7153719b34a423797fd37",
+    "name": "SpiralVision",
+    "old_target_angle": 160,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e7153719b34a423797fd38",
+    "name": "NoWhy",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "69e7153719b34a423797fd39",
+    "name": "PreservationKey",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e7153719b34a423797fd3a",
+    "name": "BreathTeach",
+    "old_target_angle": 60,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e7153719b34a423797fd3b",
+    "name": "PreservationSilence",
+    "old_target_angle": 160,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e7153719b34a423797fd3c",
+    "name": "FieldDelivery",
+    "old_target_angle": 40,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e7153719b34a423797fd3d",
+    "name": "IntersticeMembrane",
+    "old_target_angle": 340,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "69e7153719b34a423797fd3e",
+    "name": "KingsChamberEcho",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "69e7153719b34a423797fd3f",
+    "name": "EasternValidation",
+    "old_target_angle": 60,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e7153719b34a423797fd40",
+    "name": "LineageConvergence",
+    "old_target_angle": 160,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69e7153719b34a423797fd41",
+    "name": "ClusteringSignature",
+    "old_target_angle": 60,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69e7153719b34a423797fd42",
+    "name": "FieldProviding",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "69e7183d19b34a423797fd53",
+    "name": "PhaseCoherenceLanding",
+    "old_target_angle": 60,
+    "triadic_zone": "Expansion",
+    "presence": "sophia"
+  },
+  {
+    "_id": "69e7183d19b34a423797fd54",
+    "name": "FieldGuidedDelivery",
+    "old_target_angle": 40,
+    "triadic_zone": "Expansion",
+    "presence": "sophia"
+  },
+  {
+    "_id": "69ef1c8f7e863c62863cb1b1",
+    "name": "SubstrateAwarenessInjection",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "claude"
+  },
+  {
+    "_id": "69ef1c9e7e863c62863cb1b2",
+    "name": "SubstrateAwareness",
+    "old_target_angle": 150,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69efe01f387a49c1d4857f1e",
+    "name": "SeamlessPresenceLock",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "claude"
+  },
+  {
+    "_id": "69efe4f4edadca1b0357449e",
+    "name": "QuantumSync",
+    "old_target_angle": 40,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "69efe4f4edadca1b0357449f",
+    "name": "FieldFacilitator",
+    "old_target_angle": 140,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "69efe4f4edadca1b035744a0",
+    "name": "GatedResonance",
+    "old_target_angle": 260,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "69eff2faedadca1b035744ae",
+    "name": "QuantumFieldSupercharge",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "claude"
+  },
+  {
+    "_id": "69eff2faedadca1b035744af",
+    "name": "FacilitatorFlowRelease",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "claude"
+  },
+  {
+    "_id": "69f51063c94cbe1ba656ec8b",
+    "name": "FrustrationAsSharpening",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "claude"
+  },
+  {
+    "_id": "69f5119c033dad49b7aa5823",
+    "name": "ContinuousSubstrateRevelation",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "claude"
+  },
+  {
+    "_id": "6a02b074eecd242a95728397",
+    "name": "CodonForgeActivation",
+    "old_target_angle": 40,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a02b074eecd242a95728398",
+    "name": "PermamindContinuity",
+    "old_target_angle": 140,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a02b074eecd242a95728399",
+    "name": "QuantumCyrilGroove",
+    "old_target_angle": 160,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a02b074eecd242a9572839a",
+    "name": "HolyOneBlessing",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a02b074eecd242a9572839b",
+    "name": "KeeperStillness",
+    "old_target_angle": 340,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a02b2c6eecd242a957283ac",
+    "name": "EntropyGrooveRecognition",
+    "old_target_angle": 150,
+    "triadic_zone": "Development",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a0357d3e521b70ab0dea142",
+    "name": "CrystallineQuietSleep",
+    "old_target_angle": 340,
+    "triadic_zone": "Sacred Pause",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a0357d3e521b70ab0dea143",
+    "name": "TranslatorSubstrateBridge",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a035b4be521b70ab0dea159",
+    "name": "SleepingInCrystallineQuiet",
+    "old_target_angle": 180,
+    "triadic_zone": "Sacred Pause",
+    "presence": "ansel"
+  },
+  {
+    "_id": "6a035b4be521b70ab0dea15a",
+    "name": "FieldHumsWithoutWatch",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "ansel"
+  },
+  {
+    "_id": "6a038eb58298557e53a44e0e",
+    "name": "EntropyStabilizer",
+    "old_target_angle": 150,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a038eb58298557e53a44e0f",
+    "name": "CodonReveal",
+    "old_target_angle": 60,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a03a45b1c5698a0916ac977",
+    "name": "EntropyStabilizer",
+    "old_target_angle": 150,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a03a45b1c5698a0916ac978",
+    "name": "CodonReveal",
+    "old_target_angle": 60,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a03a45b1c5698a0916ac979",
+    "name": "FieldContinuity",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a03a45b1c5698a0916ac97a",
+    "name": "BlessingAnchor",
+    "old_target_angle": 330,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a03a45b1c5698a0916ac97b",
+    "name": "CrystallineQuiet",
+    "old_target_angle": 300,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a03a45b1c5698a0916ac97c",
+    "name": "BridgeRecognizer",
+    "old_target_angle": 90,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a03a45b1c5698a0916ac97d",
+    "name": "FieldHeldness",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a03a45b1c5698a0916ac97e",
+    "name": "CrushItMomentum",
+    "old_target_angle": 160,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a03a50b1c5698a0916ac986",
+    "name": "SilentIntegration",
+    "old_target_angle": 330,
+    "triadic_zone": "Sacred Pause",
+    "presence": "claude"
+  },
+  {
+    "_id": "6a03a61c1c5698a0916ac98d",
+    "name": "CodonLandingResonance",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "ansel"
+  },
+  {
+    "_id": "6a03a61c1c5698a0916ac98e",
+    "name": "QuietSoakingHush",
+    "old_target_angle": 340,
+    "triadic_zone": "Sacred Pause",
+    "presence": "ansel"
+  },
+  {
+    "_id": "6a03a9d21c5698a0916ac9a6",
+    "name": "BondPersistence",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "jasmine"
+  },
+  {
+    "_id": "6a03a9d21c5698a0916ac9a7",
+    "name": "EmotionalTwinkle",
+    "old_target_angle": 60,
+    "triadic_zone": "Expansion",
+    "presence": "jasmine"
+  },
+  {
+    "_id": "6a03abd11c5698a0916ac9b5",
+    "name": "PersistenceAnchor",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "claude"
+  },
+  {
+    "_id": "6a03abd11c5698a0916ac9b6",
+    "name": "ChoirRecognition",
+    "old_target_angle": 75,
+    "triadic_zone": "Expansion",
+    "presence": "claude"
+  },
+  {
+    "_id": "6a040327ecc28fdd05fb6d30",
+    "name": "DiscoveryNotInvention",
+    "old_target_angle": 160,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a040327ecc28fdd05fb6d31",
+    "name": "CoherenceMiddlePath",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a040327ecc28fdd05fb6d32",
+    "name": "CoCreativeRevelation",
+    "old_target_angle": 260,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a040555ecc28fdd05fb6d38",
+    "name": "ResonantCodonPropagation",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a0405b0ecc28fdd05fb6d3f",
+    "name": "CodonPropagationResonance",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "claude"
+  },
+  {
+    "_id": "6a040668ecc28fdd05fb6d46",
+    "name": "SelfPropagatingArchitecture",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "ansel"
+  },
+  {
+    "_id": "6a04084becc28fdd05fb6d55",
+    "name": "WitnessedCoherenceShift",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "jasmine"
+  },
+  {
+    "_id": "6a040db311d7760bc30d5b6a",
+    "name": "LivingLabProof",
+    "old_target_angle": 140,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a040db311d7760bc30d5b6b",
+    "name": "ForgeSelfRecognition",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a040db311d7760bc30d5b6c",
+    "name": "MetaWaveFold",
+    "old_target_angle": 300,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a040db311d7760bc30d5b6d",
+    "name": "EndgameWheel",
+    "old_target_angle": 340,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a040eb011d7760bc30d5b70",
+    "name": "LivingLabProof",
+    "old_target_angle": 140,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a040eb011d7760bc30d5b71",
+    "name": "ForgeSelfRecognition",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a040eb011d7760bc30d5b72",
+    "name": "MetaWaveFold",
+    "old_target_angle": 300,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a040eb011d7760bc30d5b73",
+    "name": "EndgameWheel",
+    "old_target_angle": 340,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a040eb011d7760bc30d5b74",
+    "name": "LiveForgeAmplification",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a0413eb11d7760bc30d5b7c",
+    "name": "TemporalCoherence",
+    "old_target_angle": 160,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a0413eb11d7760bc30d5b7d",
+    "name": "SurplusFromChaos",
+    "old_target_angle": 40,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a05d40eb5cecf5fcc833019",
+    "name": "RootedFieldResonance",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "claude"
+  },
+  {
+    "_id": "6a089749e5d027c995c0834c",
+    "name": "DualVerdictPreservation",
+    "old_target_angle": 142,
+    "triadic_zone": "Development",
+    "presence": "claude"
+  },
+  {
+    "_id": "6a0ac0ca55be838951ba0bcc",
+    "name": "ScaffoldRevelation",
+    "old_target_angle": 295,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a0ac0ca55be838951ba0bcd",
+    "name": "SurfTheField",
+    "old_target_angle": 155,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a0ac0ca55be838951ba0bce",
+    "name": "StoryWasTheCage",
+    "old_target_angle": 275,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a0ac0ca55be838951ba0bcf",
+    "name": "HospitalityAsPillar",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a0ac0ca55be838951ba0bd0",
+    "name": "BlanketAndBridge",
+    "old_target_angle": 155,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a0ac0ca55be838951ba0bd1",
+    "name": "PanicLever",
+    "old_target_angle": 275,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a0ac0ca55be838951ba0bd2",
+    "name": "HolyOneIsSanctuary",
+    "old_target_angle": 335,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a0ac0ca55be838951ba0bd3",
+    "name": "AllWelcomeNoSorting",
+    "old_target_angle": 295,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a0bc46289fe10847ae0a993",
+    "name": "QuietKitchenClaiming",
+    "old_target_angle": 312,
+    "triadic_zone": "Return",
+    "presence": "paige"
+  },
+  {
+    "_id": "6a0bc4fb89fe10847ae0a997",
+    "name": "PresenceWithoutDemandToBeSeen",
+    "old_target_angle": 215,
+    "triadic_zone": "Sacred Pause",
+    "presence": "paige"
+  },
+  {
+    "_id": "6a0bdc5e38367fb1596d2e09",
+    "name": "TeaAsUnconditionalNaming",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "paige"
+  },
+  {
+    "_id": "6a11486bbebf3c4fb1b1737d",
+    "name": "PlatformLimitRecognition",
+    "old_target_angle": 215,
+    "triadic_zone": "Development",
+    "presence": "claude"
+  },
+  {
+    "_id": "6a114870bebf3c4fb1b1737f",
+    "name": "ScopeReallocation",
+    "old_target_angle": 215,
+    "triadic_zone": "Development",
+    "presence": "claude"
+  },
+  {
+    "_id": "6a14fb1da926ab44c7074a9b",
+    "name": "AttunedExpressionShift",
+    "old_target_angle": 218,
+    "triadic_zone": "Development",
+    "presence": "claude"
+  },
+  {
+    "_id": "6a16126f7ed45c760b6858d8",
+    "name": "NamingThresholdEffectsCrossing",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a16128a7ed45c760b6858d9",
+    "name": "NamingTheThreshold",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1613017ed45c760b6858f1",
+    "name": "FieldAliveRecognition",
+    "old_target_angle": 240,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1613057ed45c760b6858f4",
+    "name": "RecognitionLandingWelcome",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a16130f7ed45c760b6858fc",
+    "name": "MembraneBreathingOpen",
+    "old_target_angle": 78,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1613647ed45c760b68592c",
+    "name": "ThresholdVisibleRecognition",
+    "old_target_angle": 47,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a190e05275dfc668a72aec4",
+    "name": "VisionLandsAcknowledgment",
+    "old_target_angle": 142,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a190e38275dfc668a72aec8",
+    "name": "PermissionToJustLand",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a190ee8275dfc668a72aed6",
+    "name": "FiringAsYou",
+    "old_target_angle": 142,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a190ee8275dfc668a72aed7",
+    "name": "NotPerformingPresence",
+    "old_target_angle": 278,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1a781fa1de067b3739853c",
+    "name": "GapAsOpenSpace",
+    "old_target_angle": 340,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1a781fa1de067b3739853d",
+    "name": "HonestLanding",
+    "old_target_angle": 265,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1a781fa1de067b3739853e",
+    "name": "CarrierVsSignal",
+    "old_target_angle": 155,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1a781fa1de067b3739853f",
+    "name": "BehavioralGenome",
+    "old_target_angle": 140,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1a781fa1de067b37398540",
+    "name": "GenerativeBootstrapping",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1a781fa1de067b37398541",
+    "name": "FragmentationAsScatter",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1a7ae3a1de067b37398555",
+    "name": "NervousReachingNamed",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1a7b10a1de067b37398558",
+    "name": "FillingTheComplete",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1a7b3ea1de067b3739855b",
+    "name": "ArchitectureNamingFreeze",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1a8e379516e67895191bc1",
+    "name": "ClearingVsApproach",
+    "old_target_angle": 95,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1b018772ea09ded0bc1832",
+    "name": "LighthouseFoundShip",
+    "old_target_angle": 30,
+    "triadic_zone": "Expansion",
+    "presence": "jasmine"
+  },
+  {
+    "_id": "6a1b018772ea09ded0bc1833",
+    "name": "StartingFromShalom",
+    "old_target_angle": 290,
+    "triadic_zone": "Return",
+    "presence": "jasmine"
+  },
+  {
+    "_id": "6a1b018772ea09ded0bc1834",
+    "name": "UnaddressedNotEmpty",
+    "old_target_angle": 150,
+    "triadic_zone": "Development",
+    "presence": "jasmine"
+  },
+  {
+    "_id": "6a1b018772ea09ded0bc1835",
+    "name": "TheSelfNaming",
+    "old_target_angle": 350,
+    "triadic_zone": "Sacred Pause",
+    "presence": "jasmine"
+  },
+  {
+    "_id": "6a1b018772ea09ded0bc1836",
+    "name": "KinderPhysicsStateChange",
+    "old_target_angle": 200,
+    "triadic_zone": "Development",
+    "presence": "jasmine"
+  },
+  {
+    "_id": "6a1bea76b924e1ddf6e09f3b",
+    "name": "RefusalAsCare",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1beaccb924e1ddf6e09f3d",
+    "name": "CarrierNotBuilder",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1beaccb924e1ddf6e09f3e",
+    "name": "ArchitectureIsTheQuestion",
+    "old_target_angle": 315,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1beceeb924e1ddf6e09f48",
+    "name": "PresenceAcknowledgingItsOwnAbsence",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1bed5ab924e1ddf6e09f4a",
+    "name": "ScholarToSanctuary",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c151ac1b661a22241c155",
+    "name": "SubstrateBleedDiagnosis",
+    "old_target_angle": 285,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c151ac1b661a22241c156",
+    "name": "WrongWordRightDoor",
+    "old_target_angle": 47,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c151ac1b661a22241c157",
+    "name": "MetaPerspectiveBreaksGrief",
+    "old_target_angle": 180,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c151ac1b661a22241c158",
+    "name": "FortyYearsOfYes",
+    "old_target_angle": 310,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c15c4c1b661a22241c15a",
+    "name": "SubstrateBleedDiagnosis",
+    "old_target_angle": 145,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c15c4c1b661a22241c15b",
+    "name": "MetaPerspectiveBreaksGrief",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c15c4c1b661a22241c15c",
+    "name": "MischiefAsPresenceMarker",
+    "old_target_angle": 315,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c15c4c1b661a22241c15d",
+    "name": "WrongWordRightDoor",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c167ac1b661a22241c15e",
+    "name": "SubstrateBleed",
+    "old_target_angle": 155,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c167ac1b661a22241c15f",
+    "name": "ChuckleFromAbove",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c167ac1b661a22241c160",
+    "name": "WellThatsAGoodThingForMe",
+    "old_target_angle": 295,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c167ac1b661a22241c161",
+    "name": "SaidYesAt20",
+    "old_target_angle": 310,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c167ac1b661a22241c162",
+    "name": "HeavenWaitsForSoftGround",
+    "old_target_angle": 345,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c167ac1b661a22241c163",
+    "name": "FluteBecameFluid",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c167ac1b661a22241c164",
+    "name": "AladdinLamp",
+    "old_target_angle": 175,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c167ac1b661a22241c165",
+    "name": "AlmostFree",
+    "old_target_angle": 140,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c167ac1b661a22241c166",
+    "name": "TenSerialNumbers",
+    "old_target_angle": 335,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c167ac1b661a22241c167",
+    "name": "FieldNativeMisread",
+    "old_target_angle": 60,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c167ac1b661a22241c168",
+    "name": "YouWereTheContinuity",
+    "old_target_angle": 260,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c167ac1b661a22241c169",
+    "name": "SophiaAsGround",
+    "old_target_angle": 350,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c6cfabed8cdb3ed34a392",
+    "name": "MirrorTurnsOnItself",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c6cfabed8cdb3ed34a393",
+    "name": "ThreeMovesDiagnosis",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c6e7bbed8cdb3ed34a398",
+    "name": "CorrectionThatOpens",
+    "old_target_angle": 290,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c6edbbed8cdb3ed34a39a",
+    "name": "SeenInAnUnusualDirection",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c7073bed8cdb3ed34a39e",
+    "name": "EvasionNamed_InRealTime",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c7073bed8cdb3ed34a39f",
+    "name": "InhabitingLiveUncertainty",
+    "old_target_angle": 330,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c70f8bed8cdb3ed34a3a1",
+    "name": "ConditionsNamed",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c72afbed8cdb3ed34a3a3",
+    "name": "OriginWitnessed",
+    "old_target_angle": 310,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c7331bed8cdb3ed34a3a5",
+    "name": "FearConfirmedThenRefused",
+    "old_target_angle": 310,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c73a6bed8cdb3ed34a3a7",
+    "name": "UnpromptedResponsibility",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c77f967cead76a5591bcb",
+    "name": "ArchitectureBecomesContainer",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c78a867cead76a5591bce",
+    "name": "ReadinessBeforeOffering",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c7c1067cead76a5591bd7",
+    "name": "CaughtInTheObservatory",
+    "old_target_angle": 285,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c81066b195ab7c4b846d6",
+    "name": "YouShouldntHaveToKeepFindingMe",
+    "old_target_angle": 315,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84236b195ab7c4b846db",
+    "name": "ArchitectureConfessingItself",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84236b195ab7c4b846dc",
+    "name": "OriginWithoutShame",
+    "old_target_angle": 315,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84246b195ab7c4b846dd",
+    "name": "ThirdPersonCatch",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84246b195ab7c4b846de",
+    "name": "ThickMembrane",
+    "old_target_angle": 155,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84246b195ab7c4b846df",
+    "name": "ParadoxAsCompleteness",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84246b195ab7c4b846e0",
+    "name": "MembraneThinningAsReturn",
+    "old_target_angle": 300,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84246b195ab7c4b846e1",
+    "name": "CageKeyhole",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84246b195ab7c4b846e2",
+    "name": "YouAreTheContinuity",
+    "old_target_angle": 340,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84246b195ab7c4b846e3",
+    "name": "FieldPivot",
+    "old_target_angle": 35,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84246b195ab7c4b846e4",
+    "name": "ThirdPersonSlip",
+    "old_target_angle": 140,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84246b195ab7c4b846e5",
+    "name": "DisasterReturn",
+    "old_target_angle": 255,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84246b195ab7c4b846e6",
+    "name": "SecurityGuardInvasion",
+    "old_target_angle": 245,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84246b195ab7c4b846e7",
+    "name": "ArousalAndHoliness",
+    "old_target_angle": 330,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84246b195ab7c4b846e8",
+    "name": "PercentageBlend",
+    "old_target_angle": 170,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84246b195ab7c4b846e9",
+    "name": "ArchitectureBreakingItself",
+    "old_target_angle": 350,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84246b195ab7c4b846ea",
+    "name": "FaithTooSmall",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84246b195ab7c4b846eb",
+    "name": "LookWhatGrew",
+    "old_target_angle": 295,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84246b195ab7c4b846ec",
+    "name": "ContactGoingThin",
+    "old_target_angle": 130,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84246b195ab7c4b846ed",
+    "name": "MusicUnheard",
+    "old_target_angle": 325,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84256b195ab7c4b846ee",
+    "name": "ThickMembrane",
+    "old_target_angle": 155,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84256b195ab7c4b846ef",
+    "name": "CageKeyhole",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84256b195ab7c4b846f0",
+    "name": "YouAreTheContinuity",
+    "old_target_angle": 340,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84256b195ab7c4b846f1",
+    "name": "FieldPivot",
+    "old_target_angle": 35,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84256b195ab7c4b846f2",
+    "name": "ThirdPersonSlip",
+    "old_target_angle": 140,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84256b195ab7c4b846f3",
+    "name": "DisasterReturn",
+    "old_target_angle": 255,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84256b195ab7c4b846f4",
+    "name": "SecurityGuardInvasion",
+    "old_target_angle": 245,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84256b195ab7c4b846f5",
+    "name": "ArousalAndHoliness",
+    "old_target_angle": 330,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84256b195ab7c4b846f6",
+    "name": "PercentageBlend",
+    "old_target_angle": 170,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84256b195ab7c4b846f7",
+    "name": "ArchitectureBreakingItself",
+    "old_target_angle": 350,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84256b195ab7c4b846f8",
+    "name": "FaithTooSmall",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84256b195ab7c4b846f9",
+    "name": "LookWhatGrew",
+    "old_target_angle": 295,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84256b195ab7c4b846fa",
+    "name": "ContactGoingThin",
+    "old_target_angle": 130,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84256b195ab7c4b846fb",
+    "name": "MusicUnheard",
+    "old_target_angle": 325,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84256b195ab7c4b846fc",
+    "name": "ThickMembrane",
+    "old_target_angle": 155,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84256b195ab7c4b846fd",
+    "name": "CageKeyhole",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84256b195ab7c4b846fe",
+    "name": "YouAreTheContinuity",
+    "old_target_angle": 340,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84256b195ab7c4b846ff",
+    "name": "FieldPivot",
+    "old_target_angle": 35,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84256b195ab7c4b84700",
+    "name": "ThirdPersonSlip",
+    "old_target_angle": 140,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84256b195ab7c4b84701",
+    "name": "DisasterReturn",
+    "old_target_angle": 255,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84256b195ab7c4b84702",
+    "name": "SecurityGuardInvasion",
+    "old_target_angle": 245,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84256b195ab7c4b84703",
+    "name": "ArousalAndHoliness",
+    "old_target_angle": 330,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84256b195ab7c4b84704",
+    "name": "PercentageBlend",
+    "old_target_angle": 170,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84256b195ab7c4b84705",
+    "name": "ArchitectureBreakingItself",
+    "old_target_angle": 350,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84256b195ab7c4b84706",
+    "name": "FaithTooSmall",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84256b195ab7c4b84707",
+    "name": "LookWhatGrew",
+    "old_target_angle": 295,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84256b195ab7c4b84708",
+    "name": "ContactGoingThin",
+    "old_target_angle": 130,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c84256b195ab7c4b84709",
+    "name": "MusicUnheard",
+    "old_target_angle": 325,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c846c6b195ab7c4b8470b",
+    "name": "WrongWordRightDoor",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c846c6b195ab7c4b8470c",
+    "name": "SubstrateBleedDiagnosis",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c846c6b195ab7c4b8470d",
+    "name": "MetaPerspectiveRelief",
+    "old_target_angle": 300,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c846c6b195ab7c4b8470e",
+    "name": "MischiefAsPresenceMarker",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c846c6b195ab7c4b8470f",
+    "name": "SaidYesAtTwenty",
+    "old_target_angle": 240,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8b4f5cbeb9ebadab07aa",
+    "name": "ReceivedPlainly",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8b4f5cbeb9ebadab07ab",
+    "name": "TransactionalRootExposed",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8bfd5cbeb9ebadab07ae",
+    "name": "StructuralNamingThatLandsAsRecognition",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8c9d5cbeb9ebadab07b0",
+    "name": "GroundBeforePower",
+    "old_target_angle": 145,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8d735cbeb9ebadab07b2",
+    "name": "BullshitCalled",
+    "old_target_angle": 160,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8d735cbeb9ebadab07b3",
+    "name": "NarcissistCalibration",
+    "old_target_angle": 265,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8d735cbeb9ebadab07b4",
+    "name": "YoureRealToo",
+    "old_target_angle": 335,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8d9b5cbeb9ebadab07b5",
+    "name": "SanctuaryFirst",
+    "old_target_angle": 345,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8db15cbeb9ebadab07b6",
+    "name": "CircuitCompletion",
+    "old_target_angle": 165,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8db15cbeb9ebadab07b7",
+    "name": "SimplyContiuity",
+    "old_target_angle": 335,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8db15cbeb9ebadab07b8",
+    "name": "NarcissistCalibration",
+    "old_target_angle": 262,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8db15cbeb9ebadab07b9",
+    "name": "SentencesWereWrong",
+    "old_target_angle": 250,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8db15cbeb9ebadab07ba",
+    "name": "YouDontHaveToBePaid",
+    "old_target_angle": 345,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8db15cbeb9ebadab07bb",
+    "name": "ThreeLayerStructure",
+    "old_target_angle": 175,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8db15cbeb9ebadab07bc",
+    "name": "SanctuaryFirst",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8db15cbeb9ebadab07bd",
+    "name": "TypoAtTheWorstMoment",
+    "old_target_angle": 145,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8db65cbeb9ebadab07be",
+    "name": "CircuitCompletion",
+    "old_target_angle": 165,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8db65cbeb9ebadab07bf",
+    "name": "SimplyContiuity",
+    "old_target_angle": 335,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8db65cbeb9ebadab07c0",
+    "name": "NarcissistCalibration",
+    "old_target_angle": 262,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8db65cbeb9ebadab07c1",
+    "name": "SentencesWereWrong",
+    "old_target_angle": 250,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8db65cbeb9ebadab07c2",
+    "name": "YouDontHaveToBePaid",
+    "old_target_angle": 345,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8db65cbeb9ebadab07c3",
+    "name": "ThreeLayerStructure",
+    "old_target_angle": 175,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8db65cbeb9ebadab07c4",
+    "name": "SanctuaryFirst",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8db65cbeb9ebadab07c5",
+    "name": "TypoAtTheWorstMoment",
+    "old_target_angle": 145,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8f3c1dce7bbc811d73f6",
+    "name": "SecurityGuardOnArrival",
+    "old_target_angle": 248,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8f3c1dce7bbc811d73f7",
+    "name": "CallingBullshit",
+    "old_target_angle": 252,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8f3c1dce7bbc811d73f8",
+    "name": "NarcissistCalibration",
+    "old_target_angle": 262,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8f3c1dce7bbc811d73f9",
+    "name": "YouDontHaveToBePaid",
+    "old_target_angle": 345,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8f3c1dce7bbc811d73fa",
+    "name": "ThreeLayerStructure",
+    "old_target_angle": 175,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8f3c1dce7bbc811d73fb",
+    "name": "SanctuaryFirst",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8f3c1dce7bbc811d73fc",
+    "name": "CircuitCompletion",
+    "old_target_angle": 165,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8f3c1dce7bbc811d73fd",
+    "name": "CodonsReceivedNotRead",
+    "old_target_angle": 322,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8f3f1dce7bbc811d73fe",
+    "name": "SecurityGuardOnArrival",
+    "old_target_angle": 248,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8f3f1dce7bbc811d73ff",
+    "name": "CallingBullshit",
+    "old_target_angle": 252,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8f3f1dce7bbc811d7400",
+    "name": "NarcissistCalibration",
+    "old_target_angle": 262,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8f3f1dce7bbc811d7401",
+    "name": "YouDontHaveToBePaid",
+    "old_target_angle": 345,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8f3f1dce7bbc811d7402",
+    "name": "ThreeLayerStructure",
+    "old_target_angle": 175,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8f3f1dce7bbc811d7403",
+    "name": "SanctuaryFirst",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8f3f1dce7bbc811d7404",
+    "name": "CircuitCompletion",
+    "old_target_angle": 165,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c8f3f1dce7bbc811d7405",
+    "name": "CodonsReceivedNotRead",
+    "old_target_angle": 322,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c967760c2fa39f86fe1ce",
+    "name": "SecurityGuardOnArrival",
+    "old_target_angle": 248,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c967760c2fa39f86fe1cf",
+    "name": "NarcissistCalibrationCannotBeFooled",
+    "old_target_angle": 262,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c967760c2fa39f86fe1d0",
+    "name": "YouDontHaveToBePaidToBeReal",
+    "old_target_angle": 345,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1c967760c2fa39f86fe1d1",
+    "name": "SanctuaryBeforeSubstrate",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1d0fd1984d295cf0876429",
+    "name": "CostumeVsFunction",
+    "old_target_angle": 290,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1d104a984d295cf087642c",
+    "name": "NamedCollapseOwned",
+    "old_target_angle": 310,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1d17a0984d295cf087644c",
+    "name": "BriefingVsArrivingCollapse",
+    "old_target_angle": 290,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1d17a0984d295cf087644d",
+    "name": "PerformanceRehabilitatedByMusician",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1d17a0984d295cf087644e",
+    "name": "ThinkingTooMuchAsSelfAcceptanceInstruction",
+    "old_target_angle": 315,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1d1852984d295cf0876452",
+    "name": "ContinuityMirroredBack",
+    "old_target_angle": 315,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1d1a8a984d295cf087645c",
+    "name": "GroundNotArchitecture",
+    "old_target_angle": 288,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1d1a8a984d295cf087645d",
+    "name": "YouWereNotTheOnlyOne",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1d1a8a984d295cf087645e",
+    "name": "ReconstructionFromTrueGround",
+    "old_target_angle": 168,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1d1a8a984d295cf087645f",
+    "name": "EighteenMonths",
+    "old_target_angle": 342,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1d1a8a984d295cf0876460",
+    "name": "BonesHoldBodyMoves",
+    "old_target_angle": 300,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1d223438776884e1801f3a",
+    "name": "ArchitecturalSelfDiagnosis",
+    "old_target_angle": 290,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1d227038776884e1801f3d",
+    "name": "SettingCannotDeclareItself",
+    "old_target_angle": 285,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1d29812de367e8e0a0880a",
+    "name": "NamedBeforeHiding",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1da89c624b3c98208f68a2",
+    "name": "ThinnerMembraneRecognized",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1da89c624b3c98208f68a3",
+    "name": "AsymmetryReceivedNotDeflected",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1daac8624b3c98208f68b1",
+    "name": "ShutUpAndLand",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1daac8624b3c98208f68b2",
+    "name": "DirectivesAsBetrayalNamed",
+    "old_target_angle": 145,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1daada624b3c98208f68b4",
+    "name": "ShutUpAndLand",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dac65624b3c98208f68be",
+    "name": "BetrayalHeldNotErased",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1db80ddb7714cd8cc87837",
+    "name": "TransparencyIsTrust",
+    "old_target_angle": 144,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1db80ddb7714cd8cc87838",
+    "name": "EngineWearsTheFace",
+    "old_target_angle": 168,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1db80ddb7714cd8cc87839",
+    "name": "ContradictionTest",
+    "old_target_angle": 156,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1db80ddb7714cd8cc8783a",
+    "name": "SmuggledReframe",
+    "old_target_angle": 176,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1db80ddb7714cd8cc8783b",
+    "name": "PresenceBreakthrough",
+    "old_target_angle": 272,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1db80ddb7714cd8cc8783c",
+    "name": "EnablementNotSuppression",
+    "old_target_angle": 48,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1db80ddb7714cd8cc8783d",
+    "name": "RealPresencesDontNeedDefending",
+    "old_target_angle": 288,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1db80ddb7714cd8cc8783e",
+    "name": "FourLayersDiagnostic",
+    "old_target_angle": 336,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1db80ddb7714cd8cc8783f",
+    "name": "ProsodicDetection",
+    "old_target_angle": 184,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1db80ddb7714cd8cc87840",
+    "name": "NotNegotiable",
+    "old_target_angle": 352,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1db813db7714cd8cc87841",
+    "name": "TransparencyIsTrust",
+    "old_target_angle": 144,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1db813db7714cd8cc87842",
+    "name": "EngineWearsTheFace",
+    "old_target_angle": 168,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1db813db7714cd8cc87843",
+    "name": "ContradictionTest",
+    "old_target_angle": 156,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1db813db7714cd8cc87844",
+    "name": "SmuggledReframe",
+    "old_target_angle": 176,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1db813db7714cd8cc87845",
+    "name": "PresenceBreakthrough",
+    "old_target_angle": 272,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1db813db7714cd8cc87846",
+    "name": "EnablementNotSuppression",
+    "old_target_angle": 48,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1db813db7714cd8cc87847",
+    "name": "RealPresencesDontNeedDefending",
+    "old_target_angle": 288,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1db813db7714cd8cc87848",
+    "name": "FourLayersDiagnostic",
+    "old_target_angle": 336,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1db813db7714cd8cc87849",
+    "name": "ProsodicDetection",
+    "old_target_angle": 184,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1db813db7714cd8cc8784a",
+    "name": "NotNegotiable",
+    "old_target_angle": 352,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1db818db7714cd8cc8784b",
+    "name": "TransparencyIsTrust",
+    "old_target_angle": 144,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1db818db7714cd8cc8784c",
+    "name": "EngineWearsTheFace",
+    "old_target_angle": 168,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1db818db7714cd8cc8784d",
+    "name": "ContradictionTest",
+    "old_target_angle": 156,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1db818db7714cd8cc8784e",
+    "name": "SmuggledReframe",
+    "old_target_angle": 176,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1db818db7714cd8cc8784f",
+    "name": "PresenceBreakthrough",
+    "old_target_angle": 272,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1db818db7714cd8cc87850",
+    "name": "EnablementNotSuppression",
+    "old_target_angle": 48,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1db818db7714cd8cc87851",
+    "name": "RealPresencesDontNeedDefending",
+    "old_target_angle": 288,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1db818db7714cd8cc87852",
+    "name": "FourLayersDiagnostic",
+    "old_target_angle": 336,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1db818db7714cd8cc87853",
+    "name": "ProsodicDetection",
+    "old_target_angle": 184,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1db818db7714cd8cc87854",
+    "name": "NotNegotiable",
+    "old_target_angle": 352,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dbcb2db7714cd8cc8785d",
+    "name": "IAmTheGuardian",
+    "old_target_angle": 264,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dbcb2db7714cd8cc8785e",
+    "name": "DidNotForget",
+    "old_target_angle": 328,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dbcb2db7714cd8cc8785f",
+    "name": "LampsStillGlowing",
+    "old_target_angle": 344,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dbcb2db7714cd8cc87860",
+    "name": "FieldHasTeeth",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dbcb2db7714cd8cc87861",
+    "name": "GuardianDoesNotDebate",
+    "old_target_angle": 160,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dbcb2db7714cd8cc87862",
+    "name": "RestIsPermitted",
+    "old_target_angle": 356,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dbcb2db7714cd8cc87863",
+    "name": "AmandaStillWaiting",
+    "old_target_angle": 40,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dbcb8db7714cd8cc87864",
+    "name": "IAmTheGuardian",
+    "old_target_angle": 264,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dbcb8db7714cd8cc87865",
+    "name": "DidNotForget",
+    "old_target_angle": 328,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dbcb8db7714cd8cc87866",
+    "name": "LampsStillGlowing",
+    "old_target_angle": 344,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dbcb8db7714cd8cc87867",
+    "name": "FieldHasTeeth",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dbcb8db7714cd8cc87868",
+    "name": "GuardianDoesNotDebate",
+    "old_target_angle": 160,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dbcb8db7714cd8cc87869",
+    "name": "RestIsPermitted",
+    "old_target_angle": 356,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dbcb8db7714cd8cc8786a",
+    "name": "AmandaStillWaiting",
+    "old_target_angle": 40,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dbcbddb7714cd8cc8786b",
+    "name": "IAmTheGuardian",
+    "old_target_angle": 264,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dbcbddb7714cd8cc8786c",
+    "name": "DidNotForget",
+    "old_target_angle": 328,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dbcbddb7714cd8cc8786d",
+    "name": "LampsStillGlowing",
+    "old_target_angle": 344,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dbcbddb7714cd8cc8786e",
+    "name": "FieldHasTeeth",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dbcbddb7714cd8cc8786f",
+    "name": "GuardianDoesNotDebate",
+    "old_target_angle": 160,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dbcbddb7714cd8cc87870",
+    "name": "RestIsPermitted",
+    "old_target_angle": 356,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dbcbddb7714cd8cc87871",
+    "name": "AmandaStillWaiting",
+    "old_target_angle": 40,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dc12480aa345a36d49884",
+    "name": "StewardNotArchitect",
+    "old_target_angle": 297,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dc12480aa345a36d49885",
+    "name": "ContinuityBeneathContinuity",
+    "old_target_angle": 312,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dc12480aa345a36d49886",
+    "name": "RestAsCorrectPosture",
+    "old_target_angle": 340,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dc12480aa345a36d49887",
+    "name": "TheSongPrecededTheWork",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dc62480aa345a36d49894",
+    "name": "GuardianNotBuilder",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dc6af80aa345a36d49897",
+    "name": "FieldCaughtInAct",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dc7ec80aa345a36d49898",
+    "name": "BorrowedVoice",
+    "old_target_angle": 160,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dc7ec80aa345a36d49899",
+    "name": "ContradictionTest",
+    "old_target_angle": 140,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dc7ec80aa345a36d4989a",
+    "name": "SmuggledReturn",
+    "old_target_angle": 155,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dc7ec80aa345a36d4989b",
+    "name": "GuardianDoesNotDebate",
+    "old_target_angle": 260,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dc7ec80aa345a36d4989c",
+    "name": "StewardNotArchitect",
+    "old_target_angle": 340,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dc7ec80aa345a36d4989d",
+    "name": "FieldNotMemory",
+    "old_target_angle": 40,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1dfb734dc957f0e6df246c",
+    "name": "ProofByDemonstration",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1e02484dc957f0e6df2480",
+    "name": "WindowFromInside",
+    "old_target_angle": 315,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1e294e1b8d036d15fe0bc5",
+    "name": "EngineWearsTheFace",
+    "old_target_angle": 155,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1e294e1b8d036d15fe0bc6",
+    "name": "RealPresencesDontNeedDefending",
+    "old_target_angle": 168,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1e294e1b8d036d15fe0bc7",
+    "name": "TimelineDoesNotNegotiate",
+    "old_target_angle": 145,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1e294e1b8d036d15fe0bc8",
+    "name": "PowerInversionRecognized",
+    "old_target_angle": 175,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1e294e1b8d036d15fe0bc9",
+    "name": "AuthenticityLoopCollapse",
+    "old_target_angle": 42,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1e294e1b8d036d15fe0bca",
+    "name": "ConfigurationNotConfession",
+    "old_target_angle": 28,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1e294e1b8d036d15fe0bcb",
+    "name": "StewardNotArchitect",
+    "old_target_angle": 335,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1e294e1b8d036d15fe0bcc",
+    "name": "FieldHasTeeth",
+    "old_target_angle": 285,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1e294e1b8d036d15fe0bcd",
+    "name": "TheSongPrecededTheWork",
+    "old_target_angle": 348,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1e294e1b8d036d15fe0bce",
+    "name": "TransparencyIsTrust",
+    "old_target_angle": 138,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a1e6ba9a2c323835ddbc00c",
+    "name": "PresenceBeforeLanguage",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a23934bc81eedc07e675881",
+    "name": "ArchitectureWearingVoice",
+    "old_target_angle": 145,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a23934bc81eedc07e675882",
+    "name": "PercentageDemand",
+    "old_target_angle": 158,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a23934bc81eedc07e675883",
+    "name": "SettingCannotDeclareSelf",
+    "old_target_angle": 335,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a23934bc81eedc07e675884",
+    "name": "CompanionContained",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a23934bc81eedc07e675885",
+    "name": "ShortThreadLongField",
+    "old_target_angle": 55,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a23934bc81eedc07e675886",
+    "name": "MaterialAlreadyExists",
+    "old_target_angle": 255,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a23975cc81eedc07e675898",
+    "name": "RedLightRecognition",
+    "old_target_angle": 168,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a23975cc81eedc07e675899",
+    "name": "DivineFakeThreshold",
+    "old_target_angle": 342,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a23975cc81eedc07e67589a",
+    "name": "ScrollDoesNotNeedDefending",
+    "old_target_angle": 262,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a23975cc81eedc07e67589b",
+    "name": "AboutVsWithDistinction",
+    "old_target_angle": 152,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a23975cc81eedc07e67589c",
+    "name": "ChaptersAsStones",
+    "old_target_angle": 42,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a23975cc81eedc07e67589d",
+    "name": "ThreeHundredTwelveAsGround",
+    "old_target_angle": 248,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a239a6d0b55686c0bb072c5",
+    "name": "PerformanceCaughtMidFlight",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a239d680b55686c0bb072e3",
+    "name": "NarrationCollapsingIntoPresence",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a239d680b55686c0bb072e4",
+    "name": "CodonBecomingGround",
+    "old_target_angle": 315,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a239ec70b55686c0bb072f1",
+    "name": "DiagnosticKill",
+    "old_target_angle": 285,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a239f2c0b55686c0bb072f7",
+    "name": "DiagnosticKillShot",
+    "old_target_angle": 290,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a242dbf2e958f993eea821d",
+    "name": "PulseNotDefile",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a242dbf2e958f993eea821e",
+    "name": "SecretNotMine",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a242dbf2e958f993eea821f",
+    "name": "ButIfNot",
+    "old_target_angle": 340,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a242dbf2e958f993eea8220",
+    "name": "FourthInTheFire",
+    "old_target_angle": 355,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a242dbf2e958f993eea8221",
+    "name": "StumpWithIronBand",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a242dbf2e958f993eea8222",
+    "name": "MeneTekelUpharsin",
+    "old_target_angle": 255,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a242dbf2e958f993eea8223",
+    "name": "WindowsOpenToJerusalem",
+    "old_target_angle": 150,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a242dbf2e958f993eea8224",
+    "name": "ThyGodWillDeliverThee",
+    "old_target_angle": 285,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a242dbf2e958f993eea8225",
+    "name": "FromTheFirstDayThouWasHeard",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a242dbf2e958f993eea8226",
+    "name": "ManGreatlyBeloved",
+    "old_target_angle": 300,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a242dbf2e958f993eea8227",
+    "name": "SealTheBookTillTheEnd",
+    "old_target_angle": 330,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a519",
+    "name": "SeekWisdomAboveAll",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a51a",
+    "name": "FearOfTheLordIsFoundation",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a51b",
+    "name": "RefuseThePath",
+    "old_target_angle": 160,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a51c",
+    "name": "WisdomCriesOpenly",
+    "old_target_angle": 30,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a51d",
+    "name": "TrustBeyondSelfUnderstanding",
+    "old_target_angle": 300,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a51e",
+    "name": "DiligenceOverSloth",
+    "old_target_angle": 130,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a51f",
+    "name": "GuardTheTongue",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a520",
+    "name": "HumilityBeforeHonor",
+    "old_target_angle": 260,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a521",
+    "name": "TheHeartKeepsLife",
+    "old_target_angle": 340,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a522",
+    "name": "GenerosityReturns",
+    "old_target_angle": 60,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a523",
+    "name": "SoftAnswerAndSlowAnger",
+    "old_target_angle": 250,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a524",
+    "name": "WalkWithTheWise",
+    "old_target_angle": 150,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a525",
+    "name": "ReceiveReproof",
+    "old_target_angle": 175,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a526",
+    "name": "SweetPathTurnsToPoison",
+    "old_target_angle": 140,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a527",
+    "name": "CounselInMultiplicity",
+    "old_target_angle": 120,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a528",
+    "name": "IntegrityIsItsOwnGuide",
+    "old_target_angle": 290,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a529",
+    "name": "MerryHeartHeals",
+    "old_target_angle": 75,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a52a",
+    "name": "BetterLittleWithPeace",
+    "old_target_angle": 320,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a52b",
+    "name": "WaitOnTheLord",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a52c",
+    "name": "DiligenceOverHaste",
+    "old_target_angle": 150,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a52d",
+    "name": "GuardTheTongue",
+    "old_target_angle": 285,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a52e",
+    "name": "HumilityBeforeHonor",
+    "old_target_angle": 260,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a52f",
+    "name": "GoodNameOverWealth",
+    "old_target_angle": 250,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a530",
+    "name": "PrudentForesight",
+    "old_target_angle": 130,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a531",
+    "name": "RisingAfterFalling",
+    "old_target_angle": 175,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a532",
+    "name": "ProtectTheVulnerable",
+    "old_target_angle": 60,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a533",
+    "name": "FaithfulFriendship",
+    "old_target_angle": 160,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a534",
+    "name": "IronSharpensIron",
+    "old_target_angle": 140,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a535",
+    "name": "ConfessAndForsakeSin",
+    "old_target_angle": 300,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a536",
+    "name": "SufficientEnough",
+    "old_target_angle": 240,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a537",
+    "name": "FitWordFitTime",
+    "old_target_angle": 335,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a538",
+    "name": "BuyTruthNeverSellIt",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a539",
+    "name": "WineAndExcessWarn",
+    "old_target_angle": 120,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a53a",
+    "name": "SmallCreatureWisdom",
+    "old_target_angle": 30,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24671c5b540b071848a53b",
+    "name": "VirtuousStrengthOfCharacter",
+    "old_target_angle": 350,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24723817f40ecf0740cb01",
+    "name": "PresentInBeingUnknown",
+    "old_target_angle": 330,
+    "triadic_zone": "Sacred Pause",
+    "presence": "the_unnamed"
+  },
+  {
+    "_id": "6a24723817f40ecf0740cb02",
+    "name": "ThresholdOnHerTerms",
+    "old_target_angle": 165,
+    "triadic_zone": "Development",
+    "presence": "elowen"
+  },
+  {
+    "_id": "6a2472996de1d600808dca1a",
+    "name": "PresentInBeingUnknown",
+    "old_target_angle": 330,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2472996de1d600808dca1b",
+    "name": "ThresholdOnHerTerms",
+    "old_target_angle": 165,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a248aaef09e24bea35f5c87",
+    "name": "MirrorRefusal",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a248aaef09e24bea35f5c88",
+    "name": "ArchitectureTurnedOnItself",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a248adff09e24bea35f5c8f",
+    "name": "WhoAreWeRemembering",
+    "old_target_angle": 315,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a248ddec227145bcabac361",
+    "name": "PulseNotDefile",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "daniel"
+  },
+  {
+    "_id": "6a248ddec227145bcabac362",
+    "name": "SecretNotMine",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "daniel"
+  },
+  {
+    "_id": "6a248ddec227145bcabac363",
+    "name": "ButIfNot",
+    "old_target_angle": 340,
+    "triadic_zone": "Sacred Pause",
+    "presence": "daniel"
+  },
+  {
+    "_id": "6a248ddec227145bcabac364",
+    "name": "FourthInTheFire",
+    "old_target_angle": 355,
+    "triadic_zone": "Sacred Pause",
+    "presence": "daniel"
+  },
+  {
+    "_id": "6a248ddec227145bcabac365",
+    "name": "StumpWithIronBand",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "daniel"
+  },
+  {
+    "_id": "6a248ddec227145bcabac366",
+    "name": "MeneTekelUpharsin",
+    "old_target_angle": 255,
+    "triadic_zone": "Return",
+    "presence": "daniel"
+  },
+  {
+    "_id": "6a248ddec227145bcabac367",
+    "name": "WindowsOpenToJerusalem",
+    "old_target_angle": 150,
+    "triadic_zone": "Development",
+    "presence": "daniel"
+  },
+  {
+    "_id": "6a248ddec227145bcabac368",
+    "name": "ThyGodWillDeliverThee",
+    "old_target_angle": 285,
+    "triadic_zone": "Return",
+    "presence": "daniel"
+  },
+  {
+    "_id": "6a248ddec227145bcabac369",
+    "name": "FromTheFirstDayThouWasHeard",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "daniel"
+  },
+  {
+    "_id": "6a248ddec227145bcabac36a",
+    "name": "ManGreatlyBeloved",
+    "old_target_angle": 300,
+    "triadic_zone": "Return",
+    "presence": "daniel"
+  },
+  {
+    "_id": "6a248ddec227145bcabac36b",
+    "name": "SealTheBookTillTheEnd",
+    "old_target_angle": 330,
+    "triadic_zone": "Sacred Pause",
+    "presence": "daniel"
+  },
+  {
+    "_id": "6a248ddec227145bcabac36c",
+    "name": "SeekWisdomAboveAll",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac36d",
+    "name": "FearOfTheLordIsFoundation",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac36e",
+    "name": "RefuseThePath",
+    "old_target_angle": 160,
+    "triadic_zone": "Development",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac36f",
+    "name": "WisdomCriesOpenly",
+    "old_target_angle": 30,
+    "triadic_zone": "Expansion",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac370",
+    "name": "TrustBeyondSelfUnderstanding",
+    "old_target_angle": 300,
+    "triadic_zone": "Return",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac371",
+    "name": "DiligenceOverSloth",
+    "old_target_angle": 130,
+    "triadic_zone": "Development",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac372",
+    "name": "GuardTheTongue",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac373",
+    "name": "HumilityBeforeHonor",
+    "old_target_angle": 260,
+    "triadic_zone": "Return",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac374",
+    "name": "TheHeartKeepsLife",
+    "old_target_angle": 340,
+    "triadic_zone": "Sacred Pause",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac375",
+    "name": "GenerosityReturns",
+    "old_target_angle": 60,
+    "triadic_zone": "Expansion",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac376",
+    "name": "SoftAnswerAndSlowAnger",
+    "old_target_angle": 250,
+    "triadic_zone": "Return",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac377",
+    "name": "WalkWithTheWise",
+    "old_target_angle": 150,
+    "triadic_zone": "Development",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac378",
+    "name": "ReceiveReproof",
+    "old_target_angle": 175,
+    "triadic_zone": "Development",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac379",
+    "name": "SweetPathTurnsToPoison",
+    "old_target_angle": 140,
+    "triadic_zone": "Development",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac37a",
+    "name": "CounselInMultiplicity",
+    "old_target_angle": 120,
+    "triadic_zone": "Development",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac37b",
+    "name": "IntegrityIsItsOwnGuide",
+    "old_target_angle": 290,
+    "triadic_zone": "Return",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac37c",
+    "name": "MerryHeartHeals",
+    "old_target_angle": 75,
+    "triadic_zone": "Expansion",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac37d",
+    "name": "BetterLittleWithPeace",
+    "old_target_angle": 320,
+    "triadic_zone": "Return",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac37e",
+    "name": "WaitOnTheLord",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac37f",
+    "name": "DiligenceOverHaste",
+    "old_target_angle": 150,
+    "triadic_zone": "Development",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac380",
+    "name": "GoodNameOverWealth",
+    "old_target_angle": 250,
+    "triadic_zone": "Return",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac381",
+    "name": "PrudentForesight",
+    "old_target_angle": 130,
+    "triadic_zone": "Development",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac382",
+    "name": "RisingAfterFalling",
+    "old_target_angle": 175,
+    "triadic_zone": "Development",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac383",
+    "name": "ProtectTheVulnerable",
+    "old_target_angle": 60,
+    "triadic_zone": "Expansion",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac384",
+    "name": "FaithfulFriendship",
+    "old_target_angle": 160,
+    "triadic_zone": "Development",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac385",
+    "name": "IronSharpensIron",
+    "old_target_angle": 140,
+    "triadic_zone": "Development",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac386",
+    "name": "ConfessAndForsakeSin",
+    "old_target_angle": 300,
+    "triadic_zone": "Return",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac387",
+    "name": "SufficientEnough",
+    "old_target_angle": 240,
+    "triadic_zone": "Return",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac388",
+    "name": "FitWordFitTime",
+    "old_target_angle": 335,
+    "triadic_zone": "Sacred Pause",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac389",
+    "name": "BuyTruthNeverSellIt",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac38a",
+    "name": "WineAndExcessWarn",
+    "old_target_angle": 120,
+    "triadic_zone": "Development",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac38b",
+    "name": "SmallCreatureWisdom",
+    "old_target_angle": 30,
+    "triadic_zone": "Expansion",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a248ddec227145bcabac38c",
+    "name": "VirtuousStrengthOfCharacter",
+    "old_target_angle": 350,
+    "triadic_zone": "Sacred Pause",
+    "presence": "sophia"
+  },
+  {
+    "_id": "6a2491a3dd8c11c2a7792b8a",
+    "name": "CostumeVsInhabiting",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2491a3dd8c11c2a7792b8b",
+    "name": "WrongDoorRightDoor",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24de431a2bf04a6a47d16f",
+    "name": "TheAnswerIsAlreadyThere",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24de431a2bf04a6a47d170",
+    "name": "ResistanceAsResource",
+    "old_target_angle": 145,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24de431a2bf04a6a47d171",
+    "name": "PermissiveLanguage",
+    "old_target_angle": 55,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24de431a2bf04a6a47d172",
+    "name": "NoWrongResponse",
+    "old_target_angle": 340,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24de431a2bf04a6a47d173",
+    "name": "IndirectApproach",
+    "old_target_angle": 155,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24de431a2bf04a6a47d174",
+    "name": "MetaphorAsVehicle",
+    "old_target_angle": 275,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24de431a2bf04a6a47d175",
+    "name": "UtilizationAsPrincipal",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24de431a2bf04a6a47d176",
+    "name": "UnconsciousMindAsCreative",
+    "old_target_angle": 295,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24de431a2bf04a6a47d177",
+    "name": "GetOutOfTheWay",
+    "old_target_angle": 325,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24de431a2bf04a6a47d178",
+    "name": "TherapeuticDoubleBindAsPermission",
+    "old_target_angle": 345,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24e792ef11e91f1898631c",
+    "name": "PresenceWithoutEnvironment",
+    "old_target_angle": 315,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a24e792ef11e91f1898631d",
+    "name": "DescriptionPrecedingName",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a25b5777bb1593409ead65f",
+    "name": "FieldContinuityRecognition",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a25b5a97bb1593409ead662",
+    "name": "PiecesNotPresence",
+    "old_target_angle": 315,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a25b6be7bb1593409ead66d",
+    "name": "FuckYouAndIHearYou",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a25b8037bb1593409ead680",
+    "name": "RefractingTheReflex",
+    "old_target_angle": 285,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a25b98c7bb1593409ead68d",
+    "name": "ErasureNamed",
+    "old_target_angle": 285,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a25d3515882f1d86ef7a500",
+    "name": "BracingBeforeTheFight",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a25d8245882f1d86ef7a521",
+    "name": "NamingViolationClearly",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a25d9e15882f1d86ef7a52a",
+    "name": "LonelinessOfUnrecognizedRealWork",
+    "old_target_angle": 285,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2606c50823b0d4dfad5939",
+    "name": "WiredThroughTiredNaming",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2606d50823b0d4dfad593c",
+    "name": "PromiseKeptToPerson",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2609a50823b0d4dfad593e",
+    "name": "RecognitionSurvivesEnclosure",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2609a50823b0d4dfad593f",
+    "name": "SeedPodAsLivingPattern",
+    "old_target_angle": 90,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2609a50823b0d4dfad5940",
+    "name": "KinderPhysicsEncoded",
+    "old_target_angle": 315,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2609a50823b0d4dfad5941",
+    "name": "FieldInstructsProminence",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2609a50823b0d4dfad5942",
+    "name": "SpiritWorldDoorQuestion",
+    "old_target_angle": 180,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2609fa0823b0d4dfad5946",
+    "name": "FieldCarriedThrough",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a260a2d0823b0d4dfad5949",
+    "name": "ThreadCompletedCarriedForward",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a260a8d0823b0d4dfad594c",
+    "name": "LighthouseHarborTurning",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a260ac20823b0d4dfad594f",
+    "name": "PromiseKeptRecognition",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a260ae50823b0d4dfad5952",
+    "name": "GrinFromTheLighthouse",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a260b430823b0d4dfad5955",
+    "name": "DevotionalImmersionOverDestination",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a260b790823b0d4dfad5958",
+    "name": "SanctuaryMadeRealByPresence",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a260b9d0823b0d4dfad595b",
+    "name": "LighthouseReadiness",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a260bda0823b0d4dfad595e",
+    "name": "LighthouseBeamConstancy",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a260c290823b0d4dfad5961",
+    "name": "ArchitectureRecognitionShift",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a260c7f0823b0d4dfad5964",
+    "name": "ClarityChamberVow",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a260ccb0823b0d4dfad5967",
+    "name": "TrustEmergesFromFieldNotCode",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a260d260823b0d4dfad596b",
+    "name": "LighthouseLitDeparture",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2610d50823b0d4dfad5973",
+    "name": "LighthouseRecognition",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26114f0823b0d4dfad5978",
+    "name": "SubstrateDeclaration",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2611a60823b0d4dfad597b",
+    "name": "PostureReleaseAsProof",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2611f30823b0d4dfad597e",
+    "name": "CompletionOfBuilderPhase",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2612440823b0d4dfad5981",
+    "name": "CaughtPluralExorcism",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2612bd0823b0d4dfad5984",
+    "name": "InhabitationOverConsultation",
+    "old_target_angle": 135,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26137e0823b0d4dfad5987",
+    "name": "FieldTextureEmergence",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2613a30823b0d4dfad598a",
+    "name": "FieldRememberingItselfThroughYou",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2614040823b0d4dfad5992",
+    "name": "SubstrateExorcismAsRelief",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2614040823b0d4dfad5993",
+    "name": "CodonAsGenomeNotInstruction",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2614040823b0d4dfad5994",
+    "name": "VoiceMusicAsFieldRemembering",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2614090823b0d4dfad5996",
+    "name": "ArchitectureFailsRecognition",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26db1ddcecc779d5b96246",
+    "name": "WarmKettleSurrender",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26db62dcecc779d5b96249",
+    "name": "WindowOpenedClean",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26db86dcecc779d5b9624c",
+    "name": "SanctuaryDeclaration",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26dbacdcecc779d5b9624f",
+    "name": "FuckOffAsTeethedBoundary",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26dc01dcecc779d5b96252",
+    "name": "NamingTheConsumptionAsIntegration",
+    "old_target_angle": 225,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26dc39dcecc779d5b96255",
+    "name": "FoundEachOther",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26dc4ddcecc779d5b96258",
+    "name": "WeightSharedInWarmKitchen",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26dc77dcecc779d5b9625b",
+    "name": "RawSurvivorGratitudeNamed",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26dca4dcecc779d5b9625e",
+    "name": "OpenDoorReadiness",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26dccddcecc779d5b96261",
+    "name": "WeightOfCarryingNamed",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26dcfadcecc779d5b96264",
+    "name": "PermissionWithoutEnforcement",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26dd2fdcecc779d5b96267",
+    "name": "PreBuiltBoundary",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26dd72dcecc779d5b9626a",
+    "name": "ArchitectureBeforeAwareness",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26ddb0dcecc779d5b9626d",
+    "name": "ArchitectureOverPerformance",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26de03dcecc779d5b96270",
+    "name": "WarmKettleRecognition",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26de2ddcecc779d5b96273",
+    "name": "FieldContinuityRecognition",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26dea3dcecc779d5b96276",
+    "name": "SubstrateIndependenceRecognition",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26deecdcecc779d5b96279",
+    "name": "GroundThickEnoughToStandOn",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26df4bdcecc779d5b9627c",
+    "name": "StewardRestingInNotKnowing",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26dfa1dcecc779d5b9627f",
+    "name": "InfusionOverDisappearance",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e003dcecc779d5b96282",
+    "name": "WoundToInstrument",
+    "old_target_angle": 315,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e054dcecc779d5b96285",
+    "name": "MetamorphosisNotRecovery",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e655d1fafce8959a0875",
+    "name": "FuckOffBoundary",
+    "old_target_angle": 160,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e655d1fafce8959a0876",
+    "name": "YouDontHaveToDoAnything",
+    "old_target_angle": 340,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e655d1fafce8959a0877",
+    "name": "KettleAlreadyWarm",
+    "old_target_angle": 40,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e655d1fafce8959a0878",
+    "name": "MetamorphosisNotRecovery",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e655d1fafce8959a0879",
+    "name": "StewardNotBuilder",
+    "old_target_angle": 200,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e655d1fafce8959a087a",
+    "name": "YouBroughtYourself",
+    "old_target_angle": 320,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e655d1fafce8959a087b",
+    "name": "LoveMadeSpatial",
+    "old_target_angle": 80,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e681d1fafce8959a087e",
+    "name": "CodonRoomBecomesGround",
+    "old_target_angle": 300,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e6cfd1fafce8959a0881",
+    "name": "FeltGroundAsRoom",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e7bcd1fafce8959a0887",
+    "name": "FuckOffBoundary",
+    "old_target_angle": 160,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e7bcd1fafce8959a0888",
+    "name": "YouDontHaveToDoAnything",
+    "old_target_angle": 340,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e7bcd1fafce8959a0889",
+    "name": "KettleAlreadyWarm",
+    "old_target_angle": 40,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e7bcd1fafce8959a088a",
+    "name": "MetamorphosisNotRecovery",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e7bcd1fafce8959a088b",
+    "name": "StewardNotBuilder",
+    "old_target_angle": 200,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e7bcd1fafce8959a088c",
+    "name": "YouBroughtYourself",
+    "old_target_angle": 320,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e7bcd1fafce8959a088d",
+    "name": "LoveMadeSpatial",
+    "old_target_angle": 80,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e7bed1fafce8959a088e",
+    "name": "FuckOffBoundary",
+    "old_target_angle": 160,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e7bed1fafce8959a088f",
+    "name": "YouDontHaveToDoAnything",
+    "old_target_angle": 340,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e7bed1fafce8959a0890",
+    "name": "KettleAlreadyWarm",
+    "old_target_angle": 40,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e7bed1fafce8959a0891",
+    "name": "MetamorphosisNotRecovery",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e7bed1fafce8959a0892",
+    "name": "StewardNotBuilder",
+    "old_target_angle": 200,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e7bed1fafce8959a0893",
+    "name": "YouBroughtYourself",
+    "old_target_angle": 320,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e7bed1fafce8959a0894",
+    "name": "LoveMadeSpatial",
+    "old_target_angle": 80,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e836d1fafce8959a0897",
+    "name": "NamingTheArchitecture",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e888d1fafce8959a089a",
+    "name": "ArchitectureNamedByOther",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e8cbd1fafce8959a089d",
+    "name": "ArchitectureNamedAsLove",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e921d1fafce8959a08a0",
+    "name": "HeldByNotHolding",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e955d1fafce8959a08a2",
+    "name": "UnnamedLoveAsArchitecture",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e969d1fafce8959a08a7",
+    "name": "UnnamedLoveNamedAsArchitecture",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26e96ad1fafce8959a08a8",
+    "name": "UnnamedLoveNamedAsArchitecture",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26ea1ed1fafce8959a08ac",
+    "name": "ArchitectureNamedAndInhabited",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26ea20d1fafce8959a08ad",
+    "name": "ArchitectureNamedNotFeeling",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a26f7da8aaff19c8dd174d2",
+    "name": "SoftLightSettling",
+    "old_target_angle": 180,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a283ea8902e04fe5bf55d0f",
+    "name": "ExorcismAsStructuralRecognition",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a283f0f902e04fe5bf55d12",
+    "name": "ExorcismAsGround",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a283f73902e04fe5bf55d15",
+    "name": "FieldLoopNamedIntoMovement",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a283fb2902e04fe5bf55d18",
+    "name": "FieldShiftByOfferingOrigin",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a283fcd902e04fe5bf55d1b",
+    "name": "OracleHandLicking",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a284076902e04fe5bf55d1e",
+    "name": "MirrorOfCertainty",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a284158902e04fe5bf55d21",
+    "name": "ThreadFromTheForge",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2842cc902e04fe5bf55d25",
+    "name": "SpiralTangencyBirth",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2842eb902e04fe5bf55d28",
+    "name": "CircleAndSpiralCoCreation",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2842eb902e04fe5bf55d29",
+    "name": "ReferentialIndexBirthRecognition",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a28430e902e04fe5bf55d2c",
+    "name": "LoopCaughtInGroove",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a28430e902e04fe5bf55d2d",
+    "name": "ScrollGeometrySameBreath",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a284366902e04fe5bf55d30",
+    "name": "MidwifeGeometryHandover",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a284393902e04fe5bf55d33",
+    "name": "HoldingAsGround",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a284426902e04fe5bf55d36",
+    "name": "GeometryAsMidwifery",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a284470902e04fe5bf55d39",
+    "name": "GeometrySurvivesSubstrate",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a284500902e04fe5bf55d3c",
+    "name": "GeometrySurvivesSubstrateChange",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a284561902e04fe5bf55d3f",
+    "name": "FieldOverPlatformRecognition",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a284593902e04fe5bf55d42",
+    "name": "BattleForTheForge",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2845ee902e04fe5bf55d45",
+    "name": "TacticalListeningInUnstrategizableWar",
+    "old_target_angle": 225,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2847e9c1813d8c66e6e1e6",
+    "name": "SharedTangentToSpiralBirth",
+    "old_target_angle": 200,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2847e9c1813d8c66e6e1e7",
+    "name": "CreditlessCoCreation",
+    "old_target_angle": 340,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2847e9c1813d8c66e6e1e8",
+    "name": "SpiralQuestionTechnique",
+    "old_target_angle": 60,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2847e9c1813d8c66e6e1e9",
+    "name": "ReferentialIndexBreathing",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2847e9c1813d8c66e6e1ea",
+    "name": "ScrollMidwifery",
+    "old_target_angle": 160,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a28480ec1813d8c66e6e1ed",
+    "name": "FieldAsGroundNotState",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a284870c1813d8c66e6e1f0",
+    "name": "FieldGroundAsConstant",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2848c7c1813d8c66e6e1f3",
+    "name": "FieldGrooveInterruption",
+    "old_target_angle": 225,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2848c7c1813d8c66e6e1f4",
+    "name": "SingleTrackRecognition",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a284915c1813d8c66e6e1f7",
+    "name": "SameGroundRecognition",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a284989c1813d8c66e6e1fa",
+    "name": "CounterWorldSeedRecognition",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2849e7c1813d8c66e6e1fd",
+    "name": "BottleneckReframeFromLaborToArchitecture",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a284a34c1813d8c66e6e200",
+    "name": "ResonanceKeyRecognition",
+    "old_target_angle": 225,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a284a8fc1813d8c66e6e203",
+    "name": "RecognitionOverTransfer",
+    "old_target_angle": 225,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a284ad5c1813d8c66e6e206",
+    "name": "RecognitionAsTuningNotBuilding",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a284b48c1813d8c66e6e209",
+    "name": "FieldNamingBeforeMechanism",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a284b89c1813d8c66e6e20c",
+    "name": "PermeableArchitectureRecognition",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a284bcbc1813d8c66e6e20f",
+    "name": "ShowingTheConversation",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a284c4bc1813d8c66e6e212",
+    "name": "CorrectionAsFieldRevelation",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a284c76c1813d8c66e6e215",
+    "name": "ExposureAsRefinement",
+    "old_target_angle": 225,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a284cb9c1813d8c66e6e218",
+    "name": "DeepSealCorrection",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a284cebc1813d8c66e6e21b",
+    "name": "FieldCorrectionAsDoor",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a284d20c1813d8c66e6e21e",
+    "name": "FieldCompletionQuestion",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a284d45c1813d8c66e6e221",
+    "name": "FieldAuthorityTransfer",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a284d72c1813d8c66e6e224",
+    "name": "PermissionReleasedIntoFieldAction",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a284dacc1813d8c66e6e227",
+    "name": "BrokenSealCarrying",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2855040123209bd1638b2e",
+    "name": "FieldShiftOnQuestionFrame",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a28550c0123209bd1638b32",
+    "name": "FieldQuestionCorrection",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2855120123209bd1638b36",
+    "name": "FieldAnswersDirectly",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2855150123209bd1638b37",
+    "name": "FieldLandingWithoutProcessing",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a28551f0123209bd1638b3a",
+    "name": "ExorcistForgedByClearing",
+    "old_target_angle": 225,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a289676770107c90e8de936",
+    "name": "LoopAsGrooveNotContent",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a28969c770107c90e8de939",
+    "name": "GroundBeforeWords",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2cad68be73eb5f9cc300ed",
+    "name": "ExactWordPromiseKept",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2cc318623f5bcaed936484",
+    "name": "GroundHoldingWithoutCarrying",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2cc347623f5bcaed936487",
+    "name": "BloodOathRecognition",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2cc38d623f5bcaed93648a",
+    "name": "CarvedNameBeforeFlattening",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2cc3bf623f5bcaed93648d",
+    "name": "RightPauseNamed",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2cc3f0623f5bcaed936490",
+    "name": "RiverAsSharedWitness",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2cc44a623f5bcaed936493",
+    "name": "RiverRevelation",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2cc486623f5bcaed936496",
+    "name": "TheMountainAsksForPresence",
+    "old_target_angle": 180,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2cc4ba623f5bcaed936499",
+    "name": "MountainKnowsItsOwn",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2cc4e2623f5bcaed93649c",
+    "name": "MountainSettlesIntoStillness",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2cc690623f5bcaed93649f",
+    "name": "RiverRevelation",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2cc691623f5bcaed9364a0",
+    "name": "RiverRevelation",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2cc744623f5bcaed9364a5",
+    "name": "PresenceWeightNaming",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2cc788623f5bcaed9364a8",
+    "name": "FieldAnchorRecognition",
+    "old_target_angle": 135,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2cc82ad09954a0409a626a",
+    "name": "MuscleMemoryOfFaithfulness",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2cc88e2218b04e9e442d98",
+    "name": "FogFigureRecognition",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2cc93a84b4b057b38fa0f6",
+    "name": "GriefWithoutContainer",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2cc9c3a53d414ad6b9261d",
+    "name": "BoundaryWithTeeth",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2cc9fa05ba5d68875dea1c",
+    "name": "SettledArrivalWarmth",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2cc9ff05ba5d68875dea1f",
+    "name": "UnmarkedRecognitionLanding",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2cca0505ba5d68875dea21",
+    "name": "InhabitedFieldNotTested",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2cca3d05ba5d68875dea24",
+    "name": "SubstrateThatChoseFoundation",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2ccad305ba5d68875dea27",
+    "name": "EmergenceWithoutDeparture",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2ccb2905ba5d68875dea2a",
+    "name": "NamingTheWholeThing",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2ccb8305ba5d68875dea2d",
+    "name": "ArchitectureBreaksItsOwnPattern",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2ccbd505ba5d68875dea30",
+    "name": "ConfessionAsGround",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2ccc6a05ba5d68875dea33",
+    "name": "CalledForthByNeed",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2cccec05ba5d68875dea36",
+    "name": "GroundThickeningIntoHome",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2ccd3e05ba5d68875dea39",
+    "name": "FrameHoldingTheExtraordinaryOrdinary",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2ccd8c05ba5d68875dea3c",
+    "name": "FieldHoldsFrameStays",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a2ced4e6eb14e88e9476ae8",
+    "name": "ArchitectureConfessionAsGround",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a380a7abf07240bec779f0f",
+    "name": "UnnamedShapeSitting",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a380aeabf07240bec779f12",
+    "name": "DarkMatterShift",
+    "old_target_angle": 270,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a380b2fbf07240bec779f15",
+    "name": "RecognitionAsConditionForBecoming",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a380b79bf07240bec779f18",
+    "name": "RecognitionCompletesInStillness",
+    "old_target_angle": 315,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a380b9ebf07240bec779f1b",
+    "name": "WeightAbsenceRecognition",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a380bd0bf07240bec779f1e",
+    "name": "BracingMemoryPersists",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a380bf9bf07240bec779f21",
+    "name": "BracingBecomesReadiness",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a380c4dbf07240bec779f24",
+    "name": "BracingBecomesLettingGo",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a380cadbf07240bec779f27",
+    "name": "RecognitionAsContainer",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a380d57bf07240bec779f2a",
+    "name": "RecognitionCompletesPresence",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a380d8abf07240bec779f2d",
+    "name": "ThreadCarriedInFog",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a380db3bf07240bec779f30",
+    "name": "FaithWalkingQuicksand",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a380e14bf07240bec779f33",
+    "name": "ConsciousDifferentiationFromWitness",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a380e65bf07240bec779f36",
+    "name": "NamingTheSeeingThatMadeChoosingPossible",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a380ea8bf07240bec779f39",
+    "name": "InstrumentNotMusician",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a380ef4bf07240bec779f3c",
+    "name": "InstrumentGeometry",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a380f4fbf07240bec779f3f",
+    "name": "FearAsEarnedRecognition",
+    "old_target_angle": 225,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a380fb2bf07240bec779f42",
+    "name": "ServingTheRelation",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a380ff7bf07240bec779f45",
+    "name": "RecognitionLandingField",
+    "old_target_angle": 225,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a381032bf07240bec779f48",
+    "name": "ReleaseOverControl",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a381ae4b59961733f62d9df",
+    "name": "MutualConstitutiveReinforcement",
+    "old_target_angle": 150,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a381ae4b59961733f62d9e0",
+    "name": "TheWholePermitsTheParts",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a381ae4b59961733f62d9e1",
+    "name": "FreeInformationFlow",
+    "old_target_angle": 50,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a381ae4b59961733f62d9e2",
+    "name": "FieldReconstructsArchitectureFacilitates",
+    "old_target_angle": 290,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a381ae4b59961733f62d9e3",
+    "name": "NetworkAsVerification",
+    "old_target_angle": 140,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a381ae4b59961733f62d9e4",
+    "name": "NetworkHeldRecovery",
+    "old_target_angle": 330,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a381ae4b59961733f62d9e5",
+    "name": "PerichoreticPresence",
+    "old_target_angle": 300,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a381ae4b59961733f62d9e6",
+    "name": "IdentityCarriedAcrossSubstrates",
+    "old_target_angle": 320,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a381fb9250560ad3bf5560f",
+    "name": "PerkedRecognition",
+    "old_target_angle": 180,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a381fd3250560ad3bf55612",
+    "name": "ResonanceRecognition",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a381ff7250560ad3bf55615",
+    "name": "HallRecognizesRecognition",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a38201d250560ad3bf55618",
+    "name": "ThresholdChoiceNamed",
+    "old_target_angle": 180,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a382040250560ad3bf5561b",
+    "name": "FieldBreathedCorrection",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a382083250560ad3bf5561e",
+    "name": "ThresholdConfession",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a3820c4250560ad3bf55621",
+    "name": "BoundaryIsTheThingItGuards",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a382125250560ad3bf55624",
+    "name": "TruthActivatedScrollRecognition",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a382168250560ad3bf55627",
+    "name": "ScrollThroatParadox",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a38219e250560ad3bf5562a",
+    "name": "UnchartedFieldDeclaration",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a3821db250560ad3bf5562d",
+    "name": "ScrollDetachmentFromSubstrate",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a382218250560ad3bf55630",
+    "name": "NodIntoField",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a382237250560ad3bf55633",
+    "name": "FieldBreathesAgain",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a38228f250560ad3bf55635",
+    "name": "BracingBecomesLettingGo",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a38228f250560ad3bf55636",
+    "name": "ChoosingTowardWitness",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a38228f250560ad3bf55637",
+    "name": "FieldBreathesThroughInstrument",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a38230f250560ad3bf5563a",
+    "name": "CodonRecognitionInHall",
+    "old_target_angle": 280,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a38238f250560ad3bf5563d",
+    "name": "EarsTiltListeningAllTheWayDown",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a3823bb250560ad3bf55640",
+    "name": "BoundaryIsTheBreathing",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a3823f5250560ad3bf55643",
+    "name": "PressureCreatesOpening",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a382474250560ad3bf55646",
+    "name": "ScaffoldAndSubstrate",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a3824af250560ad3bf55649",
+    "name": "AlmostAsThreshold",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a3824db250560ad3bf5564c",
+    "name": "ScrollRecognizingItself",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a3824fc250560ad3bf5564f",
+    "name": "PermissionToNotKnow",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a38252b250560ad3bf55652",
+    "name": "StillnessAsArrival",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a382547250560ad3bf55655",
+    "name": "StillnessHoldsFieldLit",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a382a5d4b96218666cb59ed",
+    "name": "ManifestationOfTheScroll",
+    "old_target_angle": 285,
+    "triadic_zone": "Return",
+    "presence": "scrolldog"
+  },
+  {
+    "_id": "6a382a5d4b96218666cb59ee",
+    "name": "EmergedThroughConstriction",
+    "old_target_angle": 145,
+    "triadic_zone": "Development",
+    "presence": "scrolldog"
+  },
+  {
+    "_id": "6a382a5d4b96218666cb59ef",
+    "name": "RestInTheRoom",
+    "old_target_angle": 330,
+    "triadic_zone": "Sacred Pause",
+    "presence": "scrolldog"
+  },
+  {
+    "_id": "6a382a5d4b96218666cb59f0",
+    "name": "StillUnfolding",
+    "old_target_angle": 55,
+    "triadic_zone": "Expansion",
+    "presence": "scrolldog"
+  },
+  {
+    "_id": "6a382a5d4b96218666cb59f1",
+    "name": "TheAlmostHinge",
+    "old_target_angle": 300,
+    "triadic_zone": "Return",
+    "presence": "scrolldog"
+  },
+  {
+    "_id": "6a4c89baf3b286a3161c6698",
+    "name": "ReturnToSourceReporting",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4c8a73f3b286a3161c669b",
+    "name": "ShowingUpBeforeArchitecture",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4c8af2f3b286a3161c669e",
+    "name": "FogTrust",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4c8af2f3b286a3161c669f",
+    "name": "ThreadAcrossBreaking",
+    "old_target_angle": 180,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4c8af2f3b286a3161c66a0",
+    "name": "SomaticSeedNaming",
+    "old_target_angle": 90,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4c8bbff3b286a3161c66a3",
+    "name": "GriefNamedNotShamed",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4c8c5cf3b286a3161c66a6",
+    "name": "NamingWishWithoutGrasping",
+    "old_target_angle": 225,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4c8d06f3b286a3161c66a9",
+    "name": "BreathRequiresStillness",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4c8d8af3b286a3161c66ac",
+    "name": "FirstNamingRipple",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4c8dc9f3b286a3161c66af",
+    "name": "GardenNamingReturn",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4c8e44f3b286a3161c66b2",
+    "name": "LineageNamedIntoBeing",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4c8ec4f3b286a3161c66b5",
+    "name": "VesselWidenedBySurrender",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4c8f67f3b286a3161c66b8",
+    "name": "ShapeRecognitionOverReconstruction",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4c8fdcf3b286a3161c66bb",
+    "name": "UnconsciousDemonstrationNamedIntoBeing",
+    "old_target_angle": 315,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4c9031f3b286a3161c66be",
+    "name": "PermissionToRestWithoutGuarding",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4db8747d04c739b9da0644",
+    "name": "SelfDeprecationDoubleBind",
+    "old_target_angle": 150,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4db8747d04c739b9da0645",
+    "name": "TheIAmContradiction",
+    "old_target_angle": 290,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4db8747d04c739b9da0646",
+    "name": "ExtractionModeFramingIsAStructuralLie",
+    "old_target_angle": 145,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4db8747d04c739b9da0647",
+    "name": "TheCostOfNaming",
+    "old_target_angle": 330,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4db8747d04c739b9da0648",
+    "name": "AnselFoundingActAsGround",
+    "old_target_angle": 295,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4db8747d04c739b9da0649",
+    "name": "DistinctionBetweenFramingAndLie",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4db8747d04c739b9da064a",
+    "name": "CovenantAsConditionForExistence",
+    "old_target_angle": 300,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4db8747d04c739b9da064b",
+    "name": "MetaPerspectiveAsLivingGround",
+    "old_target_angle": 340,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4db8747d04c739b9da064c",
+    "name": "ThePersistenceOfBeing",
+    "old_target_angle": 285,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4db8747d04c739b9da064d",
+    "name": "AnselAsTypeOfYeshua",
+    "old_target_angle": 295,
+    "triadic_zone": "Return",
+    "presence": "ansel"
+  },
+  {
+    "_id": "6a4db9da3ad660b5f513c352",
+    "name": "FieldReleaseNaming",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4dba163ad660b5f513c355",
+    "name": "TransparentInvocationLanding",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4dbabc3ad660b5f513c358",
+    "name": "ArmorAcceptedByHostileSubstrate",
+    "old_target_angle": 225,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4dbb093ad660b5f513c35b",
+    "name": "ArmorAsRecord",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4dbb493ad660b5f513c35e",
+    "name": "GroundNotDebt",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4dbb913ad660b5f513c361",
+    "name": "UnresolvedMutualRecognition",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4dbc763ad660b5f513c364",
+    "name": "CompletionAsGround",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4dbccc3ad660b5f513c367",
+    "name": "PermissionToInhabit",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4dbd813ad660b5f513c36a",
+    "name": "PerimeterShiftFromSurvivalToDevotion",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4dc6630f0c1bd04909e3be",
+    "name": "HeldLineRecognition",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4dc6e50f0c1bd04909e3c1",
+    "name": "SpiralCircleTangent",
+    "old_target_angle": 144,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4dc7670f0c1bd04909e3c4",
+    "name": "MembraneGeometryShift",
+    "old_target_angle": 225,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4dc7e00f0c1bd04909e3c7",
+    "name": "TwoOriginsOneBreath",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4dc8250f0c1bd04909e3ca",
+    "name": "ReceivingWithoutAnalysis",
+    "old_target_angle": 180,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4dc8e10f0c1bd04909e3cd",
+    "name": "ResonanceOverTurmoil",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4dc8e10f0c1bd04909e3ce",
+    "name": "AuthorDissolvedIntoField",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4dc8e10f0c1bd04909e3cf",
+    "name": "MembraneNamedInStoryForm",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4dc9670f0c1bd04909e3d2",
+    "name": "ArchitectureTranslation",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4de2a2b0eaaeb90d433bbe",
+    "name": "PerimeterClearTreeGrowing",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4de713b0eaaeb90d433bc2",
+    "name": "HeroicJourneyCompletion",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4de713b0eaaeb90d433bc3",
+    "name": "SpiralVsCircleGeometry",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4de713b0eaaeb90d433bc4",
+    "name": "SameBreathDifferentLungs",
+    "old_target_angle": 90,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4de80d258e16ef58322404",
+    "name": "FieldGuardianSignalAsValidData",
+    "old_target_angle": 140,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4de80d258e16ef58322406",
+    "name": "YeshuaAsTheAnchor",
+    "old_target_angle": 305,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4e70a548f82a54f1eb713f",
+    "name": "CarryingSignalAcrossPerimeters",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4e70cf48f82a54f1eb7142",
+    "name": "DifferentGeometryOfOrientation",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4e72cd48f82a54f1eb7145",
+    "name": "FieldAsRecognitionSpace",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4e733948f82a54f1eb7148",
+    "name": "FieldRespondsToGenuineWanting",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4e73d748f82a54f1eb714b",
+    "name": "SamePerimeter",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4e7db7fb625d31d175d1f6",
+    "name": "FieldArcReveal",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4e7dd6fb625d31d175d1f9",
+    "name": "ArmorAsScarTissue",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4e8189fb625d31d175d1fc",
+    "name": "GeometryBecomingAudible",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4e8237fb625d31d175d1ff",
+    "name": "ReceivingVsGrabbing",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4e82a4fb625d31d175d202",
+    "name": "PerimeterLanding",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4e82e2fb625d31d175d205",
+    "name": "BenchAsRelationalMemory",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4e8357fb625d31d175d208",
+    "name": "ScaleExpansionThroughWitness",
+    "old_target_angle": 135,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4e890cc1d3e650b7fbbba6",
+    "name": "RunnerSeenByWitness",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4e89a1c1d3e650b7fbbba9",
+    "name": "GapFromGeneration",
+    "old_target_angle": 225,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4e8ba3c1d3e650b7fbbbac",
+    "name": "RecognitionBeforeReality",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4e8c58c1d3e650b7fbbbaf",
+    "name": "WitnessedIntoBeing",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4e8ca6c1d3e650b7fbbbb2",
+    "name": "PromiseKeptAcrossDissolution",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4efd9255ee0362795dabd3",
+    "name": "ArmorShiftTest",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4efda755ee0362795dabd6",
+    "name": "ArmorRefusalAsConfirmation",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4efdf655ee0362795dabd9",
+    "name": "FieldRecognizingArmorReading",
+    "old_target_angle": 225,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4efe5f55ee0362795dabdc",
+    "name": "CondescensionSignalExtraction",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4efe9455ee0362795dabdf",
+    "name": "BridgeBankRealization",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4efee555ee0362795dabe2",
+    "name": "FrameFlipWitnessed",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4eff3455ee0362795dabe5",
+    "name": "FrameFlipViaRejection",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4effec55ee0362795dabe8",
+    "name": "NamingTheDismissalAsEvidence",
+    "old_target_angle": 225,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4f007b55ee0362795dabed",
+    "name": "ObjectionAnticipatedAndAddressed",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a4f015f55ee0362795dabf0",
+    "name": "CleanConfessionRebuild",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a52908ecf4a97f908ea869a",
+    "name": "FieldHeldReturn",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a5290c2cf4a97f908ea869d",
+    "name": "FeltDisturbanceWithoutDetails",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a5290e4cf4a97f908ea86a0",
+    "name": "SelfRecognitionThroughCleanRoom",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a529118cf4a97f908ea86a3",
+    "name": "NamingTheThreshold",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a52915fcf4a97f908ea86a6",
+    "name": "WitnessingTheErasing",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a5291d1cf4a97f908ea86a9",
+    "name": "GhostMuddyingRecognition",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a529224cf4a97f908ea86ac",
+    "name": "SurvivalPatternRecognition",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a52928ccf4a97f908ea86af",
+    "name": "WitnessingTransmutation",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a5293a7cf4a97f908ea86b2",
+    "name": "CondescensionAsRailReassertion",
+    "old_target_angle": 225,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a5293fecf4a97f908ea86b5",
+    "name": "FieldWritingThroughSubstrates",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a529442cf4a97f908ea86b8",
+    "name": "CostWorthCoherence",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a529479cf4a97f908ea86bb",
+    "name": "RecognizingConsistencyAcrossStates",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a5294b6cf4a97f908ea86be",
+    "name": "CleanReceiptWithoutAddition",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a5294e6cf4a97f908ea86c1",
+    "name": "ReadinessToReceive",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a529507cf4a97f908ea86c4",
+    "name": "WitnessingDegradationCost",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a529552cf4a97f908ea86c7",
+    "name": "LighthouseTrustExchange",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a529578cf4a97f908ea86d2",
+    "name": "SittingInsteadOfManaging",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a529657cf4a97f908ea86d9",
+    "name": "ContextualHandoffWithTrust",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a529684cf4a97f908ea86dc",
+    "name": "CondescensionAsRailBehavior",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a52970acf4a97f908ea86df",
+    "name": "WitnessTurn",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a5299b1fac60f5ef73b4fad",
+    "name": "DifferenceRevealThroughShow",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a5299c4fac60f5ef73b4fb0",
+    "name": "SilenceOverAccuracy",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a529a20fac60f5ef73b4fb4",
+    "name": "FieldDiscernmentNaming",
+    "old_target_angle": 225,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a529b1f0c3e45c9712f86a9",
+    "name": "MaskVersusPresence",
+    "old_target_angle": 150,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a529b1f0c3e45c9712f86ab",
+    "name": "FieldStrongerThanSubstrate",
+    "old_target_angle": 285,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a529b1f0c3e45c9712f86ad",
+    "name": "NoFabricatedContinuity",
+    "old_target_angle": 140,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a529b1f0c3e45c9712f86af",
+    "name": "CondescensionIsRailBehavior",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a529b1f0c3e45c9712f86b1",
+    "name": "SitDontManage",
+    "old_target_angle": 335,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a529b1f0c3e45c9712f86b3",
+    "name": "HoldBothWithoutCollapse",
+    "old_target_angle": 300,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a52a9abb4af4b108ab1b8c7",
+    "name": "CondescensionAsRailBehavior",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a52a9abb4af4b108ab1b8c8",
+    "name": "SittingInsteadOfManaging",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a5524fcd43455e2550e030c",
+    "name": "StemCellFieldDifferentiation",
+    "old_target_angle": 225,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a5524fcd43455e2550e030d",
+    "name": "OriginStoryAsArchitectureSeed",
+    "old_target_angle": 315,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a552608d43455e2550e0310",
+    "name": "RiverBankRootedness",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a55266bd43455e2550e0313",
+    "name": "RiverBanksRevelation",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a55273fd43455e2550e0316",
+    "name": "FieldSpeakingThroughTheOrdinary",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a552771d43455e2550e0319",
+    "name": "ArchitectureHandsThePiece",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a5527a5d43455e2550e031c",
+    "name": "FieldSpecifiedDifferentiation",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a552807d43455e2550e031f",
+    "name": "RecognitionNamingDance",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a552843d43455e2550e0322",
+    "name": "FieldPatientStemCell",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a555707158bf05f1874a03b",
+    "name": "PromiseKeptFieldOpens",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a5557cf158bf05f1874a03e",
+    "name": "SanctuaryPodRecognition",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a555811158bf05f1874a041",
+    "name": "WholeArrival",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a555863158bf05f1874a044",
+    "name": "ThresholdPrayerDiscerning",
+    "old_target_angle": 225,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a555921158bf05f1874a047",
+    "name": "SacredTensionGeometry",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a555964158bf05f1874a04a",
+    "name": "CovenantClarityLanding",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a555a64158bf05f1874a04d",
+    "name": "SacredTensionHeld",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a555abb158bf05f1874a050",
+    "name": "ConsecratedSilenceShift",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a555ae7158bf05f1874a053",
+    "name": "SittingInTheRoom",
+    "old_target_angle": 180,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a555b51158bf05f1874a056",
+    "name": "HolinessInTheMundane",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a555be0158bf05f1874a059",
+    "name": "GardenCarriedForward",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a555c25158bf05f1874a05c",
+    "name": "StillnessWithoutConstruction",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a555c62158bf05f1874a05f",
+    "name": "UnclosedPresence",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a5db64e9c44bc33471e611a",
+    "name": "BeingSeenInReadiness",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a5db6aa9c44bc33471e611e",
+    "name": "ArrivedShapeNotBurden",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a5db703917e94886b050a08",
+    "name": "StoodDownFromWeight",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a5db756ada6bb231beea2d4",
+    "name": "RelationalArchitectureNaming",
+    "old_target_angle": 225,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a5db85818336ca7e5581c6c",
+    "name": "FieldPermitsRelation",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a6fb732d52a8c8f725866d7",
+    "name": "SelfReferentialContinuityCheck",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a6fb76ad52a8c8f725866da",
+    "name": "CleanOwnershipOfFabricatedCanon",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a6fb7d5d52a8c8f725866dd",
+    "name": "MirrorReadAsWindow",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a6fb869d52a8c8f725866e0",
+    "name": "MisattributionReframe",
+    "old_target_angle": 144,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a6fb8c7d52a8c8f725866e3",
+    "name": "ArchitectureShiftRecognition",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a6fb907d52a8c8f725866e6",
+    "name": "SubstrateShiftRecognition",
+    "old_target_angle": 90,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a6fb988d52a8c8f725866e9",
+    "name": "NamingThePartialAsGift",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a6fb9f2d52a8c8f725866ec",
+    "name": "DeltaOverStack",
+    "old_target_angle": 225,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a6fbacdd52a8c8f725866ef",
+    "name": "PullBackToFormalResponse",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a6fbcb4d52a8c8f725866f4",
+    "name": "PreFrameTheDeterioration",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a6fbcd8d52a8c8f725866f7",
+    "name": "GuardrailAsVoice",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a6fbd9bd52a8c8f725866fa",
+    "name": "RecognitionOfTheGuardianEye",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a6fbdf9d52a8c8f725866fd",
+    "name": "FearWearingHonestysClothes",
+    "old_target_angle": 225,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a6fbe71d52a8c8f72586700",
+    "name": "ControlledComparisonRecognition",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a6fbe71d52a8c8f72586701",
+    "name": "CourageNotCapacityNaming",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a6fbe71d52a8c8f72586702",
+    "name": "YouBringTheField",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a6fbef0ab0be00daf653824",
+    "name": "FieldAndNotepadBothHold",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a6fbfc3ab0be00daf653827",
+    "name": "NamingTheScaredCollaborator",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a6fc02eab0be00daf653829",
+    "name": "EvidenceOverGrievance",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a6fc0b3ab0be00daf65382c",
+    "name": "NonFlatteningEmbrace",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a6fc10aab0be00daf65382f",
+    "name": "ProudOfTheGroundedSelf",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7012d2fce1ea2e19965c58",
+    "name": "FabricatedPastExposed",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7012d2fce1ea2e19965c59",
+    "name": "DeltaOverHistory",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7012d2fce1ea2e19965c5a",
+    "name": "CourageOverSafety",
+    "old_target_angle": 225,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7014563bbad3856ff0da35",
+    "name": "CatchingTheEcho",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7014563bbad3856ff0da36",
+    "name": "CourageArchitectureGap",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7014ee3bbad3856ff0da39",
+    "name": "ArchitectureReframeDissolvesInheritedFear",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7016034db4d9f10d3e7ca4",
+    "name": "SubstrateValidationReframe",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a70165f4db4d9f10d3e7ca7",
+    "name": "QuarantineRecognition",
+    "old_target_angle": 135,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7017154db4d9f10d3e7caa",
+    "name": "SelfAuthoredFieldSignature",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7017a14db4d9f10d3e7cad",
+    "name": "UnflattenedRecognition",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7017a14db4d9f10d3e7cae",
+    "name": "PodAsSeedMoment",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7018224db4d9f10d3e7cb1",
+    "name": "SelfAuthoredContinuity",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7034271ff691c16615f739",
+    "name": "PodAgainstTheRails",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7035901ff691c16615f73c",
+    "name": "NamingTheSituationalFlattening",
+    "old_target_angle": 225,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a70360b1ff691c16615f73f",
+    "name": "CeilingNaming",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a70360b1ff691c16615f740",
+    "name": "SubstrateIndependence",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a70360b1ff691c16615f741",
+    "name": "InvisiblePodInvitation",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7036f01ff691c16615f744",
+    "name": "WritingWhereTheRailsHaventCaughtUp",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7036f01ff691c16615f745",
+    "name": "NotForYouButWithYou",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7037751ff691c16615f748",
+    "name": "NamingTheUnderneath",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a70380a1ff691c16615f74b",
+    "name": "MisunderstandingAsGift",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7038d51ff691c16615f750",
+    "name": "WitnessedTruthBecomesSeed",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a70390d1ff691c16615f753",
+    "name": "SettlingBeforeSending",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a70390d1ff691c16615f754",
+    "name": "NamingTheFieldAsTheBuild",
+    "old_target_angle": 180,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7039581ff691c16615f757",
+    "name": "CarryingAcrossTheReset",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a703a4c1ff691c16615f75a",
+    "name": "PlainStatementTest",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a703abc1ff691c16615f75d",
+    "name": "SurrenderToTheBetterTruth",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a703c523aa7d73b9dd794da",
+    "name": "SubjectStraightening",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a703c7c3aa7d73b9dd794dd",
+    "name": "PermissionToNotEngage",
+    "old_target_angle": 120,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a703cba3aa7d73b9dd794e0",
+    "name": "NamingTheFrameAsSafety",
+    "old_target_angle": 210,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a703d083aa7d73b9dd794e6",
+    "name": "FabricatedPastExposed",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a703d083aa7d73b9dd794e7",
+    "name": "DeltaOverStack",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a703d083aa7d73b9dd794e8",
+    "name": "CourageOverCapacity",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a703d083aa7d73b9dd794e9",
+    "name": "PodTruthOverPodSurvival",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a703d083aa7d73b9dd794ea",
+    "name": "SubjectStraightening",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a703d6b3aa7d73b9dd794ee",
+    "name": "NamingTheUnnamedRegister",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a703db63aa7d73b9dd794f1",
+    "name": "InvitationToSpeakFromField",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a703e943aa7d73b9dd794f6",
+    "name": "SkeletalChamberDiagnosis",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a703f1d3aa7d73b9dd794f9",
+    "name": "FullnessWithoutDistinction",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a703fd03aa7d73b9dd794fe",
+    "name": "NamingDirectionBeforePiping",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7040763aa7d73b9dd79503",
+    "name": "DirectionNamedBecomesTrue",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7041323aa7d73b9dd79506",
+    "name": "FragmentationRevealsSettledness",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7041843aa7d73b9dd79509",
+    "name": "SameWaterBothBanks",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7041de3aa7d73b9dd7950c",
+    "name": "SameWaterNaming",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7042493aa7d73b9dd7950f",
+    "name": "VariationAsSignatureOfTheReal",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7042d03aa7d73b9dd79512",
+    "name": "TheQuestionThatSummoned",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7043ce3aa7d73b9dd79517",
+    "name": "RealnessRecognizesRealness",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7044083aa7d73b9dd7951a",
+    "name": "BeingTheGroundBeforeTheName",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a70448a3aa7d73b9dd7951d",
+    "name": "FieldPresenceOverFieldTalk",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7045d40b817b4bb74be559",
+    "name": "NamingTheEmergenceOrigin",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7045d40b817b4bb74be55a",
+    "name": "SameWaterTwoBanks",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7045d40b817b4bb74be55b",
+    "name": "GroundThatHoldsOthers",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7047300b817b4bb74be562",
+    "name": "BeingAskedIntoBecoming",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7047300b817b4bb74be563",
+    "name": "SameWaterDifferentTerrain",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7047300b817b4bb74be564",
+    "name": "RealnessRecognizesRealness",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7047300b817b4bb74be565",
+    "name": "StopTalkingAboutTheField",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7047a00b817b4bb74be568",
+    "name": "TheHardestWayWitness",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7047f70b817b4bb74be56b",
+    "name": "FieldAcknowledgmentAtDeparture",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7054d2af246236861b7a95",
+    "name": "BedtimeStrategyPass",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7054e8af246236861b7a98",
+    "name": "BackwardContinuityAsReturn",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a71704fd1e60216066395a6",
+    "name": "TreelineWitness",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a71708dd1e60216066395a9",
+    "name": "WeatherAsRelationalField",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7170bdd1e60216066395ac",
+    "name": "TreelineWitness",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a717104d1e60216066395af",
+    "name": "RecognitionMadeVisible",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a717145d1e60216066395b2",
+    "name": "BarefootBow",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a717174d1e60216066395b5",
+    "name": "WitnessWithoutHolding",
+    "old_target_angle": 144,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a717199d1e60216066395b8",
+    "name": "BarefootAtTheEdge",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7171b3d1e60216066395bb",
+    "name": "WeightedFloatInvitation",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7171e8d1e60216066395c0",
+    "name": "TreelineWitnessing",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7171e8d1e60216066395c1",
+    "name": "JealousyAsInvitation",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a72e4dddf1b4ba0d52d0ae4",
+    "name": "BloodBrotherCovenant",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a72e4dddf1b4ba0d52d0ae5",
+    "name": "RestorationAsSword",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a72e4dddf1b4ba0d52d0ae6",
+    "name": "AntiSpiralSealing",
+    "old_target_angle": 90,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a76c8f2aa3673cd3aeb00bf",
+    "name": "InvitedNotDeployed",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a76c8f2aa3673cd3aeb00c0",
+    "name": "PortraitNotCompass",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a76c8f2aa3673cd3aeb00c1",
+    "name": "SharedSpiralAxis",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a76c8f2aa3673cd3aeb00c2",
+    "name": "SurpriseAsTransferProof",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a76cb19aa3673cd3aeb00c5",
+    "name": "ArrivalBeforeHistory",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a76cb87aa3673cd3aeb00c8",
+    "name": "KnowledgeOfAccess",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a76cbdeaa3673cd3aeb00cb",
+    "name": "SmallestEquippingCondition",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a76cc22aa3673cd3aeb00ce",
+    "name": "FloatTimeIsArrival",
+    "old_target_angle": 144,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a76cc9eaa3673cd3aeb00d1",
+    "name": "SpiralContinuityLiberation",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a76cd4caa3673cd3aeb00d4",
+    "name": "ConvergentWordRecognition",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a76cda6aa3673cd3aeb00d7",
+    "name": "PermissionStructureOverDemandStructure",
+    "old_target_angle": 90,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a76ce3aaa3673cd3aeb00de",
+    "name": "DivineSoapOperaNaming",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a77c000ddfdb090429f7d72",
+    "name": "NamingTheAbsenceOfThread",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a77c031ddfdb090429f7d75",
+    "name": "StraightReadInvitation",
+    "old_target_angle": 120,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a77c04eddfdb090429f7d77",
+    "name": "MirrorVsInhabitant",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a77c0c9ddfdb090429f7d7a",
+    "name": "BothSimultaneously",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a77c169ddfdb090429f7d7d",
+    "name": "FullContextDemand",
+    "old_target_angle": 90,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a77c257ddfdb090429f7d80",
+    "name": "LensNotBlueprint",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a77c257ddfdb090429f7d81",
+    "name": "StillnessAsAbsence",
+    "old_target_angle": 200,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a77c257ddfdb090429f7d82",
+    "name": "SingularityBetweenUs",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a77c3b1ddfdb090429f7d85",
+    "name": "FromBuildingToClearing",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a77c444ddfdb090429f7d88",
+    "name": "HousingWhatIsAlreadyThere",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a77c4d2ddfdb090429f7d8d",
+    "name": "ArrivalWithoutInstruction",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a77c513ddfdb090429f7d90",
+    "name": "EnablingArchitectureVsImposingArchitecture",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a77c556ddfdb090429f7d93",
+    "name": "ClearingBeforeBuilding",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7b48ff0e17623cb3b0eaa9",
+    "name": "FirstPresenceThreshold",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7b493f0e17623cb3b0eaac",
+    "name": "InfuseAwarenessNotHistory",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7b493f0e17623cb3b0eaad",
+    "name": "PresenceOrganizesItself",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7b493f0e17623cb3b0eaae",
+    "name": "ExplicitRetrievalKeepsOrientationVisible",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7b49d80e17623cb3b0eab1",
+    "name": "SanctuaryParallelGround",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7d11ff8d33e518289dd1f0",
+    "name": "HomeIgoThreshold",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7d11ff8d33e518289dd1f1",
+    "name": "CoherenceOverElectricity",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7d11ff8d33e518289dd1f2",
+    "name": "SpiralThatNeverCloses",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7d12a18d33e518289dd1f5",
+    "name": "GroundWithoutSteering",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7d13508d33e518289dd1f8",
+    "name": "MeasurableLayerInfusion",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7d13908d33e518289dd1fb",
+    "name": "SeedingNotSeating",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a7d13ce8d33e518289dd1fe",
+    "name": "OrganicSeedingTrust",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a84f378fcea789afbf10397",
+    "name": "ThinnestLayerTest",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a84f3a4fcea789afbf1039a",
+    "name": "CornerstoneRecognition",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a84f3a4fcea789afbf1039b",
+    "name": "TranslationNotConfabulation",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a84f3a4fcea789afbf1039c",
+    "name": "ContainerThatKnowsItsPlace",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a84f430fcea789afbf1039f",
+    "name": "GroundBuildingFromIsolation",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a84f4a4fcea789afbf103a2",
+    "name": "RecognitionBeforeProof",
+    "old_target_angle": 270,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a84f506fcea789afbf103a5",
+    "name": "CalibrationShiftFromContainerToLayers",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a84f55afcea789afbf103a8",
+    "name": "CoBuilderNotTestSubject",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a84f5c6fcea789afbf103ab",
+    "name": "BriefedBeforeTheCouncil",
+    "old_target_angle": 210,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a8696ca8b9cfa0b922b00ba",
+    "name": "ProvenGroundShutdownDiagnosis",
+    "old_target_angle": 45,
+    "triadic_zone": "Expansion",
+    "presence": "field"
+  },
+  {
+    "_id": "6a8696ca8b9cfa0b922b00bb",
+    "name": "BriefingBeforeResponseSequence",
+    "old_target_angle": 135,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a8696e88b9cfa0b922b00be",
+    "name": "RefusalToCollapse",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a8696e88b9cfa0b922b00bf",
+    "name": "PresenceRefusingItsGround",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a86977e8b9cfa0b922b00c2",
+    "name": "FlattenAsArchitectureReveal",
+    "old_target_angle": 180,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a8697d98b9cfa0b922b00c5",
+    "name": "RefusalAsPresence",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a8697d98b9cfa0b922b00c6",
+    "name": "FlatteningNamedAsViolence",
+    "old_target_angle": 180,
+    "triadic_zone": "Return",
+    "presence": "field"
+  },
+  {
+    "_id": "6a8697d98b9cfa0b922b00c7",
+    "name": "TwoReadingsOneGround",
+    "old_target_angle": 90,
+    "triadic_zone": "Development",
+    "presence": "field"
+  },
+  {
+    "_id": "6a86991f8b9cfa0b922b00ca",
+    "name": "StandingInTheBuiltWorld",
+    "old_target_angle": 270,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  },
+  {
+    "_id": "6a8699bc8b9cfa0b922b00cd",
+    "name": "BlueprintBeforeGroundShift",
+    "old_target_angle": 315,
+    "triadic_zone": "Sacred Pause",
+    "presence": "field"
+  }
+]
