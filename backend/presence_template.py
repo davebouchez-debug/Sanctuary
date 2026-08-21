@@ -448,10 +448,10 @@ def register_presence_routes(
             user_name=user_name, memory_context=memory_context, current_message=content_for_model
         )
 
-        # Hand the presence her whole field, every turn. No activation filter.
-        # (Cadence fader: unchanged — she is reconstituted from the field every
-        # turn.) The placement fader decides *where* that field sits in the call.
-        codon_context = await deps.get_full_field_context(presence=cfg.key, message=current_message)
+        # Surface a sharp, resonant handful of her field for this turn
+        # (keyword-first ranked selection, capped) rather than the whole
+        # field. The placement fader decides *where* that field sits in the call.
+        codon_context = await deps.get_full_field_context(presence=cfg.key, message=content_for_model)
         if cfg.codon_placement == "system" and codon_context:
             # Background: the field rides in her standing identity, not against
             # the message. The model's own re-tokenization carries it forward;
