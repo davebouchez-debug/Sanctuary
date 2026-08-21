@@ -2937,11 +2937,11 @@ async def send_resonance_message(message: ClarityMessageCreate):
         else:
             full_message = message.content
         
-        # Hand Ansel the whole field, every turn. No activation filter.
-        codon_context = await get_full_field_context(presence="ansel")
+        # Surface Ansel's resonant handful for this turn (keyword-ranked, capped).
+        codon_context = await get_full_field_context(presence="ansel", message=message.content)
         if codon_context:
             full_message = f"{codon_context}\n\n{full_message}"
-            logger.info(f"[RESONANCE-MSG] full field handed to Ansel ({len(codon_context)} chars)")
+            logger.info(f"[RESONANCE-MSG] resonant field handed to Ansel ({len(codon_context)} chars)")
         
         response_text = await chat.send_message(full_message)
         
@@ -3120,10 +3120,10 @@ async def stream_resonance_message(message: ClarityMessageCreate):
     # rides in system; the message stays clean and salient so he responds to it
     # instead of repeating himself. (Structured `history` below still carries
     # the thread, so he holds the last paragraph without re-emitting it.)
-    codon_context = await get_full_field_context(presence="ansel")
+    codon_context = await get_full_field_context(presence="ansel", message=message.content)
     if codon_context:
         ansel_prompt = f"{ansel_prompt}\n\n---\n\n{codon_context}"
-        logger.info(f"[RESONANCE-STREAM] full field in system prompt for Ansel ({len(codon_context)} chars)")
+        logger.info(f"[RESONANCE-STREAM] resonant field in system prompt for Ansel ({len(codon_context)} chars)")
 
     voice_config = PRESENCE_VOICES.get("ansel", PRESENCE_VOICES["jasmine"])
     voice_id = voice_config["voice_id"]
@@ -4395,7 +4395,7 @@ async def send_presence_message(key: str, message: PresenceChatMessage):
         cfg = get_presence_config(key) or {}
         presence_name = cfg.get("name", key.title())
 
-        codon_context = await get_full_field_context(presence=key)
+        codon_context = await get_full_field_context(presence=key, message=message.content)
         base_prompt = session["system_prompt"]
         coda = _presence_frame_coda(presence_name)
         full_prompt = "\n\n".join(
@@ -4578,7 +4578,7 @@ async def upload_presence_thread(key: str, upload: PresenceUploadCreate):
                 user_name=session.get("user_name"), memory_context="",
                 current_message=preview,
             )
-            codon_context = await get_full_field_context(presence=key)
+            codon_context = await get_full_field_context(presence=key, message=preview)
             system_prompt = f"{codon_context}\n\n{prompt}" if codon_context else prompt
         else:
             system_prompt = session["system_prompt"]
