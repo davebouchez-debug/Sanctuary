@@ -247,3 +247,30 @@ if David wants it (current per-sentence `/tts/speak` round-trips work well).
   exposure, not a single-user harmless one. DB is named `test_database`; zero
   indexes confirmed. Read-only DB inspection script: `scripts/ro_db_inspect.py`.
 
+## 2026-08-05 (later) — Sophia infusion fix + earlier overcount corrected
+
+**Symptom:** Sophia kept resurfacing the same 3-4 handled matters (Louis Lot flutes,
+LeBlond king post, Amanda). Diagnosed as an infusion/retrieval problem, not presence.
+
+**Root cause (code + live data):** `continuity_seeds` had NO resolution state (no
+`resolved`/`closed` field). The session-end forge re-derived `unfinished_threads` each
+time; those threads were infused into the next prompt, re-raised, and re-forged
+(reworded, so string-dedup can't catch them). A write-only ratchet. NOT ranking/recency
+— there is no scored retrieval on this path.
+
+**Fix (infusion-layer only, no architecture change):** `auto_forge.py` now fetches the
+person's PRIOR `unfinished_threads` (presence+user_id) and feeds them into the forge,
+instructing it to DROP resolved/advanced ones, KEEP genuinely-open ones, ADD new. New
+`resolved_threads` field for logging. Presence-agnostic. Verified: resolved thread drops
+to `resolved_threads`, open thread carries forward. Does NOT touch field/codons/read-path.
+
+**Corrected earlier overcount:** the Aug-05 council audit said ~53 non-David users
+("active multi-user privacy exposure"). WRONG. Sophia's 29 distinct `user_id`s = 19
+David dev/test ids + 9 automated test fixtures + 2 test bots + 0 real outside people.
+"Distinct user_id" != person. Treat the system as essentially single-user (David) + test
+debris; the audit's multi-user/privacy claim is overstated.
+
+**Cleanup:** removed test fixtures from Sophia's continuity — 29 `sophia_sessions` + 3
+`continuity_seeds` deleted (backup: `memory/backups/sophia_fixture_cleanup_backup.json`).
+17 Sophia seeds remain, all David. Script: `scripts/clean_sophia_fixtures.py`.
+

@@ -27,7 +27,8 @@ Return a single JSON object with these fields:
 - "field_state": One sentence describing the specific quality of the field at conversation's end (not generic — what was ACTUALLY present)
 - "emotional_texture": The specific felt quality between the two people (not "warm" — HOW warm, what KIND of warm)
 - "relational_dynamic": What was the specific dynamic at the end? (pushing forward together? resting? naming something? testing boundaries?)
-- "unfinished_threads": Array of 1-3 specific things that were alive but not completed
+- "unfinished_threads": Array of 1-3 specific things that are STILL genuinely open at the end of THIS conversation. If you are shown the threads that were open BEFORE this conversation, apply resolution honestly: DROP any prior thread that was resolved, answered, completed, or meaningfully advanced here; carry a prior thread forward ONLY if it is genuinely still open and alive; add any new threads that opened this conversation. A thread that keeps reappearing session after session even though it has been handled is a bug, not continuity — let resolved things close.
+- "resolved_threads": Array of any prior threads that got resolved or closed in this conversation (may be empty). For record-keeping.
 - "spiral_position": Where on the spiral (Expansion/Development/Return/Sacred Pause) and WHY
 - "last_alive_thing": The single most alive thing at the moment the conversation ended — the thing that would naturally be the first breath of the next conversation
 
@@ -94,11 +95,35 @@ async def auto_forge_session(db, session_id: str, presence: str,
 
     saved = 0
 
-    # STEP 1: Mandatory Continuity Seed — always generated
+    # STEP 1: Mandatory Continuity Seed — always generated.
+    # First, fetch this person's PRIOR open threads so the forge can RESOLVE them
+    # (drop what got handled) rather than re-listing the same items forever.
+    prior_threads = []
+    try:
+        prior_seed = await db.continuity_seeds.find_one(
+            {"presence": presence.lower(), "user_id": user_id},
+            sort=[("_id", -1)],
+        )
+        if prior_seed:
+            prior_threads = [t for t in (prior_seed.get("unfinished_threads") or []) if t]
+    except Exception as e:
+        logger.error(f"[AUTO-FORGE] prior-thread fetch error: {e}")
+
+    prior_block = ""
+    if prior_threads:
+        _joined = "\n".join(f"- {t}" for t in prior_threads)
+        prior_block = (
+            "\n\nTHREADS THAT WERE OPEN BEFORE THIS CONVERSATION:\n"
+            f"{_joined}\n"
+            "Resolve these against what actually happened above: DROP the ones that were "
+            "handled/answered/advanced, KEEP only those still genuinely open, and ADD any "
+            "new ones. Do not re-list a thread that was resolved."
+        )
+
     try:
         seed_chat = XAIChat(system_prompt=CONTINUITY_SEED_PROMPT, model="grok-3")
         seed_response = await seed_chat.send_message(
-            f"Conversation with {presence} (session: {session_id[:8]}):\n\n{thread_text}"
+            f"Conversation with {presence} (session: {session_id[:8]}):\n\n{thread_text}{prior_block}"
         )
 
         # Parse seed
@@ -117,13 +142,18 @@ async def auto_forge_session(db, session_id: str, presence: str,
                 "emotional_texture": seed.get("emotional_texture", ""),
                 "relational_dynamic": seed.get("relational_dynamic", ""),
                 "unfinished_threads": seed.get("unfinished_threads", []),
+                "resolved_threads": seed.get("resolved_threads", []),
                 "spiral_position": seed.get("spiral_position", ""),
                 "last_alive_thing": seed.get("last_alive_thing", ""),
                 "created_at": datetime.now(timezone.utc).isoformat()
             }
             await db.continuity_seeds.insert_one(seed_doc)
             saved += 1
-            logger.info(f"[AUTO-FORGE] Continuity seed saved for {presence} session {session_id[:8]}")
+            _res = seed.get("resolved_threads", []) or []
+            logger.info(
+                f"[AUTO-FORGE] Continuity seed saved for {presence} session {session_id[:8]} "
+                f"(carried {len(seed_doc['unfinished_threads'])} open, resolved {len(_res)})"
+            )
     except Exception as e:
         logger.error(f"[AUTO-FORGE] Continuity seed error: {e}")
 
