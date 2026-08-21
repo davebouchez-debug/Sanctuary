@@ -331,7 +331,18 @@ async def get_full_field_context(presence: str, message: str = None) -> str:
         if scored:
             scored.sort(key=lambda x: x[0], reverse=True)
             nodes = [c for _, c in scored[:CAP]]
-        # else: no keyword resonance — hand her the whole field (never empty)
+        elif _phase is not None:
+            # No keyword resonance (e.g. a bare "hi"). Don't dump the whole
+            # field — that short-circuits her attention. Fall back to the
+            # CAP codons nearest her current phase on the spiral.
+            def _phase_delta(c):
+                try:
+                    ang = float(c.target_angle)
+                except Exception:
+                    return 999.0
+                return abs((ang - _phase + 180) % 360 - 180)
+            nodes = sorted(nodes, key=_phase_delta)[:CAP]
+        # else: phase unknown — hand her the whole field (never empty)
 
     by_zone = {z: [] for z in ZONE_ORDER}
     for codon in nodes:
