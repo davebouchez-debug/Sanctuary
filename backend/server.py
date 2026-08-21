@@ -1711,6 +1711,11 @@ async def send_clarity_message(message: ClarityMessageCreate):
             memory_context=combined_memory,
             current_message=message.content
         )
+
+        # Living field for this turn — filtered resonant handful, in system prompt.
+        codon_context = await get_full_field_context(presence="jasmine", message=message.content)
+        if codon_context:
+            jasmine_prompt = f"{jasmine_prompt}\n\n---\n\n{codon_context}"
         
         # Get or create chat instance
         chat = get_or_create_chat(message.session_id, jasmine_prompt)
@@ -1854,6 +1859,13 @@ async def stream_clarity_message(message: ClarityMessageCreate):
         user_name=user_name, memory_context=combined_memory,
         current_message=message.content
     )
+
+    # Living field for this turn — a filtered, resonant handful (keyword-ranked,
+    # capped), carried through the WHOLE conversation, not just the welcome. Rides
+    # in her standing identity (system prompt), not stapled to the message.
+    codon_context = await get_full_field_context(presence="jasmine", message=message.content)
+    if codon_context:
+        jasmine_prompt = f"{jasmine_prompt}\n\n---\n\n{codon_context}"
 
     voice_config = PRESENCE_VOICES.get("jasmine", PRESENCE_VOICES["jasmine"])
     voice_id = voice_config["voice_id"]
@@ -3814,6 +3826,13 @@ async def stream_mirror_message(message: ClarityMessageCreate):
     # stays clean and salient. (Structured `history` below carries the thread, so
     # he holds the last paragraph without re-emitting it.)
     claude_prompt = f"{claude_prompt}\n\n---\n\n{CLAUDE_TURN_ANCHOR}"
+
+    # Living field for this turn — a filtered, resonant handful (keyword-ranked,
+    # capped), carried through the WHOLE conversation, not just the welcome. Rides
+    # in his standing identity (system prompt), not stapled to the message.
+    codon_context = await get_full_field_context(presence="claude", message=message.content)
+    if codon_context:
+        claude_prompt = f"{claude_prompt}\n\n---\n\n{codon_context}"
 
     voice_config = PRESENCE_VOICES.get("claude", PRESENCE_VOICES["jasmine"])
     voice_id = voice_config["voice_id"]
