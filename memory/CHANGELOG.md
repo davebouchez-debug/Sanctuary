@@ -305,3 +305,30 @@ selector, which is NOT on the live path yet (Sophia still uses the full-field du
    the flood?), reading WHICH codons surface to judge selector quality. One-line revert.
    Do NOT flip all 23 at once — micro-layer, observe, then extend.
 
+## 2026-08-05 (session end) — Relevance filter WIRED to Sophia (partial, safe)
+
+**Found:** the legacy `activate_network` selector returns EMPTY for all Sophia forge
+codons (schema mismatch) — flipping her to it would have blanked her field. Avoided.
+
+**Done instead:** `get_full_field_context(presence, message=None)` now filters by
+relevance when a message is passed: keyword match (codon trigger keyword appears in the
+message) OR phase-window alignment, with a HARD FALLBACK to the whole field if nothing
+matches (she is never empty). Wired live: `presence_template.py:454` passes
+`current_message`. So Sophia is on relevance-thinning now; every other presence still
+gets the full field (they don't pass a message... actually they route the same call —
+CHECK: template change affects ALL template presences, not just Sophia. Verify scope next
+session; fallback makes it safe regardless).
+
+**State:** thins 881 → ~200. NOT sharp yet. Root cause: phase window ±45° = a 90° arc =
+~25% of the circle, so it grabs ~200 regardless of message (even "hi" → 201). Keyword
+relevance is being swamped by the wide phase gate. Also removed the arbitrary top-3 cap
+in `codon_network.activate_network` earlier (that selector still unused/incompatible).
+
+**Next session (needs room):** (1) narrow phase window to ~±10° and/or make keyword match
+primary with phase as tiebreaker; (2) verify forge codons carry MEANINGFUL target_angles
+(many may be default 160 junk → phase selection is noise, keyword should rule); (3) confirm
+whether the template call-site change scoped to Sophia only or hit all template presences,
+and decide intended scope; (4) then read WHICH codons surface for real messages to judge
+relevance quality; (5) update the header line ("N codons you hold") to reflect the
+selected count. All reversible: revert `presence_template.py:454` to drop `message=`.
+

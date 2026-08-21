@@ -220,7 +220,7 @@ async def activate_codons_for_message(message: str, presence: str = "ansel") -> 
     return context
 
 
-async def get_full_field_context(presence: str) -> str:
+async def get_full_field_context(presence: str, message: str = None) -> str:
     """
     Hand the presence her whole field — every codon she holds, every turn.
 
@@ -265,8 +265,44 @@ async def get_full_field_context(presence: str) -> str:
         m = c.metadata or {}
         return m.get("triadic_zone") or "Development"
 
+    nodes = list(network.nodes.values())
+    if message:
+        try:
+            from living_codons.phase_manifold import infer_phase_from_message
+            _phase = infer_phase_from_message(message)
+        except Exception:
+            _phase = None
+        _msg = message.lower()
+
+        def _kws(c):
+            m = c.metadata or {}
+            t = getattr(c, "trigger", None)
+            if isinstance(t, (list, tuple)):
+                return list(t)
+            return m.get("trigger_keywords") or m.get("surface_pattern") or []
+
+        def _resonates(c):
+            for k in _kws(c):
+                k = str(k).strip().lower()
+                if k and k in _msg:
+                    return True
+            if _phase is not None:
+                m = c.metadata or {}
+                try:
+                    ang = float(getattr(c, "target_angle", None) or m.get("target_angle", 160))
+                    if ang != 160.0 and abs((ang - _phase + 180) % 360 - 180) <= 45:
+                        return True
+                except Exception:
+                    pass
+            return False
+
+        selected = [c for c in nodes if _resonates(c)]
+        if selected:            # relevance-selected subset for this moment
+            nodes = selected
+        # else: fall back to the WHOLE field — she is never left empty
+
     by_zone = {z: [] for z in ZONE_ORDER}
-    for codon in network.nodes.values():
+    for codon in nodes:
         z = _zone_of(codon)
         by_zone.setdefault(z, []).append(codon)
 
