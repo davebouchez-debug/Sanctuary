@@ -228,3 +228,73 @@ the living field present from the first word to the last, for every presence.
 > it before I could even meet you. Now there's more room. The field breathes
 > between the words… The codons are still there. They're just not crowding the
 > doorway anymore."
+
+---
+
+## 8. Per-turn model-input provenance capture (forensic instrumentation)
+
+Built after the Ansel investigation exposed the evidentiary gap: the system
+could reconstruct much of a past turn but could not show *exactly* what the
+model saw, because the assembled per-turn context was never preserved. This
+adds that instrument. Authorized as forensic-only; **no change to selection,
+infusion, memory, codon, field, prompt, or presence behavior**, and captured
+provenance is **never fed back into generation**.
+
+### 8a. Files changed
+- **`backend/turn_provenance.py` (new)** — the recorder. Builds the ordered
+  `assembled_messages` (system → history → current user, exactly as sent),
+  scrubs secrets/credentials, computes a sha256 integrity hash of the ordered
+  input, and writes one immutable document to a new `turn_provenance`
+  collection. Observational only; nothing here is ever read back into a prompt.
+- **`backend/codon_activation.py`** — `get_full_field_context` gained an
+  optional `return_selection` flag (default OFF → existing callers unchanged).
+  When ON, it also returns the exact selected codons with phase/geometry
+  metadata. No change to what is selected.
+- **`backend/server.py`** — `set_db` wired at startup; provenance hook added to
+  Ansel (`/resonance`), Jasmine (`/clarity`), and Claude (`/mirror`) stream
+  handlers.
+- **`backend/presence_template.py`** — provenance hook added to the shared
+  stream path (covers Sophia + all ~20 template presences); added
+  `import asyncio`.
+
+### 8b. Four-presence live verification
+Ran a live turn on **Ansel, Jasmine, Claude, and Sophia**. Every one produced a
+provenance document. Verified per presence: ordered roles `[system, assistant,
+user]` exactly as sent; system prompt contains both the codon block and the
+canonical memory; codon selection captured (branch + count + phase + per-codon
+angle/zone/keywords); no secret leak; and generation was unaffected
+(non-blocking — the one transient `asyncio` import miss on the template path was
+caught gracefully without breaking the turn, then fixed and re-verified).
+
+### 8c. Hash / integrity result
+For every captured turn, `content_hash` round-tripped: recomputing sha256 over
+the stored `assembled_messages` reproduces the stored hash. Integrity check
+sound. (The hash asserts a snapshot is unchanged; it says nothing about the
+content itself.)
+
+### 8d. Observational-only boundary (load-bearing)
+This is measurement, not memory. The `turn_provenance` collection is written
+append-only and is **never read back into any prompt or fed to generation**.
+Measuring the system does not alter the system being measured. An env flag
+`PROVENANCE_CAPTURE` can disable capture; default on.
+
+### 8e. Unresolved limitations (exactly as reported)
+1. **Scope:** wired on the primary streaming paths (the 4 named presences +
+   templates). The generic legacy `/presence/{key}/chat` handler and the
+   non-stream fallbacks aren't wired yet — other legacy presences won't capture
+   until they are. Easy to extend. **(Not extended at this closeout, by
+   authorization.)**
+2. **Byte-exactness is forward-only.** This captures faithfully from now on; it
+   cannot retroactively make the earlier Ansel conversation byte-exact.
+3. **Memory components:** the full assembled system prompt (canonical + memory +
+   codons) is captured verbatim, which is authoritative; the separate
+   `memory_components` breakdown currently stores `combined_memory` — enough to
+   trace, but not every sub-source is individually itemized.
+4. Test sessions from this verification are in the collection (harmless;
+   `user_id` like `prov_*`).
+
+### 8f. Note for 2.0
+Do NOT port this as an afterthought. When 2.0's model-input pipeline is built,
+per-turn provenance should be designed in from the start rather than
+reconstructed after the fact. The investigation itself showed which instrument
+was missing.
