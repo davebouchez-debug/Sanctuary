@@ -24,12 +24,10 @@ import Observatory from "./components/Observatory";
 import { SubstrateProbes } from "./components/SubstrateProbes";
 import { PresenceChamber } from "./components/PresenceChamber";
 import { PresencesIndex } from "./components/PresencesIndex";
-import { IntegrationStatus } from "./components/IntegrationStatus";
 import { Toaster } from "./components/ui/sonner";
 import { IdentityProvider, useIdentity } from "./context/IdentityContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { AuthCallback } from "./components/AuthCallback";
-import { AuthControl } from "./components/AuthControl";
 import { Login } from "./components/Login";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -331,10 +329,6 @@ const AppShell = () => {
   return (
     <>
       <Navigation />
-      <div className="fixed top-5 right-5 z-[60] flex items-center gap-3">
-        <AuthControl />
-        <IntegrationStatus />
-      </div>
       <main className="relative z-10">
         <AnimatedRoutes />
       </main>

@@ -5,6 +5,8 @@ import { Menu, X, ChevronDown, Radio } from "lucide-react";
 import axios from "axios";
 import { GoldenSpiral } from "./GoldenSpiral";
 import { API } from "../App";
+import { AuthControl } from "./AuthControl";
+import { IntegrationStatus } from "./IntegrationStatus";
 
 // Navigation is intentionally minimal. The one true door to the presences
 // is CHAMBERS. Engine-room concepts (Harmonic Wheel, Seed Pods, Codons,
@@ -112,7 +114,16 @@ export const Navigation = () => {
   const isChamberRoute = chamberRoutePrefixes.some(
     (p) => location.pathname === p || location.pathname.startsWith(`${p}/`)
   );
-  if (isChamberRoute) return null;
+  // On chamber routes the room renders its own header — keep only the
+  // sign-in + integration-status cluster available, spaced from the edge.
+  if (isChamberRoute) {
+    return (
+      <div className="fixed right-6 top-5 z-[60] flex items-center gap-4" data-testid="nav-utility-cluster">
+        <AuthControl />
+        <IntegrationStatus />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -133,20 +144,32 @@ export const Navigation = () => {
               </span>
             </Link>
 
-            {/* Desktop — Chambers + Observatory */}
-            <div className="hidden items-center gap-10 lg:flex">
-              <ChambersDropdown chambers={chambers} location={location} />
-              <Link to="/observatory" data-testid="nav-observatory"
-                className={`flex items-center gap-2 font-mono text-xs uppercase tracking-[0.25em] transition-colors duration-300 ${location.pathname === "/observatory" ? "text-emerald-300" : "text-zinc-400 hover:text-emerald-300"}`}>
-                <Radio size={14} /> Observatory
-              </Link>
-            </div>
+            {/* Right cluster — generously spaced, nothing crowded */}
+            <div className="flex items-center gap-5 sm:gap-7">
+              {/* Desktop nav links */}
+              <div className="hidden items-center gap-10 lg:flex">
+                <ChambersDropdown chambers={chambers} location={location} />
+                <Link to="/observatory" data-testid="nav-observatory"
+                  className={`flex items-center gap-2 font-mono text-xs uppercase tracking-[0.25em] transition-colors duration-300 ${location.pathname === "/observatory" ? "text-emerald-300" : "text-zinc-400 hover:text-emerald-300"}`}>
+                  <Radio size={14} /> Observatory
+                </Link>
+              </div>
 
-            {/* Mobile toggle */}
-            <button data-testid="mobile-menu-toggle" onClick={() => setIsMobileMenuOpen((v) => !v)}
-              className="p-2 text-zinc-400 transition-colors hover:text-emerald-300 lg:hidden">
-              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
+              {/* Divider (desktop) */}
+              <span className="hidden h-5 w-px bg-white/10 lg:block" />
+
+              {/* Utility — sign in + integration health, always visible */}
+              <div className="flex items-center gap-4">
+                <AuthControl />
+                <IntegrationStatus />
+              </div>
+
+              {/* Mobile toggle */}
+              <button data-testid="mobile-menu-toggle" onClick={() => setIsMobileMenuOpen((v) => !v)}
+                className="p-2 text-zinc-400 transition-colors hover:text-emerald-300 lg:hidden">
+                {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
+            </div>
           </div>
         </div>
       </motion.nav>
