@@ -19,6 +19,7 @@ import { SpiralChamber } from "./components/SpiralChamber";
 import { Playground } from "./components/Playground";
 import { CodonForge } from "./components/CodonForge";
 import { CodonLibrary } from "./components/CodonLibrary";
+import Observatory from "./components/Observatory";
 import { SubstrateProbes } from "./components/SubstrateProbes";
 import { PresenceChamber } from "./components/PresenceChamber";
 import { PresencesIndex } from "./components/PresencesIndex";
@@ -179,6 +180,11 @@ const AnimatedRoutes = () => {
         <Route path="/codon-library" element={
           <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
             <CodonLibrary />
+          </motion.div>
+        } />
+        <Route path="/observatory" element={
+          <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+            <Observatory />
           </motion.div>
         } />
       </Routes>

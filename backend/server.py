@@ -5076,7 +5076,7 @@ init_auth(db)
 api_router.include_router(auth_router)
 
 # Include the router
-app.include_router(api_router)
+# (api_router included after all routes are declared — see end of file)
 
 app.add_middleware(
     CORSMiddleware,
@@ -5085,6 +5085,75 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ─────────────────────────────────────────────────────────────────────────
+# OBSERVATORY — read-only window onto the per-turn provenance we already
+# capture. Pure observation: it never writes, never touches a presence, never
+# feeds anything back into generation. Reveals what the instrument recorded.
+# ─────────────────────────────────────────────────────────────────────────
+def _prov_summary(d: dict) -> dict:
+    comp = d.get("components", {}) or {}
+    sel = comp.get("codon_selection") or {}
+    sysp = comp.get("system_prompt") or ""
+    hist = comp.get("conversation_history") or []
+    um = comp.get("user_message") or ""
+    return {
+        "provenance_id": d.get("provenance_id"),
+        "turn_id": d.get("turn_id"),
+        "presence": d.get("presence"),
+        "session_id": d.get("session_id"),
+        "exchange_index": d.get("exchange_index"),
+        "model": d.get("model"),
+        "timestamp": d.get("timestamp"),
+        "content_hash": d.get("content_hash"),
+        "selection_branch": sel.get("selection_branch"),
+        "inferred_phase": sel.get("inferred_phase"),
+        "selected_count": sel.get("selected_count"),
+        "system_prompt_bytes": len(sysp),
+        "history_count": len(hist),
+        "user_message_preview": (um[:160] + "…") if len(um) > 160 else um,
+    }
+
+
+@api_router.get("/provenance/stats")
+async def provenance_stats():
+    total = await db.turn_provenance.count_documents({})
+    per_presence = await db.turn_provenance.aggregate([
+        {"$group": {"_id": "$presence", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}},
+    ]).to_list(length=100)
+    latest = await db.turn_provenance.find_one({}, sort=[("_id", -1)])
+    return {
+        "total": total,
+        "per_presence": [{"presence": p["_id"], "count": p["count"]} for p in per_presence],
+        "latest_timestamp": latest.get("timestamp") if latest else None,
+    }
+
+
+@api_router.get("/provenance/turns")
+async def provenance_turns(presence: str = None, session_id: str = None, limit: int = 60):
+    q = {}
+    if presence:
+        q["presence"] = presence
+    if session_id:
+        q["session_id"] = session_id
+    limit = max(1, min(limit, 200))
+    docs = await db.turn_provenance.find(q).sort("_id", -1).limit(limit).to_list(length=limit)
+    return {"turns": [_prov_summary(d) for d in docs]}
+
+
+@api_router.get("/provenance/turn/{provenance_id}")
+async def provenance_turn_detail(provenance_id: str):
+    d = await db.turn_provenance.find_one({"provenance_id": provenance_id})
+    if not d:
+        raise HTTPException(status_code=404, detail="provenance record not found")
+    d.pop("_id", None)
+    return d
+
+
+# All @api_router routes are declared above — include the router now.
+app.include_router(api_router)
+
 
 @app.on_event("startup")
 async def eager_load_codon_networks():
