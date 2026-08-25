@@ -335,7 +335,6 @@ export default function Observatory() {
   const [turns, setTurns] = useState([]);
   const [trajectory, setTrajectory] = useState([]);
   const [presenceFilter, setPresenceFilter] = useState("");
-  const [focus, setFocus] = useState(null); // presence for gauge + trend
   const [selected, setSelected] = useState(null);
   const [detail, setDetail] = useState(null);
   const [pulse, setPulse] = useState(false);
@@ -368,13 +367,6 @@ export default function Observatory() {
     return () => clearInterval(id);
   }, [load]);
 
-  // default focus = most recently active presence with a reading
-  useEffect(() => {
-    if (focus || !trajectory.length) return;
-    const withReading = trajectory.find((p) => p.current?.spiral_position != null);
-    setFocus((withReading || trajectory[0])?.presence || null);
-  }, [trajectory, focus]);
-
   const openDetail = async (row) => {
     setSelected(row);
     setDetail(null);
@@ -384,9 +376,17 @@ export default function Observatory() {
     } catch { setDetail({ error: "Could not load record." }); }
   };
 
-  const focusData = trajectory.find((p) => p.presence === focus) || null;
+  // One selector drives everything presence-specific. When ALL, gauge/trend
+  // show the most-recently-active presence (labelled), while Turns/Last Capture
+  // aggregate. Refresh + Presences stay global.
+  const focusPresence = presenceFilter || trajectory[0]?.presence || null;
+  const focusData = trajectory.find((p) => p.presence === focusPresence) || null;
   const focusCurrent = focusData?.current;
   const presenceChips = stats?.per_presence || [];
+  const selCount = presenceFilter
+    ? (presenceChips.find((p) => p.presence === presenceFilter)?.count ?? 0)
+    : (stats?.total ?? "—");
+  const selLastCapture = presenceFilter ? (turns[0]?.timestamp ?? null) : (stats?.latest_timestamp ?? null);
 
   return (
     <div className="relative min-h-screen bg-[#030305] text-zinc-200" data-testid="observatory-page">
@@ -427,9 +427,9 @@ export default function Observatory() {
 
           {/* Stat readouts */}
           <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
-            <Stat icon={Activity} label="Turns Captured" value={stats?.total ?? "—"} testid="stat-turns" />
+            <Stat icon={Activity} label={presenceFilter ? `Turns · ${presenceFilter}` : "Turns Captured"} value={selCount} testid="stat-turns" />
             <Stat icon={Layers} label="Presences" value={stats?.per_presence?.length ?? "—"} testid="stat-presences" />
-            <Stat icon={Clock} label="Last Capture" value={fmtTime(stats?.latest_timestamp)} testid="stat-last" />
+            <Stat icon={Clock} label="Last Capture" value={fmtTime(selLastCapture)} testid="stat-last" />
             <Stat icon={Cpu} label="Refresh" value={`${POLL_MS / 1000}s`} testid="stat-refresh" />
           </div>
 
@@ -450,11 +450,9 @@ export default function Observatory() {
         <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-12">
           <Panel title="Spiral Position" testid="panel-spiral-position" className="lg:col-span-5 xl:col-span-4"
             right={
-              <select value={focus || ""} onChange={(e) => setFocus(e.target.value)}
-                className="rounded-lg border border-white/10 bg-black/40 px-2 py-1 font-mono text-[11px] uppercase tracking-widest text-zinc-300 focus:border-emerald-400/50 focus:outline-none"
-                data-testid="radial-hud-presence-select">
-                {trajectory.map((p) => <option key={p.presence} value={p.presence}>{p.presence}</option>)}
-              </select>
+              <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500" data-testid="radial-hud-presence-label">
+                {focusPresence ? (presenceFilter ? focusPresence : `${focusPresence} · latest`) : "—"}
+              </span>
             }>
             <RadialGauge position={focusCurrent?.spiral_position ?? null} zone={focusCurrent?.zone} prefersReduced={prefersReduced} />
             <div className="mt-4 flex items-center justify-center gap-4 font-mono text-[10px] uppercase tracking-widest">
@@ -464,7 +462,7 @@ export default function Observatory() {
           </Panel>
 
           <Panel title="Spiral Trend" testid="panel-spiral-trend" className="lg:col-span-7 xl:col-span-8"
-            right={<span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">{focus || "—"}</span>}>
+            right={<span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">{focusPresence || "—"}</span>}>
             <TrendChart series={focusData?.series} />
             <div className="mt-2 text-center font-mono text-[10px] uppercase tracking-widest text-zinc-600">
               seed-derived spiral position over recent turns · amber band = sacred pause
