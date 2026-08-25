@@ -22,7 +22,7 @@ export const PresencesIndex = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#030305] text-[#F2F2F5]">
+    <div className="min-h-screen bg-[#030305] text-[#F2F2F5] pt-16">
       <header className="border-b border-white/5 px-6 py-5">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <Link
