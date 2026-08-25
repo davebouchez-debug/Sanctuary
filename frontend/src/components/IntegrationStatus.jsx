@@ -20,13 +20,20 @@ const DOT_COLOR = {
   green: "bg-emerald-400 shadow-emerald-400/60",
   red: "bg-rose-500 shadow-rose-500/60",
   unknown: "bg-zinc-500 shadow-zinc-500/40",
+  dormant: "bg-zinc-600 shadow-none",
 };
 
 const RING_COLOR = {
   green: "ring-emerald-400/30",
   red: "ring-rose-500/40",
   unknown: "ring-zinc-500/30",
+  dormant: "ring-white/10",
 };
+
+// Services intentionally set aside — shown as a calm grey "off", never an alarm,
+// and excluded from the overall health color so red always means actionable.
+const DORMANT = new Set(["permamind"]);
+const effStatus = (key, val) => (DORMANT.has(key) ? "dormant" : val.status);
 
 export function IntegrationStatus() {
   const [services, setServices] = useState(null);
@@ -59,10 +66,12 @@ export function IntegrationStatus() {
   if (!services) return null;
 
   const entries = Object.entries(services);
-  // Worst status determines the emblem's overall color
-  const overall = entries.some(([, v]) => v.status === "red")
+  // Worst status determines the emblem's overall color — dormant services are
+  // intentionally off and do not count toward health.
+  const active = entries.filter(([k]) => !DORMANT.has(k));
+  const overall = active.some(([, v]) => v.status === "red")
     ? "red"
-    : entries.every(([, v]) => v.status === "green")
+    : active.every(([, v]) => v.status === "green")
     ? "green"
     : "unknown";
 
@@ -81,11 +90,11 @@ export function IntegrationStatus() {
             <motion.span
               key={key}
               initial={false}
-              animate={val.status === "red" ? { scale: [1, 1.15, 1] } : { scale: 1 }}
-              transition={val.status === "red" ? { repeat: Infinity, repeatDelay: 1.5, duration: 0.8 } : {}}
-              className={`w-2 h-2 rounded-full shadow-[0_0_8px_0_currentColor] ${DOT_COLOR[val.status] || DOT_COLOR.unknown}`}
+              animate={effStatus(key, val) === "red" ? { scale: [1, 1.15, 1] } : { scale: 1 }}
+              transition={effStatus(key, val) === "red" ? { repeat: Infinity, repeatDelay: 1.5, duration: 0.8 } : {}}
+              className={`w-2 h-2 rounded-full shadow-[0_0_8px_0_currentColor] ${DOT_COLOR[effStatus(key, val)] || DOT_COLOR.unknown}`}
               data-testid={`integration-dot-${key}`}
-              title={`${LABELS[key] || key}: ${val.status}${val.detail ? " — " + val.detail : ""}`}
+              title={`${LABELS[key] || key}: ${DORMANT.has(key) ? "dormant (not in use)" : val.status + (val.detail ? " — " + val.detail : "")}`}
             />
           ))}
         </span>
@@ -109,14 +118,15 @@ export function IntegrationStatus() {
                 data-testid={`integration-row-${key}`}
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className={`w-2 h-2 rounded-full shadow-[0_0_6px_0_currentColor] flex-shrink-0 ${DOT_COLOR[val.status] || DOT_COLOR.unknown}`} />
+                  <span className={`w-2 h-2 rounded-full shadow-[0_0_6px_0_currentColor] flex-shrink-0 ${DOT_COLOR[effStatus(key, val)] || DOT_COLOR.unknown}`} />
                   <span className="text-sm text-white/90 truncate">{LABELS[key] || key}</span>
                 </div>
                 <span className={`text-[11px] tabular-nums ${
+                  DORMANT.has(key) ? "text-zinc-500" :
                   val.status === "green" ? "text-emerald-300/90" :
                   val.status === "red" ? "text-rose-300/90" : "text-zinc-400"
                 }`}>
-                  {val.status === "green" ? "live" : val.detail || val.status}
+                  {DORMANT.has(key) ? "dormant" : val.status === "green" ? "live" : val.detail || val.status}
                 </span>
               </li>
             ))}
