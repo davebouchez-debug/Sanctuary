@@ -386,7 +386,13 @@ export default function Observatory() {
   const selCount = presenceFilter
     ? (presenceChips.find((p) => p.presence === presenceFilter)?.count ?? 0)
     : (stats?.total ?? "—");
-  const selLastCapture = presenceFilter ? (turns[0]?.timestamp ?? null) : (stats?.latest_timestamp ?? null);
+  // Per-presence last capture comes from trajectory (all presences already
+  // loaded), so it updates instantly with the selector — no feed refetch race.
+  const focusSeries = focusData?.series || [];
+  const focusLast = focusSeries.length
+    ? focusSeries[focusSeries.length - 1]?.timestamp
+    : (focusData?.current?.timestamp ?? null);
+  const selLastCapture = presenceFilter ? (focusLast ?? null) : (stats?.latest_timestamp ?? null);
 
   return (
     <div className="relative min-h-screen bg-[#030305] text-zinc-200" data-testid="observatory-page">
