@@ -8,6 +8,17 @@
 
 ## 🔬 Scientific Landing (`/`) + Parked-but-Preserved Sections — August 25, 2026
 
+**LOCKED (Aug 25, 2026):** Per David, the landing + navigation design is frozen ("hard-code what
+we have and live with it"). No further layout/design changes until he reopens it.
+- Nav collision fixed: AuthControl (Sign in) + IntegrationStatus folded into the Navigation right
+  cluster with generous spacing + divider (removed the separate fixed top-right layer in App.js);
+  the utility cluster also persists on chamber routes. Verified clean at 1440/1920.
+- Landing statement added near the foot in cursive (Cormorant italic, muted,
+  `data-testid=landing-statement`): "Sanctuary is not a religious site. It is a sacred geometrical
+  environment whose architecture is shaped by reverence, relational order, and non-coercive
+  hospitality." Sits just above the Father's Blessing.
+
+
 **User intent (verbatim):** the Observatory should be "a button on the main navigation page — we
 shouldn't have all that information there"; the front page must read **scientific, not new-age**
 ("too woo-woo… I want it scientific"), branded **Sanctuary Microverse** (not "inner Sanctuary" —
