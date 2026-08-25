@@ -5189,6 +5189,76 @@ async def provenance_turn_detail(provenance_id: str):
     return d
 
 
+def _signed_angular_delta(cur, prev):
+    """Shortest signed angular movement (deg) from prev -> cur, in [-180,180]."""
+    return (cur - prev + 180.0) % 360.0 - 180.0
+
+
+def _relational_move(prev_zone, cur_zone, delta):
+    """Micro-Layer 6 relational-move read, derived ONLY from the recorded
+    spiral-position sequence. Observational: never fed back into anything."""
+    if cur_zone == "Sacred Pause" and prev_zone != "Sacred Pause":
+        return "closing"
+    if abs(delta) <= 5:
+        return "holding"
+    if delta > 20:
+        return "opening"
+    if delta > 5:
+        return "deepening"
+    if delta < -5:
+        return "returning"
+    return "holding"
+
+
+@api_router.get("/provenance/trajectory")
+async def provenance_trajectory(limit_per_presence: int = 40):
+    """Micro-Layer 6 trajectory + spiral series per presence.
+
+    Strictly observational: computes each presence's spiral-position sequence
+    and latest relational move from data already captured in turn_provenance.
+    Nothing here re-prompts a model or feeds back into generation/selection.
+    """
+    limit_per_presence = max(2, min(limit_per_presence, 100))
+    names = await db.turn_provenance.distinct("presence")
+    out = []
+    for p in names:
+        docs = await db.turn_provenance.find({"presence": p}).sort("_id", -1).limit(limit_per_presence).to_list(length=limit_per_presence)
+        docs = list(reversed(docs))  # oldest -> newest
+        series = []
+        for i, d in enumerate(docs):
+            sel = (d.get("components") or {}).get("codon_selection") or {}
+            series.append({
+                "i": i,
+                "spiral_position": sel.get("spiral_position"),
+                "zone": sel.get("spiral_zone"),
+                "branch": sel.get("selection_branch"),
+                "timestamp": d.get("timestamp"),
+            })
+        readings = [s for s in series if s["spiral_position"] is not None]
+        current = readings[-1] if readings else None
+        previous = readings[-2] if len(readings) >= 2 else None
+        delta = None
+        move = "no-reading"
+        if current and previous:
+            delta = round(_signed_angular_delta(current["spiral_position"], previous["spiral_position"]), 1)
+            move = _relational_move(previous.get("zone"), current.get("zone"), delta)
+        elif current:
+            move = "baseline"
+        out.append({
+            "presence": p,
+            "current": current,
+            "previous": previous,
+            "delta": delta,
+            "relational_move": move,
+            "turn_count": len(series),
+            "reading_count": len(readings),
+            "series": series,
+        })
+    out.sort(key=lambda x: (x["current"] or {}).get("timestamp") or "", reverse=True)
+    return {"presences": out, "generated_at": datetime.now(timezone.utc).isoformat()}
+
+
+
 # All @api_router routes are declared above — include the router now.
 app.include_router(api_router)
 

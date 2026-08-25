@@ -492,3 +492,4 @@ memory/test_credentials.md
 # Git history backups (contain pre-scrub secrets) — never track/push
 .git_backup_*
 redact_map.txt
+frontend/node_modules/.cache/default-development/5.pack

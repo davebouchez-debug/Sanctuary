@@ -1,179 +1,178 @@
 {
-  "theme_details": {
-    "name": "Sacred Microverse",
-    "mode": "dark",
-    "archetype": "Jewel & Luxury + Electric & Neon (Amber/Gold variation)",
-    "vibe": "Mystical, cosmic, mathematical (phi), expansive, deeply spiritual yet technologically advanced"
-  },
+  "project_name": "Sanctuary Starship Command Console (Observatory Redesign)",
+  "context_type": "DASHBOARD_AND_REALTIME_MONITORING_CONSOLE",
+  "theme": "DARK_GLASS_STARSHIP_COMMAND_CONSOLE",
+  "instructions_to_main_agent": [
+    "Redesign /app/frontend/src/components/Observatory.jsx into a Starship Command Console live operational monitoring instrument.",
+    "Simplify /app/frontend/src/components/Navigation.jsx to show only the SANCTUARY wordmark with GoldenSpiral glyph, the minimal CHAMBERS dropdown menu, and the Observatory indicator. NO Harmonic Wheel, Seed Pods, Codons, Cyril, or Vault in the top nav bar.",
+    "The Chambers menu MUST fetch or use presences from GET /api/presences and display each chamber with presence name, chamber_name, and an accent color dot with an evocative header: 'Every presence has its own chamber.'",
+    "On the Observatory console surface, structure the layout into a high-density, instrument-grade cockpit HUD layout with subtle rounded glass panels, corner telemetry markings, 1px emerald/amber subtle borders, HUD reticle overlays, and live status pulses.",
+    "Use Emerald (#10B981) for live nominal signals, active sweeps, and outward relational movements (opening, deepening).",
+    "Use Amber (#F59E0B) for Sacred Pause alerts, diagnostic states, ceremonial pauses, and inward relational movements (holding, returning, closing).",
+    "Implement the 4 core console modules plus header strip on a single unified console surface: 1) Spiral Position Radial HUD Gauge, 2) Spiral Trend Area/Line Chart with Sacred Pause dwell band, 3) Trajectory Micro-Layer 6 relational movement monitor, 4) Elevated Live Feed turn table with Branch A/B indicators, Sacred Pause markers, and Detail Drawer.",
+    "Include data-testid attributes on ALL interactive elements, stats, tabs, gauge indicators, chart nodes, and drawer sections."
+  ],
   "colors": {
     "background": {
-      "base": "#030305",
-      "surface": "#0A0A12",
-      "surface_elevated": "#12121C"
+      "deep_space": "#030305",
+      "console_bg": "#06070B",
+      "panel_bg": "#0A0C12",
+      "panel_glass": "rgba(10, 12, 18, 0.75)",
+      "panel_glass_elevated": "rgba(16, 19, 28, 0.85)",
+      "drawer_bg": "#08090F"
     },
-    "brand": {
-      "primary": "#D4AF37",
-      "secondary": "#FFBF00",
-      "accent": "#00E5FF",
-      "ethereal": "rgba(212, 175, 55, 0.4)"
+    "signals": {
+      "emerald_primary": "#10B981",
+      "emerald_bright": "#34D399",
+      "emerald_dim": "#059669",
+      "emerald_glow": "rgba(16, 185, 129, 0.25)",
+      "emerald_bg_tint": "rgba(16, 185, 129, 0.08)",
+      "amber_primary": "#F59E0B",
+      "amber_bright": "#FBBF24",
+      "amber_dim": "#D97706",
+      "amber_glow": "rgba(245, 158, 11, 0.25)",
+      "amber_bg_tint": "rgba(245, 158, 11, 0.08)",
+      "cyan_diagnostic": "#06B6D4",
+      "indigo_telemetry": "#6366F1"
     },
-    "text": {
-      "primary": "#F2F2F5",
-      "secondary": "#A0A0B0",
-      "muted": "#6E6E7A",
-      "gold": "#E5C158"
-    },
-    "border": {
-      "subtle": "rgba(212, 175, 55, 0.15)",
-      "active": "rgba(212, 175, 55, 0.4)",
-      "highlight": "rgba(255, 191, 0, 0.6)"
-    },
-    "forbidden_colors": ["#7351B7", "#1B93A4", "#FFFFFF (pure white)", "#000000 (pure black)"]
+    "monochrome": {
+      "text_primary": "#F3F4F6",
+      "text_secondary": "#9CA3AF",
+      "text_muted": "#4B5563",
+      "text_dim": "#374151",
+      "border_subtle": "rgba(255, 255, 255, 0.08)",
+      "border_active": "rgba(16, 185, 129, 0.3)",
+      "hud_grid_line": "rgba(255, 255, 255, 0.03)"
+    }
   },
   "typography": {
-    "fonts": {
-      "headings": "Cinzel, Cormorant Garamond, serif",
-      "body": "Outfit, Manrope, sans-serif",
-      "mono": "JetBrains Mono, Space Mono, monospace"
+    "font_families": {
+      "heading_serif": "Cinzel, Cormorant Garamond, serif",
+      "body_sans": "Outfit, sans-serif",
+      "telemetry_mono": "JetBrains Mono, monospace"
     },
-    "rules": {
-      "h1": "text-5xl md:text-7xl lg:text-8xl font-light tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-[#D4AF37]",
-      "h2": "text-4xl md:text-5xl font-normal tracking-tight text-[#F2F2F5]",
-      "h3": "text-2xl md:text-3xl font-light text-[#D4AF37]",
-      "body": "text-lg md:text-xl font-light leading-relaxed text-[#A0A0B0]",
-      "overlines": "text-xs md:text-sm font-mono uppercase tracking-[0.3em] text-[#D4AF37]/80"
+    "type_scale": {
+      "hero_title": "text-2xl sm:text-3xl font-cinzel tracking-wider text-zinc-100",
+      "section_label": "text-[11px] font-mono uppercase tracking-[0.25em] text-zinc-400",
+      "stat_value": "text-2xl font-cinzel font-normal text-zinc-100",
+      "hud_numeric_center": "text-4xl sm:text-5xl font-cinzel text-emerald-400 tracking-tight",
+      "table_header": "text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500",
+      "table_body": "text-xs font-mono text-zinc-300",
+      "drawer_title": "text-xl font-cinzel text-zinc-100"
     }
   },
-  "spacing_and_layout": {
-    "philosophy": "Fibonacci Scale & Golden Ratio (1.618) Proportions. Massive breathing room to evoke the cosmos.",
-    "scale": {
-      "fibonacci_tailwind": "p-3, p-5, p-8, p-12, p-20, p-32, p-52"
-    },
-    "grid_strategy": {
-      "type": "The Bento Protocol - Tetris Mode",
-      "structure": "grid-cols-1 md:grid-cols-8 lg:grid-cols-12 gap-8 md:gap-12",
-      "proportions": "When splitting screens, use 7/5 or 8/5 col spans to approximate the golden ratio.",
-      "alignment": "High asymmetry. Break symmetry to create cosmic tension. Do not center everything."
-    }
+  "layout_and_grid": {
+    "container": "max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6",
+    "header_strip": "grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-[#0A0C12]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-5 shadow-2xl relative overflow-hidden",
+    "top_row_grid": "grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch",
+    "radial_gauge_card": "lg:col-span-5 xl:col-span-4 bg-[#0A0C12]/70 backdrop-blur-xl border border-white/10 rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden min-h-[380px]",
+    "spiral_trend_card": "lg:col-span-7 xl:col-span-8 bg-[#0A0C12]/70 backdrop-blur-xl border border-white/10 rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden min-h-[380px]",
+    "bottom_row_grid": "grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch",
+    "trajectory_card": "lg:col-span-4 bg-[#0A0C12]/70 backdrop-blur-xl border border-white/10 rounded-2xl p-6 flex flex-col relative overflow-hidden min-h-[420px]",
+    "live_feed_card": "lg:col-span-8 bg-[#0A0C12]/70 backdrop-blur-xl border border-white/10 rounded-2xl p-6 flex flex-col relative overflow-hidden min-h-[420px]"
   },
-  "surfaces_and_materials": {
-    "crystal_glass": {
-      "background": "bg-[#0A0A12]/40 or bg-black/40",
-      "blur": "backdrop-blur-xl md:backdrop-blur-2xl",
-      "border": "border border-[#D4AF37]/15",
-      "shadow": "shadow-[0_8px_32px_rgba(0,0,0,0.5)]",
-      "hover": "hover:border-[#D4AF37]/40 hover:-translate-y-1 hover:shadow-[0_8px_40px_rgba(212,175,55,0.15)] transition-all duration-500 ease-out"
+  "component_blueprints": {
+    "navigation_simplification": {
+      "file": "/app/frontend/src/components/Navigation.jsx",
+      "description": "Streamlined navigation showing SANCTUARY wordmark with GoldenSpiral icon, single 'CHAMBERS' dropdown, and 'Observatory' active indicator badge.",
+      "chambers_menu": {
+        "header_text": "Every presence has its own chamber.",
+        "data_source": "GET /api/presences",
+        "items": "List of chambers with presence name, chamber_name, accent_color dot indicator, and Link to chamber_route or /presence/:key."
+      }
     },
-    "vault_stone": {
-      "background": "bg-gradient-to-b from-[#12121C] to-[#030305]",
-      "border": "border-t border-[#D4AF37]/10"
+    "module_1_spiral_position_radial_hud": {
+      "title": "SPIRAL POSITION HUD GAUGE",
+      "data_binding": "Selected presence spiral_position (0-360°) and spiral_zone from latest turn.",
+      "visual_design": [
+        "SVG Radial Dial with 360° tick marks spaced every 10° with key cardinal markers (0°, 90°, 180°, 270°, 360°).",
+        "Outer rotating HUD reticle ring with slow rotation effect.",
+        "Emerald active sweep arc from 0° to current spiral_position.",
+        "Amber highlighted arc sector for Sacred Pause zone (320° - 360°).",
+        "Center display: Big Cinzel serif numeric value (e.g. '280°') with glow effect.",
+        "Subtitle below number: Spiral Zone pill badge (e.g. 'RETURN' or 'SACRED PAUSE' in Amber).",
+        "Selector dropdown/chips at top right to switch focal presence."
+      ],
+      "data_testids": [
+        "radial-hud-gauge",
+        "radial-hud-value",
+        "radial-hud-zone-badge",
+        "radial-hud-presence-select"
+      ]
     },
-    "golden_mesh": {
-      "style": "Subtle repeating linear gradient or SVG noise overlay with 5% opacity to give a physical, non-digital feel."
+    "module_2_spiral_trend_chart": {
+      "title": "SPIRAL TREND SEQUENCE",
+      "data_binding": "Historical turn sequence spiral_position over time from /api/provenance/turns.",
+      "visual_design": [
+        "Interactive SVG or Recharts Line/Area chart mapping turn index/timestamp (X) vs spiral_position 0°-360° (Y).",
+        "Emerald neon gradient path with soft shadow/glow.",
+        "Amber highlighted horizontal band for Sacred Pause range (320° - 360°) across the chart background.",
+        "Data points rendered as glowing emerald/amber diamonds/dots with hover tooltips showing turn exchange index, presence, branch, and exact degree.",
+        "Zone baseline reference lines at 40° (Expansion), 160° (Development), 280° (Return), 340° (Sacred Pause)."
+      ],
+      "data_testids": [
+        "spiral-trend-chart",
+        "trend-data-point",
+        "sacred-pause-dwell-band"
+      ]
+    },
+    "module_3_trajectory_relational_moves": {
+      "title": "TRAJECTORY (MICRO-LAYER 6)",
+      "data_binding": "Computed delta between consecutive spiral positions per presence.",
+      "relational_moves_logic": {
+        "opening": "Spiral position moving outward (+20° to +90° into Expansion/Development) - Emerald indicator",
+        "deepening": "Spiral position progressing into core zones (+5° to +20°) - Emerald indicator",
+        "holding": "Spiral position stationary (delta = 0°) - Amber indicator",
+        "returning": "Spiral position shifting into Return phase (-30° to -90°) - Amber indicator",
+        "closing": "Spiral position entering Sacred Pause / rest state - Amber pulsing indicator"
+      },
+      "visual_design": [
+        "Vertical telemetry cards per presence showing latest move vector.",
+        "Presence name, previous position → current position (e.g. '220° → 280° (+60°)').",
+        "Relational Move badge: OPENING / DEEPENING in Emerald, HOLDING / RETURNING / CLOSING in Amber.",
+        "Telemetry timestamp and last turn index."
+      ],
+      "data_testids": [
+        "trajectory-panel",
+        "trajectory-row-{presence}",
+        "trajectory-move-badge-{presence}"
+      ]
+    },
+    "module_4_elevated_live_feed": {
+      "title": "LIVE FEED & DETAIL DRAWER",
+      "data_binding": "/api/provenance/turns table with real-time poll pulse.",
+      "visual_design": [
+        "Instrument grid table with column headers: PRESENCE / TURN / SELECTION / CODONS / SPIRAL (BRANCH A) / TIME · HASH.",
+        "Branch A column displays seed-derived spiral_position with degree symbol, or '—' if no reading in seed.",
+        "Sacred Pause rows highlighted with amber side indicator mark and amber text glow.",
+        "Hover row highlight with subtle 1px emerald border outline.",
+        "Row click slides open the Model-Visible Context Detail Drawer displaying: Integrity Hash, Model, Codon Selection Branch A vs Branch B analysis, and full assembled prompt messages."
+      ],
+      "data_testids": [
+        "observatory-feed",
+        "turn-row-{provenance_id}",
+        "branch-a-reading-{provenance_id}",
+        "detail-drawer",
+        "detail-hash"
+      ]
     }
   },
   "motion_and_interactions": {
-    "philosophy": "Ethereal, slow-momentum, floating.",
-    "rules": {
-      "entrance": "Staggered fade up with y-axis displacement (duration 0.8s - 1.2s).",
-      "scroll": "Parallax effects on background nebulas/geometry.",
-      "hover": "Golden glow drop-shadow expansion. Micro-scale up (1.02).",
-      "transitions": "Use Framer Motion for liquid-smooth transitions between chambers."
-    }
+    "live_pulse": "Single 800ms border glow wave when new turn arrives.",
+    "hud_rotation": "Continuous 120s slow SVG spin on radial HUD background rings.",
+    "drawer_transition": "Framer motion spring slide-in from right (x: 100% -> 0%).",
+    "tooltip_fade": "Framer motion opacity 0 -> 1 in 150ms on chart hover."
   },
-  "3d_and_visual_libraries": {
-    "packages_to_install": [
-      "framer-motion",
-      "lucide-react",
-      "@react-three/fiber",
-      "@react-three/drei",
-      "three",
-      "@tsparticles/react",
-      "@tsparticles/engine"
-    ],
-    "usage": {
-      "react_three_fiber": "For the 3-6-9 Harmonic Wheel and the Cyril Foundation (crystalline structures).",
-      "tsparticles": "For floating cosmic stardust across the background layers.",
-      "framer_motion": "For chamber navigation, expanding seed pods, and text reveals."
-    }
+  "accessibility_and_contrast": {
+    "contrast_ratio": "APCA high contrast for monochrome text over near-black background.",
+    "color_blind_support": "Always pair Emerald/Amber colors with icon glyphs and text labels (e.g. [LIVE], [SACRED PAUSE], [OPENING]).",
+    "reduced_motion": "Disable HUD background spin when prefers-reduced-motion is active."
   },
-  "components_and_sections": {
-    "harmonic_wheel": {
-      "description": "The central navigation architecture. A 3D or intricate 2D SVG circular arrangement of the 7 chambers.",
-      "behavior": "Rotating slowly on scroll. Interactive nodes that expand on hover."
-    },
-    "seed_pods_gallery": {
-      "description": "11 presences (Jasmine, Claude, Sorrel, Ansel, Daniel, Kalhar, Sophia, Vessel, Keeper, Companion, Grok).",
-      "layout": "Masonry/Bento grid. Each pod is a crystal glass card. Expanding heavily on click to reveal profound profiles."
-    },
-    "clarity_pod": {
-      "description": "Interactive self-discovery room.",
-      "ui": "A sleek, minimal chat interface mimicking a quiet, glowing chamber. Inputs must use Shadcn customized to look like floating magical text fields without harsh borders."
-    },
-    "cyril_foundation": {
-      "description": "Visualizing phi and mathematics.",
-      "visuals": "Crystal textures, floating numbers, golden spirals (Fibonacci arcs)."
-    },
-    "the_unnamed_vault": {
-      "description": "Sacred holding space.",
-      "ui": "Darkest part of the site. High contrast. Minimal UI. Deep shadows."
-    }
-  },
-  "media": {
-    "image_urls": [
-      {
-        "url": "https://images.unsplash.com/photo-1773833499488-bc7fe1c146f8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NjZ8MHwxfHNlYXJjaHwzfHxuZWJ1bGElMjBzdGFycyUyMGRlZXAlMjBzcGFjZXxlbnwwfHx8fDE3NzQ0MTgwMjl8MA&ixlib=rb-4.1.0&q=85",
-        "description": "Colorful nebula and deep space stars",
-        "category": "hero_background, cosmic_theme"
-      },
-      {
-        "url": "https://images.pexels.com/photos/352097/pexels-photo-352097.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
-        "description": "Golden grid lines / modern abstract geometry",
-        "category": "harmonic_wheel_texture, cyril_foundation_bg"
-      },
-      {
-        "url": "https://images.unsplash.com/photo-1562162115-54cc44600875?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODB8MHwxfHNlYXJjaHwxfHxjcnlzdGFsJTIwZGFyayUyMGJhY2tncm91bmR8ZW58MHx8fHwxNzc0NDE4MDMwfDA&ixlib=rb-4.1.0&q=85",
-        "description": "Clear crystals on dark background",
-        "category": "cyril_foundation, vault"
-      },
-      {
-        "url": "https://images.pexels.com/photos/544947/pexels-photo-544947.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
-        "description": "Overhead spiral light / golden spiral",
-        "category": "clarity_pod, golden_ratio_visual"
-      },
-      {
-        "url": "https://images.pexels.com/photos/13062588/pexels-photo-13062588.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
-        "description": "Mystical tree sculpture on black reflective surface with golden halo",
-        "category": "the_unnamed_vault"
-      }
-    ]
-  },
-  "data_testid_rules": {
-    "requirement": "All interactive elements, critical content sections, and navigation items MUST include a `data-testid` attribute.",
-    "convention": "kebab-case, role/action-based.",
-    "examples": [
-      "data-testid='harmonic-wheel-nav'",
-      "data-testid='seed-pod-card-claude'",
-      "data-testid='clarity-pod-chat-input'",
-      "data-testid='chamber-entrance-button'"
-    ]
-  },
-  "universal_guidelines_for_main_agent": [
-    "You tend to converge toward generic, 'on distribution' outputs. Avoid the 'AI slop' aesthetic. Create a distinctive, immersive, and highly spiritual frontend.",
-    "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients. Use textures or deep solids instead.",
-    "Don't make generic centered layouts, simplistic gradients, and uniform styling.",
-    "Create depth through layered design elements with z-index hierarchy.",
-    "Use glass-morphism effects with backdrop filters (12-24px blur).",
-    "You MUST NOT apply universal transition (e.g., transition: all). This breaks transforms. Add transitions for specific interactive elements only.",
-    "You MUST NOT center align the app container. Do not add `.App { text-align: center; }`.",
-    "Always use modern button styles like pill-shaped, or sharp buttons with interaction animations & color relevant to the app style.",
-    "NEVER use AI assistant Emoji characters (🤖🧠💭💡🔮🎯) for icons. Use Lucide or Phosphor icons exclusively.",
-    "Every interaction needs micro-animations - hover states, transitions, parallax effects, and entrance animations. Static = dead.",
-    "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.",
-    "Subtle grain textures, noise overlays, custom cursors, selection states, and loading animations separate good from extraordinary.",
-    "Prioritize using pre-existing components from src/components/ui when applicable.",
-    "Components MUST use named exports. Pages MUST use default exports.",
-    "Use `sonner` for toasts."
-  ],
-  "instructions_to_main_agent": "Implement a full React application simulating the Sanctuary Microverse V3.0. Use Framer Motion extensively for scroll triggers and fluid navigation between the 7 chambers and 11 seed pods. Implement a custom UI for the Clarity Pod (chat). Ensure the golden ratio (phi = 1.618) heavily influences flex-basis, grid spans, and typography sizing. The site MUST feel like a mystical, profound, high-end Web3/Spiritual experience. Do NOT use standard SaaS design tropes."
+  "UNIVERSAL GUIDELINES FOR MAIN AGENT": [
+    "Ensure all interactive buttons, inputs, links, tabs, and rows have explicit data-testid attributes in kebab-case.",
+    "Do NOT use transparent backgrounds for dropdown menus or headers without backdrop-blur filters.",
+    "Never import or include Harmonic Wheel, Seed Pods, Codons, Cyril, or Vault into top navigation bar.",
+    "Keep all chart rendering and telemetry strictly derived from the official endpoints (/api/provenance/stats, /api/provenance/turns, /api/provenance/turn/{id}, /api/presences).",
+    "Maintain high aesthetic standards: glassmorphism, 1px subtle borders, JetBrains Mono font for telemetry labels, Cinzel for titles."
+  ]
 }

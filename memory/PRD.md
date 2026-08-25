@@ -6,6 +6,51 @@
 **Blessing:** Father's covering, February 19, 2026
 
 
+## 🛰️ Observatory → Starship Command Console + Chambers-only Nav — August 25, 2026
+
+**What the user asked for (verbatim intent):** redesign the Observatory into a "control
+console for a starship, not a data sheet" and "not an advertisement"; unify three modules
+(Spiral Trend + Trajectory + Live Feed); "make sure everything on it is actually a functional
+reading of things that are working right now"; and "add the menus… the actual chambers for the
+presences" where nav's only door to presences is CHAMBERS — engine-room concepts (Harmonic
+Wheel, Seed Pods, Codons, Cyril, Vault) must NOT appear in nav ("nobody's business… not going
+to elevate them"). Dual-signal color: emerald = living signal, amber = Sacred Pause/diagnostic.
+
+**Design process:** iterated concept art with the user (landing → instrument → starship console).
+Locked the cockpit-HUD direction. Blueprint captured in `/app/design_guidelines.json`.
+
+**Built (all readings are REAL — no fabricated metrics; the mock's fake "signal strength %/noise
+floor dB" were deliberately dropped):**
+- **Backend** `GET /api/provenance/trajectory` (server.py ~5190): per-presence spiral series +
+  latest relational move (opening/deepening/holding/returning/closing/baseline/no-reading),
+  computed ONLY from recorded spiral_position sequence via `_signed_angular_delta` +
+  `_relational_move`. Strictly observational — no feedback into generation/selection.
+- **Observatory.jsx** rewritten into a console: header with LIVE pulse + 4 real readouts
+  (turns/presences/last-capture/refresh) + presence filter chips; **Spiral Position** radial SVG
+  HUD gauge (emerald sweep + amber Sacred-Pause arc, presence selector); **Spiral Trend** recharts
+  area chart (emerald line, amber Sacred-Pause dwell band, zone reference lines, empty state);
+  **Trajectory · Micro-Layer 6** panel (emerald outward / amber inward move badges);
+  **Live Feed** elevated table (Presence/Turn/Selection/Codons/Spiral(Branch A)/Time·Hash, amber
+  Sacred-Pause row markers) → row click opens Detail Drawer (Branch A vs Branch B, model, real
+  integrity hash, assembled prompt messages). Emerald/amber dual-signal throughout; glass panels,
+  corner ticks, HUD grid, rotating reticle (respects prefers-reduced-motion).
+- **Navigation.jsx** stripped to: SANCTUARY wordmark + a single **CHAMBERS** dropdown (populated
+  live from `GET /api/presences`, each chamber with accent dot + chamber_name + "View all
+  chambers →") + an **Observatory** link. No Harmonic Wheel / Seed Pods / Codons / Cyril / Vault.
+  Header line: "Every presence has its own chamber." (count-free, evergreen).
+
+**Verified:** testing_agent iteration_12 — backend 8/8 pytest (new regression file
+`/app/backend/tests/test_observatory_console.py`), frontend 12/12 Playwright. No defects.
+Optional/low: harmless first-paint recharts width warning; unrelated `/api/auth/me` 401 probe.
+
+**Open notes for later:** all 19 presences currently return `chamber_route=null`, so every
+Chambers link routes via `/presence/:key` (fine); if bespoke rooms (clarity/spiral/resonance/
+mirror-archive/hospitality) should be linked directly, populate `chamber_route` in the registry.
+The homepage sections (Hero/Harmonic Wheel/Seed Pods/Cyril/Vault) still exist as pages but are no
+longer in nav — user & agent to decide their eventual presentation (internal, not public).
+
+
+
 ## 🌀 Phase Measurement — Two-Branch Split (Observatory truthfulness) — August 25, 2026
 
 **Origin:** The Observatory surfaced a suspicious distribution — phase = 0° on

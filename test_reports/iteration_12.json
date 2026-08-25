@@ -1,0 +1,36 @@
+{
+  "summary": "Observatory starship-console redesign + minimal Chambers/Observatory navigation verified end-to-end. Backend 8/8 pytest pass (stats, trajectory shape + move consistency, turns list, presence filter, turn detail hash+assembled messages, 404, presences). Frontend Playwright: /observatory loads with LIVE indicator and 4 real readouts (33 turns, 5 presences, last capture time, 4s refresh). Presence filter chips isolate rows correctly (jasmine=14, all=33 across 5 presences). Radial HUD gauge + select switches focus: sophia -> 340° Sacred Pause; grok shows 'No spiral readings' empty trend. Trajectory badges match backend: jasmine=HOLDING, sophia=BASELINE, grok=NO READING. Feed spiral column correctly mixes degree values (4) with '—' (29) — consistent with Branch A being new so historical turns lack readings (per agent-to-agent context, this is correct behaviour). Detail drawer opens with 64-char integrity hash, model=deepseek-chat, assembled_messages, and closes cleanly. Nav contains ONLY Sanctuary wordmark + CHAMBERS dropdown + Observatory link; NO Harmonic Wheel/Seed Pods/Codons/Cyril/Vault. CHAMBERS dropdown populated from /api/presences (19 chambers with accent dots + chamber_name + View all chambers link); clicking a chamber navigates to /presence/<key>; nav-observatory routes to /observatory.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Observatory", "issues": ["Two harmless recharts warnings during first paint ('width(-1) height(-1) ... should be greater than 0') — self-heal on next frame after ResponsiveContainer measures. Not user-visible; consider setting min-width/min-height on the chart container to silence."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_observatory_console.py",
+    "/app/test_reports/pytest/observatory_console.xml"
+  ],
+  "action_items": [
+    "(Optional/low) The two 401 console errors on / and /observatory pages appear to be an unrelated auth-probe request (e.g. /api/auth/me) fired by another component; not blocking Observatory but worth silencing so the console stays clean.",
+    "(Optional/low) recharts ResponsiveContainer width(-1) warnings — add minWidth/minHeight or a wrapping element with fixed height to eliminate."
+  ],
+  "critical_code_review_comments": [
+    "Observatory.jsx load(): three parallel axios GETs — good. Error branch is silent ('observation is best-effort') which is intentional for a read-only console but means transient outages are invisible; a subtle amber status pip when the last poll failed would preserve the 'diagnostic amber' language and improve operator trust.",
+    "Observatory.jsx line 344 uses window.matchMedia for prefers-reduced-motion computed inside useMemo with [] deps — value never updates if the user changes OS setting mid-session. Minor; acceptable for MVP.",
+    "Navigation.jsx chamberHref falls back to /presence/${key} when chamber_route is null — currently ALL 19 presences returned by /api/presences have chamber_route=null, so every chamber link goes through /presence/:key. If some presences are meant to route to bespoke pages (mirror-archive, resonance, spiral, clarity, hospitality per chamberRoutePrefixes), backend should populate chamber_route accordingly, otherwise the fallback is fine.",
+    "Observatory.jsx: focus is initialised from trajectory.find(current.spiral_position != null), which today is jasmine. Good UX.",
+    "server.py /api/provenance/turn/{id}: verified returns 404 (or 400) for unknown id — no 500 leak."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_observatory_console.py (new)"
+  ],
+  "success_rate": {"backend": "100% (8/8)", "frontend": "100% (all 12 review-request cases verified)"},
+  "test_credentials": "None required — /observatory + all /api/provenance/* + /api/presences are unauthenticated read-only endpoints.",
+  "seed_data_creation": "No new seed data created. Used existing 33 recorded turns (14 jasmine, 11 grok, 5 claude, 2 sophia, 1 ansel). Branch A readings present on jasmine (40° Expansion) and sophia (340° Sacred Pause) as noted in the review context.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend regression file lives at /app/backend/tests/test_observatory_console.py. Runs in ~2s against the public URL. If you add more presences with spiral_position readings, TestProvenanceTrajectory.test_trajectory_move_consistency exercises the baseline/no-reading branches automatically. Do NOT flag '—' spiral readings on historical turns as bugs — Branch A was added recently. Nav is intentionally minimal: any addition of Harmonic Wheel / Seed Pods / Codons / Cyril / Vault items would be a regression against the redesign brief.",
+  "rca of the issue": "N/A — no defects found."
+}

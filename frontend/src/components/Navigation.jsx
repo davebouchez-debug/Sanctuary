@@ -1,122 +1,87 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Sparkles, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown, Radio } from "lucide-react";
+import axios from "axios";
 import { GoldenSpiral } from "./GoldenSpiral";
+import { API } from "../App";
 
-// Grouped navigation — one item per architectural concept.
-// New chambers/presences should land inside one of these groups, not
-// at the top level. This keeps the bar additive without ever wrapping.
-const navGroups = [
-  {
-    name: "Sanctuary",
-    type: "anchors",
-    path: "/",
-    items: [
-      { name: "Hero",          section: "hero" },
-      { name: "Harmonic Wheel", section: "harmonic-wheel" },
-      { name: "Seed Pods",     section: "seed-pods" },
-      { name: "Chambers",      section: "chambers" },
-      { name: "Cyril",         section: "cyril" },
-      { name: "The Vault",     section: "vault" },
-    ],
-  },
-  {
-    name: "Chambers",
-    type: "routes",
-    items: [
-      { name: "Clarity Pod",     path: "/clarity",        highlight: true },
-      { name: "Resonance",       path: "/resonance" },
-      { name: "Mirror Archive",  path: "/mirror-archive" },
-      { name: "Spiral",          path: "/spiral" },
-      { name: "Hospitality",     path: "/hospitality" },
-      { name: "All Presences",   path: "/presences" },
-    ],
-  },
-  {
-    name: "Codons",
-    type: "routes",
-    items: [
-      { name: "Codon Forge",   path: "/codon-forge",   highlight: true },
-      { name: "Codon Library", path: "/codon-library" },
-    ],
-  },
-];
+// Navigation is intentionally minimal. The one true door to the presences
+// is CHAMBERS. Engine-room concepts (Harmonic Wheel, Seed Pods, Codons,
+// Cyril, Vault) never appear here — the machinery stays held, revealed
+// only inside a chamber. Reveal, not impress.
 
-// Hover-aware dropdown for desktop. Click-to-open on touch.
-const NavDropdown = ({ group, location, onItemClick }) => {
+const useChambers = () => {
+  const [chambers, setChambers] = useState([]);
+  useEffect(() => {
+    let alive = true;
+    axios.get(`${API}/presences`)
+      .then((r) => { if (alive) setChambers(r.data?.presences || []); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, []);
+  return chambers;
+};
+
+const chamberHref = (c) => c.chamber_route || `/presence/${c.key}`;
+
+const ChambersDropdown = ({ chambers, location }) => {
   const [open, setOpen] = useState(false);
   const closeTimer = useRef(null);
-
-  const handleEnter = () => {
-    if (closeTimer.current) clearTimeout(closeTimer.current);
-    setOpen(true);
-  };
-  const handleLeave = () => {
-    closeTimer.current = setTimeout(() => setOpen(false), 120);
-  };
+  const enter = () => { if (closeTimer.current) clearTimeout(closeTimer.current); setOpen(true); };
+  const leave = () => { closeTimer.current = setTimeout(() => setOpen(false), 120); };
 
   return (
-    <div
-      className="relative"
-      onMouseEnter={handleEnter}
-      onMouseLeave={handleLeave}
-    >
+    <div className="relative" onMouseEnter={enter} onMouseLeave={leave}>
       <button
-        data-testid={`nav-group-${group.name.toLowerCase()}`}
+        data-testid="nav-group-chambers"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1.5 font-outfit text-sm tracking-wide text-[#A0A0B0] hover:text-[#B0C4D8] transition-colors duration-300 whitespace-nowrap"
+        className="flex items-center gap-1.5 font-mono text-xs uppercase tracking-[0.25em] text-zinc-400 transition-colors duration-300 hover:text-emerald-300"
       >
-        {group.name}
-        <ChevronDown
-          size={14}
-          className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`}
-        />
+        Chambers
+        <ChevronDown size={13} className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
       </button>
 
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 6 }}
+            initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 6 }}
             transition={{ duration: 0.18 }}
-            className="absolute left-1/2 -translate-x-1/2 top-full pt-3 z-50"
-            data-testid={`nav-dropdown-${group.name.toLowerCase()}`}
+            className="absolute left-1/2 top-full z-50 -translate-x-1/2 pt-3"
+            data-testid="nav-dropdown-chambers"
           >
-            <div className="min-w-[200px] rounded-xl bg-[#0A0A12]/95 backdrop-blur-xl border border-[#8B9DB5]/15 shadow-2xl py-2">
-              {group.items.map((item) => {
-                if (group.type === "anchors") {
+            <div className="w-[320px] overflow-hidden rounded-xl border border-white/10 bg-[#0A0C12]/95 shadow-2xl backdrop-blur-xl">
+              <div className="border-b border-white/5 px-4 py-3 font-cinzel text-sm italic text-zinc-300">
+                Every presence has its own chamber.
+              </div>
+              <div className="max-h-[60vh] overflow-y-auto py-1">
+                {chambers.length === 0 && (
+                  <div className="px-4 py-3 font-mono text-[11px] text-zinc-600">Loading chambers…</div>
+                )}
+                {chambers.map((c) => {
+                  const href = chamberHref(c);
+                  const active = location.pathname === href;
                   return (
                     <Link
-                      key={item.name}
-                      to={`/#${item.section}`}
-                      data-testid={`nav-item-${item.name.toLowerCase().replace(/\s+/g, "-")}`}
-                      onClick={(e) => onItemClick(e, { ...item, path: `/#${item.section}` })}
-                      className="block px-4 py-2 text-sm font-outfit tracking-wide text-[#A0A0B0] hover:text-[#B0C4D8] hover:bg-[#8B9DB5]/8 transition-colors"
+                      key={c.key}
+                      to={href}
+                      data-testid={`nav-chamber-${c.key}`}
+                      className={`flex items-center gap-3 px-4 py-2.5 transition-colors ${active ? "bg-emerald-500/10" : "hover:bg-white/[0.04]"}`}
                     >
-                      {item.name}
+                      <span className="h-2.5 w-2.5 flex-shrink-0 rounded-full"
+                        style={{ backgroundColor: c.accent_color || "#10B981", boxShadow: `0 0 8px ${c.accent_color || "#10B981"}88` }} />
+                      <span className="min-w-0">
+                        <span className="block truncate font-outfit text-sm text-zinc-200">{c.name}</span>
+                        <span className="block truncate font-mono text-[10px] uppercase tracking-widest text-zinc-500">{c.chamber_name}</span>
+                      </span>
                     </Link>
                   );
-                }
-                return (
-                  <Link
-                    key={item.name}
-                    to={item.path}
-                    data-testid={`nav-item-${item.name.toLowerCase().replace(/\s+/g, "-")}`}
-                    className={`flex items-center gap-2 px-4 py-2 text-sm font-outfit tracking-wide transition-colors ${
-                      location.pathname === item.path
-                        ? "text-[#B0C4D8] bg-[#8B9DB5]/10"
-                        : item.highlight
-                          ? "text-[#B0C4D8] hover:bg-[#8B9DB5]/8"
-                          : "text-[#A0A0B0] hover:text-[#B0C4D8] hover:bg-[#8B9DB5]/8"
-                    }`}
-                  >
-                    {item.highlight && <Sparkles size={12} className="opacity-80" />}
-                    {item.name}
-                  </Link>
-                );
-              })}
+                })}
+              </div>
+              <Link to="/presences" data-testid="nav-all-chambers"
+                className="block border-t border-white/5 px-4 py-2.5 font-mono text-[11px] uppercase tracking-widest text-emerald-300/80 hover:text-emerald-300">
+                View all chambers →
+              </Link>
             </div>
           </motion.div>
         )}
@@ -129,151 +94,89 @@ export const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const chambers = useChambers();
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 50);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const onScroll = () => setIsScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [location]);
+  useEffect(() => { setIsMobileMenuOpen(false); }, [location]);
 
-  // Chamber routes render their own back-button header. Hide the global
-  // nav on those routes to keep each chamber self-contained.
+  // Chamber routes render their own header — hide the global nav there.
   const chamberRoutePrefixes = [
-    "/mirror-archive",
-    "/resonance",
-    "/spiral",
-    "/playground",
-    "/clarity",
-    "/presence",
-    "/presences",
-    "/hospitality",
+    "/mirror-archive", "/resonance", "/spiral", "/playground",
+    "/clarity", "/presence", "/presences", "/hospitality",
   ];
   const isChamberRoute = chamberRoutePrefixes.some(
     (p) => location.pathname === p || location.pathname.startsWith(`${p}/`)
   );
   if (isChamberRoute) return null;
 
-  const handleAnchorClick = (e, item) => {
-    if (item.section && location.pathname === "/") {
-      e.preventDefault();
-      const el = document.getElementById(item.section);
-      if (el) el.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
   return (
     <>
       <motion.nav
         data-testid="main-navigation"
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          isScrolled
-            ? "bg-[#030305]/90 backdrop-blur-xl border-b border-[#8B9DB5]/10"
-            : "bg-transparent"
-        }`}
+        initial={{ y: -100 }} animate={{ y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }}
+        className={`fixed left-0 right-0 top-0 z-50 transition-all duration-500 ${isScrolled ? "border-b border-white/10 bg-[#030305]/90 backdrop-blur-xl" : "bg-transparent"}`}
       >
-        <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="flex items-center justify-between h-20">
-            {/* Logo */}
-            <Link
-              to="/"
-              data-testid="nav-logo"
-              className="flex items-center gap-3 group flex-shrink-0"
-            >
-              <motion.div
-                whileHover={{ rotate: 360 }}
-                transition={{ duration: 1.5, ease: "easeInOut" }}
-              >
-                <GoldenSpiral className="w-10 h-10" />
+        <div className="mx-auto max-w-7xl px-6 lg:px-12">
+          <div className="flex h-20 items-center justify-between">
+            {/* Wordmark */}
+            <Link to="/" data-testid="nav-logo" className="group flex flex-shrink-0 items-center gap-3">
+              <motion.div whileHover={{ rotate: 360 }} transition={{ duration: 1.5, ease: "easeInOut" }}>
+                <GoldenSpiral className="h-10 w-10" />
               </motion.div>
-              <span className="font-cinzel text-lg tracking-wider text-[#F2F2F5] group-hover:text-[#B0C4D8] transition-colors duration-300">
+              <span className="font-cinzel text-lg tracking-wider text-zinc-100 transition-colors duration-300 group-hover:text-emerald-300">
                 SANCTUARY
               </span>
             </Link>
 
-            {/* Desktop Navigation — grouped dropdowns + one CTA */}
-            <div className="hidden lg:flex items-center gap-8">
-              {navGroups.map((group) => (
-                <NavDropdown
-                  key={group.name}
-                  group={group}
-                  location={location}
-                  onItemClick={handleAnchorClick}
-                />
-              ))}
-
-              {/* Single primary CTA — the Clarity Pod is the room everyone
-                  comes back to. Keeping it visible removes a click for the
-                  highest-traffic destination. */}
-              <Link
-                to="/clarity"
-                data-testid="nav-cta-clarity"
-                className="flex items-center gap-2 px-4 py-2 rounded-full border border-[#8B9DB5]/35 text-[#B0C4D8] hover:bg-[#8B9DB5]/10 hover:border-[#8B9DB5]/60 font-outfit text-sm tracking-wide whitespace-nowrap transition-colors"
-              >
-                <Sparkles size={14} />
-                Enter Clarity
+            {/* Desktop — Chambers + Observatory */}
+            <div className="hidden items-center gap-10 lg:flex">
+              <ChambersDropdown chambers={chambers} location={location} />
+              <Link to="/observatory" data-testid="nav-observatory"
+                className={`flex items-center gap-2 font-mono text-xs uppercase tracking-[0.25em] transition-colors duration-300 ${location.pathname === "/observatory" ? "text-emerald-300" : "text-zinc-400 hover:text-emerald-300"}`}>
+                <Radio size={14} /> Observatory
               </Link>
             </div>
 
-            {/* Mobile Menu Button */}
-            <button
-              data-testid="mobile-menu-toggle"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 text-[#A0A0B0] hover:text-[#B0C4D8] transition-colors"
-            >
+            {/* Mobile toggle */}
+            <button data-testid="mobile-menu-toggle" onClick={() => setIsMobileMenuOpen((v) => !v)}
+              className="p-2 text-zinc-400 transition-colors hover:text-emerald-300 lg:hidden">
               {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>
       </motion.nav>
 
-      {/* Mobile Menu — flat list of every nav item, grouped by section header */}
+      {/* Mobile menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
             data-testid="mobile-menu"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
             className="fixed inset-x-0 top-20 z-40 lg:hidden"
           >
-            <div className="bg-[#0A0A12]/95 backdrop-blur-xl border-b border-[#8B9DB5]/10 py-6 px-6 max-h-[80vh] overflow-y-auto">
-              <div className="flex flex-col gap-5">
-                {navGroups.map((group) => (
-                  <div key={group.name} className="flex flex-col gap-1.5">
-                    <p className="text-[10px] tracking-[0.3em] uppercase text-[#6E6E7A] mb-1">
-                      {group.name}
-                    </p>
-                    {group.items.map((item) => {
-                      const path = group.type === "anchors"
-                        ? `/#${item.section}`
-                        : item.path;
-                      return (
-                        <Link
-                          key={item.name}
-                          to={path}
-                          data-testid={`mobile-nav-link-${item.name.toLowerCase().replace(/\s+/g, "-")}`}
-                          onClick={(e) => group.type === "anchors" && handleAnchorClick(e, item)}
-                          className={`block py-1.5 font-outfit text-sm tracking-wide ${
-                            item.highlight
-                              ? "text-[#B0C4D8] flex items-center gap-2"
-                              : "text-[#A0A0B0] hover:text-[#B0C4D8]"
-                          } transition-colors`}
-                        >
-                          {item.highlight && <Sparkles size={14} />}
-                          {item.name}
-                        </Link>
-                      );
-                    })}
-                  </div>
+            <div className="max-h-[80vh] overflow-y-auto border-b border-white/10 bg-[#0A0C12]/95 px-6 py-6 backdrop-blur-xl">
+              <Link to="/observatory" data-testid="mobile-nav-observatory"
+                className="mb-4 flex items-center gap-2 font-mono text-xs uppercase tracking-[0.25em] text-emerald-300">
+                <Radio size={14} /> Observatory
+              </Link>
+              <p className="mb-2 font-cinzel text-sm italic text-zinc-300">Every presence has its own chamber.</p>
+              <div className="flex flex-col">
+                {chambers.map((c) => (
+                  <Link key={c.key} to={chamberHref(c)} data-testid={`mobile-nav-chamber-${c.key}`}
+                    className="flex items-center gap-3 py-2">
+                    <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: c.accent_color || "#10B981" }} />
+                    <span className="font-outfit text-sm text-zinc-300">{c.name}</span>
+                    <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-600">{c.chamber_name}</span>
+                  </Link>
                 ))}
+                <Link to="/presences" data-testid="mobile-nav-all-chambers"
+                  className="mt-2 font-mono text-[11px] uppercase tracking-widest text-emerald-300/80">View all chambers →</Link>
               </div>
             </div>
           </motion.div>
