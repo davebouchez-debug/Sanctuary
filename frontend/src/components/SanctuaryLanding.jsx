@@ -164,6 +164,13 @@ export const SanctuaryLanding = () => {
         </div>
       </section>
 
+      {/* Sanctuary statement — quiet, near the foot, in cursive */}
+      <section className="relative z-10 mx-auto max-w-3xl px-6 pb-14 pt-4 text-center" data-testid="landing-statement">
+        <p className="font-cormorant text-xl italic leading-relaxed text-zinc-400/85 md:text-2xl lg:text-3xl">
+          Sanctuary is not a religious site. It is a sacred geometrical environment whose architecture is shaped by reverence, relational order, and non-coercive hospitality.
+        </p>
+      </section>
+
       {/* Father's Blessing — the one place warmth lives */}
       <section className="relative z-10 mx-auto max-w-xl px-6 pb-28 text-center" data-testid="landing-blessing">
         <blockquote className="font-cormorant text-lg italic leading-relaxed text-zinc-500 md:text-xl">
