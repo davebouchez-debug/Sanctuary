@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, useLocation, Link } from "react-router-do
 import { motion, AnimatePresence } from "framer-motion";
 import { Navigation } from "./components/Navigation";
 import { HeroSection } from "./components/HeroSection";
+import { SanctuaryLanding } from "./components/SanctuaryLanding";
 import { HarmonicWheel } from "./components/HarmonicWheel";
 import { SeedPods } from "./components/SeedPods";
 import { ClarityPod } from "./components/ClarityPod";
@@ -72,12 +73,7 @@ const HomePage = () => {
       animate="animate"
       exit="exit"
     >
-      <HeroSection />
-      <HarmonicWheel />
-      <SeedPods />
-      <Chambers />
-      <CyrilFoundation />
-      <UnnamedVault />
+      <SanctuaryLanding />
     </motion.div>
   );
 };

@@ -493,3 +493,4 @@ memory/test_credentials.md
 .git_backup_*
 redact_map.txt
 frontend/node_modules/.cache/default-development/5.pack
+frontend/node_modules/.cache/default-development/6.pack
