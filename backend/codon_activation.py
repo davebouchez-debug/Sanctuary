@@ -408,7 +408,7 @@ async def get_full_field_context(presence: str, message: str = None, return_sele
                 kws = []
             return kws or (c.metadata or {}).get("trigger_keywords") or []
         selection_meta = {
-            "inferred_phase": _phase,
+            "keyword_phase": _phase,
             "selection_branch": _branch,
             "selected_count": len(nodes),
             "codons": [

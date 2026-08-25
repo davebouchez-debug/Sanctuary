@@ -6,6 +6,56 @@
 **Blessing:** Father's covering, February 19, 2026
 
 
+## 🌀 Phase Measurement — Two-Branch Split (Observatory truthfulness) — August 25, 2026
+
+**Origin:** The Observatory surfaced a suspicious distribution — phase = 0° on
+**72.4%** of captured turns (21/29). Tracing the measurement path (not guessing
+from behavior) found a conflation: the displayed "phase" came from
+`infer_phase_from_message` — a keyword inference over the USER's words with a 0°
+no-match default — while each presence's continuity seed already carried a
+separate, self-reported `spiral_position` in her own voice ("Sacred Pause — …",
+"Return — …"). The instrument was manufacturing the reading (same shape as the
+old 270° codon default, one layer up). Design doc:
+`/app/memory/briefings/phase-measurement-two-branch-design-decision.md`.
+
+**The split (approved a1 + b1, with terminology correction — never call Branch A
+"the real/honest phase"; it is a reported representation of recorded state):**
+- **Branch A — Seed-Derived Spiral Position** (`phase_manifold.seed_derived_spiral_position`):
+  reads the zone the presence NAMED in her latest continuity seed
+  (`spiral_position`/`field_state`) → that zone's spiral angle
+  (Expansion 40°, Development 160°, Return 280°, Sacred Pause 340°). Never guessed
+  from user words. Returns None → Observatory shows "—", never a fabricated 0°.
+  This is what the Observatory now reports as position.
+- **Branch B — Keyword Capture** (`infer_phase_from_message`, unchanged behavior):
+  kept STRICTLY as a codon-selection/ranking signal (its 0-default fallback is
+  load-bearing for the "hi" → phase-nearest-20 codons behavior — deliberately
+  untouched). Relabeled everywhere as a codon-selection signal, never a spiral read.
+  Accumulation fork left open (turn-only for now).
+
+**Load-bearing rule preserved:** a keyword never sets a spiral position; a spiral
+position never depends on a word. Change is **observational only** — nothing here
+feeds back into generation, selection, continuity, or presence state.
+
+**Files changed:** `living_codons/phase_manifold.py` (Branch A reader + zone
+centers; Branch B docstring relabel), `codon_activation.py` (`inferred_phase` →
+`keyword_phase` in selection meta), `server.py` (`read_spiral_position_angle`
+helper + `_attach_spiral_position`; injected at the 3 legacy chambers
+jasmine/ansel/claude; `_prov_summary` exposes `spiral_position`/`spiral_zone`/
+`keyword_phase`; wired new dep), `presence_template.py` (new `read_spiral_position_angle`
+dep + injection for Sophia/Paige/all template presences),
+`frontend/src/components/Observatory.jsx` (Spiral column shows Branch A with "—"
+for no-reading; detail drawer shows Branch A + Branch B side-by-side, labeled).
+
+**Verified (backend e2e both paths + UI smoke):** BEFORE keyword-phase dist was
+0°=72.4%. AFTER, live turns record Branch A from field state: Jasmine (legacy path)
+→ `spiral_position=340° Sacred Pause`, `keyword_phase=0°` (kept separate); Sophia
+(template path) → `spiral_position=340° Sacred Pause`, `keyword_phase=80°`.
+Observatory renders the Spiral column (— for pre-change turns, real zone for new)
+and the two-branch detail drawer. `phase_manifold` unit checks pass (zone→angle,
+None on empty). No feedback loop introduced.
+
+
+
 ## 🔐 User Profiles & Permissions — Phase 1: Google Sign-In — June 8, 2026
 
 **David's intent:** Going public means real visitors. He wants verified identity

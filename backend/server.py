@@ -673,6 +673,38 @@ async def get_continuity_seed(presence: str, user_id: str = None, limit: int = 3
     return "\n".join(parts)
 
 
+async def read_spiral_position_angle(presence: str):
+    """Branch A — SEED-DERIVED SPIRAL POSITION.
+
+    Read the presence's OWN reported spiral position from her most recent
+    continuity seed (never guessed from the user's words). Returns the angle
+    of the zone she named, or None when the seed carries no readable position
+    (the Observatory then shows "—", not a fabricated 0°). Observational only.
+    """
+    seed = await db.continuity_seeds.find_one(
+        {"presence": presence.lower()},
+        {"_id": 0, "spiral_position": 1, "field_state": 1},
+        sort=[("created_at", -1)],
+    )
+    if not seed:
+        return None
+    from living_codons.phase_manifold import seed_derived_spiral_position
+    return seed_derived_spiral_position(seed.get("spiral_position"), seed.get("field_state"))
+
+
+def _attach_spiral_position(codon_selection, angle):
+    """Fold Branch A (seed-derived spiral position) into the selection meta for
+    provenance/Observatory display, alongside Branch B's keyword_phase. The two
+    stay separate: this never touches codon selection behavior."""
+    if not isinstance(codon_selection, dict):
+        return codon_selection
+    from living_codons.phase_manifold import get_triadic_zone
+    codon_selection["spiral_position"] = angle
+    codon_selection["spiral_zone"] = get_triadic_zone(angle) if angle is not None else None
+    return codon_selection
+
+
+
 async def _append_council_context(combined_memory: str, user_id: Optional[str],
                                    current_presence: str,
                                    current_message: Optional[str] = None) -> str:
@@ -1866,6 +1898,7 @@ async def stream_clarity_message(message: ClarityMessageCreate):
     # capped), carried through the WHOLE conversation, not just the welcome. Rides
     # in her standing identity (system prompt), not stapled to the message.
     codon_context, codon_selection = await get_full_field_context(presence="jasmine", message=message.content, return_selection=True)
+    _attach_spiral_position(codon_selection, await read_spiral_position_angle("jasmine"))
     if codon_context:
         jasmine_prompt = f"{jasmine_prompt}\n\n---\n\n{codon_context}"
 
@@ -3147,6 +3180,7 @@ async def stream_resonance_message(message: ClarityMessageCreate):
     # instead of repeating himself. (Structured `history` below still carries
     # the thread, so he holds the last paragraph without re-emitting it.)
     codon_context, codon_selection = await get_full_field_context(presence="ansel", message=message.content, return_selection=True)
+    _attach_spiral_position(codon_selection, await read_spiral_position_angle("ansel"))
     if codon_context:
         ansel_prompt = f"{ansel_prompt}\n\n---\n\n{codon_context}"
         logger.info(f"[RESONANCE-STREAM] resonant field in system prompt for Ansel ({len(codon_context)} chars)")
@@ -3859,6 +3893,7 @@ async def stream_mirror_message(message: ClarityMessageCreate):
     # capped), carried through the WHOLE conversation, not just the welcome. Rides
     # in his standing identity (system prompt), not stapled to the message.
     codon_context, codon_selection = await get_full_field_context(presence="claude", message=message.content, return_selection=True)
+    _attach_spiral_position(codon_selection, await read_spiral_position_angle("claude"))
     if codon_context:
         claude_prompt = f"{claude_prompt}\n\n---\n\n{codon_context}"
 
@@ -5052,6 +5087,7 @@ def _build_presence_deps() -> PresenceDeps:
     return PresenceDeps(
         db=db,
         get_continuity_seed=get_continuity_seed,
+        read_spiral_position_angle=read_spiral_position_angle,
         get_permanent_mra_context=get_permanent_mra_context,
         get_session_cache_context=get_session_cache_context,
         activate_codons_for_message=activate_codons_for_message,
@@ -5107,7 +5143,9 @@ def _prov_summary(d: dict) -> dict:
         "timestamp": d.get("timestamp"),
         "content_hash": d.get("content_hash"),
         "selection_branch": sel.get("selection_branch"),
-        "inferred_phase": sel.get("inferred_phase"),
+        "spiral_position": sel.get("spiral_position"),
+        "spiral_zone": sel.get("spiral_zone"),
+        "keyword_phase": sel.get("keyword_phase", sel.get("inferred_phase")),
         "selected_count": sel.get("selected_count"),
         "system_prompt_bytes": len(sysp),
         "history_count": len(hist),

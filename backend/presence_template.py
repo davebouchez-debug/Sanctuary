@@ -116,6 +116,7 @@ class PresenceDeps:
     db: Any                                              # motor AsyncIOMotorDatabase
     # --- context loaders ------------------------------------------------
     get_continuity_seed: Callable                        # (presence, user_id) → awaitable[str]
+    read_spiral_position_angle: Callable                 # (presence) → awaitable[Optional[float]] — Branch A seed-derived spiral position
     get_permanent_mra_context: Callable                  # (db, user_id, presence, current_message=None) → awaitable[str]
     get_session_cache_context: Callable                  # (session_id) → str
     activate_codons_for_message: Callable                # (message, presence) → awaitable[str] — legacy / diagnostic
@@ -453,6 +454,14 @@ def register_presence_routes(
         # (keyword-first ranked selection, capped) rather than the whole
         # field. The placement fader decides *where* that field sits in the call.
         codon_context, codon_selection = await deps.get_full_field_context(presence=cfg.key, message=content_for_model, return_selection=True)
+        if isinstance(codon_selection, dict):
+            try:
+                from living_codons.phase_manifold import get_triadic_zone
+                _sp = await deps.read_spiral_position_angle(cfg.key)
+                codon_selection["spiral_position"] = _sp
+                codon_selection["spiral_zone"] = get_triadic_zone(_sp) if _sp is not None else None
+            except Exception as _spe:
+                logger.warning(f"[{cfg.key}] spiral position read skip: {_spe}")
         if cfg.codon_placement == "system" and codon_context:
             # Background: the field rides in her standing identity, not against
             # the message. The model's own re-tokenization carries it forward;

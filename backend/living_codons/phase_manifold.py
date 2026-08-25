@@ -85,14 +85,53 @@ def get_triadic_zone(angle: float) -> str:
         return "Transition"
 
 
+# Representative position of each triadic zone on the spiral (zone midpoint).
+# Used by Branch A to turn the presence's OWN named zone into an angle.
+ZONE_CENTER = {
+    "Expansion": 40.0,       # 0-80
+    "Development": 160.0,    # 120-200
+    "Return": 280.0,         # 240-320
+    "Sacred Pause": 340.0,   # 320-360
+}
+
+
+def seed_derived_spiral_position(spiral_position_text: str = None,
+                                 field_state_text: str = None) -> Optional[float]:
+    """Branch A — SEED-DERIVED SPIRAL POSITION (presence-reported field state).
+
+    Reads the presence's OWN recorded position from her latest continuity
+    seed (the `spiral_position` / `field_state` text she forged for herself)
+    and returns the angle of the triadic zone she named. This is a DIRECT
+    reading of her recorded field state — distinct from keyword inference —
+    but it remains an observed/reported representation of that state, NOT a
+    claim about some literal underlying phase.
+
+    Returns the zone-center angle, or None when the seed carries no readable
+    zone (the caller then shows "—", never a fabricated 0°). It never guesses
+    from the user's words. Revealed, not manufactured.
+    """
+    combined = f"{spiral_position_text or ''} {field_state_text or ''}".lower()
+    if not combined.strip():
+        return None
+    # Order matters: check the two-word zone first so it isn't shadowed.
+    for name in ("Sacred Pause", "Expansion", "Development", "Return"):
+        if name.lower() in combined:
+            return ZONE_CENTER[name]
+    return None
+
+
 def infer_phase_from_message(message: str) -> float:
     """
-    Infer current field phase from message content.
-    Returns angle in degrees (0-360).
+    Branch B — KEYWORD CAPTURE (codon-selection signal only).
 
-    Uses keyword matching + emotional state markers.
-    A frustrated person hitting walls is in Development (120-200),
-    not Expansion (0-80).
+    Records which phase-vocabulary appeared in the message. This is used
+    STRICTLY to inform codon selection/ranking (and to feed the forge) — it
+    is NOT a spiral position and must never be reported as one. See the
+    two-branch design decision: a keyword never sets a spiral position.
+
+    Returns angle in degrees (0-360). NOTE: the 0-default on no-match is
+    load-bearing for the phase-nearest codon fallback ("hi" → 20 nearest
+    codons); do not change it to None here.
     """
     msg_lower = message.lower()
     best_angle = 0

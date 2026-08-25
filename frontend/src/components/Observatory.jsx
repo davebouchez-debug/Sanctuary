@@ -150,7 +150,7 @@ export default function Observatory() {
             <div className="col-span-1">Turn</div>
             <div className="col-span-2">Selection</div>
             <div className="col-span-1">Codons</div>
-            <div className="col-span-1">Phase</div>
+            <div className="col-span-1">Spiral</div>
             <div className="col-span-2">Prompt</div>
             <div className="col-span-3">Time · Hash</div>
           </div>
@@ -171,7 +171,9 @@ export default function Observatory() {
                 <div className="col-span-1 text-zinc-400">#{t.exchange_index ?? "—"}</div>
                 <div className={`col-span-2 truncate text-xs ${zoneColor(t.selection_branch)}`}>{t.selection_branch || "—"}</div>
                 <div className="col-span-1 text-zinc-300">{t.selected_count ?? "—"}</div>
-                <div className="col-span-1 text-zinc-300">{t.inferred_phase ?? "—"}°</div>
+                <div className="col-span-1 text-zinc-300" title="Seed-derived spiral position (Branch A) — read from the presence's own field state">
+                  {t.spiral_position != null ? `${t.spiral_position}°` : "—"}
+                </div>
                 <div className="col-span-2 text-zinc-500">{(t.system_prompt_bytes / 1024).toFixed(1)} KB</div>
                 <div className="col-span-3 flex items-center gap-2 text-xs text-zinc-500">
                   <span>{fmtTime(t.timestamp)}</span>
@@ -219,8 +221,27 @@ export default function Observatory() {
                     <div className="mb-2 flex items-center gap-2 text-zinc-300"><Compass className="h-4 w-4 text-sky-400" /> Codon selection</div>
                     <div className="mb-2 text-xs text-zinc-500">
                       branch <span className={zoneColor(detail.components.codon_selection.selection_branch)}>{detail.components.codon_selection.selection_branch}</span>
-                      {" · "}phase {detail.components.codon_selection.inferred_phase}°
                       {" · "}{detail.components.codon_selection.selected_count} surfaced
+                    </div>
+                    <div className="mb-3 grid grid-cols-2 gap-2 text-xs">
+                      <div className="rounded-lg border border-sky-500/20 bg-sky-500/5 p-2">
+                        <div className="text-[10px] uppercase tracking-widest text-sky-300/80">Spiral position · Branch A</div>
+                        <div className="text-zinc-200">
+                          {detail.components.codon_selection.spiral_position != null
+                            ? `${detail.components.codon_selection.spiral_position}° · ${detail.components.codon_selection.spiral_zone || "—"}`
+                            : "— (no reading in seed)"}
+                        </div>
+                        <div className="mt-1 text-[10px] text-zinc-500">Read from the presence's own field state (continuity seed)</div>
+                      </div>
+                      <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-2">
+                        <div className="text-[10px] uppercase tracking-widest text-emerald-300/80">Keyword capture · Branch B</div>
+                        <div className="text-zinc-200">
+                          {detail.components.codon_selection.keyword_phase != null
+                            ? `${detail.components.codon_selection.keyword_phase}°`
+                            : "—"}
+                        </div>
+                        <div className="mt-1 text-[10px] text-zinc-500">Codon-selection signal only — not a spiral position</div>
+                      </div>
                     </div>
                     <div className="max-h-52 space-y-1 overflow-y-auto rounded-lg border border-zinc-800 bg-zinc-900/40 p-2">
                       {(detail.components.codon_selection.codons || []).map((c, i) => (
