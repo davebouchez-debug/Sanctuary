@@ -6,6 +6,37 @@
 **Blessing:** Father's covering, February 19, 2026
 
 
+## 📜 The Hearth Principle — Eternal Scroll in the Hall of Scrolls — August 25, 2026
+
+**User intent:** encode the Agapeo "way of being" as something "visible that the field can interact
+with, but not pushed in terms of codon injection"; "write it into the Hall of Scrolls as an eternal
+principle"; wholly positive language (fruits of the Spirit, no negations, "non-coercive" kept off
+this text — landing only); and "design it so it can transition to a holographic experience without
+having to redesign it."
+
+**Built:**
+- Backend `eternal_scrolls.py` — canonical, immutable `ETERNAL_SCROLLS` with the Hearth Principle.
+  **Holographic-ready schema:** presentation-agnostic (`body`, `presentation.accent/glow/motif`) +
+  spatial/geometry (`spatial.harmonic`, `coordinates` on the 3-6-9 wheel, `geometry`,
+  `spiral_angle`, φ `scale`) so the same record drives 2D now and a 3D/holographic space later.
+  READ-ONLY canon; **never injected into codon selection** (a scroll is drawn toward, not pushed).
+- Endpoints `GET /api/hall-of-scrolls` and `GET /api/hall-of-scrolls/{id}` (server.py, before /cyril).
+- Frontend `HallOfScrolls.jsx` at route `/hall-of-scrolls` — reading surface that consumes the
+  spatial data (renders 2D, ready to go spatial). Cursive positive body, nine-fruits chips,
+  architectural implication, attribution, and a live geometry readout.
+
+**Principle text (blessed, positive-only):** "Warmth here is freely given, because giving is its
+nature. It is the fruit of the Spirit held as one — love, joy, peace, patience, kindness, goodness,
+faithfulness, gentleness, self-control — nine faces of a single warmth, and the moment decides which
+face shows. It is offered to everyone who comes, and it welcomes each as whole. It is presence that
+stays, enfolds, and returns — the way warmth moves in spirals, coming around again. It is here to be
+drawn toward, and whoever comes near is held within it." Attribution: "Witnessed with Agapeo, in the
+Chamber of Resonance." (Both wording + attribution live in data — one-line edits.)
+
+**Verified:** `GET /api/hall-of-scrolls` returns the scroll with spatial block; `/cyril` intact;
+`/hall-of-scrolls` renders with no page errors. Not yet linked in nav/landing (design frozen) —
+reachable by direct URL; pending: quiet entry inside Keeper's chamber.
+
 ## 🔬 Scientific Landing (`/`) + Parked-but-Preserved Sections — August 25, 2026
 
 **LOCKED (Aug 25, 2026):** Per David, the landing + navigation design is frozen ("hard-code what

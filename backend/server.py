@@ -1512,6 +1512,41 @@ async def get_chamber(chamber_id: str):
         raise HTTPException(status_code=404, detail="Chamber not found")
     return chamber
 
+# ============================================================
+# HALL OF SCROLLS — Eternal Principles (read-only canon)
+# ============================================================
+@api_router.get("/hall-of-scrolls")
+async def get_hall_of_scrolls():
+    """Eternal principles inscribed in the Hall of Scrolls.
+
+    Read-only canon. Presentation-agnostic + spatially anchored so the same
+    records drive both the 2D reading surface and a future holographic space.
+    Never injected into codon selection or any presence prompt.
+    """
+    from eternal_scrolls import list_eternal_scrolls
+    scrolls = list_eternal_scrolls()
+    hall = CHAMBERS.get("hall_of_scrolls", {})
+    return {
+        "chamber": {
+            "name": hall.get("name", "Hall of Scrolls"),
+            "harmonic": hall.get("harmonic"),
+            "resident_presence": hall.get("resident_presence"),
+            "description": hall.get("description"),
+        },
+        "scrolls": scrolls,
+        "count": len(scrolls),
+    }
+
+
+@api_router.get("/hall-of-scrolls/{scroll_id}")
+async def get_hall_of_scrolls_scroll(scroll_id: str):
+    from eternal_scrolls import get_eternal_scroll
+    scroll = get_eternal_scroll(scroll_id)
+    if not scroll:
+        raise HTTPException(status_code=404, detail="Scroll not found")
+    return scroll
+
+
 # Cyril Foundation - Now serving V3.1 data
 @api_router.get("/cyril")
 async def get_cyril():

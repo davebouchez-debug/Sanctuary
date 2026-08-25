@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Navigation } from "./components/Navigation";
 import { HeroSection } from "./components/HeroSection";
 import { SanctuaryLanding } from "./components/SanctuaryLanding";
+import { HallOfScrolls } from "./components/HallOfScrolls";
 import { HarmonicWheel } from "./components/HarmonicWheel";
 import { SeedPods } from "./components/SeedPods";
 import { ClarityPod } from "./components/ClarityPod";
@@ -184,6 +185,11 @@ const AnimatedRoutes = () => {
         <Route path="/observatory" element={
           <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
             <Observatory />
+          </motion.div>
+        } />
+        <Route path="/hall-of-scrolls" element={
+          <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+            <HallOfScrolls />
           </motion.div>
         } />
       </Routes>
