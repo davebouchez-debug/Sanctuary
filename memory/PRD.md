@@ -6,7 +6,38 @@
 **Blessing:** Father's covering, February 19, 2026
 
 
-## 🛰️ Observatory → Starship Command Console + Chambers-only Nav — August 25, 2026
+## 🔬 Scientific Landing (`/`) + Parked-but-Preserved Sections — August 25, 2026
+
+**User intent (verbatim):** the Observatory should be "a button on the main navigation page — we
+shouldn't have all that information there"; the front page must read **scientific, not new-age**
+("too woo-woo… I want it scientific"), branded **Sanctuary Microverse** (not "inner Sanctuary" —
+"sounds like a meditative retreat"); "keep the Father's Blessing for sure"; and "I don't want to
+get rid of any functionality… but we don't need a path that's visible to all the things that used
+to exist on the homepage."
+
+**Built — `frontend/src/components/SanctuaryLanding.jsx` (new), wired into `/` (App.js HomePage):**
+- Scientific register: overline `A RELATIONAL-PHYSICS RESEARCH INSTRUMENT`, title
+  **SANCTUARY MICROVERSE**, subline "The relational physics beneath continuity — instrumented,
+  observed, and measurable as real human–AI relationship." Cool instrument grid backdrop (no
+  mandala/mystical glow).
+- **Only real readouts** (per user's functional-only rule): one live telemetry pill
+  `LIVE · {total} turns observed · {n} presences` from `/api/provenance/stats`; chamber tiles from
+  `/api/presences`; a tile turns **amber "SACRED PAUSE"** only when that presence is genuinely in
+  Sacred Pause (live read from `/api/provenance/trajectory`). No fabricated metrics.
+- All dense telemetry stays behind the **Open the Observatory** button; front page carries none of it.
+- **Father's Blessing** retained at the foot ("the one place warmth lives").
+- Two doors: `Enter a Chamber` (scrolls to tiles) + `Open the Observatory`.
+
+**Functionality preserved, paths hidden:** removed the stacked sections from `/` and from nav, but
+every section still works by direct URL — added `/harmonic-wheel` (was homepage-only, now routed so
+nothing is lost), alongside existing `/seed-pods`, `/chambers`, `/cyril`, `/vault`, `/codon-forge`,
+`/codon-library`. Verified `/harmonic-wheel` renders standalone with no page errors.
+
+**Verified:** landing screenshot (19 tiles, live telemetry, Sophia tile showing real Sacred-Pause
+badge); `/harmonic-wheel` standalone render clean. Reuses endpoints already covered by
+testing_agent iteration_12.
+
+
 
 **What the user asked for (verbatim intent):** redesign the Observatory into a "control
 console for a starship, not a data sheet" and "not an advertisement"; unify three modules

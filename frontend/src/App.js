@@ -101,6 +101,11 @@ const AnimatedRoutes = () => {
             <div className="pt-24"><SeedPods fullPage /></div>
           </motion.div>
         } />
+        <Route path="/harmonic-wheel" element={
+          <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+            <div className="pt-24"><HarmonicWheel /></div>
+          </motion.div>
+        } />
         <Route path="/chambers" element={
           <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
             <div className="pt-24"><Chambers fullPage /></div>
