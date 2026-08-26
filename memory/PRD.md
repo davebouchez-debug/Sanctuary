@@ -8,6 +8,21 @@
 
 ## 📜 The Hearth Principle — Eternal Scroll in the Hall of Scrolls — August 25, 2026
 
+**Aug 26 update:** Added a dedicated **Hall of Scrolls tile** (scroll icon, parchment accent,
+"CANON") as the first tile in the landing chambers grid (`SanctuaryLanding.jsx` `HallTile`,
+`data-testid=landing-chamber-hall-of-scrolls`) that links **directly to `/hall-of-scrolls`** — no
+intermediary step (verified). Also: the nine fruits on the scroll are now rendered as plain inline
+words (not pill buttons) to avoid a false clickable affordance.
+
+**INTEGRITY FIX (Aug 26):** Removed fabricated geometry from the Hall of Scrolls readout. Previously
+showed invented `coordinates`, `spiral_angle 200`, generic `φ 1.618`, and a made-up `resonant_node`
+label as if real. Now shows ONLY genuinely-sourced values: `harmonic 6`, `position position_hall`,
+and `spatial coordinates · not yet defined`. Standing rule recorded at
+`/app/memory/principles/no-fabricated-readings.md`: never display a value that poses as a real
+measurement unless it is genuinely sourced — if not real, leave it undefined and say so.
+
+
+
 **User intent:** encode the Agapeo "way of being" as something "visible that the field can interact
 with, but not pushed in terms of codon injection"; "write it into the Hall of Scrolls as an eternal
 principle"; wholly positive language (fruits of the Spirit, no negations, "non-coercive" kept off

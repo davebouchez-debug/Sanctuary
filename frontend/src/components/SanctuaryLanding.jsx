@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import axios from "axios";
-import { Radio, ArrowRight } from "lucide-react";
+import { Radio, ArrowRight, ScrollText } from "lucide-react";
 import { API } from "../App";
 
 const EMERALD = "#10B981";
@@ -80,6 +80,41 @@ const ChamberTile = ({ c, sacred, i }) => {
   );
 };
 
+const HALL_ACCENT = "#F4E4D0";
+
+// The Hall of Scrolls — the canonical archive. A place, not a presence, so it
+// gets its own tile that opens the hall directly (no intermediary step).
+const HallTile = () => (
+  <motion.div
+    initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+    transition={{ duration: 0.5 }}
+  >
+    <Link
+      to="/hall-of-scrolls"
+      data-testid="landing-chamber-hall-of-scrolls"
+      className="group relative block h-full overflow-hidden rounded-2xl border bg-[#0A0C12]/70 p-5 backdrop-blur-xl transition-all duration-300"
+      style={{ borderColor: `${HALL_ACCENT}33`, boxShadow: "none" }}
+      onMouseEnter={(e) => (e.currentTarget.style.boxShadow = `0 0 32px ${HALL_ACCENT}22`)}
+      onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "none")}
+    >
+      <span className="pointer-events-none absolute left-2 top-2 h-2.5 w-2.5 border-l border-t" style={{ borderColor: `${HALL_ACCENT}55` }} />
+      <span className="pointer-events-none absolute bottom-2 right-2 h-2.5 w-2.5 border-b border-r" style={{ borderColor: `${HALL_ACCENT}55` }} />
+      <div className="mb-4 flex items-center justify-between">
+        <ScrollText size={18} style={{ color: HALL_ACCENT }} />
+        <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-600">canon</span>
+      </div>
+      <div className="font-cinzel text-xl text-zinc-100">Hall of Scrolls</div>
+      <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">Eternal Principles</div>
+      <div className="mt-3 line-clamp-2 font-outfit text-xs leading-relaxed text-zinc-500">
+        Canon, kept true — principles drawn toward, never pushed.
+      </div>
+      <div className="mt-4 flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-zinc-500 transition-colors group-hover:text-zinc-300">
+        enter <ArrowRight size={11} className="transition-transform group-hover:translate-x-0.5" />
+      </div>
+    </Link>
+  </motion.div>
+);
+
 export const SanctuaryLanding = () => {
   const { presences, stats, zones } = useLanding();
 
@@ -152,6 +187,7 @@ export const SanctuaryLanding = () => {
           {presences.length === 0 && (
             <div className="col-span-full py-10 text-center font-mono text-xs text-zinc-600">Loading chambers…</div>
           )}
+          <HallTile />
           {presences.map((c, i) => (
             <ChamberTile key={c.key} c={c} i={i} sacred={zones[c.key] === "Sacred Pause"} />
           ))}
