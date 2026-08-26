@@ -1,39 +1,26 @@
 """
 Eternal Scrolls — canonical principles inscribed in the Hall of Scrolls.
 
-DESIGN NOTE (holographic-ready): every scroll is stored as PRESENTATION-AGNOSTIC
-data that carries its own spatial + geometry metadata. The same record drives
-today's 2D reading surface AND a future 3D / holographic space — no schema
-redesign is needed to go spatial. Sanctuary is already geometric (3-6-9 harmonics,
-spiral angles, phi), so each scroll knows where it lives on the wheel and how it
-should be lit.
+INTEGRITY RULE (non-negotiable): every value shown must be genuinely sourced.
+Nothing here may display a fabricated number that poses as a real measurement.
+If a value is not truly derived from the field, it is not shown — it is left
+explicitly undefined. (See /app/memory/principles/no-fabricated-readings.md)
+
+DESIGN NOTE (holographic-ready): scrolls are stored PRESENTATION-AGNOSTIC with a
+geometry slot. That slot carries only what is REAL today (the chamber's harmonic
+and position label). Cartesian coordinates are intentionally left undefined until
+a real wheel coordinate system exists — at which point they become true, not
+decorative.
 
 CANON: these records are eternal (immutable in code) and READ-ONLY. They are
 NEVER injected into codon selection or any presence prompt. A scroll is drawn
-toward, not pushed — the mechanism embodies the Hearth Principle itself.
+toward, not pushed.
 """
-
-import math
-
-PHI = (1 + 5 ** 0.5) / 2
 
 FRUITS = [
     "love", "joy", "peace", "patience", "kindness",
     "goodness", "faithfulness", "gentleness", "self-control",
 ]
-
-# 3-6-9 harmonic anchor angles on the wheel (degrees), used to place a scroll
-# in space. Radius scaled by phi so a holographic renderer inherits the geometry.
-_HARMONIC_ANGLE = {3: 90.0, 6: 210.0, 9: 330.0}
-
-
-def _wheel_point(harmonic: int, radius: float = 6.0):
-    ang = math.radians(_HARMONIC_ANGLE.get(harmonic, 210.0))
-    return {
-        "x": round(radius * math.cos(ang), 4),
-        "y": round(radius * math.sin(ang), 4),
-        "z": 0.0,
-    }
 
 
 ETERNAL_SCROLLS = [
@@ -69,15 +56,12 @@ ETERNAL_SCROLLS = [
             "glow": "#D98E5A",
             "motif": "steady-hearth-glow",
         },
-        # spatial + geometry so the scroll can live in a holographic space as-is
+        # geometry — ONLY genuinely-sourced values. Coordinates await a real
+        # wheel coordinate system; until then they are honestly undefined.
         "spatial": {
-            "harmonic": 6,
-            "position_key": "position_hall",
-            "geometry": "resonant_node",
-            "spiral_angle": 200.0,
-            "coordinates": _wheel_point(6),
-            "scale": round(PHI, 4),
-            "resonance_origin": "Chamber of Resonance",
+            "harmonic": 6,                 # real — Hall of Scrolls chamber harmonic
+            "position": "position_hall",   # real — chamber position label
+            "coordinates": None,           # undefined until a real coordinate system exists
         },
     },
 ]

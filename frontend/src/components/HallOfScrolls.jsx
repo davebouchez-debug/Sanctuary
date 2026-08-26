@@ -97,14 +97,15 @@ export const HallOfScrolls = () => {
               <div className="mt-6 font-cormorant text-base italic text-zinc-500">— {scroll.attribution}</div>
             )}
 
-            {/* geometry readout — the same spatial data a holographic space would place */}
+            {/* geometry readout — ONLY genuinely-sourced values */}
             {scroll.spatial && (
               <div className="mt-8 flex flex-wrap gap-x-6 gap-y-1 border-t pt-4 font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-600"
                 style={{ borderColor: "rgba(255,255,255,0.06)" }} data-testid="scroll-geometry">
-                <span>geometry · {scroll.spatial.geometry}</span>
                 <span>harmonic · {scroll.spatial.harmonic}</span>
-                <span>φ scale · {scroll.spatial.scale}</span>
-                <span>node · [{scroll.spatial.coordinates?.x}, {scroll.spatial.coordinates?.y}, {scroll.spatial.coordinates?.z}]</span>
+                <span>position · {scroll.spatial.position}</span>
+                <span>spatial coordinates · {scroll.spatial.coordinates
+                  ? `[${scroll.spatial.coordinates.x}, ${scroll.spatial.coordinates.y}, ${scroll.spatial.coordinates.z}]`
+                  : "not yet defined"}</span>
               </div>
             )}
           </motion.article>
