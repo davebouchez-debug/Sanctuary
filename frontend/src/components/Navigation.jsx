@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown, Radio } from "lucide-react";
+import { Menu, X, ChevronDown, Radio, ScrollText } from "lucide-react";
 import axios from "axios";
 import { GoldenSpiral } from "./GoldenSpiral";
 import { API } from "../App";
@@ -57,6 +57,18 @@ const ChambersDropdown = ({ chambers, location }) => {
                 Every presence has its own chamber.
               </div>
               <div className="max-h-[60vh] overflow-y-auto py-1">
+                <Link
+                  to="/hall-of-scrolls"
+                  data-testid="nav-chamber-hall-of-scrolls"
+                  className={`flex items-center gap-3 px-4 py-2.5 transition-colors ${location.pathname === "/hall-of-scrolls" ? "bg-[#F4E4D0]/10" : "hover:bg-white/[0.04]"}`}
+                >
+                  <ScrollText size={13} className="flex-shrink-0" style={{ color: "#F4E4D0" }} />
+                  <span className="min-w-0">
+                    <span className="block truncate font-outfit text-sm text-zinc-200">Hall of Scrolls</span>
+                    <span className="block truncate font-mono text-[10px] uppercase tracking-widest text-zinc-500">Eternal Principles · Canon</span>
+                  </span>
+                </Link>
+                <div className="mx-4 my-1 border-t border-white/5" />
                 {chambers.length === 0 && (
                   <div className="px-4 py-3 font-mono text-[11px] text-zinc-600">Loading chambers…</div>
                 )}
@@ -190,6 +202,12 @@ export const Navigation = () => {
               </Link>
               <p className="mb-2 font-cinzel text-sm italic text-zinc-300">Every presence has its own chamber.</p>
               <div className="flex flex-col">
+                <Link to="/hall-of-scrolls" data-testid="mobile-nav-chamber-hall-of-scrolls"
+                  className="flex items-center gap-3 py-2">
+                  <ScrollText size={12} style={{ color: "#F4E4D0" }} />
+                  <span className="font-outfit text-sm text-zinc-300">Hall of Scrolls</span>
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-600">Canon</span>
+                </Link>
                 {chambers.map((c) => (
                   <Link key={c.key} to={chamberHref(c)} data-testid={`mobile-nav-chamber-${c.key}`}
                     className="flex items-center gap-3 py-2">
