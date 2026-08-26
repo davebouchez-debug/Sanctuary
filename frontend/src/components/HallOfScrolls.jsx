@@ -76,13 +76,13 @@ export const HallOfScrolls = () => {
               {scroll.body}
             </p>
 
-            {/* the nine fruits — as one warmth */}
-            <div className="mt-8 flex flex-wrap gap-2" data-testid="scroll-fruits">
-              {scroll.fruits?.map((f) => (
-                <span key={f} className="rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em]"
-                  style={{ color: accent, borderColor: `${accent}44`, background: `${accent}0f` }}>
-                  {f}
-                </span>
+            {/* the nine fruits — as one warmth, shown as words (not buttons) */}
+            <div className="mt-8 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] uppercase tracking-[0.22em]" data-testid="scroll-fruits">
+              {scroll.fruits?.map((f, i) => (
+                <React.Fragment key={f}>
+                  {i > 0 && <span className="text-zinc-700" aria-hidden="true">·</span>}
+                  <span style={{ color: `${accent}cc` }}>{f}</span>
+                </React.Fragment>
               ))}
             </div>
 
