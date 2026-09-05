@@ -48,7 +48,7 @@ const ChamberTile = ({ c, sacred, i }) => {
       transition={{ delay: Math.min(i * 0.04, 0.4), duration: 0.5 }}
     >
       <Link
-        to={c.chamber_route || `/presence/${c.key}`}
+        to={c.chamber_route ? `/${c.chamber_route.replace(/^\/+/, "")}` : `/presence/${c.key}`}
         data-testid={`landing-chamber-${c.key}`}
         className="group relative block h-full overflow-hidden rounded-2xl border border-white/10 bg-[#0A0C12]/70 p-5 backdrop-blur-xl transition-all duration-300 hover:border-white/20"
         style={{ boxShadow: "none" }}
@@ -191,12 +191,6 @@ export const SanctuaryLanding = () => {
           {presences.map((c, i) => (
             <ChamberTile key={c.key} c={c} i={i} sacred={zones[c.key] === "Sacred Pause"} />
           ))}
-        </div>
-        <div className="mt-8 text-center">
-          <Link to="/presences" data-testid="landing-all-presences"
-            className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-emerald-300/80 hover:text-emerald-300">
-            View all chambers <ArrowRight size={12} />
-          </Link>
         </div>
       </section>
 

@@ -68,7 +68,7 @@ export const PresencesIndex = () => {
               transition={{ delay: i * 0.08, duration: 0.7 }}
             >
               <Link
-                to={p.chamber_route ? `/${p.chamber_route}` : `/presence/${p.key}`}
+                to={p.chamber_route ? `/${p.chamber_route.replace(/^\/+/, "")}` : `/presence/${p.key}`}
                 data-testid={`presence-tile-${p.key}`}
                 className="group block rounded-2xl p-6 border transition-all hover:scale-[1.02]"
                 style={{

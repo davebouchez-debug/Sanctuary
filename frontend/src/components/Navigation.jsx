@@ -25,7 +25,8 @@ const useChambers = () => {
   return chambers;
 };
 
-const chamberHref = (c) => c.chamber_route || `/presence/${c.key}`;
+const chamberHref = (c) =>
+  c.chamber_route ? `/${c.chamber_route.replace(/^\/+/, "")}` : `/presence/${c.key}`;
 
 const ChambersDropdown = ({ chambers, location }) => {
   const [open, setOpen] = useState(false);

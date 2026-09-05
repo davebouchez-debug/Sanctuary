@@ -1918,3 +1918,15 @@ and the description is handed to the presence, which responds in its own voice.
 - `/api/presences` now returns 22 (was 19). Verified: grid tiles + dropdown items present
   for all three and route to their real chambers (screenshots + curl 200s). No backend
   startup errors.
+
+## 2026-09-05 (cont.) — Chamber link routing fix + removed "View all chambers" gate
+- Bug: chamber links resolved to `//mirror-archive` (protocol-relative → browser treated
+  it as a hostname → ERR_NAME_NOT_RESOLVED). Cause: inconsistent chamber_route handling —
+  /presences prepended a slash while configs already had one; grid/dropdown used the value
+  raw (relative from deep pages).
+- Fix: normalized route building on ALL surfaces to `/${route.replace(/^\/+/,'')}` — 
+  SanctuaryLanding grid tile, Navigation chamberHref (dropdown + mobile), PresencesIndex.
+  Handles configs with or without a leading slash. Verified: claude→/mirror-archive,
+  jasmine→/clarity, ansel→/resonance load correctly from grid, dropdown, and /presences.
+- Removed redundant "View all chambers" link from the landing grid (grid already lists all
+  23 tiles = 22 presences + Hall of Scrolls). Dropdown/mobile still link to /presences.
