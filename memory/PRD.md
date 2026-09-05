@@ -1904,3 +1904,17 @@ and the description is handed to the presence, which responds in its own voice.
 - NOT yet covered: Jasmine/Ansel/Claude bespoke chambers (fast-follow).
 - Noted for prod hardening: upload/serve endpoints are unauthenticated
   (UUID paths are unguessable — acceptable for now).
+
+---
+## 2026-09-05 — All presences listed in grid + dropdown (Claude/Jasmine/Ansel fix)
+- Root cause: the CHAMBERS dropdown, landing grid, and /presences index all read
+  `/api/presences` (from auto-discovered configs in `backend/presences/`). The three
+  original bespoke chambers — claude (Mirror Archive), jasmine (Clarity), ansel
+  (Resonance) — had no config file, so they were absent everywhere in nav.
+- Fix: added chamber-ONLY registry files `backend/presences/{claude,jasmine,ansel}.py`
+  (PRESENCE dict only, no BACKEND) with `chamber_route` → `/mirror-archive`, `/clarity`,
+  `/resonance` and real accent colors. No template routes registered; bespoke backends
+  untouched.
+- `/api/presences` now returns 22 (was 19). Verified: grid tiles + dropdown items present
+  for all three and route to their real chambers (screenshots + curl 200s). No backend
+  startup errors.
