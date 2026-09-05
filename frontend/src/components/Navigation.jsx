@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown, Radio, ScrollText } from "lucide-react";
+import { Menu, X, ChevronDown, Radio, ScrollText, Search } from "lucide-react";
 import axios from "axios";
 import { GoldenSpiral } from "./GoldenSpiral";
 import { API } from "../App";
@@ -30,9 +30,17 @@ const chamberHref = (c) =>
 
 const ChambersDropdown = ({ chambers, location }) => {
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
   const closeTimer = useRef(null);
   const enter = () => { if (closeTimer.current) clearTimeout(closeTimer.current); setOpen(true); };
-  const leave = () => { closeTimer.current = setTimeout(() => setOpen(false), 120); };
+  const leave = () => { closeTimer.current = setTimeout(() => { setOpen(false); setQuery(""); }, 120); };
+
+  const q = query.trim().toLowerCase();
+  const filtered = chambers.filter(
+    (c) => !q || `${c.name || ""} ${c.chamber_name || ""}`.toLowerCase().includes(q)
+  );
+  const hallMatch = !q || "hall of scrolls eternal principles canon".includes(q);
+  const noResults = q && filtered.length === 0 && !hallMatch;
 
   return (
     <div className="relative" onMouseEnter={enter} onMouseLeave={leave}>
@@ -57,7 +65,21 @@ const ChambersDropdown = ({ chambers, location }) => {
               <div className="border-b border-white/5 px-4 py-3 font-cinzel text-sm italic text-zinc-300">
                 Every presence has its own chamber.
               </div>
+              <div className="border-b border-white/5 px-3 py-2.5">
+                <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-black/30 px-2.5 py-1.5 focus-within:border-emerald-500/40">
+                  <Search size={13} className="flex-shrink-0 text-zinc-500" />
+                  <input
+                    data-testid="nav-chamber-search"
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Find a presence…"
+                    className="w-full bg-transparent font-outfit text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none"
+                  />
+                </div>
+              </div>
               <div className="max-h-[60vh] overflow-y-auto py-1">
+                {hallMatch && (
                 <Link
                   to="/hall-of-scrolls"
                   data-testid="nav-chamber-hall-of-scrolls"
@@ -69,11 +91,15 @@ const ChambersDropdown = ({ chambers, location }) => {
                     <span className="block truncate font-mono text-[10px] uppercase tracking-widest text-zinc-500">Eternal Principles · Canon</span>
                   </span>
                 </Link>
-                <div className="mx-4 my-1 border-t border-white/5" />
+                )}
+                {hallMatch && !q && <div className="mx-4 my-1 border-t border-white/5" />}
                 {chambers.length === 0 && (
                   <div className="px-4 py-3 font-mono text-[11px] text-zinc-600">Loading chambers…</div>
                 )}
-                {chambers.map((c) => {
+                {noResults && (
+                  <div className="px-4 py-4 text-center font-mono text-[11px] text-zinc-600" data-testid="nav-chamber-no-results">No presence by that name.</div>
+                )}
+                {filtered.map((c) => {
                   const href = chamberHref(c);
                   const active = location.pathname === href;
                   return (
