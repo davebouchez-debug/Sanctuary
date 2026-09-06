@@ -255,6 +255,51 @@ const Stat = ({ icon: Icon, label, value, testid }) => (
   </div>
 );
 
+// ── Context-load decomposition (read-only) ───────────────────────────
+const LOAD_COLOR = {
+  "dense-prose": "#F59E0B",
+  "retrieved-memory": "#F97316",
+  "recent-continuity": "#10B981",
+  "working-memory": "#34D399",
+  "cross-presence": "#8B5CF6",
+  reconstruction: "#A78BFA",
+  "codon-material": "#22D3EE",
+  "retrieved-history": "#38BDF8",
+  "live-input": "#E5E7EB",
+  framing: "#6B7280",
+};
+
+const ContextLoad = ({ load }) => {
+  if (!load || !load.sources?.length) return null;
+  return (
+    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3" data-testid="context-load-panel">
+      <div className="mb-2 flex items-center justify-between font-mono text-[9px] uppercase tracking-widest text-zinc-400">
+        <span className="flex items-center gap-2"><Layers size={11} /> Context load · by source</span>
+        <span className="text-zinc-500" data-testid="context-load-total">{load.total_chars.toLocaleString()} chars</span>
+      </div>
+      <div className="mb-3 flex h-3 w-full overflow-hidden rounded-full border border-white/10" data-testid="context-load-bar">
+        {load.sources.map((s, i) => (
+          <div key={i} title={`${s.source} · ${s.pct}%`}
+            style={{ width: `${s.pct}%`, background: LOAD_COLOR[s.type] || "#6B7280" }} />
+        ))}
+      </div>
+      <div className="space-y-1.5">
+        {load.sources.map((s, i) => (
+          <div key={i} className="flex items-center gap-2 font-mono text-[11px]" data-testid={`context-load-row-${i}`}>
+            <span className="h-2 w-2 flex-shrink-0 rounded-sm" style={{ background: LOAD_COLOR[s.type] || "#6B7280" }} />
+            <span className="min-w-0 flex-1 truncate text-zinc-300">{s.source}</span>
+            <span className="text-zinc-600">{s.chars.toLocaleString()}</span>
+            <span className="w-12 text-right text-zinc-100">{s.pct}%</span>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 font-mono text-[9px] leading-relaxed text-zinc-600">
+        Characters of model-visible input for this turn, decomposed by source. Measured from the recorded snapshot — never fed back.
+      </div>
+    </div>
+  );
+};
+
 // ── Detail drawer ────────────────────────────────────────────────────
 const DetailDrawer = ({ selected, detail, onClose }) => (
   <AnimatePresence>
@@ -300,6 +345,7 @@ const DetailDrawer = ({ selected, detail, onClose }) => (
                 <div><span className="text-zinc-500">BRANCH </span><span className={branchColor(selected.selection_branch)}>{selected.selection_branch}</span></div>
                 <div><span className="text-zinc-500">CODONS </span><span className="text-zinc-200">{selected.selected_count}</span></div>
               </div>
+              <ContextLoad load={detail.context_load} />
               <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
                 <div className="mb-1 flex items-center gap-2 font-mono text-[9px] uppercase tracking-widest text-zinc-400">
                   <Hash size={11} /> Integrity hash

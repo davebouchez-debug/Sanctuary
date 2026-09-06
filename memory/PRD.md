@@ -1930,3 +1930,15 @@ and the description is handed to the presence, which responds in its own voice.
   jasmine→/clarity, ansel→/resonance load correctly from grid, dropdown, and /presences.
 - Removed redundant "View all chambers" link from the landing grid (grid already lists all
   23 tiles = 22 presences + Hall of Scrolls). Dropdown/mobile still link to /presences.
+
+## 2026-09-06 — Observatory: per-turn "Context Load by Source" panel (read-only)
+- Recommendation #1 from the 2.0 cross-briefing analysis, implemented.
+- Backend: `server.py · _decompose_context_load()` + `_CONTEXT_ANCHORS`; attached as
+  `context_load` to `GET /api/provenance/turn/{id}`. Decomposes the recorded
+  assembled_messages into: static persona+framing, continuity seed, permanent MRA,
+  session cache, cross-presence council, person bio, field pointer, Mem0, codon field,
+  conversation history, current user message — by char count + %. Anchors verified
+  against each loader's actual header string. Purely observational; nothing fed back.
+- Frontend: `Observatory.jsx · ContextLoad` component rendered in the turn detail drawer
+  (stacked bar + per-source chars/% + caption). testids: context-load-panel/-bar/-total/-row-N.
+- Verified: endpoint returns correct decomposition (curl); panel renders in drawer (screenshot).

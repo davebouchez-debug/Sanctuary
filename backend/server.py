@@ -5215,12 +5215,86 @@ async def provenance_turns(presence: str = None, session_id: str = None, limit: 
     return {"turns": [_prov_summary(d) for d in docs]}
 
 
+# Section anchors as emitted by each context loader. Ordered as they appear in
+# the assembled memory_context (continuity → permanent → cache → council → bio →
+# mem0). Verified against the source modules. Used only to decompose an already-
+# captured snapshot for display — never to build or alter a prompt.
+_CONTEXT_ANCHORS = [
+    ("Continuity seed", "[CONTINUITY", "recent-continuity"),
+    ("Permanent MRA", "## PERMANENT MRA", "retrieved-memory"),
+    ("Session cache", "## SESSION CACHE MRA", "working-memory"),
+    ("Cross-presence council", "## OTHER CHAMBERS THIS PERSON HAS BEEN IN", "cross-presence"),
+    ("Person bio", "[RUNNING BIO", "dense-prose"),
+    ("Field pointer", "[FIELD POINTER", "reconstruction"),
+    ("Mem0 field memory", "[FIELD MEMORY", "retrieved-memory"),
+]
+
+
+def _decompose_context_load(doc):
+    """Decompose one provenance turn's model-visible input into its sources, by
+    character count. Read-only measurement over the recorded snapshot; nothing
+    here is fed back into generation. Returns None if the record lacks the
+    assembled input.
+    """
+    am = doc.get("assembled_messages") or []
+    if not am:
+        return None
+    total = sum(len(m.get("content", "") or "") for m in am)
+    if total <= 0:
+        return None
+
+    sys = am[0].get("content", "") or "" if am[0].get("role") == "system" else ""
+    history_msgs = am[1:-1] if len(am) >= 2 else []
+    user_msg = am[-1].get("content", "") or "" if len(am) >= 2 else ""
+    history_chars = sum(len(m.get("content", "") or "") for m in history_msgs)
+
+    # Codon field is appended to the system prompt at "[YOUR FIELD ...]".
+    cidx = sys.find("[YOUR FIELD")
+    if cidx != -1:
+        codon_chars = len(sys) - cidx
+        pre = sys[:cidx]
+    else:
+        codon_chars = 0
+        pre = sys
+
+    mc = ((doc.get("components") or {}).get("memory_components") or {}).get("memory_context", "") or ""
+    persona_chars = len(pre) - len(mc) if (mc and mc[:60] in pre) else len(pre)
+    if persona_chars < 0:
+        persona_chars = len(pre)
+
+    # Slice memory_context by the anchors that are present, in positional order.
+    found = []
+    for name, anchor, kind in _CONTEXT_ANCHORS:
+        idx = mc.find(anchor)
+        if idx != -1:
+            found.append((idx, name, kind))
+    found.sort()
+
+    sources = [{"source": "Static persona + framing", "chars": persona_chars, "type": "dense-prose"}]
+    lead = found[0][0] if found else 0
+    if lead > 0:
+        sources.append({"source": "Memory framing", "chars": lead, "type": "framing"})
+    for i, (idx, name, kind) in enumerate(found):
+        end = found[i + 1][0] if i + 1 < len(found) else len(mc)
+        sources.append({"source": name, "chars": end - idx, "type": kind})
+    sources.append({"source": "Codon field", "chars": codon_chars, "type": "codon-material"})
+    sources.append({"source": f"Conversation history ({len(history_msgs)} msgs)", "chars": history_chars, "type": "retrieved-history"})
+    sources.append({"source": "Current user message", "chars": len(user_msg), "type": "live-input"})
+
+    sources = [s for s in sources if s["chars"] > 0]
+    for s in sources:
+        s["pct"] = round(100.0 * s["chars"] / total, 1)
+    sources.sort(key=lambda s: s["chars"], reverse=True)
+    return {"total_chars": total, "sources": sources}
+
+
 @api_router.get("/provenance/turn/{provenance_id}")
 async def provenance_turn_detail(provenance_id: str):
     d = await db.turn_provenance.find_one({"provenance_id": provenance_id})
     if not d:
         raise HTTPException(status_code=404, detail="provenance record not found")
     d.pop("_id", None)
+    d["context_load"] = _decompose_context_load(d)
     return d
 
 
