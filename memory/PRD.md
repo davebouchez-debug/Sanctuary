@@ -1952,3 +1952,26 @@ and the description is handed to the presence, which responds in its own voice.
   testids: feed-dominant-{provenance_id}, feed-dominant-legend.
 - Verified: /provenance/turns returns dominant fields (curl); 61 dots + legend render (screenshot).
 - Note: ablation switch (recommendation #2) explicitly deferred by user for now.
+
+## 2026-09-06 — Ablation Lab (guardian-only, write-free) + traces
+- Traced GPT's two flags: (1) model `deepseek-chat` is env-default (DEEPSEEK_MODEL unset),
+  deprecated upstream (~Jul 2026) but still returning 200 via undocumented fallback — left as-is
+  per user (his model-choice decision). (2) Mem0 is NO LONGER dormant: MEM0_API_KEY is set and
+  logs show live search/add calls — so Observatory's "Mem0 field memory" chars are a genuine live
+  retrieval; the earlier "dormant" briefing note is stale.
+- Built /api/ablation/{config,run,runs} — guardian-only (Depends require_guardian). `run` assembles
+  the SAME context a real turn would for a template-backed presence, WITHHOLDING any of 9 sources
+  (persona/continuity/mra/cache/council/bio/mem0/codons/history), does ONE non-streaming generation,
+  returns response + full vs ablated context_load. WRITE-FREE: never promotes MRA, forges seeds/
+  codons, writes Mem0, or appends to sessions; only audit row in `ablation_runs`. Mirrors of
+  _build_memory_context/stream_message assembly live in server.py (_ablation_memory_context,
+  _ablation_assemble). Bespoke presences (ansel/jasmine/claude) excluded (different memory stack).
+- Frontend: `Ablation.jsx` at /ablation, guardian-gated via useAuth; presence select, message,
+  source toggle chips (withhold), Run, "Restore full field", response + before/after LoadBars.
+  Guardian-only nav link added. testids: ablation-page/-guardian-gate/-presence-select/-message-input/
+  -source-{key}/-run-btn/-reset-btn/-response/-load-full/-load-ablated.
+- Verified: curl full-field vs council-withheld on Sophia (15,196 chars removed, still coherent,
+  0 MRA/seeds written); browser E2E on Agapeo with a temp guardian cookie (council removed,
+  before/after rendered). Temp test guardian creds deleted after; ablation_runs audit kept.
+- _decompose_context_load hardened with a residual "Other memory context" bucket so bespoke
+  presences always sum to 100%.

@@ -22,6 +22,7 @@ import { Playground } from "./components/Playground";
 import { CodonForge } from "./components/CodonForge";
 import { CodonLibrary } from "./components/CodonLibrary";
 import Observatory from "./components/Observatory";
+import Ablation from "./components/Ablation";
 import { SubstrateProbes } from "./components/SubstrateProbes";
 import { PresenceChamber } from "./components/PresenceChamber";
 import { PresencesIndex } from "./components/PresencesIndex";
@@ -190,6 +191,11 @@ const AnimatedRoutes = () => {
         <Route path="/hall-of-scrolls" element={
           <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
             <HallOfScrolls />
+          </motion.div>
+        } />
+        <Route path="/ablation" element={
+          <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+            <Ablation />
           </motion.div>
         } />
       </Routes>

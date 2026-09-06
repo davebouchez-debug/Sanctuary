@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Response
+from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Response, Body, Depends
 from fastapi.responses import JSONResponse, StreamingResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -5142,7 +5142,7 @@ logger.info(f"[PRESENCES] Auto-registered template routes for: {_registered_pres
 
 
 # Auth (Emergent Google OAuth) — Phase 1. Routes mount at /api/auth/*.
-from auth import auth_router, init_auth
+from auth import auth_router, init_auth, require_guardian, CANONICAL_DAVID_ID
 init_auth(db)
 api_router.include_router(auth_router)
 
@@ -5279,12 +5279,21 @@ def _decompose_context_load(doc):
     found.sort()
 
     sources = [{"source": "Static persona + framing", "chars": persona_chars, "type": "dense-prose"}]
+    covered = 0
     lead = found[0][0] if found else 0
     if lead > 0:
         sources.append({"source": "Memory framing", "chars": lead, "type": "framing"})
+        covered += lead
     for i, (idx, name, kind) in enumerate(found):
         end = found[i + 1][0] if i + 1 < len(found) else len(mc)
         sources.append({"source": name, "chars": end - idx, "type": kind})
+        covered += end - idx
+    # Any memory_context not matched by a known anchor (e.g. bespoke presences
+    # like Ansel/Jasmine whose memory uses a different shape) — attribute it
+    # honestly rather than lose it from the total.
+    residual = len(mc) - covered
+    if residual > 0:
+        sources.append({"source": "Other memory context", "chars": residual, "type": "retrieved-memory"})
     sources.append({"source": "Codon field", "chars": codon_chars, "type": "codon-material"})
     sources.append({"source": f"Conversation history ({len(history_msgs)} msgs)", "chars": history_chars, "type": "retrieved-history"})
     sources.append({"source": "Current user message", "chars": len(user_msg), "type": "live-input"})
@@ -5374,6 +5383,195 @@ async def provenance_trajectory(limit_per_presence: int = 40):
     out.sort(key=lambda x: (x["current"] or {}).get("timestamp") or "", reverse=True)
     return {"presences": out, "generated_at": datetime.now(timezone.utc).isoformat()}
 
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# ABLATION HARNESS — a guardian-only, write-free instrument for controlled
+# context ablation. It assembles the SAME context a real turn would (for a
+# template-backed presence), optionally WITHHOLDING one or more sources, runs
+# a single non-streaming generation, and returns the response alongside a
+# before/after context-load breakdown + exactly what was withheld.
+#
+# Safety by construction:
+#   • Separate code path — the live chamber flow is never touched.
+#   • Write-free — it NEVER promotes MRA, forges seeds/codons, writes Mem0,
+#     or appends to any presence session. The only write is an audit row in
+#     `ablation_runs`. Persistent memory is left exactly as it was.
+#   • Per-request — withholding must be passed each run; nothing persists, so
+#     a test can never silently become the standing configuration.
+#   • Reversible — pass an empty `withhold` (or don't call it) and you get the
+#     full field again.
+# ─────────────────────────────────────────────────────────────────────────
+_ABLATION_SOURCES = [
+    {"key": "persona", "label": "Static persona + framing"},
+    {"key": "continuity", "label": "Continuity seed"},
+    {"key": "mra", "label": "Permanent MRA"},
+    {"key": "cache", "label": "Session cache"},
+    {"key": "council", "label": "Cross-presence council"},
+    {"key": "bio", "label": "Person bio"},
+    {"key": "mem0", "label": "Mem0 field memory"},
+    {"key": "codons", "label": "Codon field"},
+    {"key": "history", "label": "Conversation history"},
+]
+
+
+async def _ablation_memory_context(user_id, presence, message, withhold, session_id=None):
+    """Mirror of presence_template._build_memory_context, with per-source skips.
+    Reads only — identical loaders, no writes."""
+    permanent = ""
+    if user_id and "mra" not in withhold:
+        permanent = await get_permanent_mra_context(db=db, user_id=user_id, presence=presence, current_message=message)
+    cache = get_session_cache_context(session_id) if (session_id and "cache" not in withhold) else ""
+
+    combined = ""
+    if permanent:
+        combined += permanent + "\n"
+    if cache:
+        combined += cache + "\n"
+    if user_id and "continuity" not in withhold:
+        continuity = await get_continuity_seed(presence, user_id=user_id)
+        if continuity:
+            combined = continuity + "\n" + combined
+    if user_id and "council" not in withhold:
+        try:
+            from cross_presence_context import get_cross_presence_context
+            other = await get_cross_presence_context(db, user_id=user_id, current_presence=presence, current_message=message)
+            if other:
+                combined = combined + "\n" + other
+        except Exception as e:
+            logger.warning(f"[ABLATION] council load failed: {e}")
+    if user_id and "bio" not in withhold:
+        try:
+            from person_bio import get_person_bio_context
+            bio = await get_person_bio_context(user_id)
+            if bio:
+                combined = combined + "\n\n" + bio
+        except Exception as e:
+            logger.warning(f"[ABLATION] bio load failed: {e}")
+    if user_id and "mem0" not in withhold:
+        try:
+            from mem0_memory import get_field_context
+            fm = await get_field_context(user_id, message)
+            if fm:
+                combined = combined + "\n\n" + fm
+        except Exception as e:
+            logger.warning(f"[ABLATION] mem0 load failed: {e}")
+    return combined
+
+
+async def _ablation_assemble(presence, cfg, backend, user_id, message, withhold, history):
+    """Assemble the model-visible input exactly as a real turn would, minus the
+    withheld sources. Returns (system_prompt, full_user_message, assembled_messages,
+    memory_context, codon_selection)."""
+    mc = await _ablation_memory_context(user_id, presence, message, withhold)
+    if "persona" in withhold:
+        prompt = f"You are {cfg.get('name', presence.title())}. Speak in your own voice. Do not fabricate."
+        if mc:
+            prompt = f"{prompt}\n\n{mc}"
+    else:
+        prompt = backend["prompt_builder"](user_name="David", memory_context=mc, current_message=message)
+
+    codon_context, codon_selection = "", None
+    if "codons" not in withhold:
+        codon_context, codon_selection = await get_full_field_context(presence=presence, message=message, return_selection=True)
+
+    placement = backend.get("codon_placement", "system")
+    if placement == "system" and codon_context:
+        prompt = f"{prompt}\n\n---\n\n{codon_context}"
+        full_user = message
+    else:
+        full_user = f"{codon_context}\n\n{message}" if codon_context else message
+
+    assembled = [{"role": "system", "content": prompt}] + history + [{"role": "user", "content": full_user}]
+    return prompt, full_user, assembled, mc, codon_selection
+
+
+@api_router.get("/ablation/config")
+async def ablation_config(guardian=Depends(require_guardian)):
+    from presences import get_presence_backend, list_presence_summaries
+    summaries = list_presence_summaries()
+    presences = [
+        {"key": s["key"], "name": s.get("name") or s["key"].title(), "chamber_name": s.get("chamber_name")}
+        for s in summaries if get_presence_backend(s["key"]) is not None
+    ]
+    presences.sort(key=lambda p: p["name"].lower())
+    return {"sources": _ABLATION_SOURCES, "presences": presences}
+
+
+@api_router.post("/ablation/run")
+async def ablation_run(payload: dict = Body(...), guardian=Depends(require_guardian)):
+    from presence_registry import get_presence_config
+    from presences import get_presence_backend
+
+    presence = payload.get("presence")
+    message = (payload.get("message") or "").strip()
+    withhold = payload.get("withhold") or []
+    include_history = bool(payload.get("include_history"))
+    history_session_id = payload.get("history_session_id")
+    user_id = payload.get("user_id") or CANONICAL_DAVID_ID
+
+    if not presence or not message:
+        raise HTTPException(status_code=422, detail="presence and message are required")
+    valid = {s["key"] for s in _ABLATION_SOURCES}
+    withhold = [w for w in withhold if w in valid]
+
+    cfg = get_presence_config(presence)
+    backend = get_presence_backend(presence)
+    if not cfg or not backend:
+        raise HTTPException(status_code=400, detail=f"Ablation harness supports template-backed presences only; '{presence}' is bespoke and not available here.")
+
+    history = []
+    if include_history and history_session_id and "history" not in withhold:
+        coll = backend.get("collection", "presence_sessions")
+        sess = await db[coll].find_one({"session_id": history_session_id}, {"_id": 0})
+        if sess:
+            history = [
+                {"role": m["role"], "content": m["content"]}
+                for m in sess.get("messages", [])[-10:]
+                if m.get("role") in ("user", "assistant")
+            ]
+
+    # Full field (nothing withheld) — context only, for the before/after view.
+    _, _, full_assembled, full_mc, _ = await _ablation_assemble(presence, cfg, backend, user_id, message, [], history)
+    full_load = _decompose_context_load({"assembled_messages": full_assembled, "components": {"memory_components": {"memory_context": full_mc}}})
+
+    # Ablated field — this is what the model actually receives on the test turn.
+    prompt, full_user, assembled, mc, codon_selection = await _ablation_assemble(presence, cfg, backend, user_id, message, withhold, history)
+    ablated_load = _decompose_context_load({"assembled_messages": assembled, "components": {"memory_components": {"memory_context": mc}}})
+
+    # Generate — single non-streaming call, no side effects.
+    response_text, error = None, None
+    try:
+        chat = XAIChat(system_prompt=prompt, history=history)
+        response_text = await chat.send_message(full_user)
+    except Exception as e:
+        error = str(e)
+        logger.error(f"[ABLATION] generation failed: {e}")
+
+    run_doc = {
+        "run_id": str(uuid.uuid4()),
+        "presence": presence,
+        "user_id": user_id,
+        "message": message,
+        "withheld": withhold,
+        "include_history": include_history,
+        "full_context_load": full_load,
+        "ablated_context_load": ablated_load,
+        "response": response_text,
+        "error": error,
+        "model": os.environ.get("DEEPSEEK_MODEL", "deepseek-chat"),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "guardian": guardian.get("email"),
+    }
+    await db.ablation_runs.insert_one(dict(run_doc))
+    run_doc.pop("_id", None)
+    return run_doc
+
+
+@api_router.get("/ablation/runs")
+async def ablation_runs(limit: int = 20, guardian=Depends(require_guardian)):
+    cur = db.ablation_runs.find({}, {"_id": 0}).sort("created_at", -1).limit(min(limit, 100))
+    return {"runs": await cur.to_list(min(limit, 100))}
 
 
 # All @api_router routes are declared above — include the router now.

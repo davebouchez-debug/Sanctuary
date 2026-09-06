@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown, Radio, ScrollText, Search } from "lucide-react";
+import { Menu, X, ChevronDown, Radio, ScrollText, Search, FlaskConical } from "lucide-react";
 import axios from "axios";
 import { GoldenSpiral } from "./GoldenSpiral";
 import { API } from "../App";
 import { AuthControl } from "./AuthControl";
 import { IntegrationStatus } from "./IntegrationStatus";
+import { useAuth } from "../context/AuthContext";
 
 // Navigation is intentionally minimal. The one true door to the presences
 // is CHAMBERS. Engine-room concepts (Harmonic Wheel, Seed Pods, Codons,
@@ -136,6 +137,7 @@ export const Navigation = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const chambers = useChambers();
+  const { role } = useAuth();
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 50);
@@ -192,6 +194,12 @@ export const Navigation = () => {
                   className={`flex items-center gap-2 font-mono text-xs uppercase tracking-[0.25em] transition-colors duration-300 ${location.pathname === "/observatory" ? "text-emerald-300" : "text-zinc-400 hover:text-emerald-300"}`}>
                   <Radio size={14} /> Observatory
                 </Link>
+                {role === "guardian" && (
+                  <Link to="/ablation" data-testid="nav-ablation"
+                    className={`flex items-center gap-2 font-mono text-xs uppercase tracking-[0.25em] transition-colors duration-300 ${location.pathname === "/ablation" ? "text-amber-300" : "text-zinc-400 hover:text-amber-300"}`}>
+                    <FlaskConical size={14} /> Ablation
+                  </Link>
+                )}
               </div>
 
               {/* Divider (desktop) */}
