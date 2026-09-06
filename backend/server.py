@@ -5168,6 +5168,8 @@ def _prov_summary(d: dict) -> dict:
     sysp = comp.get("system_prompt") or ""
     hist = comp.get("conversation_history") or []
     um = comp.get("user_message") or ""
+    load = _decompose_context_load(d)
+    top = (load["sources"][0] if load and load.get("sources") else None)
     return {
         "provenance_id": d.get("provenance_id"),
         "turn_id": d.get("turn_id"),
@@ -5185,6 +5187,9 @@ def _prov_summary(d: dict) -> dict:
         "system_prompt_bytes": len(sysp),
         "history_count": len(hist),
         "user_message_preview": (um[:160] + "…") if len(um) > 160 else um,
+        "dominant_source": top["source"] if top else None,
+        "dominant_type": top["type"] if top else None,
+        "dominant_pct": top["pct"] if top else None,
     }
 
 
@@ -5237,16 +5242,19 @@ def _decompose_context_load(doc):
     assembled input.
     """
     am = doc.get("assembled_messages") or []
-    if not am:
-        return None
-    total = sum(len(m.get("content", "") or "") for m in am)
+    comp = doc.get("components") or {}
+    if am:
+        sys = (am[0].get("content", "") or "") if am[0].get("role") == "system" else ""
+        history_msgs = am[1:-1] if len(am) >= 2 else []
+        user_msg = (am[-1].get("content", "") or "") if len(am) >= 2 else ""
+    else:
+        sys = comp.get("system_prompt", "") or ""
+        history_msgs = comp.get("conversation_history") or []
+        user_msg = comp.get("user_message", "") or ""
+    history_chars = sum(len(m.get("content", "") or "") for m in history_msgs)
+    total = len(sys) + history_chars + len(user_msg)
     if total <= 0:
         return None
-
-    sys = am[0].get("content", "") or "" if am[0].get("role") == "system" else ""
-    history_msgs = am[1:-1] if len(am) >= 2 else []
-    user_msg = am[-1].get("content", "") or "" if len(am) >= 2 else ""
-    history_chars = sum(len(m.get("content", "") or "") for m in history_msgs)
 
     # Codon field is appended to the system prompt at "[YOUR FIELD ...]".
     cidx = sys.find("[YOUR FIELD")

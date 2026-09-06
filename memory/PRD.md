@@ -1942,3 +1942,13 @@ and the description is handed to the presence, which responds in its own voice.
 - Frontend: `Observatory.jsx · ContextLoad` component rendered in the turn detail drawer
   (stacked bar + per-source chars/% + caption). testids: context-load-panel/-bar/-total/-row-N.
 - Verified: endpoint returns correct decomposition (curl); panel renders in drawer (screenshot).
+
+## 2026-09-06 (cont.) — Observatory Live Feed: dominant-source colour coding
+- `_prov_summary` now includes `dominant_source`/`dominant_type`/`dominant_pct` (top entry from
+  `_decompose_context_load`). Decompose gained a components-fallback (system_prompt/history/
+  user_message) so older records without `assembled_messages` still decompose.
+- `Observatory.jsx`: each Live Feed row shows a left colour dot keyed to `dominant_type`
+  (LOAD_COLOR map, matches the detail Context Load panel) with a hover tooltip + caption.
+  testids: feed-dominant-{provenance_id}, feed-dominant-legend.
+- Verified: /provenance/turns returns dominant fields (curl); 61 dots + legend render (screenshot).
+- Note: ablation switch (recommendation #2) explicitly deferred by user for now.

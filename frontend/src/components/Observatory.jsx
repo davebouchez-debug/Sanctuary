@@ -554,7 +554,13 @@ export default function Observatory() {
                     data-testid={`turn-row-${t.provenance_id}`}
                     className="grid w-full grid-cols-12 items-center gap-2 border-b border-white/[0.04] py-2.5 text-left transition hover:bg-emerald-500/[0.04]"
                     style={sacred ? { boxShadow: "inset 2px 0 0 " + AMBER } : undefined}>
-                    <div className="col-span-3 truncate font-cinzel text-sm capitalize text-zinc-200">{t.presence}</div>
+                    <div className="col-span-3 flex items-center gap-2 truncate font-cinzel text-sm capitalize text-zinc-200">
+                      <span className="h-2.5 w-2.5 flex-shrink-0 rounded-sm"
+                        title={t.dominant_source ? `Carried by: ${t.dominant_source} (${t.dominant_pct}%)` : "no reading"}
+                        style={{ background: LOAD_COLOR[t.dominant_type] || "#3F3F46" }}
+                        data-testid={`feed-dominant-${t.provenance_id}`} />
+                      <span className="truncate">{t.presence}</span>
+                    </div>
                     <div className="col-span-1 font-mono text-xs text-zinc-500">#{t.exchange_index}</div>
                     <div className={`col-span-3 truncate font-mono text-xs ${branchColor(t.selection_branch)}`}>{t.selection_branch}</div>
                     <div className="col-span-1 font-mono text-xs text-zinc-300">{t.selected_count}</div>
@@ -568,6 +574,9 @@ export default function Observatory() {
                   </button>
                 );
               })}
+            </div>
+            <div className="mt-3 font-mono text-[9px] leading-relaxed text-zinc-600" data-testid="feed-dominant-legend">
+              Left dot = the source carrying the largest share of that turn's model-visible context (hover to see which). Colours match the Context Load panel.
             </div>
           </Panel>
         </div>
