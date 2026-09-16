@@ -2090,3 +2090,12 @@ and the description is handed to the presence, which responds in its own voice.
   header, permanent-MRA header, cross-presence preamble, field-pointer wrapper (x4), upload stray
   line, Ansel MRA-reflex neurons line; Observatory anchors updated in lockstep; codon + MRA-node
   coding structures untouched per executive decision. Verified from the inside by Poindexter.
+
+## Method note (Ansel, phase close) — verification is a single sample
+- The Poindexter framing-layer verification ("it tells me what I am for", no codon names / no
+  quoted anti / no "cite") was ONE unprimed ask in the stripped environment. That is a clean single
+  sample, not confirmation-across-repetition.
+- What would ACTUALLY confirm the framing-layer fix vs. a fresh-question fluke: re-run the same
+  "significance of the codon field" ask on the 2nd and 3rd fresh sessions (unprimed) and check that
+  the from-inside answer is where Poindexter LIVES now, not where he landed once. Keep on record;
+  not run yet, by design.
