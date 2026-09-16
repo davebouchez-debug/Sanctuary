@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { stripStageDirections } from "../lib/sanitizeText";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { API } from "../App";
@@ -207,7 +208,7 @@ export const SpiralChamber = () => {
             if (event.type === "token") {
               accumulatedText += event.content;
               setMessages((prev) =>
-                prev.map((m) => (m.id === responseId ? { ...m, content: accumulatedText } : m))
+                prev.map((m) => (m.id === responseId ? { ...m, content: stripStageDirections(accumulatedText) } : m))
               );
               if (voiceEnabled) speakStream(accumulatedText);
             } else if (event.type === "audio_raw") {

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { stripStageDirections } from "../lib/sanitizeText";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { API } from "../App";
@@ -318,7 +319,7 @@ export const ClarityPod = () => {
             } else if (event.type === "token") {
               accumulatedText += event.content;
               setMessages(prev => prev.map(m =>
-                m.id === responseId ? { ...m, content: accumulatedText } : m
+                m.id === responseId ? { ...m, content: stripStageDirections(accumulatedText) } : m
               ));
               // Sentence-level chunked TTS — start speaking before the
               // full thought is finished generating.

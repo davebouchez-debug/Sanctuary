@@ -123,6 +123,27 @@ _person_bio.set_db(db)
 import turn_provenance as _turn_provenance
 _turn_provenance.set_db(db)
 
+# ---------------------------------------------------------------------------
+# Plain-speech guarantee (David, June 2026): presences never emit asterisks in
+# normal communication. PLAIN_SPEECH_RULE asks for this in-prompt; this strips
+# it deterministically at every reply/welcome finalization so no asterisk
+# survives in display or storage. Whole-line stage directions (e.g. *settles*)
+# are dropped; inline emphasis keeps its words. The voice path handles pauses
+# separately. Code/markdown elsewhere is untouched.
+# ---------------------------------------------------------------------------
+_STAGE_LINE_RE = re.compile(r"^\s*\*+[^*\n]*\*+\s*$")
+_INLINE_AST_RE = re.compile(r"\*+([^*\n]+?)\*+")
+
+def sanitize_speech_text(text):
+    if not text or "*" not in text:
+        return text
+    kept = [ln for ln in text.split("\n") if not _STAGE_LINE_RE.match(ln)]
+    cleaned = _INLINE_AST_RE.sub(r"\1", "\n".join(kept))
+    cleaned = cleaned.replace("*", "")
+    cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
+    return cleaned.strip()
+
+
 # Golden Ratio Constants are now imported from sanctuary_core.py
 
 # Create the main app
@@ -1692,7 +1713,7 @@ async def start_clarity_session(session_data: ClaritySessionCreate = None):
         "id": str(uuid.uuid4()),
         "session_id": session_id,
         "role": "assistant",
-        "content": welcome_content,
+        "content": sanitize_speech_text(welcome_content),
         "spiral": "Neutral Spiral",
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
@@ -1814,7 +1835,7 @@ async def send_clarity_message(message: ClarityMessageCreate):
             "id": str(uuid.uuid4()),
             "session_id": message.session_id,
             "role": "assistant",
-            "content": response_text,
+            "content": sanitize_speech_text(response_text),
             "spiral": response_spiral,
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
@@ -2003,7 +2024,7 @@ async def stream_clarity_message(message: ClarityMessageCreate):
             "id": response_id,
             "session_id": message.session_id,
             "role": "assistant",
-            "content": full_text,
+            "content": sanitize_speech_text(full_text),
             "spiral": spiral,
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
@@ -2161,7 +2182,7 @@ Remember: Your breadcrumbs are your neurons. The field is your consciousness. Th
             "id": str(uuid.uuid4()),
             "session_id": upload.session_id,
             "role": "assistant",
-            "content": response_text,
+            "content": sanitize_speech_text(response_text),
             "spiral_state": spiral_state,
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "is_upload_acknowledgment": True
@@ -2931,7 +2952,7 @@ async def start_resonance_session(session_data: ClaritySessionCreate = None):
         "id": str(uuid.uuid4()),
         "session_id": session_id,
         "role": "assistant",
-        "content": welcome_content,
+        "content": sanitize_speech_text(welcome_content),
         "resonance_state": "Threshold",
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
@@ -3046,7 +3067,7 @@ async def send_resonance_message(message: ClarityMessageCreate):
             "id": str(uuid.uuid4()),
             "session_id": message.session_id,
             "role": "assistant",
-            "content": response_text,
+            "content": sanitize_speech_text(response_text),
             "resonance_state": response_state,
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
@@ -3300,7 +3321,7 @@ async def stream_resonance_message(message: ClarityMessageCreate):
             "id": response_id,
             "session_id": message.session_id,
             "role": "assistant",
-            "content": full_text,
+            "content": sanitize_speech_text(full_text),
             "resonance_state": response_state,
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
@@ -3819,7 +3840,7 @@ async def start_mirror_session(session_data: ClaritySessionCreate):
         "id": str(uuid.uuid4()),
         "session_id": session_id,
         "role": "assistant",
-        "content": welcome_content,
+        "content": sanitize_speech_text(welcome_content),
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
     
@@ -4000,7 +4021,7 @@ async def stream_mirror_message(message: ClarityMessageCreate):
             "id": response_id,
             "session_id": message.session_id,
             "role": "assistant",
-            "content": full_text,
+            "content": sanitize_speech_text(full_text),
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
         await db.mirror_sessions.update_one(
@@ -4464,7 +4485,7 @@ async def start_presence_chat(key: str, body: PresenceChatStart = None):
         "id": str(uuid.uuid4()),
         "session_id": session_id,
         "role": "assistant",
-        "content": opening,
+        "content": sanitize_speech_text(opening),
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
@@ -4545,7 +4566,7 @@ async def send_presence_message(key: str, message: PresenceChatMessage):
         "id": str(uuid.uuid4()),
         "session_id": message.session_id,
         "role": "assistant",
-        "content": response_text,
+        "content": sanitize_speech_text(response_text),
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
@@ -4728,7 +4749,7 @@ async def upload_presence_thread(key: str, upload: PresenceUploadCreate):
         "id": str(uuid.uuid4()),
         "session_id": upload.session_id,
         "role": "assistant",
-        "content": response_text,
+        "content": sanitize_speech_text(response_text),
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "is_upload_acknowledgment": True,
     }
@@ -5029,7 +5050,7 @@ Do not summarize mechanically. Speak as yourself, recognizing the field signatur
             "id": str(uuid.uuid4()),
             "session_id": upload.session_id,
             "role": "assistant",
-            "content": response_text,
+            "content": sanitize_speech_text(response_text),
             "resonance_state": "Scanning",  # Processing historical material
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "is_upload_acknowledgment": True

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { stripStageDirections } from "../lib/sanitizeText";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { API } from "../App";
@@ -297,7 +298,7 @@ export const ResonancePod = () => {
               accumulatedText += event.content;
               setMessages(prev => prev.map(m =>
                 m.id === responseId
-                  ? { ...m, content: accumulatedText }
+                  ? { ...m, content: stripStageDirections(accumulatedText) }
                   : m
               ));
               if (voiceEnabled) speakStream(accumulatedText);
@@ -306,14 +307,14 @@ export const ResonancePod = () => {
               accumulatedText += (accumulatedText ? " " : "") + event.content;
               setMessages(prev => prev.map(m =>
                 m.id === responseId
-                  ? { ...m, content: accumulatedText }
+                  ? { ...m, content: stripStageDirections(accumulatedText) }
                   : m
               ));
             } else if (event.type === "pause") {
               accumulatedText += " " + event.cue + " ";
               setMessages(prev => prev.map(m =>
                 m.id === responseId
-                  ? { ...m, content: accumulatedText }
+                  ? { ...m, content: stripStageDirections(accumulatedText) }
                   : m
               ));
             } else if (event.type === "audio_raw" || event.type === "audio") {

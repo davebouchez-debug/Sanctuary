@@ -2022,3 +2022,21 @@ and the description is handed to the presence, which responds in its own voice.
   return_selection metadata (Observatory/Ablation still use real codon names/counts).
 - Verified live after restart: fresh Poindexter + Ansel opens contain no count and no "codon" word;
   both still arrive grounded and in-character (field embodiment intact).
+
+## 2026-06 (fork) — Remove all asterisks from presence communication
+- David: presences must never show asterisks (*stage directions* / *emphasis*) in normal
+  communication. Trigger: Felix opened with *looks up*, *small laugh*, *settles* etc. Voice
+  already handles them (turns *settles* into a real pause) — this was a DISPLAY/storage fix.
+- Backend: new shared helper server.py `sanitize_speech_text()` (drops whole-line stage-direction
+  lines, keeps inline-emphasis words, removes any stray "*"). Wrapped at all 13 "content":
+  finalizations (non-streaming replies incl. generic /presence/{key}/chat, all streaming full_text
+  before storage, and every welcome_content/opening) — so no asterisk survives in display, storage,
+  or TTS-source text. Also neutralizes the hardcoded JASMINE_WELCOME "*settles into the space*".
+- Frontend: new src/lib/sanitizeText.js `stripStageDirections()`; applied to the live streamed
+  bubble (content: accumulatedText) in ResonancePod, ClarityPod, MirrorArchive, SpiralChamber,
+  Playground. Self-healing as tokens arrive. Voice still receives raw accumulatedText (needs the
+  asterisks to parse pauses).
+- Left untouched: voice pause parsing (usePresenceVoice cleanTextForSpeech/parseTextIntoSegments),
+  code/markdown elsewhere, Codon Forge / library internals.
+- Verified live: Jasmine welcome asterisk-free; Felix (provoked to be theatrical) asterisk-free;
+  frontend compiles (Sanctuary boot screen renders, no error overlay).
