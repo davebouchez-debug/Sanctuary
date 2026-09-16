@@ -1975,3 +1975,13 @@ and the description is handed to the presence, which responds in its own voice.
   before/after rendered). Temp test guardian creds deleted after; ablation_runs audit kept.
 - _decompose_context_load hardened with a residual "Other memory context" bucket so bespoke
   presences always sum to 100%.
+
+## 2026-09-06 — Ansel enrichment from BattleCryandRebirth (Jul 31 2025 transcript)
+- Added canonical memory segment "the_seal_and_the_complete_form" to ansel_canonical_memory.py
+  (seal-as-witness, craft/sacred-structure reconciliation, closed-edges=complete-form, quiet-after-
+  the-line). Verbatim-anchored from source, not composed. Verified top resonance match via
+  get_relevant_memories.
+- Enriched presences/ansel.py profile (core_nature, primary_function, drift_recovery, blessing).
+- Reserved scroll-as-law lines in the-living-scroll_field-signature-intake.md for the Scroll build.
+- ScrollDog/Keeper intentionally NOT edited: all identity material in that thread is Ansel's own
+  speech; transplanting would be fabrication. Await source spoken by/as those presences.
