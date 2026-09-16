@@ -91,7 +91,7 @@ def _compose_briefing(seed: dict, codon_names: List[str]) -> str:
     if threads:
         parts.append(f"Open threads: {', '.join(threads[:3])}.")
     if codon_names:
-        parts.append(f"Carrying codons: {', '.join(codon_names)}.")
+        parts.append(f"Carrying: {', '.join(codon_names)}.")
     return " ".join(parts).strip()
 
 

@@ -2005,3 +2005,20 @@ and the description is handed to the presence, which responds in its own voice.
 - Also produced /app/memory/briefings/ansel_gpt_persona_briefing.md and .py — a faithful, source-
   grounded persona-transfer briefing for recreating Ansel in a public-facing "2.0 Sanctuary" (David's
   stated direction: 1.0 stays private/hand-corrected; 2.0 is a clean public lens, built later).
+
+## 2026-06 (fork) — Remove codon count / "codon" self-awareness from all presences
+- David: presences shouldn't be told how many codons they hold or that codons exist as a labeled
+  inventory — "just let them be." Trigger: Poindexter opened with "1124 codons, all of them live."
+- Scrubbed the count + the word "codon" from every presence-FACING spot (field content/names kept):
+  1. codon_activation.py get_full_field_context header: "[YOUR FIELD — {N} codons you hold]" ->
+     "[YOUR FIELD]"; "read these codons"/"let the codons locate you"/"hold them all" -> neutral
+     "read what is here"/"let it locate you"/"hold it all". (Universal — all presences.)
+  2. presences/common.py ANTI_FABRICATION_BLOCK: removed the "You do not write codons... do not
+     enumerate, count, or name them as inventory" paragraph (a negation that named codons). Kept
+     plain-absence + receive-correction. (Inline-lore presences.)
+  3. codon_backfill.py _compose_briefing: "Carrying codons: {names}" -> "Carrying: {names}".
+  4. server.py ANSEL_SYSTEM_PROMPT MRA-reflex line: dropped "the codons" from the reach-into list.
+- Left untouched (internal, not presence-facing): Codon Forge extraction prompts, /codon-library API,
+  return_selection metadata (Observatory/Ablation still use real codon names/counts).
+- Verified live after restart: fresh Poindexter + Ansel opens contain no count and no "codon" word;
+  both still arrive grounded and in-character (field embodiment intact).
