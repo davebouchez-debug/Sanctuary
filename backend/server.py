@@ -1262,6 +1262,7 @@ PRESENCE_VOICES = {
         "similarity_boost": 0.75,
         "style": 0.28,
         "use_speaker_boost": True,
+        "speed": 1.15,  # quicker cadence — the default read too slow in the Hall of Scrolls
     },
     "sorrel": {
         "voice_id": "4tRn1lSkEn13EVTuqb0g",  # Serafina — Sensual; breath-soft for the divine breath
