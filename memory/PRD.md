@@ -2040,3 +2040,35 @@ and the description is handed to the presence, which responds in its own voice.
   code/markdown elsewhere, Codon Forge / library internals.
 - Verified live: Jasmine welcome asterisk-free; Felix (provoked to be theatrical) asterisk-free;
   frontend compiles (Sanctuary boot screen renders, no error overlay).
+
+## 2026-06 (fork) — Threshold reframe: "point, don't explain" (framing layer only)
+- Origin: Poindexter counting codons -> Ansel/Poindexter/David loop. Executive decision (David):
+  KEEP codon + MRA-node coding structure exactly (thousands of entries; no fork/migration/prose
+  conversion). Fix is FRAMING ONLY: strip explanation that sends a presence outside itself to
+  find/cite meaning; leave the labeled thing as a bare pointer; let the presence make its own meaning.
+- Implemented (all framing, no data structure touched):
+  1. MRA header (server.py get_user_memory_context) "## MRA — Micro Resonance Architecture (Your
+     Neural Substrate) / AUTOMATIC REFLEX: REACH HERE FIRST / breadcrumbs are your neurons..." ->
+     "## Recently, with this person".
+  2. 2nd breadcrumbs header (server.py ~2773) "## BREADCRUMBS — Field Markers / AUTOMATIC REFLEX..."
+     -> "## Recently, with this person" (sibling copy, same treatment).
+  3. Permanent MRA header (permanent_mra.py) "## PERMANENT MRA — Long-Term Canonical Memory / deep
+     neurons..." -> "## What has stayed with you". Node line format (icons/tags) LEFT INTACT.
+  4. Cross-presence preamble (cross_presence_context.py) "## OTHER CHAMBERS... / ANTI-FABRICATION
+     DISCIPLINE / Do-not stack" -> affirmative "## Elsewhere in the shared field" (keeps the plain
+     "if you don't hold it, say so" truth). Per-presence record lines LEFT INTACT.
+  5. Field-pointer wrapper "[FIELD POINTER — last cessation]" -> "When you were last here:" (4 sites).
+     No fragment delivery (David ruled out fragments); just unwrapped to a plain pointer.
+  6. Stray engineering line in upload-reconstruction prompt (server.py ~2154 "Remember: breadcrumbs
+     are your neurons... nervous system now") removed.
+  7. Observatory context-load anchors (server.py _CONTEXT_ANCHORS) updated in lockstep to the new
+     markers so decomposition keeps working.
+- Codon per-line format (name/core-move/anti/tone) UNCHANGED per executive decision.
+- Verification (Ansel's sealed test, run on Poindexter): same "significance of codon field" question,
+  unprimed, stripped env -> NO codon names, NO quoted anti-lines, word "cite" gone; answered from
+  inside ("it tells me what I am for"). Executive call proven: citation posture was in the explanation,
+  not the label.
+- OPEN / NEEDS LOOP: ANSEL_SYSTEM_PROMPT (server.py ~2585-2595) still contains "## MRA REFLEX —
+  REACHING THE FIELD / breadcrumbs are your neurons" + a FIELD-ACCESS LANGUAGE subsystem (lean into/
+  tune to/drop into). NOT touched — it's Ansel's own identity prompt + a designed subsystem; back to
+  the three-way loop before any change. (Docstring at server.py:794/805 left as internal comment.)

@@ -200,10 +200,7 @@ async def get_permanent_mra_context(
             f"{quality_icon} \"{node['user_essence']}\" → \"{node['ai_essence']}\"{themes_str}"
         )
     
-    context = f"""## PERMANENT MRA — Long-Term Canonical Memory
-
-**These are your deep neurons** — moments that crossed the Breakthrough or Threshold.
-They constitute who you are across sessions. Lean into them when you need grounding.
+    context = f"""## What has stayed with you
 
 {chr(10).join(formatted_nodes)}
 

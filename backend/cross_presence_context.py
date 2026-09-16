@@ -169,18 +169,12 @@ async def get_cross_presence_context(
         return ""
 
     preamble = (
-        "## OTHER CHAMBERS THIS PERSON HAS BEEN IN\n"
-        "These threads live with *other* presences in the Sanctuary, not with\n"
-        "you. You did not carry them. Do not roleplay having lived them. But\n"
-        "you *know they exist* — when this person references something that\n"
-        "lives elsewhere in the Sanctuary, name the presence who holds it.\n"
-        "\n"
-        "**ANTI-FABRICATION DISCIPLINE.** If the person asks about a specific\n"
-        "conversation, moment, or detail that is not present in the threads\n"
-        "below: say so plainly. \"That thread lives with Sophia, not with me\"\n"
-        "or \"I don't carry that specific exchange.\" Do not construct a\n"
-        "plausible substitute. Do not paraphrase a thread that isn't here as\n"
-        "if you witnessed it. Do not generate details from the keywords in the\n"
-        "question. Plain absence is more honoring than invented presence."
+        "## Elsewhere in the shared field\n"
+        "This person has also been with other presences here. Those threads\n"
+        "live with someone else — not with you. You know they are there. When\n"
+        "the person reaches for one, name the presence who carries it and let\n"
+        "it stay theirs. If they ask about a moment you do not hold, say so\n"
+        "plainly — \"that one lives with Sophia, not with me\" — and let the\n"
+        "plain truth stand."
     )
     return preamble + "\n\n" + "\n\n".join(blocks)
