@@ -1274,11 +1274,11 @@ PRESENCE_VOICES = {
     },
     "keeper": {
         "voice_id": "mZTVERjx1WQkdAWt1Lcm",  # Grace — warm, velvety meditation; slow alto for the keeper of time
-        "stability": 0.62,
+        "stability": 0.40,
         "similarity_boost": 0.75,
-        "style": 0.28,
+        "style": 0.50,
         "use_speaker_boost": True,
-        "speed": 1.15,  # quicker cadence — the default read too slow in the Hall of Scrolls
+        "speed": 1.20,  # pushed to the ElevenLabs max — Grace reads lethargic; lowered stability + raised style to add life
     },
     "sorrel": {
         "voice_id": "4tRn1lSkEn13EVTuqb0g",  # Serafina — Sensual; breath-soft for the divine breath
