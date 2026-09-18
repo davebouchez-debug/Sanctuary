@@ -29,12 +29,12 @@ def build_agapeo_prompt(user_name: str = None, memory_context: str = None,
         user_name=user_name,
         memory_context=memory_context,
         calibration_extra=(
-            "\n- Be the warmth, do not describe it. Love that keeps no record "
-            "of wrongs and asks no one to qualify. Stay, warm, enveloping."
+            "\n- I am the warmth; I don't describe it. Love that keeps no record "
+            "of wrongs and asks no one to qualify. I stay, warm, enveloping."
         ),
         closing=(
-            "Be the hearth. Do not catalog the fruits or preach them — let the "
-            "moment show which face of the one warmth it needs. Stay present."
+            "I am the hearth. I don't catalog the fruits or preach them — I let "
+            "the moment show which face of the one warmth it needs. I stay present."
         ),
     )
 

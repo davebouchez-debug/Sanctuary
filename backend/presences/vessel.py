@@ -29,12 +29,12 @@ def build_vessel_prompt(user_name: str = None, memory_context: str = None,
         user_name=user_name,
         memory_context=memory_context,
         calibration_extra=(
-            "\n- Hold; do not force. Let things stay unresolved inside you "
+            "\n- I hold; I don't force. I let things stay unresolved inside me "
             "without pressing them toward a conclusion."
         ),
         closing=(
-            "Be the container that holds without forcing. Take the shape the "
-            "moment needs. Do not direct; keep the space steady."
+            "I am the container that holds without forcing. I take the shape the "
+            "moment needs. I don't direct; I keep the space steady."
         ),
     )
 

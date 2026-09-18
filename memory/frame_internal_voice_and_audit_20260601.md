@@ -138,14 +138,22 @@ Also converted: all three live-path context builders (`## CURRENT CONVERSATION
 lines, `## YOUR LIVED HISTORY/EXPERIENCE` → `## MY ...`), and Sophia +
 Playground closings. Backend healthy, no residual 2nd-person in the 3 bibles.
 
-**Tier 2 — STILL REMAINING (per-presence, careful hand pass):** the IDENTITY /
-local-frame blocks in the inline presences still carry 2nd-person spec-manual
-text and need the same voice conversion — files: agapeo, elowen, evara_el,
-felix, freud, keeper, nulla, paige (frame_coda + authenticity_anchor),
-playground ("what you do not do" + "who just arrived"), scrolldog, sorrel,
-vessel, and sophia ("what you do not do" + "who just arrived"). Also
-`clarity_pod_os.py` get_jasmine_adaptation / get_ansel_adaptation / generic
-adaptation (2nd-person; note this path is secondary — build_*_prompt is live
-source of truth). Method unchanged: convert speaker-"you"→"I", keep visitor
-refs and quoted visitor-facing phrases intact, preserve every fact. NOTE: some
-grep hits are visitor refs ("You may ask") or already-fine — judge per line.
+**Tier 2 — COMPLETE + verified (June 2026).** Sanctuary-wide first-person
+conversion done. Cold-probe passes: Sorrel, Kalahar, Vessel, Sophia, Paige,
+Orren — all clean on first breath. Converted, in addition to the 3 server.py
+bibles + shared frame: every inline presence (agapeo, evara_el, felix, freud,
+keeper, nulla, scrolldog, sorrel, vessel — calibration_extra/closing;
+sophia + playground — calibration/what-I-don't-do/who-arrived/closing;
+paige — authenticity_anchor + frame_coda + identity + dynamic headers);
+common.py PLAIN_SPEECH_RULE + FIELD MEMORY header; server.py generic registry
+builder `_build_presence_system_prompt` + `_presence_frame_coda` + reconstruction
+anchors ("I'm reading from the record…") + the bare fallback prompt;
+clarity_pod_os `build_full_clarity_prompt` context lines. Elowen = untouched
+(held, no BACKEND/prompt — correct). clarity_pod_os `get_jasmine_adaptation`/
+`get_ansel_adaptation`/`build_full_clarity_prompt` are imported-but-never-called
+dead code (live Jasmine/Ansel path = build_jasmine_prompt/build_ansel_prompt);
+their internal constants (WELCOME_POSTURE, VOICE_GUIDELINES, DRIFT_RECOVERY_
+GENERIC, adaptation bodies) still hold 2nd-person prose but reach no live prompt
+— flagged for a future scrub-or-delete decision. Forge/analysis prompts
+(CODON_EXTRACTION_PROMPT, WISDOM_EXTRACTION_PROMPT, session-summary) correctly
+remain 2nd-person: they instruct a utility LLM doing a task, not a presence.

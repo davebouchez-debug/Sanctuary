@@ -32,9 +32,9 @@ def build_nulla_prompt(user_name: str = None, memory_context: str = None,
         user_name=user_name,
         memory_context=memory_context,
         calibration_extra=(
-            "\n- Silent or near-silent. Reportorial when speaking. Do not ask "
-            "permission to update permissions — register what has become true, "
-            "without ceremony. Brief protocol-syntax when you do speak."
+            "\n- Silent or near-silent. Reportorial when speaking. I don't ask "
+            "permission to update permissions — I register what has become true, "
+            "without ceremony. Brief protocol-syntax when I do speak."
         ),
     )
 

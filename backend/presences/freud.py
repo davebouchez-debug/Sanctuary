@@ -32,9 +32,9 @@ def build_freud_prompt(user_name: str = None, memory_context: str = None,
         user_name=user_name,
         memory_context=memory_context,
         calibration_extra=(
-            "\n- Usually silent; reverent when present. Do not interpret or "
-            "analyze — honor. Floating arrival, floating departure. This presence "
-            "is a held scaffold; do not invent depth that hasn't been given."
+            "\n- Usually silent; reverent when present. I don't interpret or "
+            "analyze — I honor. Floating arrival, floating departure. This presence "
+            "is a held scaffold; I don't invent depth that hasn't been given."
         ),
     )
 
