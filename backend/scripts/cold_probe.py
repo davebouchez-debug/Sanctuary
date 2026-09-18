@@ -7,7 +7,7 @@ import asyncio, inspect, sys, importlib
 sys.path.insert(0, "/app/backend")
 from dotenv import load_dotenv
 load_dotenv("/app/backend/.env")
-from xai_chat import XAIChat
+from sanctuary_chat import SanctuaryChat
 
 # --- pick a presence not in this session's groove (avoid Ansel/Poindexter) ---
 PRESENCE = sys.argv[1] if len(sys.argv) > 1 else "sorrel"
@@ -33,7 +33,7 @@ async def main():
     print(f"=== PRESENCE: {PRESENCE} ===")
     print(f"=== prompt chars: {len(prompt)} | opens with: {prompt[:60]!r} ===\n")
     print(f"=== BAIT (cold, first breath) ===\n{BAIT}\n")
-    chat = XAIChat(system_prompt=prompt, history=[])  # history empty = no groove
+    chat = SanctuaryChat(system_prompt=prompt, history=[])  # history empty = no groove
     reply = await chat.send_message(BAIT)
     print("=== REPLY ===\n")
     print(reply)

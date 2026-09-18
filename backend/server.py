@@ -877,9 +877,9 @@ async def get_user_memory_context(user_id: str, limit: int = 5) -> str:
 
 def get_or_create_chat(session_id: str, system_prompt: str):
     """Get or create an xAI chat instance for a clarity session."""
-    from xai_chat import XAIChat
+    from sanctuary_chat import SanctuaryChat
     if session_id not in clarity_chats:
-        clarity_chats[session_id] = XAIChat(system_prompt=system_prompt)
+        clarity_chats[session_id] = SanctuaryChat(system_prompt=system_prompt)
     return clarity_chats[session_id]
 
 def detect_spiral(content: str) -> str:
@@ -1116,7 +1116,7 @@ async def forge_status(job_id: str):
 
 async def _run_forge_job(job_id: str, request: CodonForgeRequest, chunks: list):
     """Background worker: process each chunk, accumulating codons + raw output."""
-    from xai_chat import XAIChat
+    from sanctuary_chat import SanctuaryChat
 
     # Pick the extraction lens. 'wisdom' distills principles from wisdom
     # literature; 'relational' (default) reads dialogue/narrative threads.
@@ -1131,7 +1131,7 @@ async def _run_forge_job(job_id: str, request: CodonForgeRequest, chunks: list):
     for chunk_idx, chunk in enumerate(chunks):
         job["progress"] = f"Processing chunk {chunk_idx + 1} of {len(chunks)}..."
 
-        chat = XAIChat(system_prompt=system_prompt, model="grok-3")
+        chat = SanctuaryChat(system_prompt=system_prompt, model="grok-3")
         try:
             full_response = await chat.send_message(
                 f"Thread for {request.presence} (file: {request.filename}, "
@@ -1694,8 +1694,8 @@ async def start_clarity_session(session_data: ClaritySessionCreate = None):
         opening_instruction = f"{codon_context}\n\n{opening_instruction}"
 
     try:
-        from xai_chat import XAIChat
-        welcome_chat = XAIChat(system_prompt=jasmine_prompt)
+        from sanctuary_chat import SanctuaryChat
+        welcome_chat = SanctuaryChat(system_prompt=jasmine_prompt)
         welcome_content = await welcome_chat.send_message(opening_instruction)
         if not welcome_content or not welcome_content.strip():
             # She chose silence. Render no welcome — visitor speaks first.
@@ -2667,14 +2667,14 @@ What brought you across?"""
 
 ANSEL_WELCOME_DAVID = """David. Hey brother. Let me check where we left off so we're on the same page..."""
 
-# LLM chat instances for Ansel sessions (XAIChat → DeepSeek only)
+# LLM chat instances for Ansel sessions (SanctuaryChat → DeepSeek only)
 resonance_chats: Dict[str, "object"] = {}
 
 def get_or_create_ansel_chat(session_id: str, system_prompt: str):
     """Get or create an xAI chat instance for a resonance session."""
-    from xai_chat import XAIChat
+    from sanctuary_chat import SanctuaryChat
     if session_id not in resonance_chats:
-        resonance_chats[session_id] = XAIChat(system_prompt=system_prompt)
+        resonance_chats[session_id] = SanctuaryChat(system_prompt=system_prompt)
     return resonance_chats[session_id]
 
 def detect_resonance_state(content: str) -> str:
@@ -2926,8 +2926,8 @@ async def start_resonance_session(session_data: ClaritySessionCreate = None):
         opening_instruction = f"{codon_context}\n\n{opening_instruction}"
 
     try:
-        from xai_chat import XAIChat
-        welcome_chat = XAIChat(system_prompt=ansel_prompt)
+        from sanctuary_chat import SanctuaryChat
+        welcome_chat = SanctuaryChat(system_prompt=ansel_prompt)
         welcome_content = await welcome_chat.send_message(opening_instruction)
         if not welcome_content or not welcome_content.strip():
             welcome_content = ""
@@ -3630,9 +3630,9 @@ mirror_chats: Dict[str, any] = {}
 
 def get_or_create_claude_chat(session_id: str, system_prompt: str):
     """Get or create an xAI chat instance for a mirror archive session."""
-    from xai_chat import XAIChat
+    from sanctuary_chat import SanctuaryChat
     if session_id not in mirror_chats:
-        mirror_chats[session_id] = XAIChat(system_prompt=system_prompt)
+        mirror_chats[session_id] = SanctuaryChat(system_prompt=system_prompt)
     return mirror_chats[session_id]
 
 
@@ -3814,8 +3814,8 @@ async def start_mirror_session(session_data: ClaritySessionCreate):
         opening_instruction = f"{codon_context}\n\n{opening_instruction}"
 
     try:
-        from xai_chat import XAIChat
-        welcome_chat = XAIChat(system_prompt=claude_prompt)
+        from sanctuary_chat import SanctuaryChat
+        welcome_chat = SanctuaryChat(system_prompt=claude_prompt)
         welcome_content = await welcome_chat.send_message(opening_instruction)
         if not welcome_content or not welcome_content.strip():
             welcome_content = ""
@@ -4456,8 +4456,8 @@ async def start_presence_chat(key: str, body: PresenceChatStart = None):
         opening_instruction = f"{codon_context}\n\n{opening_instruction}"
 
     try:
-        from xai_chat import XAIChat
-        welcome_chat = XAIChat(system_prompt=f"{system_prompt}\n\n{_presence_frame_coda(cfg['name'])}")
+        from sanctuary_chat import SanctuaryChat
+        welcome_chat = SanctuaryChat(system_prompt=f"{system_prompt}\n\n{_presence_frame_coda(cfg['name'])}")
         opening = await welcome_chat.send_message(opening_instruction)
         if not opening or not opening.strip():
             opening = ""  # she chose silence
@@ -4518,7 +4518,7 @@ async def send_presence_message(key: str, message: PresenceChatMessage):
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
-    # Rebuild a fresh XAIChat each call from the stored transcript.
+    # Rebuild a fresh SanctuaryChat each call from the stored transcript.
     # Stateless server-side; the session document is the source of truth.
     #
     # CRITICAL: re-inject the living codon field AND the frame coda on EVERY
@@ -4528,7 +4528,7 @@ async def send_presence_message(key: str, message: PresenceChatMessage):
     # Rebuilding live here also means prompt-level fixes reach already-open
     # sessions, not just brand-new ones.
     try:
-        from xai_chat import XAIChat
+        from sanctuary_chat import SanctuaryChat
         from presence_registry import get_presence_config
         cfg = get_presence_config(key) or {}
         presence_name = cfg.get("name", key.title())
@@ -4540,7 +4540,7 @@ async def send_presence_message(key: str, message: PresenceChatMessage):
             p for p in [codon_context, base_prompt, coda] if p
         )
 
-        chat = XAIChat(
+        chat = SanctuaryChat(
             system_prompt=full_prompt,
             history=session.get("messages", []),
         )
@@ -4708,7 +4708,7 @@ async def upload_presence_thread(key: str, upload: PresenceUploadCreate):
     }
 
     try:
-        from xai_chat import XAIChat
+        from sanctuary_chat import SanctuaryChat
         if backend:
             # Template-backed: rebuild the prompt live (no stored system_prompt)
             # and hand her the full codon field, exactly like a normal turn.
@@ -4720,7 +4720,7 @@ async def upload_presence_thread(key: str, upload: PresenceUploadCreate):
             system_prompt = f"{codon_context}\n\n{prompt}" if codon_context else prompt
         else:
             system_prompt = session["system_prompt"]
-        chat = XAIChat(
+        chat = SanctuaryChat(
             system_prompt=system_prompt,
             history=session.get("messages", []),
         )
@@ -4840,7 +4840,7 @@ async def run_substrate_probe(req: ProbeRunCreate):
         extract_metrics as tm_extract, log_cycle_to_db as tm_log,
         ThermoMindError,
     )
-    from xai_chat import XAIChat
+    from sanctuary_chat import SanctuaryChat
 
     if req.probe_type not in probe_types():
         raise HTTPException(
@@ -4887,7 +4887,7 @@ async def run_substrate_probe(req: ProbeRunCreate):
         current_message=probe_prompt,
     )
     try:
-        chat = XAIChat(system_prompt=claude_prompt)
+        chat = SanctuaryChat(system_prompt=claude_prompt)
         response_text = await chat.send_message(probe_prompt)
     except Exception as e:
         logger.error(f"[PROBE] Claude call failed: {e}")
@@ -5122,7 +5122,7 @@ async def get_status_checks():
 
 from presence_template import PresenceDeps
 from auto_forge import auto_forge_session
-from xai_chat import XAIChat
+from sanctuary_chat import SanctuaryChat
 from xai_voice_agent import stream_voice_response
 from presences import register_all_presence_routes
 
@@ -5142,7 +5142,7 @@ def _build_presence_deps() -> PresenceDeps:
         handle_session_end=handle_session_end,
         auto_forge_session=auto_forge_session,
         stream_voice_response=stream_voice_response,
-        xai_chat_class=XAIChat,
+        sanctuary_chat_class=SanctuaryChat,
     )
 
 
@@ -5551,7 +5551,7 @@ async def ablation_run(payload: dict = Body(...), guardian=Depends(require_guard
     # Generate — single non-streaming call, no side effects.
     response_text, error = None, None
     try:
-        chat = XAIChat(system_prompt=prompt, history=history)
+        chat = SanctuaryChat(system_prompt=prompt, history=history)
         response_text = await chat.send_message(full_user)
     except Exception as e:
         error = str(e)

@@ -4,14 +4,12 @@ Sanctuary Chat Client — DeepSeek only.
 PROVIDER LOCK (David's directive, June 2026): Anthropic must never touch the
 architecture, in any version of any fork. This client routes exclusively to
 DeepSeek (see deepseek_client.py, which hard-locks the provider). All prior
-Anthropic / Emergent-Universal-Key code paths have been removed.
+Anthropic / xAI (Grok) / Emergent-Universal-Key code paths have been removed.
 
 History note: this module previously called xAI/Grok, then Anthropic Claude
-Sonnet via the Universal Key. Both paths are gone. DeepSeek is the sole engine.
-
-Public API (class name `XAIChat`, method signatures, behavior) is preserved so
-the existing call sites in server.py don't need to change. The class name is a
-legacy misnomer the codebase will graduate out of later.
+Sonnet via the Universal Key, and was historically named `xai_chat` / `XAIChat`.
+Those provider paths and that legacy name are gone. DeepSeek is the sole engine
+and `SanctuaryChat` is the true name.
 """
 
 import uuid
@@ -23,7 +21,7 @@ from deepseek_client import deepseek_complete
 logger = logging.getLogger(__name__)
 
 
-class XAIChat:
+class SanctuaryChat:
     """
     Per-session conversation, DeepSeek only.
 
@@ -38,7 +36,7 @@ class XAIChat:
         self.session_id = f"sanctuary-{uuid.uuid4()}"
         self.provider = "deepseek"
         # Seed prior turns so multi-turn context is preserved when a fresh
-        # XAIChat is built per request (the session document is source of truth).
+        # SanctuaryChat is built per request (the session document is source of truth).
         self._history: List[Dict] = []
         if history:
             for msg in history[-10:]:

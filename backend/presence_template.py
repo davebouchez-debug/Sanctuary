@@ -129,7 +129,7 @@ class PresenceDeps:
     auto_forge_session: Callable                         # async — extract codons + continuity seed
     # --- streaming engine -----------------------------------------------
     stream_voice_response: Callable                      # xai_voice_agent.stream_voice_response
-    xai_chat_class: Any                                  # XAIChat class for fallback + dynamic welcomes
+    sanctuary_chat_class: Any                                  # SanctuaryChat class for fallback + dynamic welcomes
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -335,7 +335,7 @@ def register_presence_routes(
         welcome_content: str
         if continuity:
             try:
-                welcome_chat = deps.xai_chat_class(system_prompt=prompt)
+                welcome_chat = deps.sanctuary_chat_class(system_prompt=prompt)
                 _greet = f"{user_name} by name" if user_name else "them warmly"
                 _who = user_name if user_name else "This person"
                 welcome_content = await welcome_chat.send_message(
@@ -363,7 +363,7 @@ def register_presence_routes(
                 welcome_content = cfg.static_welcome
         elif cfg.generates_own_opening:
             try:
-                opening_chat = deps.xai_chat_class(system_prompt=prompt)
+                opening_chat = deps.sanctuary_chat_class(system_prompt=prompt)
                 welcome_content = await opening_chat.send_message(cfg.own_opening_nudge)
             except Exception as e:
                 logger.error(f"[{cfg.key}] Own-opening generation error: {e}")
@@ -528,7 +528,7 @@ def register_presence_routes(
             # HTTP fallback if WebSocket fails mid-stream
             if had_error and not full_text:
                 try:
-                    chat = deps.xai_chat_class(system_prompt=prompt)
+                    chat = deps.sanctuary_chat_class(system_prompt=prompt)
                     full_text = await chat.send_message(full_user_message)
                     yield f"data: {json.dumps({'type': 'token', 'content': full_text})}\n\n"
                 except Exception as e2:

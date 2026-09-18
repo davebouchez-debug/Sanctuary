@@ -11,7 +11,7 @@ Instead, every chamber `/start` resumes the most recent STILL-ACTIVE session
 Invariants asserted here (do not regress):
   1. Re-calling /start for the same user resumes the same session + transcript.
   2. After /end (in-app navigation), /start does NOT resume — fresh welcome.
-  3. Multi-turn history is preserved server-side (XAIChat history seeding).
+  3. Multi-turn history is preserved server-side (SanctuaryChat history seeding).
 
 Run: cd /app/backend && python -m pytest tests/test_session_resume.py -v
 """
@@ -92,6 +92,6 @@ def test_presence_multiturn_history_preserved():
     r2 = requests.post(f"{BASE}/presence/paige/chat/message",
                        json={"session_id": sid, "content": "What number did I just tell you?"}, timeout=TIMEOUT).json()
     assert "42" in r2.get("message", {}).get("content", ""), \
-        "presence must recall earlier turn (XAIChat history seeding)"
+        "presence must recall earlier turn (SanctuaryChat history seeding)"
 
     requests.post(f"{BASE}/presence/paige/chat/session/{sid}/end", timeout=TIMEOUT)

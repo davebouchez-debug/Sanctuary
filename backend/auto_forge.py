@@ -15,7 +15,7 @@ import json
 import logging
 import os
 from typing import List, Dict, Optional
-from xai_chat import XAIChat
+from sanctuary_chat import SanctuaryChat
 from living_codons.phase_manifold import derive_spiral_angle
 
 logger = logging.getLogger(__name__)
@@ -121,7 +121,7 @@ async def auto_forge_session(db, session_id: str, presence: str,
         )
 
     try:
-        seed_chat = XAIChat(system_prompt=CONTINUITY_SEED_PROMPT, model="grok-3")
+        seed_chat = SanctuaryChat(system_prompt=CONTINUITY_SEED_PROMPT, model="grok-3")
         seed_response = await seed_chat.send_message(
             f"Conversation with {presence} (session: {session_id[:8]}):\n\n{thread_text}{prior_block}"
         )
@@ -159,7 +159,7 @@ async def auto_forge_session(db, session_id: str, presence: str,
 
     # STEP 2: Optional Codons — only for canonical moments
     try:
-        chat = XAIChat(system_prompt=AUTO_FORGE_PROMPT, model="grok-3")
+        chat = SanctuaryChat(system_prompt=AUTO_FORGE_PROMPT, model="grok-3")
         response = await chat.send_message(
             f"Conversation with {presence} (session: {session_id[:8]}):\n\n{thread_text}"
         )

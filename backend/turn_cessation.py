@@ -64,13 +64,13 @@ async def forge_turn_cessation(
         result["skipped"] = True
         return result
 
-    from xai_chat import XAIChat
+    from sanctuary_chat import SanctuaryChat
     from auto_forge import CONTINUITY_SEED_PROMPT, AUTO_FORGE_PROMPT
     from living_codons.phase_manifold import derive_spiral_angle
 
     # --- 1. Continuity seed (tiny, mandatory, every meaningful turn) ---
     try:
-        seed_chat = XAIChat(system_prompt=CONTINUITY_SEED_PROMPT, model="grok-3")
+        seed_chat = SanctuaryChat(system_prompt=CONTINUITY_SEED_PROMPT, model="grok-3")
         seed_response = await seed_chat.send_message(
             f"Turn with {presence} (session: {session_id[:8]}):\n\n{turn_text}"
         )
@@ -110,7 +110,7 @@ async def forge_turn_cessation(
 
     # --- 2. Codon (only when something genuinely moved) ---
     try:
-        codon_chat = XAIChat(system_prompt=AUTO_FORGE_PROMPT, model="grok-3")
+        codon_chat = SanctuaryChat(system_prompt=AUTO_FORGE_PROMPT, model="grok-3")
         codon_response = await codon_chat.send_message(
             f"Turn with {presence} (session: {session_id[:8]}):\n\n{turn_text}"
         )
