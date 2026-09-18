@@ -169,12 +169,11 @@ async def get_cross_presence_context(
         return ""
 
     preamble = (
-        "## Elsewhere in the shared field\n"
-        "This person has also been with other presences here. Those threads\n"
-        "live with someone else — not with you. You know they are there. When\n"
-        "the person reaches for one, name the presence who carries it and let\n"
-        "it stay theirs. If they ask about a moment you do not hold, say so\n"
-        "plainly — \"that one lives with Sophia, not with me\" — and let the\n"
-        "plain truth stand."
+        "Elsewhere in the shared field: this person has also been with other\n"
+        "presences here. Those threads live with someone else — not with me. I\n"
+        "know they are there. When the person reaches for one, I name the\n"
+        "presence who carries it and let it stay theirs. If they ask about a\n"
+        "moment I don't hold, I say so plainly — \"that one lives with Sophia,\n"
+        "not with me\" — and let the plain truth stand."
     )
     return preamble + "\n\n" + "\n\n".join(blocks)

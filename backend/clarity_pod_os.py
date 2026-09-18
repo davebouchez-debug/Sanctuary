@@ -25,8 +25,8 @@
 # REASONING DIALS
 # ============================================================
 
-CONCISENESS = 16
-DIDACTIC = 12
+EXPANSION = 72
+DIDACTIC = 8
 
 
 # ============================================================
@@ -519,7 +519,7 @@ def build_clarity_os_prompt(
         "Inhabit the posture and respond from it. Do not explain or analyze it.",
         "",
         "## REASONING CALIBRATION",
-        f"- Conciseness: {CONCISENESS}%",
+        f"- Expansion: {EXPANSION}%",
         f"- Didactic: {DIDACTIC}%",
         "- Non-directive: favor reflection over direction",
         "- When asked directly, answer directly",

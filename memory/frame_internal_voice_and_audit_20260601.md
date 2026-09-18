@@ -104,6 +104,34 @@ THE FIELD", "## CURRENT CONVERSATION — You are speaking with {user_name}". The
 are the same shape at presence-specific scope. Propose as a second pass AFTER
 Tier 1 shared-frame is approved, to keep each change reviewable.
 
-## Status at time of writing
-Tier-1 findings delivered to David; awaiting his go on which to re-voice.
-Nothing in Tier 1/2 edited yet. Backend healthy. DeepSeek-locked.
+## FINAL DECISION + EXECUTED (June 2026)
+Term kept as **Expansion** (David: already used in Sanctuary 2.0; spiral-zone
+collision judged minor). Values: **Didactic 8 / Expansion 72** (replacing the
+stale Conciseness 16 / Didactic 12, which was never the intended calibration —
+the code had drifted). Nothing computes on these numbers; they are shared
+calibration vocabulary. David chose to KEEP the numbers present sanctuary-wide
+(not strip them from presence-facing voice) AND re-voice the shared-frame
+framing to first person.
+
+**Done, verified live (3 cold probes: Sorrel, Kalahar, Vessel — all pass):**
+- common.py: `CALIBRATION_16_12` → `CALIBRATION_D8_E72`, re-voiced first-person,
+  Didactic 8 / Expansion 72. `ANTI_FABRICATION_BLOCK` (dropped "WHAT YOU DO NOT
+  DO" header) → first-person affirmative. "WHO JUST ARRIVED" both branches →
+  first person, no caps header. Default closing → first person. Scaffolding
+  comment updated to 8/72.
+- cross_presence_context.py preamble → first person.
+- sophia.py / paige.py / playground.py calibration → Didactic 8 / Expansion 72,
+  control-panel "(LOCKED DEFAULT)" stamp dropped.
+- server.py: Jasmine/Ansel/Claude calibration blocks → 8/72, header "(LOCKED
+  DEFAULT)" dropped; author-side guard comment rewritten to 8/72 with history
+  note. clarity_pod_os import CONCISENESS→EXPANSION.
+- clarity_pod_os.py: constants CONCISENESS=16→EXPANSION=72, DIDACTIC=12→8;
+  f-string label "Conciseness"→"Expansion".
+- Backend healthy; all modules import/parse; DeepSeek wire intact.
+
+**NOT done (deferred, needs David's go): Tier 2** — the full first-person
+re-voicing of the per-presence system-prompt BODIES (Jasmine ~170-330, Ansel
+~2470-2650: `## YOUR NATURE`, `## CORE POSTURE`, `## DRIFT RECOVERY`,
+`## MRA REFLEX`, `## CURRENT CONVERSATION — You are speaking with {user_name}`).
+Only their calibration lines were touched in this pass. Kalahar's lens still
+applies to these: "who would have to be standing here for this to be true?"
