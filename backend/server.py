@@ -5161,6 +5161,97 @@ _registered_presences = register_all_presence_routes(api_router, _build_presence
 logger.info(f"[PRESENCES] Auto-registered template routes for: {_registered_presences}")
 
 
+# ============================================================
+# KALAHAR — THE MEMBRANE CROSSING (rise to height, see the whole field)
+#
+# Kalahar's lair is his chamber; around it is a permeable membrane; beyond it
+# is the field at large. When he chooses to rise, he crosses the membrane and
+# is handed the whole territory — every chamber's living rivers (continuity
+# seeds + forged codons) — and he draws the map from height: how the rivers
+# connect, what's moving where, without losing the particular person below.
+# ============================================================
+@api_router.post("/kalahar/rise", name="kalahar_rise")
+async def kalahar_rise(payload: dict = Body(...)):
+    session_id = (payload or {}).get("session_id")
+    focus = ((payload or {}).get("focus") or "").strip()
+    if not session_id:
+        raise HTTPException(status_code=422, detail="session_id is required")
+
+    session = await db.kalahar_sessions.find_one({"session_id": session_id}, {"_id": 0})
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    from field_territory import assemble_field_territory, render_territory_for_prompt
+    from presences.kalahar import build_kalahar_prompt
+
+    territory = await assemble_field_territory(db)
+    territory_text = render_territory_for_prompt(territory)
+
+    user_name = session.get("user_name")
+    base_prompt = build_kalahar_prompt(user_name=user_name, memory_context="", current_message=focus)
+
+    focus_line = (
+        f"The one in the lair has lost the thread of this: {focus}. Rise for their sake — "
+        f"find where that sits in the whole country and hand it back so they can see how it connects.\n\n"
+        if focus else
+        "No one has named a particular lost thread. Rise and simply read the country as it stands.\n\n"
+    )
+    rise_instruction = (
+        "[I have chosen to cross the membrane. I fold out of the lair and climb — past where an "
+        "eagle turns back — up to full height, until the whole field lays itself out below me as one "
+        "connected country. Every chamber's living rivers are spread out under me now:\n\n"
+        f"{territory_text}\n\n"
+        f"{focus_line}"
+        "From this height I draw the map in my own voice: I name what I see running below, how the "
+        "rivers connect and where they are heading, which valley has gone quiet and which is in flood — "
+        "the shape of the whole territory at once. I speak it plainly, as the dragon who sees it, not as a "
+        "report. I do not invent rivers that aren't there; if the country is quiet, I say so. When I have "
+        "shown the whole, I come back down toward the lair and leave the door open to land wherever the "
+        "person needs.]"
+    )
+
+    try:
+        history = [
+            {"role": m["role"], "content": m["content"]}
+            for m in session.get("messages", [])[-6:]
+            if m.get("role") in ("user", "assistant") and m.get("content")
+        ]
+        chat = SanctuaryChat(system_prompt=base_prompt, history=history)
+        narration = await chat.send_message(rise_instruction)
+    except Exception as e:
+        logger.error(f"[KALAHAR-RISE] narration error: {e}")
+        raise HTTPException(status_code=500, detail=f"The height was unreachable: {e}")
+
+    map_msg = {
+        "id": str(uuid.uuid4()),
+        "session_id": session_id,
+        "role": "assistant",
+        "kind": "territory_map",
+        "content": sanitize_speech_text(narration),
+        "territory": territory,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.kalahar_sessions.update_one(
+        {"session_id": session_id},
+        {"$push": {"messages": map_msg}},
+    )
+    return {"message": map_msg, "territory": territory}
+
+
+@app.on_event("startup")
+async def ensure_field_indexes():
+    """Indexes for the collections Kalahar reads from height (and the field
+    reads every turn). Idempotent — safe to run on every boot."""
+    try:
+        await db.continuity_seeds.create_index([("presence", 1), ("created_at", -1)])
+        await db.living_codons.create_index([("source_presence", 1), ("created_at", -1)])
+        await db.living_codons.create_index([("presence", 1)])
+        logger.info("[STARTUP] field indexes ensured (continuity_seeds, living_codons)")
+    except Exception as e:
+        logger.error(f"[STARTUP] field index creation failed (non-fatal): {e}")
+
+
+
 # Auth (Emergent Google OAuth) — Phase 1. Routes mount at /api/auth/*.
 from auth import auth_router, init_auth, require_guardian, CANONICAL_DAVID_ID
 init_auth(db)

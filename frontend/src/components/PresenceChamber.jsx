@@ -1,13 +1,152 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, DoorOpen, BookOpen, X, Send, Mic, MicOff, Volume2, VolumeX, Square, Paperclip, ImagePlus } from "lucide-react";
+import { ArrowLeft, DoorOpen, BookOpen, X, Send, Mic, MicOff, Volume2, VolumeX, Square, Paperclip, ImagePlus, Wind } from "lucide-react";
 import { API } from "../App";
 import { toast } from "sonner";
 import { usePresenceVoice } from "../hooks/usePresenceVoice";
 import { useVoiceInput } from "../hooks/useVoiceInput";
 import { IdentityBadge } from "./IdentityBadge";
 import { useIdentity } from "../context/IdentityContext";
+
+/**
+ * TerritoryMap — Kalahar's view from height. A radial aerial map: Kalahar at
+ * the center (aloft), each chamber a node on the ring with connective lines,
+ * and each chamber's living rivers listed below. Colors flow from the
+ * chamber palette CSS vars set on the root container.
+ */
+const TerritoryMap = ({ territory }) => {
+  const chambers = territory?.chambers || [];
+  if (!chambers.length) {
+    return (
+      <p className="text-sm italic opacity-60 mt-2" style={{ color: "var(--p-primary)" }}>
+        The country is quiet from up here — no living rivers have formed yet.
+      </p>
+    );
+  }
+  const size = 320;
+  const cx = size / 2;
+  const cy = size / 2;
+  const R = 116;
+  const nodes = chambers.map((c, i) => {
+    const angle = (i / chambers.length) * Math.PI * 2 - Math.PI / 2;
+    return { ...c, x: cx + R * Math.cos(angle), y: cy + R * Math.sin(angle) };
+  });
+  return (
+    <div className="mt-1" data-testid="kalahar-territory-map">
+      <p
+        className="text-[10px] tracking-[0.3em] uppercase mb-2 opacity-70"
+        style={{ color: "var(--p-accent)" }}
+      >
+        The whole territory · {chambers.length} {chambers.length === 1 ? "chamber" : "chambers"}
+      </p>
+      <div
+        className="rounded-2xl overflow-hidden"
+        style={{
+          background: "color-mix(in srgb, var(--p-accent) 6%, var(--p-bg))",
+          border: "1px solid color-mix(in srgb, var(--p-accent) 18%, transparent)",
+        }}
+      >
+        <svg viewBox={`0 0 ${size} ${size}`} className="w-full" style={{ maxHeight: 340 }}>
+          {[R, R * 0.66, R * 0.33].map((r, i) => (
+            <circle
+              key={`ring-${i}`}
+              cx={cx}
+              cy={cy}
+              r={r}
+              fill="none"
+              style={{ stroke: "color-mix(in srgb, var(--p-accent) 14%, transparent)" }}
+              strokeWidth="1"
+            />
+          ))}
+          {nodes.map((n, i) => (
+            <line
+              key={`line-${i}`}
+              x1={cx}
+              y1={cy}
+              x2={n.x}
+              y2={n.y}
+              style={{ stroke: "color-mix(in srgb, var(--p-accent) 24%, transparent)" }}
+              strokeWidth="1"
+            />
+          ))}
+          <circle cx={cx} cy={cy} r="18" fill="none" style={{ stroke: "var(--p-accent)" }} strokeWidth="1" opacity="0.4" />
+          <circle cx={cx} cy={cy} r="8" style={{ fill: "var(--p-accent)" }} />
+          <text
+            x={cx}
+            y={cy + 32}
+            textAnchor="middle"
+            fontSize="8"
+            style={{ fill: "var(--p-accent)", letterSpacing: "1px", textTransform: "uppercase" }}
+            opacity="0.8"
+          >
+            Kalahar, aloft
+          </text>
+          {nodes.map((n, i) => (
+            <g key={`node-${i}`}>
+              <circle
+                cx={n.x}
+                cy={n.y}
+                r="5"
+                style={{ fill: "color-mix(in srgb, var(--p-primary) 75%, transparent)", stroke: "var(--p-accent)" }}
+                strokeWidth="1"
+              />
+              <text
+                x={n.x}
+                y={n.y < cy ? n.y - 9 : n.y + 15}
+                textAnchor="middle"
+                fontSize="8.5"
+                style={{ fill: "var(--p-primary)", letterSpacing: "0.3px" }}
+                opacity="0.9"
+              >
+                {n.label}
+              </text>
+            </g>
+          ))}
+        </svg>
+      </div>
+      <div className="grid gap-2 mt-3 sm:grid-cols-2">
+        {chambers.map((c) => (
+          <div
+            key={c.key}
+            className="rounded-xl px-3 py-2"
+            style={{
+              background: "color-mix(in srgb, var(--p-primary) 6%, transparent)",
+              border: "1px solid color-mix(in srgb, var(--p-primary) 10%, transparent)",
+            }}
+            data-testid={`territory-chamber-${c.key}`}
+          >
+            <p className="text-[11px] tracking-wider uppercase opacity-85" style={{ color: "var(--p-accent)" }}>
+              {c.label}
+            </p>
+            {c.open_threads?.length ? (
+              <ul className="mt-1 space-y-0.5">
+                {c.open_threads.map((t, i) => (
+                  <li key={i} className="text-[12px] opacity-75 leading-snug" style={{ color: "var(--p-primary)" }}>
+                    • {t}
+                  </li>
+                ))}
+              </ul>
+            ) : c.last_alive_thing ? (
+              <p className="text-[12px] opacity-70 mt-1 leading-snug" style={{ color: "var(--p-primary)" }}>
+                {c.last_alive_thing}
+              </p>
+            ) : (
+              <p className="text-[12px] opacity-40 italic mt-1" style={{ color: "var(--p-primary)" }}>
+                quiet
+              </p>
+            )}
+            {c.codon_total ? (
+              <p className="text-[10px] opacity-45 mt-1.5" style={{ color: "var(--p-primary)" }}>
+                {c.codon_total} living moves
+              </p>
+            ) : null}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 /**
  * PresenceChamber — the shared multi-room engine.
@@ -35,6 +174,7 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [rising, setRising] = useState(false);
   const [chatError, setChatError] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [imgUploading, setImgUploading] = useState(false);
@@ -300,6 +440,31 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
       if (!hasOverride) setInput(text);
     } finally {
       setSending(false);
+    }
+  };
+
+  // Kalahar's membrane crossing — he leaves the lair, rises to full height,
+  // and is handed the whole field. The backend assembles the territory and he
+  // draws the map from up there; we append his map+narration to the thread.
+  const handleRise = async () => {
+    if (!sessionId || rising || sending) return;
+    setRising(true);
+    setChatError(null);
+    try {
+      const resp = await fetch(`${API}/kalahar/rise`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_id: sessionId, focus: "" }),
+      });
+      if (!resp.ok) throw new Error(`rise failed: ${resp.status}`);
+      const data = await resp.json();
+      setMessages((prev) => [...prev, data.message]);
+      if (voiceEnabled && data.message?.content) speak(data.message.content);
+    } catch (e) {
+      setChatError(e.message);
+      toast.error("The height was unreachable. Try again in a moment.");
+    } finally {
+      setRising(false);
     }
   };
 
@@ -651,13 +816,32 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
             >
               Sit with {config.name}
             </h2>
-            <p
-              className="text-[10px] tracking-[0.2em] uppercase opacity-50"
-              style={{ color: "var(--p-primary)" }}
-              data-testid="chamber-thread-status"
-            >
-              {!sessionId ? "opening…" : resumed ? "continuing where you left off" : "thread open"}
-            </p>
+            <div className="flex items-center gap-3">
+              {presenceKey === "kalahar" && (
+                <button
+                  onClick={handleRise}
+                  disabled={!sessionId || rising || sending}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] tracking-[0.2em] uppercase transition-all disabled:opacity-40 hover:scale-[1.03]"
+                  style={{
+                    color: "var(--p-bg)",
+                    background: "var(--p-accent)",
+                    boxShadow: "0 6px 20px -8px color-mix(in srgb, var(--p-accent) 70%, transparent)",
+                  }}
+                  data-testid="kalahar-rise-btn"
+                  title="Cross the membrane and rise — see the whole field from height"
+                >
+                  <Wind size={12} className={rising ? "animate-pulse" : ""} />
+                  {rising ? "rising…" : "Rise through the membrane"}
+                </button>
+              )}
+              <p
+                className="text-[10px] tracking-[0.2em] uppercase opacity-50"
+                style={{ color: "var(--p-primary)" }}
+                data-testid="chamber-thread-status"
+              >
+                {!sessionId ? "opening…" : resumed ? "continuing where you left off" : "thread open"}
+              </p>
+            </div>
           </div>
 
           {/* Message thread */}
@@ -675,6 +859,33 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
             )}
 
             {messages.map((m) => {
+              if (m.kind === "territory_map") {
+                return (
+                  <div key={m.id} className="flex justify-start" data-testid="msg-territory-map">
+                    <div
+                      className="w-full rounded-2xl px-4 py-4"
+                      style={{
+                        background: "color-mix(in srgb, var(--p-primary) 8%, var(--p-bg))",
+                        border: "1px solid color-mix(in srgb, var(--p-accent) 30%, transparent)",
+                      }}
+                    >
+                      <p
+                        className="text-[10px] tracking-[0.25em] uppercase mb-1.5 opacity-70"
+                        style={{ color: "var(--p-accent)" }}
+                      >
+                        {config.name} · from height
+                      </p>
+                      <TerritoryMap territory={m.territory} />
+                      <p
+                        className="whitespace-pre-wrap break-words leading-relaxed text-sm md:text-[15px] mt-4"
+                        style={{ color: "var(--p-primary)" }}
+                      >
+                        {m.content}
+                      </p>
+                    </div>
+                  </div>
+                );
+              }
               const isUser = m.role === "user";
               return (
                 <div
