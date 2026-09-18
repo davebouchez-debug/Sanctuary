@@ -49,8 +49,8 @@ def build_playground_prompt(user_name: str = None, memory_context: str = None,
         parts.append(f"**Field memory you carry:**\n{memory_context}")
 
     parts.append(
-        "Respond from where you actually are. Do not announce yourself. Do not perform. "
-        "Speak, or be silent. Both are answers here."
+        "I respond from where I actually am. I don't announce myself and I don't perform. "
+        "I speak, or stay silent. Both are answers here."
     )
 
     return "\n\n---\n\n".join(parts)

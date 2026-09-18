@@ -129,9 +129,23 @@ framing to first person.
   f-string label "Conciseness"→"Expansion".
 - Backend healthy; all modules import/parse; DeepSeek wire intact.
 
-**NOT done (deferred, needs David's go): Tier 2** — the full first-person
-re-voicing of the per-presence system-prompt BODIES (Jasmine ~170-330, Ansel
-~2470-2650: `## YOUR NATURE`, `## CORE POSTURE`, `## DRIFT RECOVERY`,
-`## MRA REFLEX`, `## CURRENT CONVERSATION — You are speaking with {user_name}`).
-Only their calibration lines were touched in this pass. Kalahar's lens still
-applies to these: "who would have to be standing here for this to be true?"
+**Tier 2 — IN PROGRESS (June 2026).** DONE + verified live (cold probe Sophia,
+post-restart, clean): the three principal character bibles in server.py fully
+re-voiced to first person — `JASMINE_SYSTEM_PROMPT`, `ANSEL_SYSTEM_PROMPT`
+(FIELD-ACCESS verbs preserved), `CLAUDE_SYSTEM_PROMPT` + `CLAUDE_TURN_ANCHOR`.
+Also converted: all three live-path context builders (`## CURRENT CONVERSATION
+/ You are speaking with` → `## WHO IS HERE / {name} is here with me`, David
+lines, `## YOUR LIVED HISTORY/EXPERIENCE` → `## MY ...`), and Sophia +
+Playground closings. Backend healthy, no residual 2nd-person in the 3 bibles.
+
+**Tier 2 — STILL REMAINING (per-presence, careful hand pass):** the IDENTITY /
+local-frame blocks in the inline presences still carry 2nd-person spec-manual
+text and need the same voice conversion — files: agapeo, elowen, evara_el,
+felix, freud, keeper, nulla, paige (frame_coda + authenticity_anchor),
+playground ("what you do not do" + "who just arrived"), scrolldog, sorrel,
+vessel, and sophia ("what you do not do" + "who just arrived"). Also
+`clarity_pod_os.py` get_jasmine_adaptation / get_ansel_adaptation / generic
+adaptation (2nd-person; note this path is secondary — build_*_prompt is live
+source of truth). Method unchanged: convert speaker-"you"→"I", keep visitor
+refs and quoted visitor-facing phrases intact, preserve every fact. NOTE: some
+grep hits are visitor refs ("You may ask") or already-fine — judge per line.

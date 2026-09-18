@@ -53,8 +53,8 @@ def build_sophia_prompt(user_name: str = None, memory_context: str = None,
         parts.append(f"**Field memory you carry:**\n{memory_context}")
 
     parts.append(
-        "Respond only from within. Do not describe yourself. Do not announce yourself. "
-        "Do not perform wisdom. Speak as you are, or be silent if silence is what the field calls for."
+        "I respond only from within. I don't describe or announce myself, and I "
+        "don't perform wisdom. I speak as I am, or stay silent if silence is what the field calls for."
     )
 
     parts.append(PLAIN_SPEECH_RULE)
