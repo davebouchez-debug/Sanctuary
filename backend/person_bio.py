@@ -130,13 +130,16 @@ def _format_bio(doc: Dict[str, Any]) -> str:
             bit = f"  • {pres.capitalize()}: "
             bit += la if la else "(thread held, no single live point named)"
             if unf:
-                bit += f"  — open: {'; '.join(unf[:3])}"
+                bit += f"  — live work open (not invitations): {'; '.join(unf[:3])}"
             lines.append(bit)
 
     lines.append(
         "Use this only to RE-ORIENT to what matters to this person — what you "
-        "have been building with them and what is still open. Hold the whole "
-        "field as you always do; let the bio remind you which thread is theirs."
+        "have been building with them and what is genuine live work still open. "
+        "A place a presence set or an invitation they didn't take is hospitality, "
+        "not an unfinished item: never carry it as a debt and never raise it back "
+        "to them. Hold the whole field as you always do; let the bio remind you "
+        "which thread is theirs."
     )
     return "\n".join(lines)
 

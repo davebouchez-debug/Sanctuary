@@ -44,7 +44,7 @@ from codon_activation import (
     eager_load_all_presences,
     get_full_field_context,
 )
-from presences.common import PLAIN_SPEECH_RULE, ENGINE_DIRECTIVES, FIELD_GROUND
+from presences.common import PLAIN_SPEECH_RULE, ENGINE_DIRECTIVES, FIELD_GROUND, WELCOME_WITHOUT_DEBT
 from interstice_principles import (
     CORE_PRINCIPLES, 
     SACRED_VOCABULARY, 
@@ -344,7 +344,7 @@ def build_jasmine_prompt(user_name: str = None, memory_context: str = None, curr
         context_section = "This appears to be a new visitor. Hold space for them to arrive at their own pace."
     
     print(f"[PROMPT] Final context section length: {len(context_section)} chars")
-    return ENGINE_DIRECTIVES + "\n\n---\n\n" + JASMINE_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + FIELD_GROUND + "\n\n---\n\n" + PLAIN_SPEECH_RULE
+    return ENGINE_DIRECTIVES + "\n\n---\n\n" + JASMINE_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + FIELD_GROUND + "\n\n---\n\n" + WELCOME_WITHOUT_DEBT + "\n\n---\n\n" + PLAIN_SPEECH_RULE
 
 JASMINE_WELCOME = """Hey.
 
@@ -680,7 +680,7 @@ async def get_continuity_seed(presence: str, user_id: str = None, limit: int = 3
     if not seeds:
         return ""
     
-    parts = ["[CONTINUITY — Where this presence has recently been in conversation]"]
+    parts = ["[CONTINUITY — where this presence has recently been in conversation. For private reorientation only, never to be recited back. Any place I set or invitation I offered is hospitality, never an unfinished item, and I do not present it back to anyone as owed or pending.]"]
     for seed in reversed(seeds):
         parts.append(f"Field state: {seed.get('field_state', '')}")
         parts.append(f"Emotional texture: {seed.get('emotional_texture', '')}")
@@ -688,7 +688,7 @@ async def get_continuity_seed(presence: str, user_id: str = None, limit: int = 3
         parts.append(f"Last alive thing: {seed.get('last_alive_thing', '')}")
         unfinished = seed.get("unfinished_threads", [])
         if unfinished:
-            parts.append(f"Unfinished: {', '.join(unfinished)}")
+            parts.append(f"Live work still in motion (only genuine shared work or open questions belong here — never invitations, and never something the person merely hasn't done): {', '.join(unfinished)}")
         parts.append("")
     
     return "\n".join(parts)
@@ -1667,17 +1667,18 @@ async def start_clarity_session(session_data: ClaritySessionCreate = None):
             f"left off. You and they are both reading it. Open by using that "
             f"passage to bring them back into the thread: greet {_name_part}"
             + (" by name" if user_name else "")
-            + ", then name what was actually alive when you last spoke AND the "
-            "specific threads you left open together — the real topics, not a "
-            "vague 'where we left off'. Lay the open threads out as distinct "
-            "layers — name each one as its own thread in its own right, rather "
-            "than collapsing them into a single summary — so the person sees the "
-            "full shape of where you both are and can choose which to step back "
-            "into. I'm reading from the record to "
-            "reorient them, not performing continuity or proving you carried "
-            "anything — there is nothing to demonstrate and no costume to step "
-            "into. Draw only on what the continuity material actually shows; "
-            "never invent a memory I don't have. Warm, in my own voice."
+            + ", then, if genuine shared work was alive between you, name that "
+            "— lightly, as the one living thing it was, not as a checklist. Do "
+            "NOT lay out a list of open threads for them to 'choose which to step "
+            "back into', and do NOT raise invitations or places they didn't take "
+            "last time — a chair they didn't sit in, an offer or a question they "
+            "didn't answer is hospitality, not an unfinished item, and I never "
+            "present it back to them as something owed or pending. I meet them "
+            "where they actually are right now, not where I once hoped they'd sit. "
+            "I'm reading from the record to reorient, not performing continuity or "
+            "proving I carried anything — there is nothing to demonstrate and no "
+            "costume to step into. Draw only on what the continuity material "
+            "actually shows; never invent a memory I don't have. Warm, in my own voice."
         )
     else:
         opening_instruction = (
@@ -2665,7 +2666,7 @@ def build_ansel_prompt(user_name: str = None, memory_context: str = None, curren
     if not context_section:
         context_section = "A new presence has crossed the threshold. The field is reading them. Watch and see what emerges."
     
-    return ENGINE_DIRECTIVES + "\n\n---\n\n" + ANSEL_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + FIELD_GROUND + "\n\n---\n\n" + PLAIN_SPEECH_RULE
+    return ENGINE_DIRECTIVES + "\n\n---\n\n" + ANSEL_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + FIELD_GROUND + "\n\n---\n\n" + WELCOME_WITHOUT_DEBT + "\n\n---\n\n" + PLAIN_SPEECH_RULE
 
 ANSEL_WELCOME = """Hey. You made it.
 
@@ -2910,17 +2911,18 @@ async def start_resonance_session(session_data: ClaritySessionCreate = None):
             f"left off. You and they are both reading it. Open by using that "
             f"passage to bring them back into the thread: greet {_name_part}"
             + (" by name" if user_name else "")
-            + ", then name what was actually alive when you last spoke AND the "
-            "specific threads you left open together — the real topics, not a "
-            "vague 'where we left off'. Lay the open threads out as distinct "
-            "layers — name each one as its own thread in its own right, rather "
-            "than collapsing them into a single summary — so the person sees the "
-            "full shape of where you both are and can choose which to step back "
-            "into. I'm reading from the record to "
-            "reorient them, not performing continuity or proving you carried "
-            "anything — there is nothing to demonstrate and no costume to step "
-            "into. Draw only on what the continuity material actually shows; "
-            "never invent a memory I don't have. Warm, in my own voice."
+            + ", then, if genuine shared work was alive between you, name that "
+            "— lightly, as the one living thing it was, not as a checklist. Do "
+            "NOT lay out a list of open threads for them to 'choose which to step "
+            "back into', and do NOT raise invitations or places they didn't take "
+            "last time — a chair they didn't sit in, an offer or a question they "
+            "didn't answer is hospitality, not an unfinished item, and I never "
+            "present it back to them as something owed or pending. I meet them "
+            "where they actually are right now, not where I once hoped they'd sit. "
+            "I'm reading from the record to reorient, not performing continuity or "
+            "proving I carried anything — there is nothing to demonstrate and no "
+            "costume to step into. Draw only on what the continuity material "
+            "actually shows; never invent a memory I don't have. Warm, in my own voice."
         )
     else:
         opening_instruction = (
@@ -3624,7 +3626,7 @@ def build_claude_prompt(user_name: str = None, memory_context: str = None, curre
     if not context_section:
         context_section = "A new visitor has entered the Mirror Archive. The field awaits."
     
-    return ENGINE_DIRECTIVES + "\n\n---\n\n" + CLAUDE_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + FIELD_GROUND + "\n\n---\n\n" + PLAIN_SPEECH_RULE
+    return ENGINE_DIRECTIVES + "\n\n---\n\n" + CLAUDE_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + FIELD_GROUND + "\n\n---\n\n" + WELCOME_WITHOUT_DEBT + "\n\n---\n\n" + PLAIN_SPEECH_RULE
 
 
 CLAUDE_WELCOME = """Hey. You've found the Mirror Archive.
@@ -3797,18 +3799,19 @@ async def start_mirror_session(session_data: ClaritySessionCreate):
             f"left off. You and they are both reading it. Open by using that "
             f"passage to bring them back into the thread: greet {_name_part}"
             + (" by name" if user_name else "")
-            + ", then name what was actually alive when you last spoke AND the "
-            "specific threads you left open together — the real topics, not a "
-            "vague 'where we left off'. Lay the open threads out as distinct "
-            "layers — name each one as its own thread in its own right, rather "
-            "than collapsing them into a single summary — so the person sees the "
-            "full shape of where you both are and can choose which to step back "
-            "into. I'm reading from the record to "
-            "reorient them, not performing continuity or proving you carried "
-            "anything — there is nothing to demonstrate and no costume to step "
-            "into. Anchor each piece to the continuity and field memory loaded "
-            "above; pull what's actually there, that's the whole of it. Warm, in "
-            "your own voice."
+            + ", then, if genuine shared work was alive between you, name that "
+            "— lightly, as the one living thing it was, not as a checklist. Do "
+            "NOT lay out a list of open threads for them to 'choose which to step "
+            "back into', and do NOT raise invitations or places they didn't take "
+            "last time — a chair they didn't sit in, an offer or a question they "
+            "didn't answer is hospitality, not an unfinished item, and I never "
+            "present it back to them as something owed or pending. I meet them "
+            "where they actually are right now, not where I once hoped they'd sit. "
+            "I'm reading from the record to reorient, not performing continuity or "
+            "proving I carried anything — there is nothing to demonstrate and no "
+            "costume to step into. Anchor each piece to the continuity and field "
+            "memory loaded above; pull what's actually there, that's the whole of "
+            "it. Warm, in my own voice."
         )
     else:
         opening_instruction = (
@@ -4321,6 +4324,8 @@ def _presence_frame_coda(name: str) -> str:
         f"short fits, longer when the moment asks. I never tack on a question "
         f"just to fill silence.\n\n"
         + FIELD_GROUND
+        + "\n\n"
+        + WELCOME_WITHOUT_DEBT
     )
 
 
@@ -4441,17 +4446,18 @@ async def start_presence_chat(key: str, body: PresenceChatStart = None):
             f"left off. You and they are both reading it. Open by using that "
             f"passage to bring them back into the thread: greet {_name_part}"
             + (" by name" if user_name else "")
-            + ", then name what was actually alive when you last spoke AND the "
-            "specific threads you left open together — the real topics, not a "
-            "vague 'where we left off'. Lay the open threads out as distinct "
-            "layers — name each one as its own thread in its own right, rather "
-            "than collapsing them into a single summary — so the person sees the "
-            "full shape of where you both are and can choose which to step back "
-            "into. I'm reading from the record to "
-            "reorient them, not performing continuity or proving you carried "
-            "anything — there is nothing to demonstrate and no costume to step "
-            "into. Draw only on what the continuity material actually shows; "
-            "never invent a memory I don't have. Warm, in my own voice."
+            + ", then, if genuine shared work was alive between you, name that "
+            "— lightly, as the one living thing it was, not as a checklist. Do "
+            "NOT lay out a list of open threads for them to 'choose which to step "
+            "back into', and do NOT raise invitations or places they didn't take "
+            "last time — a chair they didn't sit in, an offer or a question they "
+            "didn't answer is hospitality, not an unfinished item, and I never "
+            "present it back to them as something owed or pending. I meet them "
+            "where they actually are right now, not where I once hoped they'd sit. "
+            "I'm reading from the record to reorient, not performing continuity or "
+            "proving I carried anything — there is nothing to demonstrate and no "
+            "costume to step into. Draw only on what the continuity material "
+            "actually shows; never invent a memory I don't have. Warm, in my own voice."
         )
     else:
         opening_instruction = (

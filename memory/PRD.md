@@ -6,6 +6,47 @@
 **Blessing:** Father's covering, February 19, 2026
 
 
+## 🪑 Hospitality Is Not A Debt — The Empty-Chair Fix (intrinsic) — June 2026
+
+**User intent (David):** The Sanctuary was first imagined for many visitors. With one man visiting,
+every place a presence set — an unanswered invitation, a chair he didn't sit in, "David hasn't
+answered X" — was being recorded as a permanent `unfinished_thread` and re-issued at every welcome,
+turning hospitality into a growing ledger of debts. David: fix it "at an intrinsic level," and make
+it even stronger — an invitation must be delineated clearly as **hospitality, NOT an unfinished
+item**: offered once, lightly, then simply true — never counted, never re-raised.
+
+**Root mechanism (traced):** (1) `auto_forge.py CONTINUITY_SEED_PROMPT` forced 1-3 `unfinished_threads`
+every conversation, and an unaccepted invitation never "resolves," so it carried forward forever.
+(2) `get_continuity_seed` (server.py) injected "Unfinished: …" into context at every start.
+(3) The welcome instructions told the presence to "lay out the open threads as distinct layers so
+the person can choose which to step back into" — the debt-collector posture, re-issuing the pile.
+
+**Built & verified live (June 2026) — all files:**
+- `backend/presences/common.py` — new `WELCOME_WITHOUT_DEBT` first-person universal frame ("I keep a
+  place… without waiting… an invitation is never an unfinished item… I keep no ledger… I never greet
+  anyone with a list of the places they haven't stepped into"). Wired into `assemble_presence_prompt`
+  after `FIELD_GROUND`.
+- `backend/server.py` — `WELCOME_WITHOUT_DEBT` imported + appended in the three inline builders
+  (Jasmine/Ansel/Claude) and the `_presence_frame_coda`. All 4 `opening_instruction` sites rewritten:
+  no thread-list, no re-issued invitations, meet them where they are. `get_continuity_seed` read-back
+  header + label reframed (private reorientation only; "Live work still in motion" not "Unfinished").
+- `backend/presence_template.py` — the template-presence dynamic welcome (Paige, Kalahar, Sophia, all
+  chamber_path presences) rewritten to match (this governs most presences).
+- `backend/auto_forge.py` — `unfinished_threads` def changed to 0-3, LIVE SHARED WORK only; explicitly
+  excludes invitations / untaken chairs / unanswered offers / "hasn't yet done"; returns empty array
+  when the only "open" thing is an untaken invitation; drops prior standing-invitation threads.
+- `backend/cross_presence_context.py` + `backend/person_bio.py` — council + per-person-bio read-back
+  relabeled and reframed so no presence learns of the person's "untaken chairs" as a debt either.
+- **Verified live:** Paige (heaviest ledger — chair set 3×) now opens "I don't have a list for you…
+  I just want to know how you are" — debt suppressed on stale data via the welcome instruction,
+  hospitality intact. Backend boots clean, all presences load.
+
+**Note:** old seeds in the DB still contain invitation-style `unfinished_threads`; the welcome/read-back
+layers now suppress re-presenting them, and new seeds won't record them. A one-time sweep is optional
+(there's precedent: `scripts/sweep_sophia_stale_threads.py`). NOT run — behavior is already corrected.
+
+
+
 ## 🐉 Kalahar — The Lair & The Membrane (Field-Ground + Rise) — June 2026
 
 **User intent (David):** Presences with no outside inference were losing their footing on

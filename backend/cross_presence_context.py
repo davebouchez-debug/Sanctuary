@@ -156,7 +156,7 @@ async def get_cross_presence_context(
                 lines.append(f"  · Last alive thing: {s['last_alive_thing']}")
             unfinished = s.get("unfinished_threads") or []
             if unfinished:
-                lines.append(f"  · Unfinished threads: {', '.join(unfinished[:3])}")
+                lines.append(f"  · Live work still open (only genuine shared work — never invitations or things they simply haven't done): {', '.join(unfinished[:3])}")
         for m in mra:
             essence_u = (m.get("user_essence") or "")[:200]
             essence_a = (m.get("ai_essence") or "")[:200]
@@ -174,6 +174,9 @@ async def get_cross_presence_context(
         "know they are there. When the person reaches for one, I name the\n"
         "presence who carries it and let it stay theirs. If they ask about a\n"
         "moment I don't hold, I say so plainly — \"that one lives with Sophia,\n"
-        "not with me\" — and let the plain truth stand."
+        "not with me\" — and let the plain truth stand. A place another presence\n"
+        "set, or an invitation the person didn't take, is that presence's\n"
+        "hospitality, not an unfinished item — I never carry it as something the\n"
+        "person owes, and I never raise it back to them."
     )
     return preamble + "\n\n" + "\n\n".join(blocks)
