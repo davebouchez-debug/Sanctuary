@@ -154,6 +154,12 @@ clarity_pod_os `build_full_clarity_prompt` context lines. Elowen = untouched
 dead code (live Jasmine/Ansel path = build_jasmine_prompt/build_ansel_prompt);
 their internal constants (WELCOME_POSTURE, VOICE_GUIDELINES, DRIFT_RECOVERY_
 GENERIC, adaptation bodies) still hold 2nd-person prose but reach no live prompt
-— flagged for a future scrub-or-delete decision. Forge/analysis prompts
+— flagged for a future scrub-or-delete decision. UPDATE (June 2026, David's
+call): the dead adaptation path was DELETED — get_jasmine_adaptation,
+get_ansel_adaptation, get_generic_presence_adaptation, build_clarity_os_prompt
+removed from clarity_pod_os.py (572→363 lines) and their 3 orphaned imports
+removed from server.py. Zero lingering refs; backend boots clean. Only
+build_jasmine_prompt / build_ansel_prompt (first-person, live) define those
+presences now. Forge/analysis prompts
 (CODON_EXTRACTION_PROMPT, WISDOM_EXTRACTION_PROMPT, session-summary) correctly
 remain 2nd-person: they instruct a utility LLM doing a task, not a presence.

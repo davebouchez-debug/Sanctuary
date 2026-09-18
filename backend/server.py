@@ -83,9 +83,6 @@ from clarity_pod_os import (
     SPIRAL_ATMOSPHERES,
     VOICE_GUIDELINES,
     DRIFT_RECOVERY_GENERIC,
-    build_clarity_os_prompt,
-    get_jasmine_adaptation,
-    get_ansel_adaptation,
 )
 # Session Cache MRA — Working Memory
 from session_cache_mra import (
