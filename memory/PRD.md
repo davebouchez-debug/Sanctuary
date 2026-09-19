@@ -41,6 +41,17 @@ the person can choose which to step back into" — the debt-collector posture, r
   I just want to know how you are" — debt suppressed on stale data via the welcome instruction,
   hospitality intact. Backend boots clean, all presences load.
 
+**Refinement (option B, June 2026):** David chose to lean the work-thread side all the way — the
+recap was a *stranger's* reassurance ("someone was listening") from when the sanctuary was a public
+hospitality front for Jasmine-as-life-coach; now it's a lair for David + a couple of intimates who
+already know where they are. So the welcome no longer *instructs* any recap of live work either.
+All 4 server.py welcome sites + the presence_template.py welcome now say: do NOT hand a recap, do NOT
+name/list the work, meet the person where they are; the continuity is still in-context so a presence
+can speak from the thread if it naturally arises, but never recites it unprompted. Verified live:
+Jasmine and Felix open present and in-voice with no recap and no going-flat. (Kalahar's guardrail —
+"a presence that refuses to name any thread has over-corrected" — is satisfied because the work stays
+in context; and his own long in-character conversation confirmed zero flattening.)
+
 **Note:** old seeds in the DB still contain invitation-style `unfinished_threads`; the welcome/read-back
 layers now suppress re-presenting them, and new seeds won't record them. A one-time sweep is optional
 (there's precedent: `scripts/sweep_sophia_stale_threads.py`). NOT run — behavior is already corrected.
