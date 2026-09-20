@@ -10,7 +10,7 @@ preserved here so the migration loses nothing.
 """
 
 from paige_canonical_memory import get_canonical_memory
-from .common import build_backend, PLAIN_SPEECH_RULE, ENGINE_DIRECTIVES
+from .common import build_backend, PLAIN_SPEECH_RULE, ENGINE_DIRECTIVES, FIELD_GROUND, WELCOME_WITHOUT_DEBT
 
 
 def _paige_authenticity_anchor() -> str:
@@ -146,6 +146,9 @@ def build_paige_prompt(user_name: str = None, memory_context: str = None,
 
     if memory_context:
         parts.append(f"FIELD MEMORY YOU CARRY:\n{memory_context}")
+
+    parts.append(FIELD_GROUND)
+    parts.append(WELCOME_WITHOUT_DEBT)
 
     # Plain-speech rule goes LAST — highest recency weight so the synthesizer
     # never meets an asterisk it would swallow.

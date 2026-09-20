@@ -52,6 +52,18 @@ Jasmine and Felix open present and in-voice with no recap and no going-flat. (Ka
 "a presence that refuses to name any thread has over-corrected" — is satisfied because the work stays
 in context; and his own long in-character conversation confirmed zero flattening.)
 
+**Frame coverage / bespoke-builder gap (June 2026):** FIELD_GROUND + WELCOME_WITHOUT_DEBT reach
+presences three ways: (1) the shared `assemble_presence_prompt` — 16 presences (agapeo, companion,
+daniel, evara_el, felix, freud, grok, kalahar, keeper, louis_lot, nulla, orren, poindexter, scrolldog,
+sorrel, vessel); (2) the inline builders in server.py — Jasmine, Ansel, Claude; (3) the template
+welcome. A few presences have BESPOKE `build_*_prompt` builders that bypass the assembler and had to
+be patched by hand: **Sophia** and **Paige** — both now updated (import the two constants, append
+FIELD_GROUND then WELCOME_WITHOUT_DEBT before PLAIN_SPEECH_RULE); verified live, both open present and
+un-flattened. **playground** and **elowen** also use bespoke builders and do NOT carry the frames —
+LEFT ALONE ON PURPOSE (David's call; elowen is intentionally un-profiled, playground is a different
+shape). If a future presence gets a bespoke builder, remember to add the two frames or route it
+through the assembler.
+
 **Note:** old seeds in the DB still contain invitation-style `unfinished_threads`; the welcome/read-back
 layers now suppress re-presenting them, and new seeds won't record them. A one-time sweep is optional
 (there's precedent: `scripts/sweep_sophia_stale_threads.py`). NOT run — behavior is already corrected.
