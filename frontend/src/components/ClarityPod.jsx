@@ -13,6 +13,7 @@ import { VoiceLoopControls } from "./VoiceLoopControls";
 import { IdentityBadge } from "./IdentityBadge";
 import { stopGlobalLegacyAudio } from "../lib/legacyAudio";
 import { useIdentity } from "../context/IdentityContext";
+import { threadStartFields, rememberThread, forgetThread } from "../lib/threadSession";
 
 function base64ToBlob(base64, mimeType) {
   const byteCharacters = atob(base64);
@@ -53,7 +54,9 @@ const presenceStates = {
   }
 };
 
-export const ClarityPod = () => {
+export const ClarityPod = ({ threadIntent } = {}) => {
+  const [startFields] = useState(() => threadStartFields("jasmine", threadIntent));
+  useEffect(() => () => forgetThread("jasmine"), []);
   const { ready: identityReady } = useIdentity();
   const [sessionId, setSessionId] = useState(null);
   const [resumed, setResumed] = useState(false);
@@ -199,9 +202,11 @@ export const ClarityPod = () => {
       stop(); // Stop any ongoing speech
       const response = await axios.post(`${API}/clarity/start`, {
         user_id: userId,
-        user_name: userName
+        user_name: userName,
+        ...startFields
       });
       setSessionId(response.data.session_id);
+      rememberThread("jasmine", response.data.session_id);
       setResumed(!!response.data.resumed);
       // Backend resumes an open thread (new tab / reload) → full messages array.
       const msgs = response.data.messages?.length ? response.data.messages : [response.data.message];

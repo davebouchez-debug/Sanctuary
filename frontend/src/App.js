@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import "@/App.css";
-import { BrowserRouter, Routes, Route, useLocation, Link } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Link, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Navigation } from "./components/Navigation";
 import { HeroSection } from "./components/HeroSection";
@@ -25,12 +25,22 @@ import Observatory from "./components/Observatory";
 import Ablation from "./components/Ablation";
 import { SubstrateProbes } from "./components/SubstrateProbes";
 import { PresenceChamber } from "./components/PresenceChamber";
+import { ThreadedChamber } from "./components/ThreadSidebar";
 import { PresencesIndex } from "./components/PresencesIndex";
 import { Toaster } from "./components/ui/sonner";
 import { IdentityProvider, useIdentity } from "./context/IdentityContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { AuthCallback } from "./components/AuthCallback";
 import { Login } from "./components/Login";
+
+
+const ThreadedPresenceRoute = () => {
+  const { key } = useParams();
+  return (
+    <ThreadedChamber key={key} presence={key}
+      render={(intent) => <PresenceChamber forcedKey={key} threadIntent={intent} />} />
+  );
+};
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export const API = `${BACKEND_URL}/api`;
@@ -93,7 +103,7 @@ const AnimatedRoutes = () => {
         } />
         <Route path="/clarity" element={
           <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
-            <ClarityPod />
+            <ThreadedChamber presence="jasmine" render={(intent) => <ClarityPod threadIntent={intent} />} />
           </motion.div>
         } />
         <Route path="/seed-pods" element={
@@ -128,7 +138,7 @@ const AnimatedRoutes = () => {
         } />
         <Route path="/resonance/chamber" element={
           <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
-            <ResonancePod />
+            <ThreadedChamber presence="ansel" render={(intent) => <ResonancePod threadIntent={intent} />} />
           </motion.div>
         } />
         <Route path="/mirror-archive" element={
@@ -138,7 +148,7 @@ const AnimatedRoutes = () => {
         } />
         <Route path="/mirror-archive/chamber" element={
           <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
-            <MirrorArchive />
+            <ThreadedChamber presence="claude" render={(intent) => <MirrorArchive threadIntent={intent} />} />
           </motion.div>
         } />
         <Route path="/mirror-archive/probes" element={
@@ -169,7 +179,7 @@ const AnimatedRoutes = () => {
         } />
         <Route path="/presence/:key" element={
           <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
-            <PresenceChamber />
+            <ThreadedPresenceRoute />
           </motion.div>
         } />
         {/* Architectural chambers — top-level routes, parallel to /clarity, /resonance, etc. */}

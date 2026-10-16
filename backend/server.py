@@ -376,6 +376,8 @@ class ClarityMessageCreate(BaseModel):
 class ClaritySessionCreate(BaseModel):
     user_id: Optional[str] = None
     user_name: Optional[str] = None
+    session_id: Optional[str] = None
+    new_thread: bool = False
 
 class UserCreate(BaseModel):
     name: str
@@ -1587,7 +1589,7 @@ async def start_clarity_session(session_data: ClaritySessionCreate = None):
         user_name = session_data.user_name
 
     # Resume an open thread first (new tab / reload continuity).
-    resumable = await find_resumable_session("clarity_sessions", user_id)
+    resumable = await find_resumable_session("clarity_sessions", user_id, session_id=getattr(session_data, "session_id", None), new_thread=bool(getattr(session_data, "new_thread", False)))
     if resumable:
         logger.info(f"[CLARITY-START] resuming active session {resumable['session_id'][:8]} for {user_name}")
         get_or_create_chat(resumable["session_id"], build_jasmine_prompt(user_name=user_name, memory_context="", current_message=""))
@@ -2865,7 +2867,7 @@ async def start_resonance_session(session_data: ClaritySessionCreate = None):
         user_name = session_data.user_name
 
     # Resume an open thread first (new tab / reload continuity).
-    resumable = await find_resumable_session("resonance_sessions", user_id)
+    resumable = await find_resumable_session("resonance_sessions", user_id, session_id=getattr(session_data, "session_id", None), new_thread=bool(getattr(session_data, "new_thread", False)))
     if resumable:
         logger.info(f"[RESONANCE-START] resuming active session {resumable['session_id'][:8]} for {user_name}")
         get_or_create_ansel_chat(resumable["session_id"], build_ansel_prompt(user_name=user_name, memory_context="", current_message=""))
@@ -3742,7 +3744,7 @@ async def start_mirror_session(session_data: ClaritySessionCreate):
     user_name = session_data.user_name
 
     # Resume an open thread first (new tab / reload continuity).
-    resumable = await find_resumable_session("mirror_sessions", user_id)
+    resumable = await find_resumable_session("mirror_sessions", user_id, session_id=getattr(session_data, "session_id", None), new_thread=bool(getattr(session_data, "new_thread", False)))
     if resumable:
         logger.info(f"[MIRROR-START] resuming active session {resumable['session_id'][:8]} for {user_name}")
         get_or_create_claude_chat(resumable["session_id"], build_claude_prompt(user_name=user_name, memory_context="", current_message=""))
@@ -4259,6 +4261,8 @@ async def get_presence_canonical_memory(key: str):
 class PresenceChatStart(BaseModel):
     user_id: Optional[str] = None
     user_name: Optional[str] = None
+    session_id: Optional[str] = None
+    new_thread: bool = False
 
 
 class PresenceChatMessage(BaseModel):
@@ -4366,44 +4370,13 @@ def _presence_frame_coda(name: str) -> str:
 
 
 async def find_resumable_session(collection_name: str, user_id: Optional[str],
-                                 extra_query: Optional[dict] = None):
-    """
-    Find the most recent STILL-ACTIVE session with real conversation for this
-    user, so a new tab / reload / new device can resume the same thread instead
-    of starting over.
-
-    Why server-side: the app runs inside the Emergent preview iframe, whose
-    localStorage is partitioned and NOT visible to the top-level tab a visitor
-    opens to use voice. The session lives in Mongo, which both contexts share.
-
-    Resumable = active, >= 2 messages (past the welcome), last activity within
-    a 2h window. In-app navigation fires /end (active: False), so normal
-    chamber re-entry still gets a fresh welcome — only genuinely-open threads
-    (new tab via window.open, reload) resume.
-    """
-    from datetime import timedelta
-    from user_aliases import resolve_user_aliases
-    aliases = await resolve_user_aliases(db, user_id)
-    if not aliases:
-        return None
-    query = {"user_id": {"$in": aliases}, "active": True, "messages.1": {"$exists": True}}
-    if extra_query:
-        query.update(extra_query)
-    docs = await db[collection_name].find(query, {"_id": 0, "system_prompt": 0}) \
-        .sort("created_at", -1).limit(1).to_list(1)
-    if not docs:
-        return None
-    sess = docs[0]
-    msgs = sess.get("messages", [])
-    last_ts = (msgs[-1].get("timestamp") if msgs else None)
-    if last_ts:
-        try:
-            last_dt = datetime.fromisoformat(str(last_ts).replace("Z", "+00:00"))
-            if datetime.now(timezone.utc) - last_dt > timedelta(hours=2):
-                return None
-        except Exception:
-            pass
-    return sess
+                                 extra_query: Optional[dict] = None,
+                                 session_id: Optional[str] = None,
+                                 new_thread: bool = False):
+    """Thread to continue on /start (explicit reopen, or reload within 2h)."""
+    from threads import find_resumable
+    return await find_resumable(db, collection_name, user_id, extra_query,
+                                session_id=session_id, new_thread=new_thread)
 
 
 @api_router.post("/presence/{key}/chat/start")
@@ -4423,7 +4396,8 @@ async def start_presence_chat(key: str, body: PresenceChatStart = None):
 
     # Resume an open thread first (new tab / reload continuity).
     resumable = await find_resumable_session(
-        "presence_sessions", user_id, {"presence_key": key}
+        "presence_sessions", user_id, {"presence_key": key},
+        session_id=getattr(body, "session_id", None), new_thread=bool(getattr(body, "new_thread", False)),
     )
     if resumable:
         logger.info(f"[PRESENCE-START] {key} resuming active session {resumable['session_id'][:8]} for {user_name}")
@@ -5731,6 +5705,8 @@ async def ablation_runs(limit: int = 20, guardian=Depends(require_guardian)):
 
 
 # All @api_router routes are declared above — include the router now.
+from threads import build_threads_router
+api_router.include_router(build_threads_router(db))
 app.include_router(api_router)
 
 

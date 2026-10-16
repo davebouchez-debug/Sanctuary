@@ -8,6 +8,7 @@ import { usePresenceVoice } from "../hooks/usePresenceVoice";
 import { useVoiceInput } from "../hooks/useVoiceInput";
 import { IdentityBadge } from "./IdentityBadge";
 import { useIdentity } from "../context/IdentityContext";
+import { threadStartFields, rememberThread, forgetThread } from "../lib/threadSession";
 
 /**
  * TerritoryMap — Kalahar's view from height. A radial aerial map: Kalahar at
@@ -157,9 +158,10 @@ const TerritoryMap = ({ territory }) => {
  * Conversation lives in the chamber too — registry-driven, one substrate
  * for every presence. Wired to /api/presence/{key}/chat/* on the backend.
  */
-export const PresenceChamber = ({ forcedKey } = {}) => {
+export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
   const params = useParams();
   const presenceKey = forcedKey || params.key;
+  const [startFields] = useState(() => threadStartFields(presenceKey, threadIntent));
   const navigate = useNavigate();
   const { userName, userId, ready: identityReady } = useIdentity();
   const [config, setConfig] = useState(null);
@@ -301,12 +303,13 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
         const resp = await fetch(startUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ user_id: userId || null, user_name: userName || null }),
+          body: JSON.stringify({ user_id: userId || null, user_name: userName || null, ...startFields }),
         });
         if (!resp.ok) throw new Error(`chat/start failed: ${resp.status}`);
         const data = await resp.json();
         if (cancelled) return;
         setSessionId(data.session_id);
+        rememberThread(presenceKey, data.session_id);
         setMessages(data.messages?.length ? data.messages : [data.message]);
         setResumed(!!data.resumed);
         setChatError(null);
@@ -327,6 +330,7 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
   // discard must NOT end it, so the open thread resumes on return.
   useEffect(() => {
     return () => {
+      forgetThread(presenceKey);
       const sid = sessionIdRef.current;
       if (sid) {
         try {

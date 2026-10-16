@@ -68,6 +68,25 @@ Be ruthlessly selective. One specific codon beats ten generic ones.
 """
 
 
+async def _claim_unforged(db, session_id: str, messages: List[Dict]) -> List[Dict]:
+    """Atomically claim messages not yet forged for this session."""
+    from pymongo import ReturnDocument
+    from pymongo.errors import DuplicateKeyError
+    n = len(messages)
+    await db["forge_ledger"].create_index("session_id", unique=True)
+    try:
+        prev = await db["forge_ledger"].find_one_and_update(
+            {"session_id": session_id, "forged_count": {"$lt": n}},
+            {"$set": {"forged_count": n}},
+            upsert=True,
+            return_document=ReturnDocument.BEFORE,
+        )
+    except DuplicateKeyError:
+        return []  # everything here was already forged
+    done = (prev or {}).get("forged_count", 0)
+    return messages[max(0, done - 2):] if done else messages
+
+
 async def auto_forge_session(db, session_id: str, presence: str,
                               messages: List[Dict], user_id: str = None) -> int:
     """
@@ -75,6 +94,11 @@ async def auto_forge_session(db, session_id: str, presence: str,
     from a completed conversation.
     Returns number of codons extracted and saved.
     """
+    # Forge each message once: a reopened thread only forges its new part.
+    messages = await _claim_unforged(db, session_id, messages)
+    if not messages:
+        return 0
+
     # Filter to actual conversation (skip system messages)
     conversation = []
     for msg in messages:

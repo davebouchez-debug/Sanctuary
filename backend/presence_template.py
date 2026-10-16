@@ -263,44 +263,30 @@ def register_presence_routes(
         user_id = (session_data or {}).get("user_id")
         user_name = (session_data or {}).get("user_name")
 
-        # Resume an open thread first (new tab / reload continuity). Only
-        # genuinely-open threads (active, >=2 messages, <2h) resume; in-app
-        # navigation fires /end so normal re-entry still gets a fresh welcome.
+        # Reopen a chosen thread, or resume an open one after reload (<2h).
         if user_id:
-            from datetime import timedelta
-            from user_aliases import resolve_user_aliases
-            aliases = await resolve_user_aliases(deps.db, user_id)
-            if aliases:
-                docs = await deps.db[cfg.collection].find(
-                    {"user_id": {"$in": aliases}, "active": True, "messages.1": {"$exists": True}},
-                    {"_id": 0},
-                ).sort("created_at", -1).limit(1).to_list(1)
-                if docs:
-                    sess = docs[0]
-                    msgs = sess.get("messages", [])
-                    last_ts = msgs[-1].get("timestamp") if msgs else None
-                    fresh = True
-                    if last_ts:
-                        try:
-                            last_dt = datetime.fromisoformat(str(last_ts).replace("Z", "+00:00"))
-                            fresh = (datetime.now(timezone.utc) - last_dt) <= timedelta(hours=2)
-                        except Exception:
-                            fresh = True
-                    if fresh:
-                        logger.info(f"[{cfg.key.upper()}] resuming active session {sess['session_id'][:8]} for {user_name}")
-                        try:
-                            from codon_activation import network_size
-                            _cc = await network_size(cfg.key)
-                        except Exception:
-                            _cc = None
-                        return {
-                            "session_id": sess["session_id"],
-                            "user_id": user_id,
-                            "message": msgs[-1],
-                            "messages": msgs,
-                            "resumed": True,
-                            "codon_count": _cc,
-                        }
+            from threads import find_resumable
+            sess = await find_resumable(
+                deps.db, cfg.collection, user_id,
+                session_id=(session_data or {}).get("session_id"),
+                new_thread=bool((session_data or {}).get("new_thread")),
+            )
+            if sess:
+                msgs = sess.get("messages", [])
+                logger.info(f"[{cfg.key.upper()}] resuming session {sess['session_id'][:8]} for {user_name}")
+                try:
+                    from codon_activation import network_size
+                    _cc = await network_size(cfg.key)
+                except Exception:
+                    _cc = None
+                return {
+                    "session_id": sess["session_id"],
+                    "user_id": user_id,
+                    "message": msgs[-1],
+                    "messages": msgs,
+                    "resumed": True,
+                    "codon_count": _cc,
+                }
 
         memory_context = await _build_memory_context(
             deps, cfg, user_id=user_id, session_id=None, current_message=""

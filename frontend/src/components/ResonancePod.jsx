@@ -10,6 +10,7 @@ import { VoiceLoopControls } from "./VoiceLoopControls";
 import { stopGlobalLegacyAudio } from "../lib/legacyAudio";
 import { IdentityBadge } from "./IdentityBadge";
 import { useIdentity } from "../context/IdentityContext";
+import { threadStartFields, rememberThread, forgetThread } from "../lib/threadSession";
 
 // Helper to convert base64 to Blob for audio playback
 function base64ToBlob(base64, mimeType) {
@@ -21,7 +22,9 @@ function base64ToBlob(base64, mimeType) {
   return new Blob([new Uint8Array(byteNumbers)], { type: mimeType });
 }
 
-export const ResonancePod = () => {
+export const ResonancePod = ({ threadIntent } = {}) => {
+  const [startFields] = useState(() => threadStartFields("ansel", threadIntent));
+  useEffect(() => () => forgetThread("ansel"), []);
   const { ready: identityReady } = useIdentity();
   const [sessionId, setSessionId] = useState(null);
   const [resumed, setResumed] = useState(false);
@@ -104,11 +107,12 @@ export const ResonancePod = () => {
       const response = await fetch(`${API}/resonance/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_name: name, user_id: id || null })
+        body: JSON.stringify({ user_name: name, user_id: id || null, ...startFields })
       });
       
       const data = await response.json();
       setSessionId(data.session_id);
+      rememberThread("ansel", data.session_id);
       
       if (data.user_id && !id) {
         setUserId(data.user_id);

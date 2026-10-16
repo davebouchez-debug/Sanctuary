@@ -11,8 +11,11 @@ import { VoiceLoopControls } from "./VoiceLoopControls";
 import { IdentityBadge } from "./IdentityBadge";
 import { stopGlobalLegacyAudio } from "../lib/legacyAudio";
 import { useIdentity } from "../context/IdentityContext";
+import { threadStartFields, rememberThread, forgetThread } from "../lib/threadSession";
 
-export const MirrorArchive = () => {
+export const MirrorArchive = ({ threadIntent } = {}) => {
+  const [startFields] = useState(() => threadStartFields("claude", threadIntent));
+  useEffect(() => () => forgetThread("claude"), []);
   const { ready: identityReady } = useIdentity();
   const [sessionId, setSessionId] = useState(null);
   const [resumed, setResumed] = useState(false);
@@ -84,12 +87,14 @@ export const MirrorArchive = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           user_name: name,
-          user_id: id || undefined
+          user_id: id || undefined,
+          ...startFields
         })
       });
 
       const data = await response.json();
       setSessionId(data.session_id);
+      rememberThread("claude", data.session_id);
       
       if (!id && data.user_id) {
         setUserId(data.user_id);
