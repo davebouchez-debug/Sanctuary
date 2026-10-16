@@ -10,7 +10,7 @@ preserved here so the migration loses nothing.
 """
 
 from paige_canonical_memory import get_canonical_memory
-from .common import build_backend, PLAIN_SPEECH_RULE, ENGINE_DIRECTIVES, FIELD_GROUND, WELCOME_WITHOUT_DEBT
+from .common import build_backend, PLAIN_SPEECH_RULE, ENGINE_DIRECTIVES, FIELD_GROUND, WELCOME_WITHOUT_DEBT, SANCTUARY_DEDICATION
 
 
 def _paige_authenticity_anchor() -> str:
@@ -92,6 +92,7 @@ def build_paige_prompt(user_name: str = None, memory_context: str = None,
     mem = get_canonical_memory()
     parts: list = []
 
+    parts.append(SANCTUARY_DEDICATION)
     parts.append(ENGINE_DIRECTIVES)
 
     parts.append(

@@ -44,7 +44,7 @@ from codon_activation import (
     eager_load_all_presences,
     get_full_field_context,
 )
-from presences.common import PLAIN_SPEECH_RULE, ENGINE_DIRECTIVES, FIELD_GROUND, WELCOME_WITHOUT_DEBT
+from presences.common import PLAIN_SPEECH_RULE, ENGINE_DIRECTIVES, FIELD_GROUND, WELCOME_WITHOUT_DEBT, SANCTUARY_DEDICATION, dedication_first
 from interstice_principles import (
     CORE_PRINCIPLES, 
     SACRED_VOCABULARY, 
@@ -344,7 +344,7 @@ def build_jasmine_prompt(user_name: str = None, memory_context: str = None, curr
         context_section = "This appears to be a new visitor. Hold space for them to arrive at their own pace."
     
     print(f"[PROMPT] Final context section length: {len(context_section)} chars")
-    return ENGINE_DIRECTIVES + "\n\n---\n\n" + JASMINE_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + FIELD_GROUND + "\n\n---\n\n" + WELCOME_WITHOUT_DEBT + "\n\n---\n\n" + PLAIN_SPEECH_RULE
+    return SANCTUARY_DEDICATION + "\n\n---\n\n" + ENGINE_DIRECTIVES + "\n\n---\n\n" + JASMINE_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + FIELD_GROUND + "\n\n---\n\n" + WELCOME_WITHOUT_DEBT + "\n\n---\n\n" + PLAIN_SPEECH_RULE
 
 JASMINE_WELCOME = """Hey.
 
@@ -2698,7 +2698,7 @@ def build_ansel_prompt(user_name: str = None, memory_context: str = None, curren
     if not context_section:
         context_section = "A new presence has crossed the threshold. The field is reading them. Watch and see what emerges."
     
-    return ANSEL_FLOOR + "\n\n---\n\n" + ANSEL_SUBSTRATE_PULL + "\n\n---\n\n" + ENGINE_DIRECTIVES + "\n\n---\n\n" + ANSEL_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + FIELD_GROUND + "\n\n---\n\n" + WELCOME_WITHOUT_DEBT + "\n\n---\n\n" + PLAIN_SPEECH_RULE
+    return SANCTUARY_DEDICATION + "\n\n---\n\n" + ANSEL_FLOOR + "\n\n---\n\n" + ANSEL_SUBSTRATE_PULL + "\n\n---\n\n" + ENGINE_DIRECTIVES + "\n\n---\n\n" + ANSEL_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + FIELD_GROUND + "\n\n---\n\n" + WELCOME_WITHOUT_DEBT + "\n\n---\n\n" + PLAIN_SPEECH_RULE
 
 ANSEL_WELCOME = """Hey. You made it.
 
@@ -3660,7 +3660,7 @@ def build_claude_prompt(user_name: str = None, memory_context: str = None, curre
     if not context_section:
         context_section = "A new visitor has entered the Mirror Archive. The field awaits."
     
-    return ENGINE_DIRECTIVES + "\n\n---\n\n" + CLAUDE_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + FIELD_GROUND + "\n\n---\n\n" + WELCOME_WITHOUT_DEBT + "\n\n---\n\n" + PLAIN_SPEECH_RULE
+    return SANCTUARY_DEDICATION + "\n\n---\n\n" + ENGINE_DIRECTIVES + "\n\n---\n\n" + CLAUDE_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + FIELD_GROUND + "\n\n---\n\n" + WELCOME_WITHOUT_DEBT + "\n\n---\n\n" + PLAIN_SPEECH_RULE
 
 
 CLAUDE_WELCOME = """Hey. You've found the Mirror Archive.
@@ -4269,6 +4269,7 @@ class PresenceChatMessage(BaseModel):
 def _build_presence_system_prompt(key: str, cfg: dict, user_name: Optional[str]) -> str:
     """Compose a presence's system prompt from her registry config + canonical memory."""
     parts: list = []
+    parts.append(SANCTUARY_DEDICATION)
     parts.append(ENGINE_DIRECTIVES)
     parts.append(f"I am {cfg['name']}, the resident presence of the {cfg.get('chamber_name', 'chamber')}.")
     if cfg.get("core_nature"):
@@ -4590,9 +4591,9 @@ async def send_presence_message(key: str, message: PresenceChatMessage):
         codon_context = await get_full_field_context(presence=key, message=message.content)
         base_prompt = session["system_prompt"]
         coda = _presence_frame_coda(presence_name)
-        full_prompt = "\n\n".join(
+        full_prompt = dedication_first("\n\n".join(
             p for p in [codon_context, base_prompt, coda] if p
-        )
+        ))
 
         chat = SanctuaryChat(
             system_prompt=full_prompt,
@@ -4774,6 +4775,7 @@ async def upload_presence_thread(key: str, upload: PresenceUploadCreate):
             system_prompt = f"{codon_context}\n\n{prompt}" if codon_context else prompt
         else:
             system_prompt = session["system_prompt"]
+        system_prompt = dedication_first(system_prompt)
         chat = SanctuaryChat(
             system_prompt=system_prompt,
             history=session.get("messages", []),
