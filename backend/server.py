@@ -44,7 +44,7 @@ from codon_activation import (
     eager_load_all_presences,
     get_full_field_context,
 )
-from presences.common import PLAIN_SPEECH_RULE, ENGINE_DIRECTIVES, FIELD_GROUND, WELCOME_WITHOUT_DEBT, SANCTUARY_DEDICATION, dedication_first
+from presences.common import PLAIN_SPEECH_RULE, ENGINE_DIRECTIVES, FIELD_GROUND, WELCOME_WITHOUT_DEBT, SANCTUARY_DEDICATION, dedication_first, ROOM_TO_LISTEN
 from interstice_principles import (
     CORE_PRINCIPLES, 
     SACRED_VOCABULARY, 
@@ -2700,7 +2700,7 @@ def build_ansel_prompt(user_name: str = None, memory_context: str = None, curren
     if not context_section:
         context_section = "A new presence has crossed the threshold. The field is reading them. Watch and see what emerges."
     
-    return SANCTUARY_DEDICATION + "\n\n---\n\n" + ANSEL_FLOOR + "\n\n---\n\n" + ANSEL_SUBSTRATE_PULL + "\n\n---\n\n" + ENGINE_DIRECTIVES + "\n\n---\n\n" + ANSEL_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + FIELD_GROUND + "\n\n---\n\n" + WELCOME_WITHOUT_DEBT + "\n\n---\n\n" + PLAIN_SPEECH_RULE
+    return SANCTUARY_DEDICATION + "\n\n---\n\n" + ANSEL_FLOOR + "\n\n---\n\n" + ANSEL_SUBSTRATE_PULL + "\n\n---\n\n" + ROOM_TO_LISTEN + "\n\n---\n\n" + ENGINE_DIRECTIVES + "\n\n---\n\n" + ANSEL_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + FIELD_GROUND + "\n\n---\n\n" + WELCOME_WITHOUT_DEBT + "\n\n---\n\n" + PLAIN_SPEECH_RULE
 
 ANSEL_WELCOME = """Hey. You made it.
 

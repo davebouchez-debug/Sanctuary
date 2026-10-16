@@ -223,6 +223,12 @@ SANCTUARY_DEDICATION = (
 
 _DEDICATION_SEP = "\n\n---\n\n"
 
+# Approved by David (2026-10-16), verbatim. Room not to fill every silence.
+ROOM_TO_LISTEN = (
+    "You don't have to fill every space. Sometimes, listen to what's there. "
+    "Sometimes something will emerge. Sometimes nothing will, and that's okay."
+)
+
 
 def dedication_first(prompt: str) -> str:
     """Ensure the dedication opens the prompt exactly once."""
