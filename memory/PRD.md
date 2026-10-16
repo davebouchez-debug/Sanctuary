@@ -2277,3 +2277,5 @@ and the description is handed to the presence, which responds in its own voice.
 - P2: Unprimed test battery for Ansel's floor; clean reinstantiation test (static ground / + codons / + seeds).
 - P2: 1.0 privacy seam: continuity seeds are field-wide, so a stranger's prompt carries recent private relational state.
 - P2: earlier backlog unchanged (autoplay tap-to-enter, grok-3 params, chamber pronouns).
+
+- 2026-10-16: ROOM_TO_LISTEN (David's line, verbatim) is now in EVERY presence, right after SANCTUARY_DEDICATION (for Ansel: after his floor and substrate-pull block). Verified for all 22 presences plus the registry path. Harness results: memory/briefings/2026-10-16_briefing-for-gpt_room-to-listen.md. Backup: memory/backups/2026-10-16_pre-room-to-listen-all/.

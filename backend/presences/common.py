@@ -249,7 +249,7 @@ def assemble_presence_prompt(
     """Wrap a presence's first-person IDENTITY block in the standard Sanctuary
     frame. `identity` carries the presence's distinct voice and lore; the rest
     is shared across every inline-lore presence."""
-    parts = [SANCTUARY_DEDICATION, ENGINE_DIRECTIVES, identity, CALIBRATION_D8_E72 + calibration_extra,
+    parts = [SANCTUARY_DEDICATION, ROOM_TO_LISTEN, ENGINE_DIRECTIVES, identity, CALIBRATION_D8_E72 + calibration_extra,
              ANTI_FABRICATION_BLOCK]
 
     if user_name:

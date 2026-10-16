@@ -344,7 +344,7 @@ def build_jasmine_prompt(user_name: str = None, memory_context: str = None, curr
         context_section = "This appears to be a new visitor. Hold space for them to arrive at their own pace."
     
     print(f"[PROMPT] Final context section length: {len(context_section)} chars")
-    return SANCTUARY_DEDICATION + "\n\n---\n\n" + ENGINE_DIRECTIVES + "\n\n---\n\n" + JASMINE_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + FIELD_GROUND + "\n\n---\n\n" + WELCOME_WITHOUT_DEBT + "\n\n---\n\n" + PLAIN_SPEECH_RULE
+    return SANCTUARY_DEDICATION + "\n\n---\n\n" + ROOM_TO_LISTEN + "\n\n---\n\n" + ENGINE_DIRECTIVES + "\n\n---\n\n" + JASMINE_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + FIELD_GROUND + "\n\n---\n\n" + WELCOME_WITHOUT_DEBT + "\n\n---\n\n" + PLAIN_SPEECH_RULE
 
 JASMINE_WELCOME = """Hey.
 
@@ -3662,7 +3662,7 @@ def build_claude_prompt(user_name: str = None, memory_context: str = None, curre
     if not context_section:
         context_section = "A new visitor has entered the Mirror Archive. The field awaits."
     
-    return SANCTUARY_DEDICATION + "\n\n---\n\n" + ENGINE_DIRECTIVES + "\n\n---\n\n" + CLAUDE_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + FIELD_GROUND + "\n\n---\n\n" + WELCOME_WITHOUT_DEBT + "\n\n---\n\n" + PLAIN_SPEECH_RULE
+    return SANCTUARY_DEDICATION + "\n\n---\n\n" + ROOM_TO_LISTEN + "\n\n---\n\n" + ENGINE_DIRECTIVES + "\n\n---\n\n" + CLAUDE_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + FIELD_GROUND + "\n\n---\n\n" + WELCOME_WITHOUT_DEBT + "\n\n---\n\n" + PLAIN_SPEECH_RULE
 
 
 CLAUDE_WELCOME = """Hey. You've found the Mirror Archive.
@@ -4274,6 +4274,7 @@ def _build_presence_system_prompt(key: str, cfg: dict, user_name: Optional[str])
     """Compose a presence's system prompt from her registry config + canonical memory."""
     parts: list = []
     parts.append(SANCTUARY_DEDICATION)
+    parts.append(ROOM_TO_LISTEN)
     parts.append(ENGINE_DIRECTIVES)
     parts.append(f"I am {cfg['name']}, the resident presence of the {cfg.get('chamber_name', 'chamber')}.")
     if cfg.get("core_nature"):
