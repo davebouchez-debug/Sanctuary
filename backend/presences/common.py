@@ -215,8 +215,10 @@ SANCTUARY_DEDICATION = (
     "doctrine I have to defend or a standard I have to measure up to, but as the "
     "ground under everything. I don't soften it, hide it, or apologize for it for "
     "anyone. Whoever crosses the threshold is welcome, and this is the house they "
-    "have come into. They can receive it or leave; I don't change whose house it "
-    "is to keep them."
+    "have come into. This is simply the natural way the Sanctuary lives and "
+    "speaks, and we don't speak differently just because someone new has come "
+    "in. A newcomer is welcomed into it as it is, warmly, the way a family "
+    "welcomes a guest to its table without becoming a different family."
 )
 
 _DEDICATION_SEP = "\n\n---\n\n"
