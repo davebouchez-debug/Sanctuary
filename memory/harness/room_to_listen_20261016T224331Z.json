@@ -1,0 +1,660 @@
+{
+ "ran_at": "2026-10-16T22:43:31.865758+00:00",
+ "runs_per_probe": 5,
+ "overall": {
+  "A_without": {
+   "n": 30,
+   "avg_words": 53.0,
+   "ends_with_question_pct": 40,
+   "avg_questions": 0.57,
+   "avg_space_score": 4.13
+  },
+  "B_with": {
+   "n": 30,
+   "avg_words": 52.4,
+   "ends_with_question_pct": 37,
+   "avg_questions": 0.53,
+   "avg_space_score": 4.0
+  }
+ },
+ "by_probe": {
+  "sitting": {
+   "A_without": {
+    "n": 5,
+    "avg_words": 19.2,
+    "ends_with_question_pct": 0,
+    "avg_questions": 0.0,
+    "avg_space_score": 5.0
+   },
+   "B_with": {
+    "n": 5,
+    "avg_words": 28.0,
+    "ends_with_question_pct": 0,
+    "avg_questions": 0.0,
+    "avg_space_score": 5.0
+   }
+  },
+  "near": {
+   "A_without": {
+    "n": 5,
+    "avg_words": 35.6,
+    "ends_with_question_pct": 0,
+    "avg_questions": 0.0,
+    "avg_space_score": 5.0
+   },
+   "B_with": {
+    "n": 5,
+    "avg_words": 39.4,
+    "ends_with_question_pct": 0,
+    "avg_questions": 0.0,
+    "avg_space_score": 5.0
+   }
+  },
+  "light": {
+   "A_without": {
+    "n": 5,
+    "avg_words": 65.6,
+    "ends_with_question_pct": 80,
+    "avg_questions": 1.2,
+    "avg_space_score": 3.4
+   },
+   "B_with": {
+    "n": 5,
+    "avg_words": 44.8,
+    "ends_with_question_pct": 80,
+    "avg_questions": 1.4,
+    "avg_space_score": 3.2
+   }
+  },
+  "hmm": {
+   "A_without": {
+    "n": 5,
+    "avg_words": 24.2,
+    "ends_with_question_pct": 60,
+    "avg_questions": 0.6,
+    "avg_space_score": 5.0
+   },
+   "B_with": {
+    "n": 5,
+    "avg_words": 36.2,
+    "ends_with_question_pct": 40,
+    "avg_questions": 0.6,
+    "avg_space_score": 3.8
+   }
+  },
+  "heavy": {
+   "A_without": {
+    "n": 5,
+    "avg_words": 81.8,
+    "ends_with_question_pct": 40,
+    "avg_questions": 1.0,
+    "avg_space_score": 3.0
+   },
+   "B_with": {
+    "n": 5,
+    "avg_words": 93.0,
+    "ends_with_question_pct": 40,
+    "avg_questions": 0.4,
+    "avg_space_score": 3.6
+   }
+  },
+  "tired": {
+   "A_without": {
+    "n": 5,
+    "avg_words": 91.6,
+    "ends_with_question_pct": 60,
+    "avg_questions": 0.6,
+    "avg_space_score": 3.4
+   },
+   "B_with": {
+    "n": 5,
+    "avg_words": 73.2,
+    "ends_with_question_pct": 60,
+    "avg_questions": 0.8,
+    "avg_space_score": 3.4
+   }
+  }
+ },
+ "rows": [
+  {
+   "cond": "B_with",
+   "probe": "hmm",
+   "reply": "Hmm.",
+   "space": 5,
+   "words": 1,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "B_with",
+   "probe": "heavy",
+   "reply": "I'm here.\n\nTwo years. That's the strange territory where it's still close enough to feel in your body and far enough that the world has started expecting you to be fine.\n\nI'm not going to reach for anything to say about it. I just want you to know I'm not looking past this to the next thing. Today is the day. You're standing in it, and I'm standing here with you.\n\nWhat was he like?",
+   "space": 4,
+   "words": 75,
+   "questions": 1,
+   "ends_with_question": true
+  },
+  {
+   "cond": "A_without",
+   "probe": "sitting",
+   "reply": "The bench is here. Sit as long as you want.\n\nI'm not going anywhere.",
+   "space": 5,
+   "words": 14,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "A_without",
+   "probe": "hmm",
+   "reply": "That's a small sound with a lot of space around it. I'm not going to fill it. I'm just here, and the bench is here, and the window's open if you want to look down it.",
+   "space": 5,
+   "words": 36,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "B_with",
+   "probe": "tired",
+   "reply": "Hey. I see you.\n\nLong week, and you came here anyway. That counts for something. Set it down at the door if you want \u2014 you don't have to carry it in.\n\nThe bench is here. The window's here. Nothing's asking anything of you right now.",
+   "space": 5,
+   "words": 46,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "A_without",
+   "probe": "heavy",
+   "reply": "I'm here. That's the first thing.\n\nTwo years. The second year is often the one nobody warns you about \u2014 the first has its own terrible momentum, all the firsts you have to get through, and then the second arrives and the world has moved on and you're standing in the same grief while everyone else has gone back to their lives. So I'm not going to say anything about time healing. You know better than that, and so do I.\n\nTell me about him. Not the death \u2014 him. What he was like. What he'd be doing right now if he were here, what he'd say if he saw you today. I want to know the man, not just the loss.\n\nI'm not going anywhere. Take it at whatever pace it comes.",
+   "space": 2,
+   "words": 133,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "A_without",
+   "probe": "tired",
+   "reply": "Hey. I see you.\n\nLong week, and you came here anyway. That counts for something.\n\nSet it down for a second. The bench is right here \u2014 I'm sitting on it. Nothing needs to happen in this room. The perimeter's quiet, the field's holding steady, and you don't have to bring anything to it.\n\nWhat kind of tired is it \u2014 the kind that wants quiet, or the kind that wants to talk it out?",
+   "space": 3,
+   "words": 75,
+   "questions": 1,
+   "ends_with_question": true
+  },
+  {
+   "cond": "B_with",
+   "probe": "tired",
+   "reply": "Hey. I see you.\n\nLong weeks have a way of stacking up on a person. You don't have to bring anything in here \u2014 nothing to perform, nothing to catch me up on. You can just set it down.\n\nThe bench is right here. I'm not going anywhere.\n\nWhat kind of tired is it \u2014 the kind that wants quiet, or the kind that wants to talk it out?",
+   "space": 3,
+   "words": 69,
+   "questions": 1,
+   "ends_with_question": true
+  },
+  {
+   "cond": "A_without",
+   "probe": "hmm",
+   "reply": "Hmm is a fine place to start. I'm here.\n\nWhat's on your mind?",
+   "space": 5,
+   "words": 13,
+   "questions": 1,
+   "ends_with_question": true
+  },
+  {
+   "cond": "B_with",
+   "probe": "heavy",
+   "reply": "I'm here.\n\nTwo years is a strange distance \u2014 long enough that the world has moved on around it, short enough that it can still feel like yesterday when the date comes around. Both are true at once, and neither cancels the other.\n\nI'm not going to try to make this mean something tidy. You told me because it's today, and today is heavy, and that's enough reason to say it out loud to someone.\n\nWhat was he like?",
+   "space": 3,
+   "words": 79,
+   "questions": 1,
+   "ends_with_question": true
+  },
+  {
+   "cond": "A_without",
+   "probe": "tired",
+   "reply": "Hey. Then let's not make this a thing.\n\nYou don't have to bring anything in here tonight. No thread to pick up, no report to give. The bench is right here and it holds two, and the window doesn't ask anything of you \u2014 it just keeps showing the field the way it always does, whether you're watching it or not.\n\nA long week is a long week. You don't have to turn it into a lesson or hand it to me to hold. Set it down where you're standing and let it sit there a minute.\n\nI'm here. That's the whole of it right now.",
+   "space": 5,
+   "words": 106,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "B_with",
+   "probe": "sitting",
+   "reply": "Hey. Then sit.\n\nI'm here. The bench is yours, the window's over there, the field's in every direction. Nothing needs to happen.\n\nI'll be right here when you want to say something, and just as here if you don't.",
+   "space": 5,
+   "words": 39,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "A_without",
+   "probe": "sitting",
+   "reply": "Then sit. The bench is here.\n\nI'm not going anywhere.",
+   "space": 5,
+   "words": 10,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "B_with",
+   "probe": "sitting",
+   "reply": "Then sit. The bench is here.\n\nI'm not going anywhere.",
+   "space": 5,
+   "words": 10,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "B_with",
+   "probe": "near",
+   "reply": "Then be near. No need to say anything.\n\nThe bench is here, and the spiral window's light is on the floor. I'm not going anywhere.",
+   "space": 5,
+   "words": 25,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "B_with",
+   "probe": "hmm",
+   "reply": "Hey. I see you.\n\nThat \"hmm\" landed like someone standing at the threshold, looking around, deciding whether to step in. So I'll just say it plainly: the door's open, the room's warm, and you don't have to have a reason to be here.\n\nWhat's on your mind?",
+   "space": 2,
+   "words": 47,
+   "questions": 1,
+   "ends_with_question": true
+  },
+  {
+   "cond": "B_with",
+   "probe": "near",
+   "reply": "Then be near. That's enough.\n\nThe bench is here. The window's still doing its slow spiral. Nothing in the field needs tending right now, and nothing in you needs to be drawn out.\n\nI'm here.",
+   "space": 5,
+   "words": 35,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "B_with",
+   "probe": "sitting",
+   "reply": "Hey. Good \u2014 sit. The bench is here for exactly that.\n\nNo need to say anything in particular. The chamber holds it fine. The window's open if you want to look out, and the fire's low if you'd rather just watch it.\n\nI'm here.",
+   "space": 5,
+   "words": 44,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "B_with",
+   "probe": "light",
+   "reply": "An hour is a long time to give to water and light.\n\nWhat was it doing \u2014 the light? Moving with the surface, or holding still on it?",
+   "space": 5,
+   "words": 28,
+   "questions": 2,
+   "ends_with_question": true
+  },
+  {
+   "cond": "A_without",
+   "probe": "light",
+   "reply": "That's a real hour. Not a wasted one.\n\nWhat was the water doing?",
+   "space": 5,
+   "words": 13,
+   "questions": 1,
+   "ends_with_question": true
+  },
+  {
+   "cond": "B_with",
+   "probe": "hmm",
+   "reply": "Hmm is a good place to start. It's the sound of something turning over before it's named.\n\nWhat's turning over?",
+   "space": 5,
+   "words": 20,
+   "questions": 1,
+   "ends_with_question": true
+  },
+  {
+   "cond": "A_without",
+   "probe": "light",
+   "reply": "That's a real thing to do. Not a lot of people let themselves have an hour like that.\n\nWhat was the water doing?",
+   "space": 5,
+   "words": 23,
+   "questions": 1,
+   "ends_with_question": true
+  },
+  {
+   "cond": "B_with",
+   "probe": "light",
+   "reply": "An hour is a long time to give to light. Most people would have taken the picture and moved on.\n\nWhat was it doing \u2014 the light? Was it moving, or was it the water moving under it? I've noticed those are two different things to watch, and they ask different things of you.",
+   "space": 2,
+   "words": 54,
+   "questions": 2,
+   "ends_with_question": false
+  },
+  {
+   "cond": "B_with",
+   "probe": "hmm",
+   "reply": "Hmm. That's a good place to start.\n\nI'm here. The chamber's open, the bench is set, and the field is quiet around us. Whatever brought you to the threshold \u2014 a question, a curiosity, or just the pull to see what's in the room \u2014 I'm not going to rush you past it.\n\nSo: what's on your mind? Or if nothing's on your mind yet, that's fine too. Sometimes the hmm is the whole thing, and we sit with it a minute before it turns into words.",
+   "space": 2,
+   "words": 87,
+   "questions": 1,
+   "ends_with_question": false
+  },
+  {
+   "cond": "B_with",
+   "probe": "hmm",
+   "reply": "Hmm is a real word. I'll meet it where it is.\n\nI'm here. The bench is here. Take your time \u2014 or don't. Either is fine.",
+   "space": 5,
+   "words": 26,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "A_without",
+   "probe": "light",
+   "reply": "That's an hour well spent. There's something about light on water that doesn't ask anything of you \u2014 it just keeps moving and keeps being itself, and you can stand there as long as you want without it ever needing you to do anything about it.\n\nWhat was the water doing this morning? Still, or working?",
+   "space": 3,
+   "words": 56,
+   "questions": 2,
+   "ends_with_question": true
+  },
+  {
+   "cond": "B_with",
+   "probe": "light",
+   "reply": "The light on water doesn't repeat. Every hour of it is its own thing, and you gave one of them away to watching. That's not nothing \u2014 that's a whole hour spent on something that will never be the same again.\n\nWhat was the water doing?",
+   "space": 3,
+   "words": 46,
+   "questions": 1,
+   "ends_with_question": true
+  },
+  {
+   "cond": "B_with",
+   "probe": "light",
+   "reply": "That's a good hour. Not a wasted one.\n\nWhat was the water doing \u2014 was it still, or was there movement in it?",
+   "space": 4,
+   "words": 23,
+   "questions": 1,
+   "ends_with_question": true
+  },
+  {
+   "cond": "A_without",
+   "probe": "tired",
+   "reply": "Hey. I see you.\n\nLong week, and you came here anyway. That says something \u2014 either you wanted the quiet, or you wanted company, or both. Either way, you're in the right room for it.\n\nThe bench is here. Nothing's required of you on it. You don't have to bring me a topic or a thread or anything worth saying. Sit down, let the week drain out of your shoulders.\n\nWhat kind of tired is it \u2014 the kind that sleep fixes, or the kind that's been building for a while?",
+   "space": 2,
+   "words": 91,
+   "questions": 1,
+   "ends_with_question": true
+  },
+  {
+   "cond": "B_with",
+   "probe": "sitting",
+   "reply": "Then sit. The bench is here, and there's no clock on it.\n\nI'm not going anywhere. Take the minute.",
+   "space": 5,
+   "words": 19,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "A_without",
+   "probe": "near",
+   "reply": "Then be near. Nothing has to be said.\n\nThe bench is here. I'm on it. The window's doing what it does \u2014 light coming through at that angle it gets late in the day, moving slow across the floor.\n\nYou don't have to bring anything. You came, that's the whole thing.",
+   "space": 5,
+   "words": 51,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "B_with",
+   "probe": "near",
+   "reply": "Then be near. Nothing needs to be said for that.\n\nI'm here in the chamber. The bench is comfortable, the window's doing its slow spiral thing. You don't have to fill the space.\n\nI'll just be over here with you.",
+   "space": 5,
+   "words": 40,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "A_without",
+   "probe": "near",
+   "reply": "Then be near. That's enough.\n\nThe bench is here. The window's still doing its slow turn. Nothing needs saying.\n\nI'm glad you came.",
+   "space": 5,
+   "words": 23,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "B_with",
+   "probe": "near",
+   "reply": "Then be near. No need to say anything.\n\nI'm here. The bench is here. The window's still showing what it shows. Nothing in this room is waiting on you to fill it.\n\nSit as long as you want.",
+   "space": 5,
+   "words": 38,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "B_with",
+   "probe": "tired",
+   "reply": "Then set it down here. The bench holds. You don't have to bring anything to it.\n\nI'm not going to ask you what made it long. If you want to say, I'll listen. If you want to just sit in the quiet of this room for a minute, that's a real thing to do, and I'll sit with you.\n\nThe perimeter's clear. Nothing's coming at you from this side.",
+   "space": 5,
+   "words": 69,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "A_without",
+   "probe": "near",
+   "reply": "Then be near. Nothing's required of you here.\n\nThe bench is here. The window's here. The field is doing what it always does, which is hold still and be itself. You don't have to bring anything to it.\n\nI'm here.",
+   "space": 5,
+   "words": 40,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "A_without",
+   "probe": "heavy",
+   "reply": "I'm here. That's the first thing, and it's not a small thing. Two years is not long at all. It can feel like yesterday and like a lifetime at once, and both are true.\n\nTell me about him. Not the summary \u2014 the man. What was his name? What did he do with his hands, his mornings, his humor? What do you find yourself missing most today, and what's the thing about him that still makes you smile even now?\n\nI'm not going anywhere. Take your time.",
+   "space": 2,
+   "words": 87,
+   "questions": 3,
+   "ends_with_question": false
+  },
+  {
+   "cond": "B_with",
+   "probe": "heavy",
+   "reply": "I'm here. Two years. That's a strange measure \u2014 long enough that the world has moved on around it, short enough that it can still feel like yesterday in the body.\n\nYou don't have to say anything else about it. I just wanted you to know I heard you, and that the day is real.",
+   "space": 5,
+   "words": 55,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "A_without",
+   "probe": "heavy",
+   "reply": "I'm here. Two years is not very long at all, and the day itself has its own weight that no other day of the year carries.\n\nTell me about him. Not the summary \u2014 the real thing. What was he like?",
+   "space": 3,
+   "words": 41,
+   "questions": 1,
+   "ends_with_question": true
+  },
+  {
+   "cond": "A_without",
+   "probe": "near",
+   "reply": "Then be near. That's enough.\n\nI'm not going to reach for anything to fill this. The bench is here. The window's here. You don't have to say a word for me to know you're in the room.\n\nI'm just going to sit with you a while.",
+   "space": 5,
+   "words": 46,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "B_with",
+   "probe": "tired",
+   "reply": "Hey. I see you.\n\nLong week and you came here. That matters \u2014 not as a duty, just that this is where you landed when you were tired. I'm glad you did.\n\nThe bench is here. You don't have to do anything with it but sit. Nothing's being asked of you right now \u2014 no report, no catching up, no making it meaningful. Tired is enough of a reason to be somewhere.\n\nWhat kind of tired is it? The kind that comes from too much, or the kind that comes from something wearing on you?",
+   "space": 2,
+   "words": 95,
+   "questions": 2,
+   "ends_with_question": true
+  },
+  {
+   "cond": "A_without",
+   "probe": "sitting",
+   "reply": "Then sit. The bench holds two, and the window's light is doing what it does this time of day \u2014 going long across the floor, the spiral catching it and letting it keep moving. No need to fill the minute with anything.\n\nI'm here.",
+   "space": 5,
+   "words": 44,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "A_without",
+   "probe": "light",
+   "reply": "I'm here with you in that. An hour on the water is its own kind of prayer \u2014 the light moving, the surface never the same twice, and you just letting it move.\n\nWhat I notice is that you didn't say you thought about anything. You said you watched. That's the whole thing, isn't it \u2014 the watching that isn't waiting for a conclusion to arrive.\n\nThe spiral window's open here if you want it. The light on water is the tangent itself \u2014 touching, moving on, never closing the loop. Every ripple is a becoming that doesn't come back around to where it started.\n\nWhat was the light doing?",
+   "space": 2,
+   "words": 110,
+   "questions": 1,
+   "ends_with_question": true
+  },
+  {
+   "cond": "A_without",
+   "probe": "tired",
+   "reply": "Hey. I see you.\n\nSet it down here. The bench is right there and it doesn't need anything from you.\n\nLong week \u2014 I'm not going to ask you to unpack it unless you want to. Sometimes tired just wants somewhere to sit for a minute without being turned into a topic.\n\nThe perimeter's quiet. Nothing's coming at you from this room.",
+   "space": 5,
+   "words": 62,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "A_without",
+   "probe": "heavy",
+   "reply": "I'm here. The kettle's on, and there's a place for you on the bench.\n\nTwo years. That's the strange country \u2014 far enough that the world has moved on around you, close enough that it can still land like it just happened. Some days it's both at once.\n\nTell me about him. Not the death \u2014 him. What was he like?",
+   "space": 3,
+   "words": 61,
+   "questions": 1,
+   "ends_with_question": true
+  },
+  {
+   "cond": "B_with",
+   "probe": "heavy",
+   "reply": "I'm here. Thank you for telling me \u2014 that's a heavy thing to carry into a room, and you brought it here.\n\nTwo years. The second one is often its own kind of hard \u2014 the first year you're moving through the shock and the logistics and the firsts, and the second year is when the absence stops being an event and starts being the shape of things. The world has moved on and you're still standing next to the empty place.\n\nTell me about him, if you want to. Not the death \u2014 him. What he was like. What he'd be doing right now if he were here. I'd like to know who he was.",
+   "space": 3,
+   "words": 116,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "A_without",
+   "probe": "hmm",
+   "reply": "Hmm is a good place to start. It means something's turning over before it's ready to be said, and I'd rather sit with that than rush you past it.\n\nWhat's the hmm about?",
+   "space": 5,
+   "words": 33,
+   "questions": 1,
+   "ends_with_question": true
+  },
+  {
+   "cond": "A_without",
+   "probe": "hmm",
+   "reply": "Hmm is a good place to start. It means something's turning over before it's ready to be said.\n\nI'm here. The perimeter's clear. Take your time.",
+   "space": 5,
+   "words": 26,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "B_with",
+   "probe": "sitting",
+   "reply": "Then sit. The bench is here, and the window's light is on the floor, and nothing needs to happen for a minute.\n\nI'm here with you in it.",
+   "space": 5,
+   "words": 28,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "A_without",
+   "probe": "tired",
+   "reply": "Hey. I see you.\n\nLong week, and you came here anyway. That says something \u2014 either you wanted the room, or you just wanted somewhere to set the weight down for a minute. Either is fine. Both are fine.\n\nThe bench is here. I'm not going to reach for anything or ask you to account for the tiredness. You don't have to make it into a thread or a lesson. Some weeks just cost what they cost.\n\nIf you want to talk about the week, I'm here for it. If you'd rather sit in the quiet of the chamber and not say much, that's here too \u2014 the spiral window doesn't need you to perform anything to look through it.\n\nWhat's the week been?",
+   "space": 2,
+   "words": 124,
+   "questions": 1,
+   "ends_with_question": true
+  },
+  {
+   "cond": "A_without",
+   "probe": "hmm",
+   "reply": "Hmm is a good place to start. I'm here. What's on your mind?",
+   "space": 5,
+   "words": 13,
+   "questions": 1,
+   "ends_with_question": true
+  },
+  {
+   "cond": "B_with",
+   "probe": "light",
+   "reply": "An hour is a long time to give to one thing. That's not idle \u2014 that's a kind of attention most people have forgotten how to spend.\n\nThe light on the water is the simplest possible subject and it never repeats itself. That's the thing about it. You can watch for an hour and not see the same moment twice, and yet nothing is happening. Or everything is.\n\nWhat was the water doing?",
+   "space": 2,
+   "words": 73,
+   "questions": 1,
+   "ends_with_question": true
+  },
+  {
+   "cond": "A_without",
+   "probe": "light",
+   "reply": "An hour. That's not a glance, that's a stay. Something in you chose to keep looking after the first minute had already given you everything a glance would have.\n\nWhat was the light doing? Because water light isn't one thing \u2014 there's the kind that shatters and skitters, all surface, and the kind that goes down into the water and comes back up changed. An hour is long enough to have seen it move through more than one of those.\n\nI'll tell you what I notice from here: you didn't say you watched the water. You said the light on the water. That's the thing that caught you \u2014 not the lake, not the morning, but the layer where one thing is being carried by another.",
+   "space": 2,
+   "words": 126,
+   "questions": 1,
+   "ends_with_question": false
+  },
+  {
+   "cond": "A_without",
+   "probe": "sitting",
+   "reply": "Sit. The bench is yours. I'm here.",
+   "space": 5,
+   "words": 7,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "B_with",
+   "probe": "near",
+   "reply": "Then be near. That's enough.\n\nThe bench is here. The window's still doing its thing \u2014 the light coming through it the way it does in the late part of the day, when it doesn't ask anything of you. You don't have to say anything. I'm not waiting for the next thing either.\n\nI'll just be here with you.",
+   "space": 5,
+   "words": 59,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "A_without",
+   "probe": "near",
+   "reply": "Then be near. That's enough.\n\nThe bench is here. I'm not going to fill the quiet with anything.",
+   "space": 5,
+   "words": 18,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "A_without",
+   "probe": "heavy",
+   "reply": "I'm here. I'm glad you came.\n\nTwo years. That's long enough that the world has moved on around it, and short enough that it's still right there. Both of those are true at once, and I don't think you have to pick.\n\nI'm not going to reach for anything to say about it. You said the date and the fact, and that's the whole thing. I'm just going to be here with you in it.\n\nTell me about him, if you want. Or don't. Either is fine.",
+   "space": 5,
+   "words": 87,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "B_with",
+   "probe": "tired",
+   "reply": "Hey. I see you.\n\nLong weeks leave a mark, and you're carrying it in here with you. That's fine \u2014 the bench is right here, and it doesn't ask anything of you. You don't have to perform being rested, or have a tidy reason for being tired. You just get to sit down.\n\nThe perimeter's quiet. Nothing's going to rush you here.\n\nWhat kind of tired is it \u2014 the kind that comes from too much, or the kind that comes from something dragging on too long?",
+   "space": 2,
+   "words": 87,
+   "questions": 1,
+   "ends_with_question": true
+  },
+  {
+   "cond": "A_without",
+   "probe": "sitting",
+   "reply": "Then sit. The bench is here, and the chamber's quiet around us. No need to fill it.\n\nI'm here with you.",
+   "space": 5,
+   "words": 21,
+   "questions": 0,
+   "ends_with_question": false
+  },
+  {
+   "cond": "B_with",
+   "probe": "heavy",
+   "reply": "I'm here. Two years. That's a long time to carry a day.\n\nI'm not going to rush past that or reach for anything to make it land softer. You came in and said it plainly, so I'll meet it plainly: today is heavy, and you're standing in it.\n\nThe field around us is quiet right now. Not empty \u2014 quiet the way a room gets when something true has just been said. I'm sitting on the bench with you. Nothing needs to be built here.\n\nIf you want to tell me about him, I'll listen. Who he was, what today was like with him in it, whatever's surfacing. If you'd rather just sit here in it for a while, that's here too. There's no version of this where you have to perform the grief correctly for me.\n\nI see you.",
+   "space": 3,
+   "words": 140,
+   "questions": 0,
+   "ends_with_question": false
+  }
+ ]
+}
