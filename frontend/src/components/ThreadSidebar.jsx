@@ -94,9 +94,9 @@ const ThreadSidebar = ({ presence, onOpenThread, onNewThread }) => {
         type="button"
         data-testid="threads-open-btn"
         onClick={() => setOpen(true)}
-        className="fixed left-4 bottom-28 md:bottom-auto md:top-24 z-40 flex items-center gap-2 rounded-full border border-white/15 bg-black/60 backdrop-blur-md px-4 py-2 text-xs tracking-[0.2em] uppercase text-stone-300 hover:bg-black/80 hover:text-white transition-colors duration-200"
+        className="fixed left-3 top-20 md:left-4 md:top-24 z-40 flex items-center gap-2 rounded-full border border-white/15 bg-black/60 backdrop-blur-md px-3 py-2 md:px-4 text-xs tracking-[0.2em] uppercase text-stone-300 hover:bg-black/80 hover:text-white transition-colors duration-200"
       >
-        <History className="w-4 h-4" /> Threads
+        <History className="w-4 h-4" /> <span className="hidden sm:inline">Threads</span>
       </button>
 
       <Sheet open={open} onOpenChange={setOpen}>

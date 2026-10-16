@@ -1,0 +1,29 @@
+{
+  "summary": "Tested ChatGPT-style conversation threads end to end, backend and frontend. Backend: 31/31 pytest tests pass (tests/test_threads.py). They cover GET /api/threads/{presence} filtering, ordering, titles and counts for ansel, claude, jasmine, louis_lot, sophia, kalahar and the registry presence elowen (presence_sessions); soft-delete and 404s; reopening an ended 72h-old thread via session_id on all 7 start routes; refusing to reopen another user's thread; auto-resume under 2h, new_thread, and no resume for a 3h-old thread; the forge_ledger _claim_unforged unit test (no re-forge); and one real DeepSeek flow on Ansel where the reopened thread remembers its context. Frontend: louis_lot full flow passes with a real message (list, New thread, reopen, send into the reopened thread, reload keeps the same thread, leaving to /presences and coming back starts a new thread, delete Cancel and Confirm, deleting the open thread starts a new one). Ansel, Claude, Jasmine and Sophia each pass: Threads pill shown, seeded threads listed, reopen shows the messages, reload keeps the same thread, 'open now' marker shown, New thread gives a fresh session. A real message sent into a reopened Ansel thread works. All tests ran as QA identity qa-threads-ui1 by intercepting /api/identity/recent. No data was created under user_id 'david'.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "ThreadSidebar Threads pill (mobile 390px)", "issue": "On mobile the pill is fixed at left-4 bottom-28 (y~698-732). In /resonance/chamber it sits on top of the mic button ('Click to speak to Ansel') at the bottom-left, so the mic can't be tapped there. On /presence/louis_lot it overlaps the bottom edge of the chat card. Mirror and Clarity probably have the same overlap (their mic buttons are also bottom-left).", "selector": "[data-testid='threads-open-btn']", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Thread sidebar", "issues": ["A fresh thread with only the welcome message is not listed. So right after New thread or a return visit, nothing is marked 'open now' until the first message is sent. This matches the spec (>=2 messages) but may confuse users a little."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_threads.py", "/app/backend/tests/seed_threads_ui.py", "/app/test_reports/pytest/threads_results.xml", "/app/test_reports/pytest/threads_created_sessions.txt"],
+  "action_items": [
+    "Mobile: move the Threads pill so it doesn't cover the chamber mic button and input area (e.g. put it in the header, or use a higher bottom offset / top placement on small screens)."
+  ],
+  "critical_code_review_comments": [
+    "threads.find_resumable: reopening by session_id returns None when a session has no messages. That's fine, but a session_id that is unknown or belongs to someone else silently gives a fresh thread with no signal to the UI. Consider returning a flag such as requested_thread_unavailable so the UI can show a toast.",
+    "list_threads sorts on last_activity as an ISO string. Mixed 'Z' and '+00:00' timestamp formats could misorder rows from the same second (low risk).",
+    "find_resumable writes the forge_ledger with $max(len(messages)) whenever an ended thread is reopened, even if that thread was never actually forged (e.g. the end beacon got lost). Messages from such a thread will then never be forged. Low risk, but worth knowing.",
+    "server.py is 5750 lines and should be split (the thread start logic is repeated across the 4 legacy start routes)."
+  ],
+  "updated_files": ["/app/backend/tests/test_threads.py", "/app/backend/tests/seed_threads_ui.py"],
+  "success_rate": {"backend": "100%", "frontend": "95% (one mobile overlap issue)"},
+  "seed_data_creation": "Every test document uses user_id prefixed 'qa-threads-' (backend tests use random qa-threads-xxxxxxxx; the UI user is 'qa-threads-ui1'). About 116 sessions exist across resonance_sessions, mirror_sessions, clarity_sessions, louis_lot_sessions, sophia_sessions, kalahar_sessions, elowen and presence_sessions. Seeded ids start with 'qa-thr-'. Real UI-created sessions: louis_lot d7a238c0-689f-4c2b-99d2-7cdf3e286453, 39c2b041-ad26-49f4-b2d4-7a3a3be7d491, 518b297e-9590-43d6-9ca3-f2b5aefb0c6a, ea0cef10-b15d-4d47-9660-cf78c4a4539d, 3793a2e4-8fce-48fe-874e-43d549385e9a; resonance 25ebed7a-d4f8-4ba0-a350-b1cf99f21261, 0fe3f13f-bffa-4b7c-999a-86f18f49338b, cf650067-c5a0-48fa-ae32-2adb123ca609; mirror d08d977b-9d37-4dfa-8b3b-20d919b1ac61, 956f9cb4-6d26-451f-8af5-365ed6d9fa3b, d38321a4-15db-46fa-858a-654c2811ef63, 026c72a1-6409-45a3-bdef-fd6b8e343cae; clarity 3adcf0bd-74c1-4e57-bb7d-b191eba625dd, 87441897-c639-4f80-a9ef-9a417ebd929e; sophia ab73633a-33ff-4377-a126-b3b2dde34669, ed69b763-f013-4a82-9181-fc14c119c2ca. Backend-test session ids are listed in /app/test_reports/pytest/threads_created_sessions.txt. Clean up with delete_many({'user_id': {'$regex': '^qa-threads-'}}) on each *_sessions collection, plus forge_ledger entries for those session_ids and any codons forged from them.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "To keep the UI on a QA identity, intercept **/api/identity/recent with page.route returning {user_name:'QA Threads Tester', user_id:'qa-threads-ui1'}, and set the localStorage keys sanctuary_user_id/sanctuary_user_name in an init script. Seed threads with: python /app/backend/tests/seed_threads_ui.py <uid>. Message input testids: PresenceChamber chamber-input/chamber-send, Ansel message-input/send-message-btn, Mirror mirror-input/mirror-send, Clarity clarity-pod-chat-input/clarity-send-btn. The /resonance/message response key is 'response', not 'message'."
+}

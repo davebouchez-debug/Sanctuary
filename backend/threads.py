@@ -50,7 +50,7 @@ async def find_resumable(db, collection: str, user_id: Optional[str],
         if not sess.get("active"):
             # Already forged when it closed: record that so continuing it
             # later forges only the new part.
-            if sess.get("ended_at"):
+            if sess.get("ended_at") and await db["continuity_seeds"].find_one({"session_id": session_id}, {"_id": 1}):
                 await db["forge_ledger"].update_one(
                     {"session_id": session_id},
                     {"$max": {"forged_count": len(sess["messages"])}},
