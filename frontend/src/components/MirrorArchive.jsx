@@ -49,17 +49,9 @@ export const MirrorArchive = () => {
     }
   }, [sessionId]);
 
-  // Handle navigation away - end session and promote breadcrumbs
+  // End session only on in-app navigation away; reload/sleep resumes the thread.
   useEffect(() => {
-    const handleBeforeUnload = () => {
-      if (sessionId) {
-        navigator.sendBeacon(`${API}/mirror/session/${sessionId}/end`);
-      }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
     return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
       if (sessionId) {
         endSession();
       }

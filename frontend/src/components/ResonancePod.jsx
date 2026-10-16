@@ -60,19 +60,9 @@ export const ResonancePod = () => {
     }
   }, [sessionId]);
 
-  // Handle navigation away - end session and promote breadcrumbs
+  // End session only on in-app navigation away; reload/sleep resumes the thread.
   useEffect(() => {
-    const handleBeforeUnload = () => {
-      if (sessionId) {
-        // Use sendBeacon for reliable delivery on page unload
-        navigator.sendBeacon(`${API}/resonance/session/${sessionId}/end`);
-      }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
     return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      // Also end session when component unmounts (React navigation)
       if (sessionId) {
         endSession();
       }

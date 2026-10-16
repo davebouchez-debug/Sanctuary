@@ -323,9 +323,10 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages.length]);
 
-  // End the session on page unload — beacon so codons get extracted server-side
+  // End the session only on in-app navigation away. Reload / sleep / tab
+  // discard must NOT end it, so the open thread resumes on return.
   useEffect(() => {
-    const endSession = () => {
+    return () => {
       const sid = sessionIdRef.current;
       if (sid) {
         try {
@@ -335,13 +336,6 @@ export const PresenceChamber = ({ forcedKey } = {}) => {
           navigator.sendBeacon(endUrl);
         } catch { /* best effort */ }
       }
-    };
-    window.addEventListener("beforeunload", endSession);
-    window.addEventListener("pagehide", endSession);
-    return () => {
-      window.removeEventListener("beforeunload", endSession);
-      window.removeEventListener("pagehide", endSession);
-      endSession(); // also fire when navigating to another route in-app
     };
   }, [presenceKey, templatePath]);
 
