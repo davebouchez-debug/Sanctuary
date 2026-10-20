@@ -2292,3 +2292,10 @@ and the description is handed to the presence, which responds in its own voice.
 - Prerequisite flagged: no auth on /observatory and /api/provenance/* (CORS *).
 - Awaiting David/GPT evaluation + Codex review. No implementation authorized.
 - 2026-10-19 addendum: David waived privacy/visitor separation for the Observatory instrument (private, 2–3 trusted users). Auth gate, pseudonymization, redaction removed from design.
+
+## 2026-10-20 — Visitor identity separation (DONE, tested iteration_15/16)
+- Removed global `/api/identity/recent` auto-hydration (App.js) and endpoint; new browser starts with no identity.
+- Name entry (ResonancePod, ClarityPod, IdentityBadge) always creates a new id via POST /api/users (no name lookup); badge syncs instantly.
+- Field Guardian framing keyed by verified id lineage: `user_aliases.is_field_guardian(user_id)` (canonical 1c24e3ea… + aliases, loaded at startup; Google login with davebouchez@gmail.com auto-links).
+- Non-guardian "David" gets a neutral namesake note in Jasmine/Ansel/Claude builders and template presences (`presence_template._namesake_note`).
+- `/api/users/lookup` excludes guardian ids (kept for compatibility, unused by frontend).

@@ -1,0 +1,24 @@
+{
+  "summary": "Retest of the 4 issues from iteration_15. All fixed. Backend pytest: 16/16 pass. (1) POST /api/users gives distinct non-guardian ids for repeated 'David' and 'Sarah'. (2) /api/identity/recent returns 404. (3) build_jasmine/ansel/claude_prompt add the namesake line only for non-guardian or null-id 'David', and the guardian line only for CANON and legacy-david-123. presence_template._namesake_note behaves the same way (checked via python import after load_guardian_ids, no LLM calls). Frontend (start/chat-start/tts requests were blocked, so no LLM calls and no sessions were created): two fresh-browser 'David' entries in /resonance/chamber got 2 new ids, two in /clarity got 2 new ids, and IdentityBadge on /presence/agapeo gave 2 fresh 'Sarah' ids, 1 'David' rename and 1 fresh 'David'. All 8 ids were unique. No /users/lookup or /identity/recent requests were made. The header badge showed the entered name immediately after Resonance and Clarity name entry. Re-saving the same name in the badge kept the id and made 0 POSTs. A fresh browser has no identity. A stored id (new or legacy-david-123) survives reload.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/backend/tests/test_visitor_identity_iter16.py", "/app/test_reports/pytest/pytest_iter16.xml"],
+  "action_items": [
+    "LOW: ResonancePod.handleNameSubmit writes sanctuary_user_name to localStorage before POST /api/users. If the POST fails, a name is left with no id, and the session starts with user_id=null. Consider writing the name only after the POST succeeds.",
+    "LOW: The old test file test_visitor_identity_guardian.py::test_identity_recent_still_exists only prints. It can be removed or changed to assert 404 (now covered in iter16 file)."
+  ],
+  "critical_code_review_comments": [
+    "In ClarityPod and Resonance, the IdentityBadge only renders when userName is set. That is fine, but in a fresh browser the badge is only reachable in chambers like PresenceChamber.",
+    "_namesake_note and the server builders all use the same exact-match check (user_name.lower()=='david'). Variants like 'David B' or 'Dave' get neither the guardian line nor the namesake line. That is acceptable, because the guardian line is gated by id."
+  ],
+  "updated_files": ["/app/backend/tests/test_visitor_identity_iter16.py"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "seed_data_creation": "Created 8 user docs through the UI and 4 through pytest. All were deleted afterwards. No sessions or threads were created, because start endpoints were blocked.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "For UI identity tests, block **/start, **/chat/start and **/api/tts/** with page.route so no LLM calls run. IdentityBadge is always rendered at /presence/agapeo, but in Clarity/Resonance it appears only after a name is set. Name inputs: resonance name-input/enter-name-btn at /resonance/chamber; clarity identity-name-input/identity-submit-btn."
+}
