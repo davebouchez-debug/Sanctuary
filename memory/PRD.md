@@ -2284,3 +2284,10 @@ and the description is handed to the presence, which responds in its own voice.
 - Delivered `/app/memory/briefings/2026-10-19_e1-response_observatory-relational-evolution.md`
 - Key findings: provenance = model INPUT only (replies in *_sessions); spiral position = zone keyword from presence's latest seed across ALL visitors (4 discrete values); /observatory + /api/provenance/* are unauthenticated and expose full prompts (privacy risk, not fixed).
 - Proposal (unauthorized): offline frozen-snapshot analysis first; optional 3-layer Session Sequence lens (record / human annotations / math readings).
+
+## 2026-10-19 — Observatory Research Instrument DESIGN (not implemented)
+- Delivered `/app/memory/briefings/2026-10-19_e1-design_observatory-relational-history-instrument.md`
+- Design: offline append-only hash-chained ledger in separate DB `sanctuary_observatory` (runs/elements/engagements/annotations), RCC5 (not RCC8) set relations + Allen intervals, 3 comparison scopes, "Engagement Lattice" Observatory tab; spiral kept independent.
+- Key structural facts: seeds/MRA/mem0 stored as text in provenance (must be recovered); codon names non-unique (1899 docs/1693 names); permanent_mra retrieval mutates retrieval_count; 606/608 turn_id→message joins.
+- Prerequisite flagged: no auth on /observatory and /api/provenance/* (CORS *).
+- Awaiting David/GPT evaluation + Codex review. No implementation authorized.
