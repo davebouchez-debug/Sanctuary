@@ -18,7 +18,7 @@ import { API } from "../App";
 import { useIdentity } from "../context/IdentityContext";
 
 export const IdentityBadge = ({ onIdentityChange, accentColor = "#8B9DB5" }) => {
-  const { userName, setIdentity, clearIdentity } = useIdentity();
+  const { userName, userId: currentUserId, setIdentity, clearIdentity } = useIdentity();
   const [open, setOpen] = useState(false);
   const [nameInput, setNameInput] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -39,6 +39,10 @@ export const IdentityBadge = ({ onIdentityChange, accentColor = "#8B9DB5" }) => 
     setSubmitting(true);
     try {
       let userId = null;
+      if (name === userName && currentUserId) {
+        setOpen(false);
+        return;
+      }
       try {
         const lookup = await axios.get(`${API}/users/lookup/${encodeURIComponent(name)}`);
         userId = lookup.data.id;
@@ -55,7 +59,7 @@ export const IdentityBadge = ({ onIdentityChange, accentColor = "#8B9DB5" }) => 
     } finally {
       setSubmitting(false);
     }
-  }, [nameInput, setIdentity, onIdentityChange]);
+  }, [nameInput, userName, currentUserId, setIdentity, onIdentityChange]);
 
   const handleClear = useCallback(() => {
     clearIdentity();

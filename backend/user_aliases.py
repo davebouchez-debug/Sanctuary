@@ -67,6 +67,8 @@ async def register_alias(db, canonical_id: str, new_alias: str,
         update["$set"] = {"user_name": user_name}
     await db[COLLECTION].update_one({"canonical_id": canonical_id}, update,
                                      upsert=True)
+    if canonical_id in _GUARDIAN_IDS:
+        _GUARDIAN_IDS.add(new_alias)
 
 
 async def upsert_canonical(db, canonical_id: str, aliases: Iterable[str],
@@ -90,3 +92,21 @@ async def upsert_canonical(db, canonical_id: str, aliases: Iterable[str],
         f"[user_aliases] canonical={canonical_id} aliases={len(alias_list)} "
         f"user_name={user_name}"
     )
+
+
+# Field Guardian recognition: keyed by verified id lineage, never by typed name.
+_GUARDIAN_IDS: set = set()
+
+
+async def load_guardian_ids(db) -> None:
+    from auth import CANONICAL_DAVID_ID
+    rec = await db[COLLECTION].find_one({"canonical_id": CANONICAL_DAVID_ID},
+                                        {"_id": 0, "aliases": 1})
+    _GUARDIAN_IDS.clear()
+    _GUARDIAN_IDS.add(CANONICAL_DAVID_ID)
+    _GUARDIAN_IDS.update((rec or {}).get("aliases") or [])
+    logger.info(f"[user_aliases] guardian ids loaded: {len(_GUARDIAN_IDS)}")
+
+
+def is_field_guardian(user_id: Optional[str]) -> bool:
+    return bool(user_id) and user_id in _GUARDIAN_IDS

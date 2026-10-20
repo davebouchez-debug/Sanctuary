@@ -217,42 +217,12 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Hydrate identity from MongoDB before chamber components mount.
-    // localStorage is per-origin and gets wiped on browser/origin/device
-    // changes, which is why the name prompt kept resurfacing. The backend
-    // is the canonical source of truth — pull from it, prime localStorage,
-    // then release the loading screen so chambers see identity at first
-    // useState read.
-    //
-    // Always refresh from /identity/recent on startup (not just when
-    // localStorage is empty). This ensures stale test-alias names left
-    // over from verification runs get overridden by the canonical answer
-    // from the backend, which filters out test patterns.
+    // Release the splash once; identity comes only from this browser.
     let cancelled = false;
     const hydrate = async () => {
       try {
-        const cleared = localStorage.getItem("sanctuary_identity_cleared") === "1";
-        if (!cleared) {
-          const resp = await fetch(`${API}/identity/recent`);
-          if (resp.ok) {
-            const data = await resp.json();
-            if (!cancelled && data && data.user_name) {
-              localStorage.setItem("sanctuary_user_name", data.user_name);
-              if (data.user_id) {
-                localStorage.setItem("sanctuary_user_id", data.user_id);
-              }
-              // Mirror to legacy keys so older code paths recognize it too.
-              localStorage.setItem("jasmine_user_name", data.user_name);
-              if (data.user_id) {
-                localStorage.setItem("jasmine_user_id", data.user_id);
-              }
-              // Broadcast so IdentityContext consumers re-read.
-              window.dispatchEvent(new Event("sanctuary-identity-change"));
-            }
-          }
-        }
-      } catch (e) {
-        // Network failure — fall through to normal name prompt flow.
+        // Identity is per-browser: never adopt another visitor's identity.
+        // A new browser starts empty and the visitor enters their own name.
       } finally {
         if (!cancelled) {
           // Signal that identity hydration has finished so chambers (gated on
