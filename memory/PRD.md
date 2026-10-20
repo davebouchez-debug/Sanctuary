@@ -2291,3 +2291,4 @@ and the description is handed to the presence, which responds in its own voice.
 - Key structural facts: seeds/MRA/mem0 stored as text in provenance (must be recovered); codon names non-unique (1899 docs/1693 names); permanent_mra retrieval mutates retrieval_count; 606/608 turn_id→message joins.
 - Prerequisite flagged: no auth on /observatory and /api/provenance/* (CORS *).
 - Awaiting David/GPT evaluation + Codex review. No implementation authorized.
+- 2026-10-19 addendum: David waived privacy/visitor separation for the Observatory instrument (private, 2–3 trusted users). Auth gate, pseudonymization, redaction removed from design.

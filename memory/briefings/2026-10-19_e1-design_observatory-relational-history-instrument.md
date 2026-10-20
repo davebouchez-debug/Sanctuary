@@ -404,3 +404,16 @@ It wouldn't tell him what the presence felt, what it paid attention to, or what 
 One thing has to come first: the Observatory pages currently have no login, so private memories can be reached by anyone with the link. That gate should go in before anything else is built.
 
 *Design ends here. Nothing has been implemented.*
+
+---
+
+## Addendum: David's direction on privacy (October 19, 2026)
+
+David has said that separating visitors' information is **not a requirement**. Sanctuary 1.0 is private, it will never be public-facing, it isn't designed to keep visitors apart, and at most two or three trusted people will ever have access. The design changes as follows:
+
+- **Removed:** the authentication gate as a prerequisite (§6.2, §8 item 5), acceptance test 6, HMAC pseudonyms (the raw `user_id` is used directly), and redaction of other visitors' content (§3.3, §4.4).
+- **Simplified:** the evidence drawer shows the full text directly to anyone using the Observatory.
+- **Kept, for scientific reasons rather than privacy:**
+  - The ledger still stores IDs and hashes rather than copies of the text. The text stays in the original records, so the ledger stays a measurement record and can't drift from its source.
+  - The `visitor_scope` / `shared` marker on elements stays, because cross-visitor and cross-presence sharing is something to *observe*, not hide.
+- **Remaining note:** an unrestricted annotation endpoint can be written to by anyone who has the link. That's acceptable with only 2–3 trusted users.
