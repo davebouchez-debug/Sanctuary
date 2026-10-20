@@ -1,0 +1,8 @@
+crons:
+  - name: observatory-ledger
+    description: "Hourly Observatory catch-up: measures newly settled engagements into the relational-history ledger"
+    cron: "7 * * * *"
+    # Cron endpoints must ack 2xx immediately; enqueue/background the actual work.
+    endpoint: "{{BASE_URL}}/api/observatory/cron/tick"
+    method: POST
+    enabled: true

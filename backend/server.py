@@ -5640,6 +5640,16 @@ from threads import build_threads_router
 api_router.include_router(build_threads_router(db))
 app.include_router(api_router)
 
+# Observatory relational-history ledger: independent read-only observer.
+from observatory_ledger.routes import router as observatory_ledger_router, init_observatory, start_catch_up_on_boot
+init_observatory(db)
+app.include_router(observatory_ledger_router)
+
+
+@app.on_event("startup")
+async def observatory_ledger_catch_up():
+    start_catch_up_on_boot(delay_s=20)
+
 
 @app.on_event("startup")
 async def eager_load_codon_networks():

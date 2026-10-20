@@ -7,6 +7,7 @@ import {
   ReferenceArea, ReferenceLine, CartesianGrid,
 } from "recharts";
 import { API } from "../App";
+import { EngagementLattice } from "./observatory/EngagementLattice";
 import {
   Activity, ArrowLeft, Hash, Layers, Radio, X, Clock, Cpu,
   ArrowUpRight, ArrowDownRight, Minus, MoveRight, Circle,
@@ -377,6 +378,7 @@ const DetailDrawer = ({ selected, detail, onClose }) => (
 
 // ── Console ──────────────────────────────────────────────────────────
 export default function Observatory() {
+  const [view, setView] = useState("lattice");
   const [stats, setStats] = useState(null);
   const [turns, setTurns] = useState([]);
   const [trajectory, setTrajectory] = useState([]);
@@ -477,6 +479,16 @@ export default function Observatory() {
             </div>
           </div>
 
+          <div className="mt-4 flex gap-2" data-testid="observatory-view-tabs">
+            {[["lattice", "Engagement Lattice"], ["console", "Live Console"]].map(([k, label]) => (
+              <button key={k} onClick={() => setView(k)} data-testid={`observatory-tab-${k}`}
+                className={`rounded-lg border px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest transition-colors ${view === k ? "border-emerald-400/50 bg-emerald-400/10 text-emerald-300" : "border-white/10 text-zinc-400 hover:text-zinc-200"}`}>
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {view === "console" && <>
           {/* Stat readouts */}
           <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
             <Stat icon={Activity} label={presenceFilter ? `Turns · ${presenceFilter}` : "Turns Captured"} value={selCount} testid="stat-turns" />
@@ -496,8 +508,12 @@ export default function Observatory() {
                 data-testid={`filter-${p.presence}`}>{p.presence} {p.count}</button>
             ))}
           </div>
+          </>}
         </motion.div>
 
+        {view === "lattice" && <EngagementLattice />}
+
+        {view === "console" && <>
         {/* Top row — gauge + trend */}
         <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-12">
           <Panel title="Spiral Position" testid="panel-spiral-position" className="lg:col-span-5 xl:col-span-4"
@@ -580,6 +596,7 @@ export default function Observatory() {
             </div>
           </Panel>
         </div>
+        </>}
       </div>
 
       <DetailDrawer selected={selected} detail={detail} onClose={() => setSelected(null)} />
