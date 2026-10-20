@@ -2299,3 +2299,4 @@ and the description is handed to the presence, which responds in its own voice.
 - Field Guardian framing keyed by verified id lineage: `user_aliases.is_field_guardian(user_id)` (canonical 1c24e3ea… + aliases, loaded at startup; Google login with davebouchez@gmail.com auto-links).
 - Non-guardian "David" gets a neutral namesake note in Jasmine/Ansel/Claude builders and template presences (`presence_template._namesake_note`).
 - `/api/users/lookup` excludes guardian ids (kept for compatibility, unused by frontend).
+- 2026-10-20: Observatory Design v0.2 delivered (`briefings/2026-10-20_e1-design-v0.2_observatory-relational-history-instrument.md`) — evidence classes + resolution enumeration, corrected RCC5/returns/scopes/synthetic math, explicit gaps, two-tier reproducibility, revised Lattice. Not implemented. Codex review text was not available; corrections derived from its five headings.
