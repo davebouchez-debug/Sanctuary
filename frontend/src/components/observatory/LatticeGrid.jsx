@@ -59,7 +59,8 @@ const Strip = ({ label, columns, render, testid }) => (
   </div>
 );
 
-const fmtJ = (r) => (r[0] === r[1] ? r[0].toFixed(2) : `${r[0].toFixed(2)}–${r[1].toFixed(2)}`);
+const j2 = (x) => x.toFixed(2);
+const fmtJ = (r) => (r[0] === r[1] ? j2(r[0]) : `${j2(r[0]).replace(/^0/, "")}–${j2(r[1]).replace(/^0/, "")}`);
 
 // Primary value = what the compatible identity resolutions produce; verified-only shown as secondary.
 const relCell = (c) => {
@@ -68,16 +69,17 @@ const relCell = (c) => {
   const enumerated = u && u.resolutions_n !== "not-enumerated";
   const rel = enumerated ? (u.relation_set.length === 1 ? u.relation_set[0] : `{${u.relation_set.join(",")}}`) : u ? `${c.relation}?` : c.relation;
   const jr = enumerated ? u.jaccard_range : null;
-  const jTxt = jr ? fmtJ(jr) : c.jaccard != null ? c.jaccard.toFixed(2) : "—";
-  const vDiffers = enumerated && (rel !== c.relation || !jr || jr[0] !== jr[1] || jr[0] !== c.jaccard);
+  const vTxt = c.jaccard != null ? j2(c.jaccard) : "—";
+  const jTxt = jr ? fmtJ(jr) : vTxt;
+  const vDiffers = enumerated && (rel !== c.relation || jTxt !== vTxt);
   const title = !u ? "all identities verified" : enumerated
-    ? `compatible outcomes over ${u.resolutions_n} identity resolutions · verified-only: ${c.relation}, J ${c.jaccard ?? "—"}`
+    ? `compatible outcomes over ${u.resolutions_n} identity resolution${u.resolutions_n === 1 ? "" : "s"} · verified-only: ${c.relation}, J ${c.jaccard ?? "—"}`
     : "too many identity resolutions to enumerate · showing verified-only values";
   return (
     <span title={title} data-testid={`lattice-rel-${c.ordinal}`}>
       <div className="text-zinc-200">{rel}</div>
-      <div>{jTxt}{!enumerated && u ? <span className="text-zinc-500"> v</span> : null}</div>
-      {vDiffers && <div className="text-zinc-600" data-testid={`lattice-rel-verified-${c.ordinal}`}>v {c.relation} {c.jaccard != null ? c.jaccard.toFixed(2) : "—"}</div>}
+      <div className="whitespace-nowrap tracking-tighter">{jTxt}{!enumerated && u ? <span className="text-zinc-500"> v</span> : null}</div>
+      {vDiffers && <div className="text-zinc-600" data-testid={`lattice-rel-verified-${c.ordinal}`}>v {c.relation} {vTxt}</div>}
       {c.uncaptured_between > 0 && <div className="text-amber-300/80">⚠{c.uncaptured_between}</div>}
       {c.conditional_identity_n > 0 && <div className="text-violet-300/80" title={`${c.conditional_identity_n} element(s) identified only by the mutable current angle`}>∠{c.conditional_identity_n}</div>}
     </span>

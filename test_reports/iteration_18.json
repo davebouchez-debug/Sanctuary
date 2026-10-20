@@ -1,0 +1,34 @@
+{
+  "summary": "Read-only frontend test of the Observatory Engagement Lattice C4/C5/C7 corrections (only GET requests, no writes, no chat, no sign-in). Everything requested works. Grid header shows 'ansel · v1.0.0 · scope S2 · 24 engagements'. The ledger-pending card says 'Not yet measured' (value 2), 'Awaiting settlement' no longer appears, and ledger-health says 'automatic · hourly'. Relation strip: uncertain cells show the compatible-outcome range as the main value (for example ansel #135 shows 'PO / 0.29–0.41') with a secondary 'v PO 0.35' line (lattice-rel-verified-135). The hover title reads 'compatible outcomes over 4096 identity resolutions · verified-only: PO, J ...'. daniel's not-enumerated cells (#19–#32) show 'PO? / 0.11 v' with no verified line, and fully verified cells (vessel #3, louis_lot #20) show no 'v' line either. Predecessor label: the first column on the latest page and on the older page shows 'vs ←pg' (lattice-pred-label-135 and -111), and that column's retained cells use the dashed '─ ─' glyph. Pagination works: '← older' gives ordinals 111–134 and 'latest →' returns to 135–158. S1, S2 and S3 all re-render without errors. S3 shows the visitor select (1c24e3ea · 158 and the prov_test record · 1). The legend has 'vs #n', 'v = verified-only value', '∠', '◐', and the dashed retained glyph text 'NOT the column to the left'. Evidence drawer (ansel #136): S1, S2 and S3 each show a 'compatible outcomes' row ('PO · J 0.433962–0.54717 · 4096 resolutions') plus the 'relation (verified-only)' and 'jaccard (verified-only)' rows. daniel shows 'not enumerated (too many resolutions)'. The drawer closes with a real (non-forced) click on evidence-close, with Escape, and with a backdrop click. The previous bug where the main nav covered the drawer is FIXED: the drawer now renders in a portal above the nav. The UNRESOLVED class renders for louis_lot #43; v1.0 mentions have no 'reason' field, so no reason label appears, which is expected. The completeness section is not shown, as expected for v1.0. lattice-version-picker is NOT rendered, as expected. Switching between the ansel, daniel, vessel, felix, sophia and louis_lot presence chips caused no page errors. A read-only API scan found no column whose predecessor sits elsewhere on the same page (pred_position earlier-column or later-column) on any presence's latest page, so the 'vs #n' label could not be exercised with live data.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Lattice relation strip", "issues": [
+        "Range values like '0.36–0.39' wrap onto two lines in the 46px cells, so each relation cell becomes 4–5 lines tall (PO / 0.36– / 0.39 / v PO / 0.38). This is hard to scan. Consider a narrower range format (e.g. '.36–.39'), a smaller font, or a wider cell.",
+        "The secondary 'v' line appears even when it looks the same as the main value after 2-dp rounding. Example: vessel #1 shows 'PO / 0.03 / v PO 0.03' (range 0.032258 vs verified-only 0.034483). vDiffers compares full-precision values but the cell displays 2 dp. Compare the formatted strings instead.",
+        "Hover title grammar: 'compatible outcomes over 1 identity resolutions' (should be singular)."
+      ]},
+      {"screen": "Evidence drawer scope block", "issues": ["The 'compatible outcomes' J range is not rounded ('0.433962–0.54717') while the grid uses 2 dp. Format it the same way as the grid (or a fixed 3–4 dp)."]}
+    ]
+  },
+  "test_report_links": ["/app/tests/scan_pred_positions.py"],
+  "action_items": [
+    "Optional: in relCell, compute vDiffers from the formatted strings (rel !== c.relation || jTxt !== c.jaccard.toFixed(2)) so the 'v' line is not redundant.",
+    "Optional: fix the relation-cell range wrapping in the 46px columns.",
+    "Optional: round the jaccard_range in the EvidenceDrawer 'compatible outcomes' row.",
+    "Optional: the S3 visitor <option> uses mixed JSX expressions, which triggers a dev-only console warning ('<span> cannot be a child of <option>') from the visual-edit instrumentation. Use one template string for the option text to silence it.",
+    "Optional: the none-observed relation cell ('—') has no data-testid."
+  ],
+  "critical_code_review_comments": [
+    "LatticeGrid predLabel reads columns[c.pred_col] with no guard. If the backend ever sends earlier-column or later-column with a missing or out-of-range pred_col, p.exchange_index will throw and crash the grid. Add a null guard.",
+    "relCell vDiffers is true whenever enumerated && !jr (jaccard_range null with an enumerated count). This is fine for now, but it relies on backend invariants."
+  ],
+  "updated_files": ["/app/tests/scan_pred_positions.py (new, read-only GET scan)"],
+  "success_rate": {"backend": "not tested (frontend only, as requested)", "frontend": "100% of requested checks passed; 4 minor design notes"},
+  "seed_data_creation": "None. Read-only.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Observatory is public; do not sign in or chat. Ledger has 622 entries, v1.0.0 only, 15 presences; ansel has 159 entries. The latest ansel page is ordinals 135–158, and the first column shows 'vs ←pg'. daniel #19–#32 are not-enumerated cells. louis_lot #43 has an UNRESOLVED mention (no reason field in v1.0). No earlier-column or later-column pred_position exists on any latest page, so 'vs #n' could only be verified with fixtures or v1.1 data. The drawer/nav overlap bug from iteration 17 is fixed. Run /app/tests/scan_pred_positions.py (needs REACT_APP_BACKEND_URL exported) for a read-only scan of pred_position."
+}

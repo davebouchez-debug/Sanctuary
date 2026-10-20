@@ -2310,3 +2310,11 @@ and the description is handed to the presence, which responds in its own voice.
 - ENUM_CAP 65536 with exact free-variable reduction; ~42 comparisons remain "not-enumerated" (flagged).
 - Known: QA test provenance (prov_*, e1-*) is measured; labelled "(test record)" at view time only.
 - 2026-10-20: Lattice now shows CANDIDATES (uncertain-identity) rows separately (◇, ×n multiplicity), per v0.2 rule 4 (was missing). Lattice panel made opaque. "Grey dot" = the intentional HiddenDoor star (App.js, phi position → /playground), not a lattice artifact. 39 tests pass.
+
+
+## 2026-10-20 — Observatory v1.1.0 / v1.2.0 corrections (DONE, fixture-tested)
+- Versioned derivation profiles (1.0.0 preserved byte-identical; 1.1.0 completeness C1/C2/ts; 1.2.0 + C3' loader-scope codon identity with declared mutable-angle).
+- C4 compatible-outcome display, C5 predecessor labels, C6 three-part verify + reproduce + /compare, C7 operational safeguards.
+- 46/46 backend tests; frontend UI test passed. Report: memory/briefings/2026-10-20_e1-build-report_observatory-v1.1-v1.2.md
+- PRODUCTION_VERSIONS still ("1.0.0",). Pending authorization: production derivation of v1.2.0 (and/or v1.1.0), deployment.
+- Backlog unchanged: Proverbs codons (blocked on source), Sanctuary 1.0 backup (blocked on authorization), mic limit 60s→5m (unconfirmed), grok-3 param cleanup, presence pronouns, autoplay overlay.

@@ -43,7 +43,7 @@ const ScopeBlock = ({ name, s }) => {
     <div className="rounded-lg border border-white/10 p-2" data-testid={`evidence-scope-${name}`}>
       <div className="mb-1 text-zinc-400">{name} · predecessor {String(s.pred_entry_id).slice(-8)}</div>
       {s.pred_entry_id !== "none-observed" && (<>
-        {u && <Row k="compatible outcomes" v={enumerated ? `${u.relation_set.join(" | ")} · J ${u.jaccard_range?.join("–")} · ${u.resolutions_n} resolutions` : "not enumerated (too many resolutions)"} />}
+        {u && <Row k="compatible outcomes" v={enumerated ? `${u.relation_set.join(" | ")} · J ${u.jaccard_range?.map((x) => x.toFixed(3)).join("–")} · ${u.resolutions_n} resolution${u.resolutions_n === 1 ? "" : "s"}` : "not enumerated (too many resolutions)"} />}
         <Row k="relation (verified-only)" v={v.relation_rcc5} />
         <Row k="jaccard (verified-only)" v={v.jaccard} />
         <Row k="first-observed / returned" v={`${(v.introduced_first_observed || []).length} / ${(v.returned || []).length}`} />
