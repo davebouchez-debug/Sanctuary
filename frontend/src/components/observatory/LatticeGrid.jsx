@@ -6,7 +6,7 @@ const GLYPH = {
   first: { ch: "◆", cls: "text-emerald-300", title: "first observed in this scope" },
   returned: { ch: "↺", cls: "text-sky-300", title: "returned (seen earlier in scope, then absent)" },
   retained: { ch: "━━━", cls: "text-zinc-300", title: "retained from the adjacent predecessor" },
-  "present-gap": { ch: "┄┄┄", cls: "text-zinc-500", title: "present at both observations — unobserved turns between" },
+  "present-gap": { ch: "· · ·", cls: "text-sky-200/70", title: "present at both observations — unobserved turns between" },
   withdrawn: { ch: "○", cls: "text-zinc-500", title: "withdrawn since predecessor" },
 };
 const TYPE_LABEL = { seed: "Continuity seeds", mra: "Breadcrumbs (permanent MRA)", codon: "Codons", history: "Conversation history" };
@@ -27,8 +27,8 @@ const ColHead = ({ c, prev, onOpen }) => {
           #{c.exchange_index}{c.session_open ? "·open" : ""}
         </button>
       )}
-      <div className="text-zinc-600">{fmtGap(dt)}</div>
-      {c.kind === "entry" && <div className="truncate text-zinc-600">{String(c.visitor).slice(0, 4)}</div>}
+      <div className="text-zinc-500">{fmtGap(dt)}</div>
+      {c.kind === "entry" && <div className="truncate text-zinc-500">{String(c.visitor).slice(0, 4)}</div>}
     </div>
   );
 };
@@ -46,14 +46,14 @@ const Strip = ({ label, columns, render, testid }) => (
 );
 
 const relCell = (c) => {
-  if (c.pred_entry_id === "none-observed") return <span className="text-zinc-600" title="no earlier observation in this scope">—</span>;
+  if (c.pred_entry_id === "none-observed") return <span className="text-zinc-500" title="no earlier observation in this scope">—</span>;
   const u = c.uncertainty;
   const undetermined = u && !u.determined;
   return (
     <span title={u ? `uncertain identities: ${u.resolutions_n === "not-enumerated" ? "not enumerated" : `${u.relation_set.join(" | ")}, J ${u.jaccard_range?.join("–")}`}` : "all identities verified"}>
       <div className="text-zinc-200">{undetermined ? (u.resolutions_n === "not-enumerated" ? `${c.relation}?` : `{${u.relation_set.join(",")}}`) : c.relation}</div>
       <div>{c.jaccard != null ? c.jaccard.toFixed(2) : "—"}</div>
-      {u && u.jaccard_range && u.jaccard_range[0] !== u.jaccard_range[1] && <div className="text-zinc-600">{u.jaccard_range.map((x) => x.toFixed(2)).join("–")}</div>}
+      {u && u.jaccard_range && u.jaccard_range[0] !== u.jaccard_range[1] && <div className="text-zinc-500">{u.jaccard_range.map((x) => x.toFixed(2)).join("–")}</div>}
       {c.uncaptured_between > 0 && <div className="text-amber-300/80">⚠{c.uncaptured_between}</div>}
     </span>
   );
@@ -139,7 +139,7 @@ export const LatticeGrid = ({ data, loading, showText, onOpen, onOlder, onLatest
 };
 
 const Legend = () => (
-  <div className="flex flex-wrap gap-x-5 gap-y-1 border-t border-white/10 px-4 py-3 font-mono text-[10px] text-zinc-500" data-testid="lattice-legend">
+  <div className="flex flex-wrap gap-x-5 gap-y-1 border-t border-white/10 px-4 py-3 font-mono text-[10px] text-zinc-400" data-testid="lattice-legend">
     {Object.entries(GLYPH).map(([k, g]) => <span key={k}><span className={g.cls}>{g.ch}</span> {g.title}</span>)}
     <span><span className="inline-block h-2.5 w-4 align-middle" style={hatch} /> uncaptured turn (exists, context unknown)</span>
     <span>│ thick rule = session boundary</span>

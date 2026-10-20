@@ -5,7 +5,7 @@ const fmt = (t) => (t ? new Date(t).toLocaleString() : "—");
 
 export const LedgerStatus = ({ status }) => {
   const last = status?.runs?.[0];
-  const lastWork = status?.runs?.find((r) => r.processed > 0);
+  const lastWork = status?.last_work_run;
   const ok = last ? last.status === "ok" : null;
   return (
     <div className="grid grid-cols-2 gap-3 md:grid-cols-5" data-testid="ledger-status">

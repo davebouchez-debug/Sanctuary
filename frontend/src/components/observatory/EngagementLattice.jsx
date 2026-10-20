@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { API } from "../../App";
 import { LatticeGrid } from "./LatticeGrid";
@@ -30,25 +30,36 @@ export const EngagementLattice = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [entryId, setEntryId] = useState(null);
+  const [error, setError] = useState(null);
+  const reqId = useRef(0);
 
   const loadStatus = useCallback(async () => {
-    const { data: s } = await axios.get(`${API}/observatory/status`);
-    setStatus(s);
-    setPresence((p) => p || s.presences?.[0]?.presence || "");
+    try {
+      const { data: s } = await axios.get(`${API}/observatory/status`);
+      setStatus(s);
+      setPresence((p) => p || s.presences?.[0]?.presence || "");
+    } catch {
+      setError("Observer status unavailable — retrying automatically.");
+    }
   }, []);
 
   const loadLattice = useCallback(async () => {
     if (!presence) return;
+    const id = ++reqId.current;
     setLoading(true);
     try {
       const params = { presence, scope, limit: 24 };
       if (scope === "S3" && visitor) params.visitor = visitor;
       if (before != null) params.before_ordinal = before;
       const { data: d } = await axios.get(`${API}/observatory/lattice`, { params });
+      if (id !== reqId.current) return;
       setData(d);
+      setError(null);
       if (scope === "S3" && !visitor && d.visitor) setVisitor(d.visitor);
+    } catch {
+      if (id === reqId.current) setError("Lattice could not be loaded — retrying automatically.");
     } finally {
-      setLoading(false);
+      if (id === reqId.current) setLoading(false);
     }
   }, [presence, scope, visitor, before]);
 
@@ -61,7 +72,11 @@ export const EngagementLattice = () => {
   }, [loadLattice, before]);
   useEffect(() => {
     if (!presence) return;
-    axios.get(`${API}/observatory/visitors`, { params: { presence } }).then(({ data: v }) => setVisitors(v.visitors || []));
+    let live = true;
+    axios.get(`${API}/observatory/visitors`, { params: { presence } })
+      .then(({ data: v }) => live && setVisitors(v.visitors || []))
+      .catch(() => live && setVisitors([]));
+    return () => { live = false; };
   }, [presence]);
 
   const pickPresence = (p) => { setPresence(p); setVisitor(""); setBefore(null); };
@@ -88,7 +103,7 @@ export const EngagementLattice = () => {
             <select value={visitor} onChange={(e) => { setVisitor(e.target.value); setBefore(null); }}
               data-testid="lattice-visitor-select"
               className="rounded-full border border-white/10 bg-black/40 px-3 py-1 font-mono text-[11px] text-zinc-300">
-              {visitors.map((v) => <option key={v.visitor} value={v.visitor}>visitor {String(v.visitor).slice(0, 8)} · {v.entries}</option>)}
+              {visitors.map((v) => <option key={v.visitor} value={v.visitor}>visitor {String(v.visitor).slice(0, 8)}{v.is_test ? " (test record)" : ""} · {v.entries}</option>)}
             </select>
           )}
           <label className="ml-auto flex items-center gap-2 font-mono text-[11px] text-zinc-400">
@@ -97,6 +112,7 @@ export const EngagementLattice = () => {
           </label>
         </div>
       </div>
+      {error && <div className="rounded-xl border border-amber-400/30 bg-amber-400/5 px-4 py-2 font-mono text-[11px] text-amber-300" data-testid="lattice-error">{error}</div>}
       <LatticeGrid data={data} loading={loading} showText={showText} onOpen={setEntryId}
         onOlder={() => setBefore(data?.first_ordinal)} onLatest={() => setBefore(null)} paged={before != null} />
       <EvidenceDrawer entryId={entryId} onClose={() => setEntryId(null)} />

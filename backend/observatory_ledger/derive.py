@@ -454,12 +454,24 @@ async def verify(db, ledger: Optional[Ledger] = None, check_drift: bool = False)
                             drift_n += 1
         out["presences"][presence] = {"entries": n, "chain_ok": broken is None, "broken_at": broken}
         out["ok"] = out["ok"] and broken is None
-    async for e in ledger.entries.find({"derivation_version": DERIVATION_VERSION},
-                                       {"entry_id": 1, "source": 1}):
-        from bson import ObjectId
-        p = await db.turn_provenance.find_one({"_id": ObjectId(e["source"]["provenance_oid"])}, {"assembled_messages": 1})
-        if not p or h(json.dumps(p.get("assembled_messages") or [], ensure_ascii=False)) != e["source"]["content_hash_recomputed"]:
-            out["provenance_changed"].append(e["entry_id"])
+    from bson import ObjectId
+    batch = []
+
+    async def check(items):
+        found = {str(p["_id"]): p async for p in db.turn_provenance.find(
+            {"_id": {"$in": [ObjectId(x["source"]["provenance_oid"]) for x in items]}}, {"assembled_messages": 1})}
+        for x in items:
+            p = found.get(x["source"]["provenance_oid"])
+            if not p or h(json.dumps(p.get("assembled_messages") or [], ensure_ascii=False)) != x["source"]["content_hash_recomputed"]:
+                out["provenance_changed"].append(x["entry_id"])
+
+    async for e in ledger.entries.find({"derivation_version": DERIVATION_VERSION}, {"entry_id": 1, "source": 1}):
+        batch.append(e)
+        if len(batch) >= 200:
+            await check(batch)
+            batch = []
+    if batch:
+        await check(batch)
     out["ok"] = out["ok"] and not out["provenance_changed"]
     if check_drift:
         out["drift"] = {"verified_mentions_checked": checked, "source_drifted": drift_n}

@@ -2300,3 +2300,12 @@ and the description is handed to the presence, which responds in its own voice.
 - Non-guardian "David" gets a neutral namesake note in Jasmine/Ansel/Claude builders and template presences (`presence_template._namesake_note`).
 - `/api/users/lookup` excludes guardian ids (kept for compatibility, unused by frontend).
 - 2026-10-20: Observatory Design v0.2 delivered (`briefings/2026-10-20_e1-design-v0.2_observatory-relational-history-instrument.md`) — evidence classes + resolution enumeration, corrected RCC5/returns/scopes/synthetic math, explicit gaps, two-tier reproducibility, revised Lattice. Not implemented. Codex review text was not available; corrections derived from its five headings.
+
+## 2026-10-20 — Observatory Research Instrument v1.0.0 BUILT (tested iteration_17 + 38 pytest)
+- Package `backend/observatory_ledger/` (measure.py pure math, recover.py identification, derive.py incremental derivation/chain/lock/catch-up/verify, routes.py API). Mounted in server.py after api_router + startup catch-up. No Sanctuary module imports.
+- Ledger collections (same DB, Sanctuary never reads): obs_ledger_runs, obs_ledger_engagements, obs_ledger_state. ~32KB/entry (~20MB for 622).
+- Automation: `.emergent/crons.yml` hourly (`7 * * * *`) → POST /api/observatory/cron/tick (Bearer WEBHOOK_CRON_SECRET); preview platform cron registration was UNREACHABLE (reconcile API timeout), so backend in-process hourly loop + startup catch-up are the active mechanism in preview; lock prevents overlap.
+- API: /api/observatory/{status,visitors,lattice,entry/{id},verify,run,cron/tick}.
+- Frontend: Observatory default tab "Engagement Lattice" (components/observatory/*); "Live Console" keeps original spiral gauge/trend/feed unchanged.
+- ENUM_CAP 65536 with exact free-variable reduction; ~42 comparisons remain "not-enumerated" (flagged).
+- Known: QA test provenance (prov_*, e1-*) is measured; labelled "(test record)" at view time only.

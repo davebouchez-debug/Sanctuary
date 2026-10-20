@@ -3,6 +3,7 @@ import asyncio
 import hmac
 import logging
 import os
+import re
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -93,10 +94,10 @@ async def status():
                     "visitors": {"$addToSet": "$visitor.resolved_visitor"}}}]):
         per.append({"presence": r["_id"], "entries": r["n"], "last_timestamp": r["last"], "visitors": len(r["visitors"])})
     per.sort(key=lambda x: -x["entries"])
-    last_run = runs[0] if runs else None
+    last_work = await led.runs.find_one({"processed": {"$gt": 0}}, {"_id": 0, "unavailable_evidence": 0}, sort=[("started_at", -1)])
     return {"derivation_version": DERIVATION_VERSION, "ledger_entries": total, "provenance_records": prov_total,
             "pending": prov_total - total, "running": bool(_state["task"] and not _state["task"].done()),
-            "presences": per, "runs": runs,
+            "presences": per, "runs": runs, "last_work_run": last_work,
             "unavailable_evidence": (await led.runs.find_one({}, {"unavailable_evidence": 1}, sort=[("started_at", -1)]) or {}).get("unavailable_evidence")}
 
 
@@ -108,8 +109,13 @@ async def visitors(presence: str):
         {"$match": {"derivation_version": DERIVATION_VERSION, "chronology.presence": presence}},
         {"$group": {"_id": "$visitor.resolved_visitor", "n": {"$sum": 1}, "last": {"$max": "$chronology.timestamp"}}},
         {"$sort": {"last": -1}}]):
-        out.append({"visitor": r["_id"], "entries": r["n"], "last_timestamp": r["last"]})
+        out.append({"visitor": r["_id"], "entries": r["n"], "last_timestamp": r["last"],
+                    "is_test": bool(_TEST_VISITOR.match(str(r["_id"] or "")))})
     return {"visitors": out}
+
+
+# QA-created provenance (labelled at view time only; measurements are never altered).
+_TEST_VISITOR = re.compile(r"^(prov_|e1-|test|TEST|qa[-_])", re.I)
 
 
 def _label(el: str, meta: dict) -> str:

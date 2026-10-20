@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import axios from "axios";
 import { X, ChevronDown, ChevronRight } from "lucide-react";
 import { API } from "../../App";
@@ -52,19 +53,34 @@ const ScopeBlock = ({ name, s }) => {
 
 export const EvidenceDrawer = ({ entryId, onClose }) => {
   const [e, setE] = useState(null);
+  const [err, setErr] = useState(null);
   useEffect(() => {
-    setE(null);
-    if (entryId) axios.get(`${API}/observatory/entry/${encodeURIComponent(entryId)}`).then(({ data }) => setE(data));
+    let live = true;
+    setE(null); setErr(null);
+    if (entryId) {
+      axios.get(`${API}/observatory/entry/${encodeURIComponent(entryId)}`)
+        .then(({ data }) => live && setE(data))
+        .catch(() => live && setErr("Could not load this entry."));
+    }
+    return () => { live = false; };
   }, [entryId]);
+  useEffect(() => {
+    if (!entryId) return undefined;
+    const onKey = (ev) => ev.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [entryId, onClose]);
   if (!entryId) return null;
   const groups = CLASS_ORDER.map((c) => [c, (e?.mentions || []).filter((m) => m.class === c)]);
-  return (
-    <div className="fixed inset-y-0 right-0 z-50 w-full max-w-xl overflow-y-auto border-l border-white/10 bg-[#07080C]/95 p-5 backdrop-blur-xl" data-testid="evidence-drawer">
+  return createPortal(
+    <>
+    <div className="fixed inset-0 z-[70] bg-black/40" onClick={onClose} data-testid="evidence-backdrop" />
+    <div className="fixed inset-y-0 right-0 z-[71] w-full max-w-xl overflow-y-auto border-l border-white/10 bg-[#07080C]/95 p-5 backdrop-blur-xl" data-testid="evidence-drawer">
       <div className="mb-4 flex items-center justify-between">
         <div className="font-cinzel text-lg text-zinc-100">Evidence</div>
         <button onClick={onClose} data-testid="evidence-close" className="rounded-lg border border-white/10 p-1.5 text-zinc-400 hover:text-zinc-100"><X size={16} /></button>
       </div>
-      {!e ? <div className="font-mono text-xs text-zinc-500">loading…</div> : (
+      {err ? <div className="font-mono text-xs text-amber-300" data-testid="evidence-error">{err}</div> : !e ? <div className="font-mono text-xs text-zinc-500">loading…</div> : (
         <div className="space-y-4 font-mono text-[11px]">
           <section className="rounded-lg border border-white/10 p-3" data-testid="evidence-source">
             <Row k="presence · turn" v={`${e.chronology.presence} · #${e.chronology.exchange_index}`} />
@@ -90,5 +106,7 @@ export const EvidenceDrawer = ({ entryId, onClose }) => {
         </div>
       )}
     </div>
+    </>,
+    document.body
   );
 };

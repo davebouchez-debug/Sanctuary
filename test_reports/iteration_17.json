@@ -1,0 +1,42 @@
+{
+  "summary": "Observatory ledger (Sanctuary 1.0) tested on backend and frontend. Backend: the existing suite test_observatory_ledger.py passed 18/18 (46s). The new public-API regression file test_observatory_api.py passed 20/20 after I fixed one assertion bug in my own test. It covers status, verify (chain_ok for all 15 presences, provenance_changed empty), verify with drift (11783 verified mentions checked, 0 drifted), lattice S1/S2/S3 for ansel with pagination, every presence across all 3 scopes, bad scope (400), unknown presence (empty), visitors, entry detail with evidence_text and run info, entry 404, cron tick (401 with no or wrong bearer, 202 with the correct one, duplicate X-Webhook-Id returns duplicate:true, list body returns 400), and manual run (202). Lattice semantic checks all held: 'retained' only appears where adjacent is true and uncaptured_between is 0, uncaptured columns have all-null cells, all S3 columns share one visitor, and none-observed columns have relation null. No obs_test_* collections were left behind. Frontend: lattice is the default tab. Status cards, presence/scope chips, S3 visitor select, text-only toggle and strip, uncaptured hatched columns, collapsed codon group (157 rows on expand), relation/participation strips, legend, older/latest pagination and the evidence drawer (source, scopes, evidence classes, evidence text) all work. felix (1 entry), companion and jasmine render in all scopes with no errors. The Live Console tab still shows the spiral gauge, trend, trajectory and live feed. One real UI bug: the fixed main navigation sits on top of the evidence drawer's header and close button, so a real click cannot close the drawer.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/observatory/status", "issue": "runs list is limited to 8. These are mostly no-op catch-up runs (processed 0), so the UI's 'Last new measurements' card shows '—' even though 622 entries exist. Query the last run with processed>0 separately."},
+      {"endpoint": "ledger content", "issue": "Provenance records left by earlier QA (user_ids prov_test, prov_multi, prov_sophia2, e1-reload-test-*) are now measured into the append-only production ledger. For example, ansel has visitor 'prov_test' in the S3 visitor select. This is not a bug in this feature, but the research data includes test visitors. Consider an exclusion list in the derivation."},
+      {"endpoint": "/api/observatory/verify", "issue": "Makes one find_one per ledger entry (N+1 queries) for the provenance integrity check. It is fine at 622 entries (about 2s) but will grow linearly. Batch it with $in."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "EvidenceDrawer", "issue": "The drawer is fixed with z-50, and the main navigation (data-testid main-navigation, also fixed z-50) renders above it. The 'Sign in' button and status pill cover the 'Evidence' title, and the nav intercepts pointer events on the close button, so a real click on evidence-close times out. Fix: give the drawer z-[60] or higher (or a top offset below the nav), and add Escape-to-close or a backdrop click.", "selector": "[data-testid='evidence-close']", "priority": "HIGH"}
+    ],
+    "integration_issues": [
+      {"flow": "Lattice/status loading", "issue": "loadStatus, loadLattice, the visitors fetch and the drawer fetch have no catch or error state. A failed request leaves stale data or an endless 'loading…'. Fast presence/scope switches can also let an older response overwrite a newer one, since there is no AbortController or request-id guard.", "affected_selectors": ["lattice-grid", "evidence-drawer"]}
+    ],
+    "design_issues": [
+      {"screen": "Engagement Lattice grid", "issues": ["The 'retained' glyph (━━━ zinc-300) and the 'present-gap' glyph (┄┄┄ zinc-500) look almost the same at 11px in this monospace font. Both read as solid lines in the grid and in the legend. Use a clearly dashed or dotted glyph or a distinct color for present-gap.", "Text sizes of 9-10px in zinc-500/600 on a near-black background (column Δt/visitor labels, legend) have low contrast."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_observatory_ledger.py", "/app/backend/tests/test_observatory_api.py", "/app/test_reports/pytest/obs_ledger_results.xml", "/app/test_reports/pytest/obs_api_results.xml"],
+  "action_items": [
+    "HIGH: Fix the EvidenceDrawer z-index so the main nav does not cover the drawer header and close button. Consider Escape-to-close.",
+    "Make 'Last new measurements' use the last run with processed>0, not just the last 8 runs.",
+    "Add error handling and stale-response guards to the lattice, visitors and drawer fetches.",
+    "Make the present-gap glyph visually distinct from retained.",
+    "Optional: exclude QA test visitors (prov_test etc.) from the ledger derivation; batch the verify provenance lookups."
+  ],
+  "critical_code_review_comments": [
+    "routes.lattice recomputes uncaptured turns by loading all session collections on every request (load_sessions scans every *_sessions collection). That is fine now, but expensive under 60s polling with many tabs open; consider caching per run.",
+    "routes.cron_tick: the dedup $addToSet followed by $slice -200 works. With a missing WEBHOOK_CRON_SECRET it correctly fails closed (401).",
+    "derive.catch_up: on startup-catch-up with a stale lock it sleeps about 15 minutes inside the task. During that time _spawn reports 'started': false for cron and manual triggers. This is acceptable but worth noting.",
+    "Read-only toward Sanctuary was confirmed by code review: only find/distinct/aggregate on Sanctuary collections, and writes go only to obs_ledger_* collections."
+  ],
+  "updated_files": ["/app/backend/tests/test_observatory_api.py"],
+  "success_rate": {"backend": "100% (38/38)", "frontend": "95% (all flows work; evidence-close is blocked by the nav overlay for real clicks)"},
+  "seed_data_creation": "None. The cron tick test adds 'TEST_<uuid>' webhook ids to the obs_ledger_state 'webhooks' seen list, which is trimmed to the last 200.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Observatory is public (no login). Ledger has 622 entries across 15 presences; ansel has 159 entries and 2 visitors (1c24e3ea... and prov_test). Run both test_observatory_ledger.py and test_observatory_api.py. Do not chat with presences. To verify the drawer fix, click [data-testid=evidence-close] without force or dispatch."
+}
