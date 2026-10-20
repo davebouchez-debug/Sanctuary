@@ -31,9 +31,12 @@ A read-only observer that measures every recorded Sanctuary turn (`turn_provenan
 - `.emergent/crons.yml`: hourly tick. `WEBHOOK_CRON_SECRET` is in `backend/.env`.
 - `frontend/src/components/observatory/*` and the tab switch in `frontend/src/components/Observatory.jsx`.
 - Tests: `backend/tests/test_observatory_ledger.py` (E1) and `backend/tests/test_observatory_api.py` (testing agent).
-- Run: `cd backend && python -m pytest tests/test_observatory_ledger.py tests/test_observatory_api.py -q`
-  - Needs `REACT_APP_BACKEND_URL` to point at a running backend.
-  - Integration tests write only to throwaway `obs_test_*` collections.
+
+## Access boundary (deliberate)
+- Codex and GPT have **no access to Sanctuary 1.0 or its records**. David keeps it that way on purpose.
+- This is a **static audit** of the code and design. The tests aren't runnable outside Sanctuary, because they need the live database.
+- **E1's latest test result:** 39 / 39 passed. The command is `python -m pytest tests/test_observatory_ledger.py tests/test_observatory_api.py`.
+- If a finding needs evidence from the data, write it as a **check request**: what to measure and what result would confirm or refute it. David will pass it to E1. E1 runs it inside Sanctuary and reports back **aggregate results only** (counts, pass/fail), never record content.
 
 ## Please verify
 1. **Isolation.** Nothing in `observatory_ledger/` imports or calls Sanctuary's prompt, memory, retrieval or model code. In particular, `get_permanent_mra_context` must never be called, because it writes `retrieval_count`. No writes to any Sanctuary collection.
