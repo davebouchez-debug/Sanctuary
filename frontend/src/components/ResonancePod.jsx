@@ -181,20 +181,6 @@ export const ResonancePod = ({ threadIntent } = {}) => {
     setShowNamePrompt(false);
     setIsInitializing(true);
     
-    // Try to look up existing user
-    try {
-      const lookupResponse = await fetch(`${API}/users/lookup/${encodeURIComponent(name)}`);
-      if (lookupResponse.ok) {
-        const userData = await lookupResponse.json();
-        setUserId(userData.id);
-        localStorage.setItem("sanctuary_user_id", userData.id);
-        initializeSession(name, userData.id);
-        return;
-      }
-    } catch (e) {
-      // User not found, create new
-    }
-    
     // Create new user
     try {
       const createResponse = await fetch(`${API}/users`, {
@@ -207,6 +193,7 @@ export const ResonancePod = ({ threadIntent } = {}) => {
         const newUser = await createResponse.json();
         setUserId(newUser.id);
         localStorage.setItem("sanctuary_user_id", newUser.id);
+        window.dispatchEvent(new Event("sanctuary-identity-change"));
         initializeSession(name, newUser.id);
       } else {
         initializeSession(name, null);

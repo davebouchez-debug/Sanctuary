@@ -159,6 +159,7 @@ export const ClarityPod = ({ threadIntent } = {}) => {
     localStorage.setItem("sanctuary_user_name", name);
     localStorage.setItem("jasmine_user_id", id);
     localStorage.setItem("jasmine_user_name", name);
+    window.dispatchEvent(new Event("sanctuary-identity-change"));
   };
 
   // Handle identity submission
@@ -167,22 +168,14 @@ export const ClarityPod = ({ threadIntent } = {}) => {
     
     const name = nameInput.trim();
     
+    // Each new browser gets its own id; never adopt someone else's by name.
     try {
-      // Try to look up existing user
-      const lookupResponse = await axios.get(`${API}/users/lookup/${encodeURIComponent(name)}`);
-      setUserId(lookupResponse.data.id);
-      setUserName(lookupResponse.data.name);
-      storeIdentity(lookupResponse.data.id, lookupResponse.data.name);
-    } catch {
-      // Create new user
-      try {
-        const createResponse = await axios.post(`${API}/users`, { name });
-        setUserId(createResponse.data.id);
-        setUserName(name);
-        storeIdentity(createResponse.data.id, name);
-      } catch (error) {
-        console.error("Failed to create user:", error);
-      }
+      const createResponse = await axios.post(`${API}/users`, { name });
+      setUserId(createResponse.data.id);
+      setUserName(name);
+      storeIdentity(createResponse.data.id, name);
+    } catch (error) {
+      console.error("Failed to create user:", error);
     }
     
     setShowIdentityModal(false);

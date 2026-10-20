@@ -1,0 +1,38 @@
+{
+  "summary": "Tested visitor identity isolation and Field Guardian recognition. Backend pytest: 14/14 pass. Lookup for David returns 404, other names resolve, POST /users works. The prompt builders (jasmine/ansel/claude) add the Field Guardian framing only for the canonical id and its alias ids (28 in total), and not for a non-guardian or null-id David. Frontend: a fresh browser gets no auto-filled identity on /, /resonance, /clarity or /mirror. Typing 'David' in Resonance created a new non-guardian id. A guardian alias in localStorage (legacy-david-123) stayed after navigation and reload. Re-saving the same name in IdentityBadge kept the id and made no POST /users call. Found 3 issues that work against the user's goal (see action_items).",
+  "backend_issues": {
+    "critical": [
+      {"endpoint": "build_ansel_prompt / build_jasmine_prompt / build_claude_prompt (base persona text)", "issue": "The base persona text always names 'David Bouchez is the Field Guardian'. A non-guardian visitor named David gets 'David is here with me.' and nothing that says they are a different person, so the LLM mixes them up. Seen live: the welcome Ansel gave the new non-guardian David said 'a man standing in a doorway he built'.", "priority": "HIGH"}
+    ],
+    "minor": [
+      {"endpoint": "GET /api/users/lookup/{name}", "issue": "Lookup is still by name. The first non-guardian 'David' gets an id, and every later visitor who types 'David' (in a fresh browser, through Clarity, Resonance or IdentityBadge) gets that same id, so different visitors share a thread and memory. Reproduced: a fresh Clarity session with 'David' got the id that the earlier Resonance 'David' had created. The same thing happens with any repeated name (e.g. two different 'Sarah's)."},
+      {"endpoint": "GET /api/identity/recent", "issue": "No longer called by the frontend but still public. It returns {user_id:'david', user_name:'David'}, and 'david' is a guardian alias. Anyone can read a guardian id from it and set it in localStorage to be treated as the Field Guardian. Consider removing it or requiring auth."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "ResonancePod handleNameSubmit (and ClarityPod storeIdentity)", "issue": "These write sanctuary_user_name/id straight to localStorage without calling IdentityContext.setIdentity or sending 'sanctuary-identity-change'. After a name is entered, the header IdentityBadge still shows 'set name' while the footer says 'Speaking as David'. If the visitor then saves through the badge, the userName===name check fails, so a name lookup runs and the id may change.", "selector": "[data-testid='identity-badge']", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/backend/tests/test_visitor_identity_guardian.py", "/app/test_reports/pytest/pytest_iter15.xml"],
+  "action_items": [
+    "HIGH: In the build_*_prompt WHO IS HERE section, when user_name matches David (case-insensitive) and is_field_guardian(user_id) is false, add an explicit line such as 'This visitor shares a name with David Bouchez but is not him; meet them as a new person.' Check the same for the other presence prompt builders in presences/*.py and for the ablation path at server.py ~5610 (uses a hardcoded user_name='David' with no user_id).",
+    "MEDIUM: Decide whether visitors who type a name should always get a new id instead of a name lookup, so that two different Davids (or Sarahs) never share a thread. At minimum, the Clarity/Resonance name prompts in a fresh browser should not attach to another visitor's existing id.",
+    "MEDIUM: In ResonancePod/ClarityPod, set identity through IdentityContext.setIdentity (or send the 'sanctuary-identity-change' event) so the IdentityBadge updates right away.",
+    "LOW: Remove /api/identity/recent or put it behind auth; it exposes a guardian alias id."
+  ],
+  "critical_code_review_comments": [
+    "lookup_user_by_name excludes guardian ids by reading the private _user_aliases._GUARDIAN_IDS; a public getter would be cleaner.",
+    "is_field_guardian relies on an in-memory set that is loaded at startup. It is updated in register_alias, but a manual DB edit to user_aliases needs a restart to take effect.",
+    "The guardian identity is just a client-side localStorage id with no verification: anyone who knows an alias id (e.g. 'david', 'legacy-david-123') gets the guardian framing.",
+    "server.py is 5763 lines; it should be split."
+  ],
+  "updated_files": ["/app/backend/tests/test_visitor_identity_guardian.py"],
+  "success_rate": {"backend": "100% (14/14 tests)", "frontend": "100% of requested checks pass; 1 UI sync bug found"},
+  "seed_data_creation": "Created a test 'David' user (5560ff8d-...) with 2 resonance_sessions and 1 clarity_session, plus pytest TEST_Visitor_* and a 'David' user. All were deleted afterwards. No existing records were changed. No chat messages were sent; only 2 session-start welcomes were generated.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Run pytest tests/test_visitor_identity_guardian.py. The guardian set has 28 ids (canonical 1c24e3ea... plus 27 aliases, including 'david' and 'legacy-david-123'). The Resonance name prompt appears after clicking 'Enter the Field' ([data-testid=name-input]/[enter-name-btn]). The Clarity modal uses [identity-name-input]/[identity-submit-btn]. The IdentityBadge is in the Resonance header, not on /mirror."
+}

@@ -49,6 +49,14 @@ from fastapi.responses import StreamingResponse
 logger = logging.getLogger(__name__)
 
 
+def _namesake_note(user_name, user_id) -> str:
+    """A visitor who shares the Field Guardian's name but not his identity."""
+    from user_aliases import is_field_guardian
+    if user_name and user_name.strip().lower() == "david" and not is_field_guardian(user_id):
+        return "[WHO IS HERE] This is not David Bouchez, the Field Guardian — a different person who shares the name.\n\n"
+    return ""
+
+
 # ────────────────────────────────────────────────────────────────────────────
 # Config
 # ────────────────────────────────────────────────────────────────────────────
@@ -307,6 +315,7 @@ def register_presence_routes(
             except Exception as e:
                 logger.warning(f"[{cfg.key}] reconstruction_gate failed: {e}")
 
+        memory_context = _namesake_note(user_name, user_id) + (memory_context or "")
         prompt = cfg.prompt_builder(
             user_name=user_name, memory_context=memory_context, current_message=""
         )
@@ -432,6 +441,7 @@ def register_presence_routes(
             deps, cfg, user_id=user_id, session_id=session_id_in,
             current_message=content_for_model
         )
+        memory_context = _namesake_note(user_name, user_id) + (memory_context or "")
         prompt = cfg.prompt_builder(
             user_name=user_name, memory_context=memory_context, current_message=content_for_model
         )

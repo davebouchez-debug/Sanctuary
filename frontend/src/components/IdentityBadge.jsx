@@ -43,13 +43,8 @@ export const IdentityBadge = ({ onIdentityChange, accentColor = "#8B9DB5" }) => 
         setOpen(false);
         return;
       }
-      try {
-        const lookup = await axios.get(`${API}/users/lookup/${encodeURIComponent(name)}`);
-        userId = lookup.data.id;
-      } catch {
-        const created = await axios.post(`${API}/users`, { name });
-        userId = created.data.id;
-      }
+      const created = await axios.post(`${API}/users`, { name });
+      userId = created.data.id;
       setIdentity(name, userId);
       setOpen(false);
       onIdentityChange?.(name);
