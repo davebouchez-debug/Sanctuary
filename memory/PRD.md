@@ -2279,3 +2279,8 @@ and the description is handed to the presence, which responds in its own voice.
 - P2: earlier backlog unchanged (autoplay tap-to-enter, grok-3 params, chamber pronouns).
 
 - 2026-10-16: ROOM_TO_LISTEN (David's line, verbatim) is now in EVERY presence, right after SANCTUARY_DEDICATION (for Ansel: after his floor and substrate-pull block). Verified for all 22 presences plus the registry path. Harness results: memory/briefings/2026-10-16_briefing-for-gpt_room-to-listen.md. Backup: memory/backups/2026-10-16_pre-room-to-listen-all/.
+
+## 2026-10-19 — Observatory Research Consultation (read-only)
+- Delivered `/app/memory/briefings/2026-10-19_e1-response_observatory-relational-evolution.md`
+- Key findings: provenance = model INPUT only (replies in *_sessions); spiral position = zone keyword from presence's latest seed across ALL visitors (4 discrete values); /observatory + /api/provenance/* are unauthenticated and expose full prompts (privacy risk, not fixed).
+- Proposal (unauthorized): offline frozen-snapshot analysis first; optional 3-layer Session Sequence lens (record / human annotations / math readings).
