@@ -13,7 +13,7 @@ load_dotenv(ROOT.parent / "frontend" / ".env")
 BASE_URL = os.environ.get("REACT_APP_BACKEND_URL").rstrip("/")
 OBS = f"{BASE_URL}/api/observatory"
 SECRET = os.environ.get("WEBHOOK_CRON_SECRET")
-GLYPHS = {"first", "returned", "retained", "present-gap", "withdrawn", None, "uncertain"}
+GLYPHS = {"first", "returned", "retained", "retained-remote", "present-gap", "withdrawn", None, "uncertain"}
 
 
 @pytest.fixture(scope="module")
@@ -27,7 +27,7 @@ def test_status(s):
     assert r.status_code == 200
     d = r.json()
     assert d["ledger_entries"] >= 600
-    assert d["pending"] >= 0 and d["pending"] < 50
+    assert d["not_yet_measured"] >= 0 and d["not_yet_measured"] < 50
     assert isinstance(d["runs"], list) and d["runs"]
     assert any(p["presence"] == "ansel" for p in d["presences"])
     assert "_id" not in d["runs"][0]
@@ -65,7 +65,7 @@ def _check_lattice(d, scope):
             if row.get("aggregate"):
                 continue
             assert cell in GLYPHS
-            if cell == "retained":
+            if cell in ("retained", "retained-remote"):
                 assert c["adjacent"] is True and not c["uncaptured_between"], (row["element"], c)
     for c in cols:
         if c["kind"] == "entry" and c["pred_entry_id"] == "none-observed":

@@ -7,11 +7,13 @@ export const LedgerStatus = ({ status }) => {
   const last = status?.runs?.[0];
   const lastWork = status?.last_work_run;
   const ok = last ? last.status === "ok" : null;
+  const health = status?.running ? "measuring…" : !last ? "automatic · hourly"
+    : last.status === "ok" ? "automatic · hourly" : last.status === "ok-with-errors" ? "last run completed with errors" : "last run failed — will retry";
   return (
     <div className="grid grid-cols-2 gap-3 md:grid-cols-5" data-testid="ledger-status">
-      <Cell label="Engagements measured" value={status?.ledger_entries ?? "—"} testid="ledger-entries" />
-      <Cell label="Awaiting settlement" value={status?.pending ?? "—"} testid="ledger-pending"
-        hint="Turns whose outcome is not yet known (next message, session end, or 24h)" />
+      <Cell label={`Engagements measured · v${status?.derivation_version ?? "—"}`} value={status?.ledger_entries ?? "—"} testid="ledger-entries" />
+      <Cell label="Not yet measured" value={status?.not_yet_measured ?? "—"} testid="ledger-pending"
+        hint="Recorded turns not yet in this ledger: waiting to settle (next message, session end, or 24h) or queued" />
       <Cell label="Last observer run" value={last ? `${fmt(last.finished_at || last.started_at)}` : "—"} testid="ledger-last-run"
         hint={last ? `${last.trigger} · ${last.status}` : ""} />
       <Cell label="Last new measurements" value={lastWork ? `${lastWork.processed} · ${fmt(lastWork.finished_at)}` : "—"} testid="ledger-last-work" />
@@ -19,7 +21,7 @@ export const LedgerStatus = ({ status }) => {
         <div className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Observer</div>
         <div className={`mt-1 flex items-center gap-2 font-mono text-sm ${ok === false ? "text-amber-300" : "text-emerald-300"}`}>
           {status?.running ? <RefreshCw size={14} className="animate-spin" /> : ok === false ? <ShieldAlert size={14} /> : <ShieldCheck size={14} />}
-          {status?.running ? "measuring…" : ok === false ? "last run failed — will retry" : "automatic · hourly"}
+          {health}
         </div>
       </div>
     </div>

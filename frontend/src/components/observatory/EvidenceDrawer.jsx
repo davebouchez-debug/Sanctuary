@@ -15,7 +15,9 @@ const Mention = ({ m }) => {
         <span className="w-16 text-zinc-500">{m.type}</span>
         <span className="truncate">{m.element || (m.candidates ? `${m.candidates.length} candidates` : `#${m.frag_hash.slice(0, 10)}`)}</span>
         {m.render_matches_current_record === false && <span className="ml-auto text-amber-300/80" title="rendered text differs from the stored record as it reads now">≠ store</span>}
-        {m.identity_basis && <span className="ml-auto text-zinc-500" title="identified by name plus current angle (angle may have drifted)">angle tie-break</span>}
+        {m.identity_basis === "name+current-angle" && <span className="ml-auto text-zinc-500" title="identified by name plus current angle (angle may have drifted)">angle tie-break</span>}
+        {m.identity_basis === "mutable-angle" && <span className="ml-auto text-violet-300/80" title="conditional: identified only by the mutable current angle within the loader scope">∠ conditional</span>}
+        {m.reason && <span className="ml-auto text-zinc-500" data-testid={`evidence-reason-${m.mention_id}`}>{m.reason}</span>}
       </button>
       {open && (
         <div className="ml-5 mt-1 space-y-1 font-mono text-[10px] text-zinc-500">
@@ -35,17 +37,21 @@ const Row = ({ k, v }) => (
 
 const ScopeBlock = ({ name, s }) => {
   const v = s.verified || {};
+  const u = s.uncertainty;
+  const enumerated = u && u.resolutions_n !== "not-enumerated";
   return (
     <div className="rounded-lg border border-white/10 p-2" data-testid={`evidence-scope-${name}`}>
       <div className="mb-1 text-zinc-400">{name} · predecessor {String(s.pred_entry_id).slice(-8)}</div>
       {s.pred_entry_id !== "none-observed" && (<>
-        <Row k="relation (verified)" v={v.relation_rcc5} />
-        <Row k="jaccard (verified)" v={v.jaccard} />
+        {u && <Row k="compatible outcomes" v={enumerated ? `${u.relation_set.join(" | ")} · J ${u.jaccard_range?.join("–")} · ${u.resolutions_n} resolutions` : "not enumerated (too many resolutions)"} />}
+        <Row k="relation (verified-only)" v={v.relation_rcc5} />
+        <Row k="jaccard (verified-only)" v={v.jaccard} />
         <Row k="first-observed / returned" v={`${(v.introduced_first_observed || []).length} / ${(v.returned || []).length}`} />
         <Row k="withdrawn / present-at-both" v={`${(v.withdrawn || []).length} / ${(v.present_at_both || []).length}`} />
         <Row k="adjacent" v={v.adjacent ? "yes" : "no"} />
         <Row k="uncaptured between" v={s.uncaptured_between} />
-        {s.uncertainty && <Row k="with uncertain identities" v={s.uncertainty.resolutions_n === "not-enumerated" ? "not enumerated" : `${s.uncertainty.relation_set.join(" | ")} · J ${s.uncertainty.jaccard_range?.join("–")}`} />}
+        {s.uncaptured_unplaceable > 0 && <Row k="uncaptured, time unknown" v={s.uncaptured_unplaceable} />}
+        {s.conditional_identity_n > 0 && <Row k="conditional identities (∠ angle)" v={s.conditional_identity_n} />}
       </>)}
     </div>
   );
@@ -93,7 +99,16 @@ export const EvidenceDrawer = ({ entryId, onClose }) => {
             <Row k="method" v={`v${e.derivation_version} · ${e.norm_version} · run ${String(e.run_id).slice(0, 8)} · commit ${String(e.run?.code_commit).slice(0, 8)}`} />
             <Row k="response" v={`${e.participation.match} · ${e.participation.response_len_chars ?? "—"} chars · ${e.participation.end_state}`} />
             {e.gaps.length > 0 && <Row k="gaps" v={e.gaps.join(", ")} />}
+            {e.configuration_complete != null && <Row k="configuration" v={e.configuration_complete ? "complete" : "partial (unresolved observed material)"} />}
           </section>
+          {e.completeness && (
+            <section className="rounded-lg border border-white/10 p-3" data-testid="evidence-completeness">
+              <div className="mb-1 uppercase tracking-widest text-zinc-500">section completeness</div>
+              {Object.entries(e.completeness).map(([t, r]) => (
+                <Row key={t} k={t} v={`${r.status}${r.unresolved_n ? ` · ${r.unresolved_n} unresolved` : ""}${r.unattributed_lines_n ? ` · ${r.unattributed_lines_n} lines unattributed` : ""}`} />
+              ))}
+            </section>
+          )}
           <section className="grid gap-2" data-testid="evidence-scopes">
             {["S1", "S2", "S3"].map((s) => <ScopeBlock key={s} name={s} s={e.scopes[s]} />)}
           </section>

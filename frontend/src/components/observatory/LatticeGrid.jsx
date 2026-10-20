@@ -5,7 +5,8 @@ const CELL = 46;
 const GLYPH = {
   first: { ch: "◆", cls: "text-emerald-300", title: "first observed in this scope" },
   returned: { ch: "↺", cls: "text-sky-300", title: "returned (seen earlier in scope, then absent)" },
-  retained: { ch: "━━━", cls: "text-zinc-300", title: "retained from the adjacent predecessor" },
+  retained: { ch: "━━━", cls: "text-zinc-300", title: "retained from the adjacent predecessor (the column to the left)" },
+  "retained-remote": { ch: "─ ─", cls: "text-zinc-400", title: "retained from the adjacent predecessor, which is NOT the column to the left (see the 'vs' label)" },
   "present-gap": { ch: "· · ·", cls: "text-sky-200/70", title: "present at both observations — unobserved turns between" },
   withdrawn: { ch: "○", cls: "text-zinc-500", title: "withdrawn since predecessor" },
   uncertain: { ch: "◇", cls: "text-amber-200/80", title: "present, identity uncertain (one of several stored records with identical text)" },
@@ -14,9 +15,19 @@ const TYPE_LABEL = { seed: "Continuity seeds", mra: "Breadcrumbs (permanent MRA)
 const fmtGap = (s) => (s == null ? "" : s < 90 ? `${Math.round(s)}s` : s < 5400 ? `${Math.round(s / 60)}m` : s < 172800 ? `${Math.round(s / 3600)}h` : `${Math.round(s / 86400)}d`);
 const hatch = { backgroundImage: "repeating-linear-gradient(45deg, rgba(255,255,255,0.06) 0 4px, transparent 4px 8px)" };
 
-const ColHead = ({ c, prev, onOpen }) => {
+const predLabel = (c, columns) => {
+  if (c.pred_position === "off-page") return { t: "vs ←pg", title: "predecessor is on an earlier page" };
+  if (c.pred_position === "earlier-column" || c.pred_position === "later-column") {
+    const p = columns[c.pred_col];
+    return { t: `vs #${p.exchange_index}`, title: `predecessor is column #${p.exchange_index} (${p.session_id.slice(0, 6)}), not the column to the left` };
+  }
+  return null;
+};
+
+const ColHead = ({ c, prev, columns, onOpen }) => {
   const boundary = prev && prev.session_id !== c.session_id;
   const dt = prev ? (new Date(c.timestamp) - new Date(prev.timestamp)) / 1000 : null;
+  const pl = c.kind === "entry" ? predLabel(c, columns) : null;
   return (
     <div style={{ width: CELL, ...(c.kind === "uncaptured" ? hatch : {}) }}
       className={`flex-shrink-0 px-0.5 text-center font-mono text-[9px] leading-tight ${boundary ? "border-l-2 border-zinc-400/60" : "border-l border-white/[0.04]"}`}>
@@ -26,10 +37,12 @@ const ColHead = ({ c, prev, onOpen }) => {
         <button onClick={() => onOpen(c.entry_id)} className="w-full py-1 text-zinc-300 hover:text-emerald-300" data-testid={`lattice-col-${c.ordinal}`}
           title={`${new Date(c.timestamp).toLocaleString()} · session ${c.session_id.slice(0, 8)} · visitor ${String(c.visitor).slice(0, 8)}`}>
           #{c.exchange_index}{c.session_open ? "·open" : ""}
+          {c.configuration_complete === false && <span className="text-amber-300/80" title="partial configuration: some observed material is unresolved"> ◐</span>}
         </button>
       )}
       <div className="text-zinc-500">{fmtGap(dt)}</div>
       {c.kind === "entry" && <div className="truncate text-zinc-500">{String(c.visitor).slice(0, 4)}</div>}
+      {pl && <div className="truncate text-sky-300/80" title={pl.title} data-testid={`lattice-pred-label-${c.ordinal}`}>{pl.t}</div>}
     </div>
   );
 };
@@ -46,16 +59,27 @@ const Strip = ({ label, columns, render, testid }) => (
   </div>
 );
 
+const fmtJ = (r) => (r[0] === r[1] ? r[0].toFixed(2) : `${r[0].toFixed(2)}–${r[1].toFixed(2)}`);
+
+// Primary value = what the compatible identity resolutions produce; verified-only shown as secondary.
 const relCell = (c) => {
   if (c.pred_entry_id === "none-observed") return <span className="text-zinc-500" title="no earlier observation in this scope">—</span>;
   const u = c.uncertainty;
-  const undetermined = u && !u.determined;
+  const enumerated = u && u.resolutions_n !== "not-enumerated";
+  const rel = enumerated ? (u.relation_set.length === 1 ? u.relation_set[0] : `{${u.relation_set.join(",")}}`) : u ? `${c.relation}?` : c.relation;
+  const jr = enumerated ? u.jaccard_range : null;
+  const jTxt = jr ? fmtJ(jr) : c.jaccard != null ? c.jaccard.toFixed(2) : "—";
+  const vDiffers = enumerated && (rel !== c.relation || !jr || jr[0] !== jr[1] || jr[0] !== c.jaccard);
+  const title = !u ? "all identities verified" : enumerated
+    ? `compatible outcomes over ${u.resolutions_n} identity resolutions · verified-only: ${c.relation}, J ${c.jaccard ?? "—"}`
+    : "too many identity resolutions to enumerate · showing verified-only values";
   return (
-    <span title={u ? `uncertain identities: ${u.resolutions_n === "not-enumerated" ? "not enumerated" : `${u.relation_set.join(" | ")}, J ${u.jaccard_range?.join("–")}`}` : "all identities verified"}>
-      <div className="text-zinc-200">{undetermined ? (u.resolutions_n === "not-enumerated" ? `${c.relation}?` : `{${u.relation_set.join(",")}}`) : c.relation}</div>
-      <div>{c.jaccard != null ? c.jaccard.toFixed(2) : "—"}</div>
-      {u && u.jaccard_range && u.jaccard_range[0] !== u.jaccard_range[1] && <div className="text-zinc-500">{u.jaccard_range.map((x) => x.toFixed(2)).join("–")}</div>}
+    <span title={title} data-testid={`lattice-rel-${c.ordinal}`}>
+      <div className="text-zinc-200">{rel}</div>
+      <div>{jTxt}{!enumerated && u ? <span className="text-zinc-500"> v</span> : null}</div>
+      {vDiffers && <div className="text-zinc-600" data-testid={`lattice-rel-verified-${c.ordinal}`}>v {c.relation} {c.jaccard != null ? c.jaccard.toFixed(2) : "—"}</div>}
       {c.uncaptured_between > 0 && <div className="text-amber-300/80">⚠{c.uncaptured_between}</div>}
+      {c.conditional_identity_n > 0 && <div className="text-violet-300/80" title={`${c.conditional_identity_n} element(s) identified only by the mutable current angle`}>∠{c.conditional_identity_n}</div>}
     </span>
   );
 };
@@ -73,7 +97,9 @@ const partCell = (c) => {
 const ElementRow = ({ row, columns }) => (
   <div className="flex hover:bg-white/[0.02]" data-testid={`lattice-row-${row.element}`}>
     <div className={`sticky left-0 z-10 w-60 flex-shrink-0 truncate bg-[#0A0C12] px-2 py-0.5 font-mono text-[10px] ${row.uncertain ? "italic text-amber-200/70" : "text-zinc-400"}`}
-      title={row.uncertain ? `candidates: ${row.candidates.join(", ")}` : row.element}>{row.label}</div>
+      title={row.uncertain ? `candidates: ${row.candidates.join(", ")}` : row.conditional ? `${row.element} · identified by the mutable current angle in at least one engagement` : row.element}>
+      {row.label}{row.conditional && <span className="text-violet-300/80" data-testid={`lattice-row-conditional-${row.element}`}> ∠</span>}
+    </div>
     {row.cells.map((g, i) => {
       const unc = columns[i].kind === "uncaptured";
       const meta = !row.aggregate && g ? GLYPH[g] : null;
@@ -113,7 +139,7 @@ export const LatticeGrid = ({ data, loading, showText, onOpen, onOlder, onLatest
     <div className="rounded-2xl border border-white/10 bg-[#0A0C12]" data-testid="lattice-grid">
       <div className="flex items-center justify-between px-4 py-3">
         <div className="font-mono text-[11px] text-zinc-400">
-          <span className="font-cinzel text-base text-zinc-100">{data.presence}</span> · scope {data.scope}
+          <span className="font-cinzel text-base text-zinc-100">{data.presence}</span> · v{data.version} · scope {data.scope}
           {data.scope === "S3" && ` · visitor ${String(data.visitor).slice(0, 8)}`} · {columns.filter((c) => c.kind === "entry").length} engagements
           {columns.some((c) => c.kind === "uncaptured") && <span className="ml-2 inline-flex items-center gap-1 text-amber-300/80"><AlertTriangle size={11} />{columns.filter((c) => c.kind === "uncaptured").length} uncaptured turns shown</span>}
         </div>
@@ -127,7 +153,7 @@ export const LatticeGrid = ({ data, loading, showText, onOpen, onOlder, onLatest
           <div className="inline-block min-w-full">
             <div className="sticky top-0 z-20 flex bg-[#0A0C12]">
               <div className="sticky left-0 z-10 w-60 flex-shrink-0 bg-[#0A0C12] px-2 py-1 font-mono text-[10px] uppercase tracking-widest text-zinc-500">engagement · Δt · visitor</div>
-              {columns.map((c, i) => <ColHead key={i} c={c} prev={columns[i - 1]} onOpen={onOpen} />)}
+              {columns.map((c, i) => <ColHead key={i} c={c} prev={columns[i - 1]} columns={columns} onOpen={onOpen} />)}
             </div>
             {groups.map(([t, rows]) => <Group key={t} type={t} rows={rows} columns={columns} />)}
             <Strip label={`relation to predecessor [${data.scope}]`} columns={columns} render={relCell} testid="lattice-relation-strip" />
@@ -147,7 +173,10 @@ const Legend = () => (
     {Object.entries(GLYPH).map(([k, g]) => <span key={k}><span className={g.cls}>{g.ch}</span> {g.title}</span>)}
     <span><span className="inline-block h-2.5 w-4 align-middle" style={hatch} /> uncaptured turn (exists, context unknown)</span>
     <span>│ thick rule = session boundary</span>
-    <span>relation: RCC5 on verified identities · {"{…}"} = several possible under uncertain identities · ? = too many to enumerate</span>
+    <span><span className="text-sky-300/80">vs #n</span> = this column is compared with column #n, not the one to its left</span>
+    <span>relation/J: outcome over all compatible identity resolutions (range when they differ) · <span className="text-zinc-600">v</span> = verified-only value · ? = too many to enumerate</span>
+    <span><span className="text-violet-300/80">∠</span> = identity rests on the mutable current angle (conditional)</span>
+    <span><span className="text-amber-300/80">◐</span> = partial configuration (unresolved observed material)</span>
     <span>⚠n = n unobserved turns between this and its predecessor</span>
   </div>
 );

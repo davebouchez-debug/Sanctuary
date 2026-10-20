@@ -13,7 +13,7 @@ from typing import Dict, List, Optional
 
 from pymongo.errors import DuplicateKeyError
 
-from . import DERIVATION_VERSION, NORM_VERSION, ENUM_CAP
+from . import DERIVATION_VERSION, NORM_VERSION, ENUM_CAP, PROFILES, PRODUCTION_VERSIONS
 from .measure import enumerate_resolutions, per_type, text_layer, transform
 from .recover import canonical_hash, h, norm, recover
 
@@ -85,9 +85,9 @@ async def build_indexes(db) -> dict:
         mra_meta[nid] = {"source_session_id": m.get("source_session_id"), "created_at": str(m.get("promoted_at"))}
     codon_by = {}
     async for c in db.living_codons.find({}, {"name": 1, "core_move": 1, "target_angle": 1, "triadic_zone": 1,
-                                              "angle_backfilled_at": 1}):
+                                              "angle_backfilled_at": 1, "presence": 1}):
         codon_by.setdefault(c.get("name"), []).append({
-            "id": str(c["_id"]), "target_angle": c.get("target_angle"),
+            "id": str(c["_id"]), "target_angle": c.get("target_angle"), "presence": c.get("presence"),
             "fp": canonical_hash({k: c.get(k) for k in ("name", "core_move", "target_angle", "triadic_zone", "angle_backfilled_at")}),
         })
     aliases = {}
@@ -201,7 +201,8 @@ def uncaptured_between(unc: List[dict], scope: str, ref: dict, t0: datetime, t1:
     return n, unknown
 
 
-def scope_measure(scope: str, cur: dict, history: List[dict], unc: List[dict]) -> dict:
+def scope_measure(scope: str, cur: dict, history: List[dict], unc: List[dict], profile: Optional[dict] = None) -> dict:
+    profile = profile or {}
     key = _scope_key(scope, cur)
     seq = [e for e in history if _scope_key(scope, e) == key]
     if not seq:
@@ -235,16 +236,37 @@ def scope_measure(scope: str, cur: dict, history: List[dict], unc: List[dict]) -
         gaps += [f"uncaptured-between:{n_unc}", "predecessor-not-adjacent", "gap-hides-events:possible"]
     elif not adjacent:
         gaps.append("predecessor-not-adjacent")
+    if profile.get("ts_unplaceable"):
+        # Known uncaptured turns whose timestamp cannot be parsed: counted, never placed.
+        sids = {cur["session_id"]} if scope == "S1" else {cur["session_id"], pred["session_id"]}
+        unp = [u for u in unc if u["ts"] is None and u["session_id"] in sids
+               and (scope != "S3" or u["visitor"] in (cur["visitor"], None))]
+        out["uncaptured_unplaceable"] = len(unp)
+        if unp:
+            gaps += [f"uncaptured-unplaceable:{len(unp)}", "adjacency-unverifiable"]
+            if tr["adjacent"]:
+                tr["adjacent"] = False
+                gaps.append("predecessor-not-adjacent")
+    if profile.get("codon_scope"):
+        cond = set(pred.get("conditional") or []) | set(cur.get("conditional") or [])
+        involved = cond & (set(pred["verified"]) | set(cur["verified"]))
+        out["conditional_identity_n"] = len(involved)
+        if involved:
+            gaps.append("conditional-identity:mutable-angle")
     out["gaps"] = gaps
     return out
 
 
 # ---------------------------------------------------------------- entry
 def build_entry(prov: dict, idx: dict, sess: Optional[dict], history: List[dict], unc: List[dict],
-                part: dict, ordinal: int) -> dict:
+                part: dict, ordinal: int, version: str = DERIVATION_VERSION) -> dict:
+    profile = PROFILES[version]
     sid = prov.get("session_id")
-    mentions, gaps = recover(prov, idx, [m for m in (sess or {}).get("messages", []) if m["content"] is not None])
+    report: dict = {}
+    mentions, gaps = recover(prov, idx, [m for m in (sess or {}).get("messages", []) if m["content"] is not None],
+                             profile, report)
     verified = sorted({m["element"] for m in mentions if m["class"] == "VERIFIED"})
+    conditional = sorted({m["element"] for m in mentions if m["class"] == "VERIFIED" and m.get("conditional")})
     uncertain = [m["candidates"] for m in mentions if m["class"] == "CANDIDATES"]
     text = sorted({f'{m["type"]}:{m["frag_hash"][:16]}' for m in mentions if m["class"] == "TEXT_ONLY"})
     meta = {}
@@ -264,16 +286,24 @@ def build_entry(prov: dict, idx: dict, sess: Optional[dict], history: List[dict]
         cls_counts[m["class"]] = cls_counts.get(m["class"], 0) + 1
         type_counts[m["type"]] = type_counts.get(m["type"], 0) + 1
     ts = parse_ts(prov.get("timestamp"))
-    cur = {"entry_id": f'{DERIVATION_VERSION}:{prov["provenance_id"]}', "session_id": sid,
+    cur = {"entry_id": f'{version}:{prov["provenance_id"]}', "session_id": sid,
            "presence": prov.get("presence"), "visitor": canon or uid, "ts": ts,
-           "verified": verified, "uncertain": uncertain, "text": text}
-    scopes = {s: scope_measure(s, cur, history, unc) for s in ("S1", "S2", "S3")}
+           "verified": verified, "uncertain": uncertain, "text": text, "conditional": conditional}
+    scopes = {s: scope_measure(s, cur, history, unc, profile) for s in ("S1", "S2", "S3")}
     if part["match"] != "matched":
         gaps.append("response-unmatched")
     if recomputed != prov.get("content_hash"):
         gaps.append("provenance-hash-mismatch")
+    availability = {"verified": verified, "uncertain": uncertain, "text": text,
+                    "counts_by_class": cls_counts, "counts_by_type": type_counts}
+    extra = {}
+    if profile.get("completeness"):
+        extra = {"completeness": report.get("completeness", {}), "configuration_complete": report.get("complete", True)}
+    if profile.get("codon_scope"):
+        availability["conditional"] = conditional
     return {
-        "entry_id": cur["entry_id"], "derivation_version": DERIVATION_VERSION, "norm_version": NORM_VERSION,
+        **extra,
+        "entry_id": cur["entry_id"], "derivation_version": version, "norm_version": NORM_VERSION,
         "source": {"provenance_oid": str(prov["_id"]), "provenance_id": prov.get("provenance_id"),
                    "turn_id": prov.get("turn_id"), "content_hash_recorded": prov.get("content_hash"),
                    "content_hash_recomputed": recomputed,
@@ -285,8 +315,7 @@ def build_entry(prov: dict, idx: dict, sess: Optional[dict], history: List[dict]
                        "session_open": prov.get("exchange_index") == 1,
                        "first_captured_in_session": not any(e["session_id"] == sid for e in history)},
         "visitor": {"user_id": uid, "resolved_visitor": canon or uid, "resolution": "alias" if canon else "raw"},
-        "availability": {"verified": verified, "uncertain": uncertain, "text": text,
-                         "counts_by_class": cls_counts, "counts_by_type": type_counts},
+        "availability": availability,
         "element_meta": meta,
         "mentions": mentions,
         "scopes": scopes,
@@ -308,7 +337,7 @@ def _hist_item(e: dict) -> dict:
     return {"entry_id": e["entry_id"], "session_id": c["session_id"], "presence": c["presence"],
             "visitor": e["visitor"]["resolved_visitor"], "ts": parse_ts(c["timestamp"]),
             "verified": e["availability"]["verified"], "uncertain": e["availability"]["uncertain"],
-            "text": e["availability"]["text"]}
+            "text": e["availability"]["text"], "conditional": e["availability"].get("conditional") or []}
 
 
 # ---------------------------------------------------------------- lock
@@ -328,33 +357,75 @@ async def release_lock(ledger: Ledger, holder: str):
                                   {"$set": {"expires_at": datetime.now(timezone.utc) - timedelta(seconds=1)}})
 
 
+async def renew_lock(ledger: Ledger, holder: str) -> bool:
+    r = await ledger.state.update_one({"_id": "lock", "holder": holder},
+                                      {"$set": {"expires_at": datetime.now(timezone.utc) + LOCK_TTL}})
+    return r.matched_count == 1
+
+
+# ---------------------------------------------------------------- shared derivation context
+async def derivation_context(db) -> dict:
+    idx = await build_indexes(db)
+    pres_by_sess = {}
+    async for p in db.turn_provenance.find({}, {"session_id": 1, "presence": 1}):
+        pres_by_sess.setdefault(p.get("session_id"), p.get("presence"))
+    first = await db.turn_provenance.find_one({}, {"timestamp": 1}, sort=[("_id", 1)])
+    return {"idx": idx, "window_start": parse_ts(first["timestamp"]) if first else None,
+            "sessions": await load_sessions(db, pres_by_sess),
+            "captured": set(await db.turn_provenance.distinct("turn_id"))}
+
+
+def uncaptured_for(ctx: dict, presence: str, profile: dict) -> List[dict]:
+    """Known assistant turns without provenance; unparseable timestamps are kept (ts=None) only when the profile counts them."""
+    unc, ws = [], ctx["window_start"]
+    for sid, s in ctx["sessions"].items():
+        if s["presence"] != presence:
+            continue
+        vis = ctx["idx"]["aliases"].get(s["user_id"], s["user_id"])
+        for m in s["messages"]:
+            if m["role"] != "assistant" or m["id"] in ctx["captured"]:
+                continue
+            if m["ts"] and (ws is None or m["ts"] >= ws):
+                unc.append({"ts": m["ts"], "session_id": sid, "visitor": vis})
+            elif m["ts"] is None and profile.get("ts_unplaceable"):
+                unc.append({"ts": None, "session_id": sid, "visitor": vis})
+    return unc
+
+
 # ---------------------------------------------------------------- run
 async def run_once(db, trigger: str = "manual", ledger: Optional[Ledger] = None,
-                   max_records: Optional[int] = None, now: Optional[datetime] = None) -> dict:
+                   max_records: Optional[int] = None, now: Optional[datetime] = None,
+                   version: str = DERIVATION_VERSION) -> dict:
     ledger = ledger or Ledger(db)
-    await ledger.ensure_indexes()
+    profile = PROFILES[version]
     run_id = str(uuid.uuid4())
-    if not await acquire_lock(ledger, run_id):
-        return {"status": "skipped-locked", "run_id": None}
+    try:
+        if not await acquire_lock(ledger, run_id):
+            return {"status": "skipped-locked", "run_id": None, "version": version}
+    except Exception as e:
+        logger.exception("[OBSERVATORY] lock acquisition failed")
+        return {"status": "failed", "run_id": None, "version": version, "errors": [repr(e)], "processed": 0}
     now = now or datetime.now(timezone.utc)
     started = datetime.now(timezone.utc)
-    run = {"run_id": run_id, "trigger": trigger, "derivation_version": DERIVATION_VERSION,
-           "norm_version": NORM_VERSION, "enum_cap": ENUM_CAP, "code_commit": _code_commit(),
-           "started_at": started, "status": "running", "unavailable_evidence": UNAVAILABLE_EVIDENCE}
-    await ledger.runs.insert_one(dict(run))
-    processed, unsettled, errors = 0, 0, []
+    processed, unsettled, errors, status, run_recorded = 0, 0, [], "failed", False
     try:
-        idx = await build_indexes(db)
-        pres_by_sess = {}
-        async for p in db.turn_provenance.find({}, {"session_id": 1, "presence": 1}):
-            pres_by_sess.setdefault(p.get("session_id"), p.get("presence"))
-        first = await db.turn_provenance.find_one({}, {"timestamp": 1}, sort=[("_id", 1)])
-        window_start = parse_ts(first["timestamp"]) if first else None
-        sessions = await load_sessions(db, pres_by_sess)
-        captured_turns = set(await db.turn_provenance.distinct("turn_id"))
+        await ledger.ensure_indexes()
+        await ledger.runs.update_many({"status": "running", "started_at": {"$lt": started - LOCK_TTL}},
+                                      {"$set": {"status": "abandoned"}})
+        await ledger.runs.insert_one({"run_id": run_id, "trigger": trigger, "derivation_version": version,
+                                      "norm_version": NORM_VERSION, "enum_cap": ENUM_CAP, "code_commit": _code_commit(),
+                                      "started_at": started, "status": "running",
+                                      "unavailable_evidence": UNAVAILABLE_EVIDENCE})
+        run_recorded = True
+        ctx = await derivation_context(db)
+        idx, sessions = ctx["idx"], ctx["sessions"]
+        lost = False
         for presence in sorted(await db.turn_provenance.distinct("presence")):
+            if not await renew_lock(ledger, run_id):
+                errors.append("lock-lost")
+                break
             last = await ledger.entries.find_one(
-                {"derivation_version": DERIVATION_VERSION, "chronology.presence": presence},
+                {"derivation_version": version, "chronology.presence": presence},
                 sort=[("chronology.ordinal", -1)])
             q = {"presence": presence}
             if last:
@@ -363,20 +434,11 @@ async def run_once(db, trigger: str = "manual", ledger: Optional[Ledger] = None,
             if not await db.turn_provenance.count_documents(q, limit=1):
                 continue
             history = [_hist_item(e) async for e in ledger.entries.find(
-                {"derivation_version": DERIVATION_VERSION, "chronology.presence": presence},
+                {"derivation_version": version, "chronology.presence": presence},
                 {"entry_id": 1, "chronology": 1, "visitor": 1, "availability": 1}).sort("chronology.ordinal", 1)]
             prev_hash = last["chain"]["entry_hash"] if last else "GENESIS"
             ordinal = last["chronology"]["ordinal"] + 1 if last else 0
-            unc = []
-            for sid, s in sessions.items():
-                if s["presence"] != presence:
-                    continue
-                vis = s["user_id"]
-                vis = idx["aliases"].get(vis, vis)
-                for m in s["messages"]:
-                    if m["role"] == "assistant" and m["id"] not in captured_turns and m["ts"] and \
-                            (window_start is None or m["ts"] >= window_start):
-                        unc.append({"ts": m["ts"], "session_id": sid, "visitor": vis})
+            unc = uncaptured_for(ctx, presence, profile)
             async for prov in db.turn_provenance.find(q).sort("_id", 1):
                 if max_records is not None and processed >= max_records:
                     break
@@ -385,7 +447,7 @@ async def run_once(db, trigger: str = "manual", ledger: Optional[Ledger] = None,
                 if not settled:
                     unsettled += 1
                     break  # frontier: keep chain in provenance order
-                entry = await asyncio.to_thread(build_entry, prov, idx, sess, history, unc, part, ordinal)
+                entry = await asyncio.to_thread(build_entry, prov, idx, sess, history, unc, part, ordinal, version)
                 entry["chain"] = {"prev_entry_hash": prev_hash, "entry_hash": chain_hash(prev_hash, entry)}
                 entry["run_id"] = run_id
                 entry["derived_at"] = datetime.now(timezone.utc)
@@ -398,10 +460,14 @@ async def run_once(db, trigger: str = "manual", ledger: Optional[Ledger] = None,
                 history.append(_hist_item(entry))
                 ordinal += 1
                 processed += 1
+                if processed % 25 == 0 and not await renew_lock(ledger, run_id):
+                    errors.append("lock-lost")
+                    lost = True
+                    break
                 await asyncio.sleep(0)
-            if max_records is not None and processed >= max_records:
+            if lost or (max_records is not None and processed >= max_records):
                 break
-        status = "ok"
+        status = "ok-with-errors" if errors else "ok"
     except Exception as e:  # recorded; next run resumes from the ledger frontier
         logger.exception("[OBSERVATORY] run failed")
         errors.append(repr(e))
@@ -409,38 +475,52 @@ async def run_once(db, trigger: str = "manual", ledger: Optional[Ledger] = None,
     finally:
         await release_lock(ledger, run_id)
     summary = {"status": status, "processed": processed, "unsettled_frontiers": unsettled,
-               "errors": errors[:20], "finished_at": datetime.now(timezone.utc),
-               "ledger_total": await ledger.entries.count_documents({"derivation_version": DERIVATION_VERSION})}
-    await ledger.runs.update_one({"run_id": run_id}, {"$set": summary})
-    logger.info(f"[OBSERVATORY] run {run_id[:8]} {trigger}: {status}, processed={processed}")
+               "errors": errors[:20], "finished_at": datetime.now(timezone.utc), "version": version}
+    try:
+        summary["ledger_total"] = await ledger.entries.count_documents({"derivation_version": version})
+        if run_recorded:
+            await ledger.runs.update_one({"run_id": run_id}, {"$set": summary})
+    except Exception:
+        logger.exception("[OBSERVATORY] run summary could not be recorded")
+    logger.info(f"[OBSERVATORY] run {run_id[:8]} v{version} {trigger}: {status}, processed={processed}")
     return {"run_id": run_id, **summary}
 
 
-async def catch_up(db, trigger: str, ledger: Optional[Ledger] = None, delay_s: float = 0) -> dict:
+async def catch_up(db, trigger: str, ledger: Optional[Ledger] = None, delay_s: float = 0,
+                   versions=PRODUCTION_VERSIONS) -> dict:
     """Run until nothing new is settled (covers suspension, restarts, missed ticks)."""
     if delay_s:
         await asyncio.sleep(delay_s)
     last = {}
     for _ in range(20):
-        last = await run_once(db, trigger, ledger)
-        if last.get("status") == "skipped-locked" and trigger == "startup-catch-up":
-            # A lock left by a crashed process expires after LOCK_TTL; retry once then.
-            await asyncio.sleep(LOCK_TTL.total_seconds() + 5)
-            last = await run_once(db, trigger, ledger)
-        if last.get("status") != "ok" or not last.get("processed"):
+        progressed, healthy = False, True
+        for v in versions:
+            last = await run_once(db, trigger, ledger, version=v)
+            if last.get("status") == "skipped-locked" and trigger == "startup-catch-up":
+                # A lock left by a crashed process expires after LOCK_TTL; retry once then.
+                await asyncio.sleep(LOCK_TTL.total_seconds() + 5)
+                last = await run_once(db, trigger, ledger, version=v)
+            if last.get("status") != "ok":
+                healthy = False
+                break
+            progressed = progressed or bool(last.get("processed"))
+        if not healthy or not progressed:
             break
     return last
 
 
-async def verify(db, ledger: Optional[Ledger] = None, check_drift: bool = False) -> dict:
-    """Chain integrity + Tier-1 provenance integrity (+ optional Tier-2 drift)."""
+# ---------------------------------------------------------------- verification
+async def verify(db, ledger: Optional[Ledger] = None, check_drift: bool = False,
+                 version: str = DERIVATION_VERSION, reproduce_check: bool = False) -> dict:
+    """Three separately labelled claims:
+    ledger_integrity (chain + ordinals), source_consistency (inputs unchanged), reproducibility (re-derivation)."""
     ledger = ledger or Ledger(db)
-    out = {"presences": {}, "ok": True, "provenance_changed": [], "drift": None}
+    V = {"derivation_version": version}
+    integ = {"presences": {}, "ok": True}
     drift_n = checked = 0
-    for presence in sorted(await ledger.entries.distinct("chronology.presence", {"derivation_version": DERIVATION_VERSION})):
+    for presence in sorted(await ledger.entries.distinct("chronology.presence", V)):
         prev, n, broken = "GENESIS", 0, None
-        async for e in ledger.entries.find({"derivation_version": DERIVATION_VERSION, "chronology.presence": presence}
-                                           ).sort("chronology.ordinal", 1):
+        async for e in ledger.entries.find({**V, "chronology.presence": presence}).sort("chronology.ordinal", 1):
             if e["chain"]["prev_entry_hash"] != prev or chain_hash(prev, e) != e["chain"]["entry_hash"] \
                     or e["chronology"]["ordinal"] != n:
                 broken = broken or e["entry_id"]
@@ -452,27 +532,68 @@ async def verify(db, ledger: Optional[Ledger] = None, check_drift: bool = False)
                         checked += 1
                         if await current_fingerprint(db, m["element"]) != m["record_fingerprint"]:
                             drift_n += 1
-        out["presences"][presence] = {"entries": n, "chain_ok": broken is None, "broken_at": broken}
-        out["ok"] = out["ok"] and broken is None
+        integ["presences"][presence] = {"entries": n, "chain_ok": broken is None, "broken_at": broken}
+        integ["ok"] = integ["ok"] and broken is None
     from bson import ObjectId
+    src = {"ok": True, "checked": 0, "provenance_changed": [], "components_changed": []}
     batch = []
 
     async def check(items):
         found = {str(p["_id"]): p async for p in db.turn_provenance.find(
-            {"_id": {"$in": [ObjectId(x["source"]["provenance_oid"]) for x in items]}}, {"assembled_messages": 1})}
+            {"_id": {"$in": [ObjectId(x["source"]["provenance_oid"]) for x in items]}},
+            {"assembled_messages": 1, "components.codon_selection": 1, "components.memory_components": 1})}
         for x in items:
+            src["checked"] += 1
             p = found.get(x["source"]["provenance_oid"])
             if not p or h(json.dumps(p.get("assembled_messages") or [], ensure_ascii=False)) != x["source"]["content_hash_recomputed"]:
-                out["provenance_changed"].append(x["entry_id"])
+                src["provenance_changed"].append(x["entry_id"])
+                continue
+            comp, eh = p.get("components") or {}, x["source"].get("evidence_hashes") or {}
+            if any(canonical_hash(comp.get(k)) != eh.get(k) for k in ("codon_selection", "memory_components")):
+                src["components_changed"].append(x["entry_id"])
 
-    async for e in ledger.entries.find({"derivation_version": DERIVATION_VERSION}, {"entry_id": 1, "source": 1}):
+    async for e in ledger.entries.find(V, {"entry_id": 1, "source": 1}):
         batch.append(e)
         if len(batch) >= 200:
             await check(batch)
             batch = []
     if batch:
         await check(batch)
-    out["ok"] = out["ok"] and not out["provenance_changed"]
-    if check_drift:
-        out["drift"] = {"verified_mentions_checked": checked, "source_drifted": drift_n}
+    src["ok"] = not src["provenance_changed"] and not src["components_changed"]
+    out = {"version": version, "ledger_integrity": integ, "source_consistency": src, "reproducibility": None,
+           "drift": {"verified_mentions_checked": checked, "source_drifted": drift_n} if check_drift else None,
+           "presences": integ["presences"], "provenance_changed": src["provenance_changed"]}
+    if reproduce_check:
+        out["reproducibility"] = await reproduce(db, ledger, version)
+    out["ok"] = integ["ok"] and src["ok"] and (out["reproducibility"] is None or out["reproducibility"]["ok"])
     return out
+
+
+async def reproduce(db, ledger: Ledger, version: str, now: Optional[datetime] = None) -> dict:
+    """Re-derive every stored entry in memory and compare. Uses stored participation (time-dependent);
+    identification uses the CURRENT store, so a pass proves reproducibility only while the store has not drifted."""
+    from bson import ObjectId
+    profile, now = PROFILES[version], now or datetime.now(timezone.utc)
+    ctx = await derivation_context(db)
+    res = {"ok": True, "checked": 0, "mismatched": 0, "missing_provenance": 0, "participation_time_dependent": 0,
+           "basis": "current store; stored participation", "first_mismatch": None}
+    for presence in sorted(await ledger.entries.distinct("chronology.presence", {"derivation_version": version})):
+        unc, history, prev = uncaptured_for(ctx, presence, profile), [], "GENESIS"
+        async for e in ledger.entries.find({"derivation_version": version, "chronology.presence": presence}).sort("chronology.ordinal", 1):
+            prov = await db.turn_provenance.find_one({"_id": ObjectId(e["source"]["provenance_oid"])})
+            res["checked"] += 1
+            if not prov:
+                res["missing_provenance"] += 1
+            else:
+                sess = ctx["sessions"].get(prov.get("session_id"))
+                new = await asyncio.to_thread(build_entry, prov, ctx["idx"], sess, history, unc,
+                                              e["participation"], e["chronology"]["ordinal"], version)
+                if chain_hash(prev, new) != e["chain"]["entry_hash"]:
+                    res["mismatched"] += 1
+                    res["first_mismatch"] = res["first_mismatch"] or e["entry_id"]
+                if participation(prov, sess, now)[0] != e["participation"]:
+                    res["participation_time_dependent"] += 1
+            history.append(_hist_item(e))
+            prev = e["chain"]["entry_hash"]
+    res["ok"] = res["mismatched"] == 0 and res["missing_provenance"] == 0
+    return res

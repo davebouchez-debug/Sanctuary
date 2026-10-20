@@ -73,18 +73,52 @@ def _mention(mid, typ, field, s, e, frag, cls, element=None, candidates=None, ex
     return m
 
 
-def recover(prov: dict, idx: dict, session_msgs: List[dict]) -> Tuple[List[dict], List[str]]:
-    """Return (mentions, gap_codes). idx holds store indexes built by derive."""
+_HEADER = re.compile(r"^(## |\[[A-Z])")
+
+
+def _after_terminator(text, s0, e0, kept):
+    """Lines a text-only block dropped after its terminator: (same-shape continuation lines, other lines count)."""
+    body = list(_lines(text, s0, e0))[1:]
+    rest = body[len(kept) + 1:]
+    shape = kept[0][0].strip()[:2] if kept else None
+    cont, other, stopped = [], 0, False
+    for ln, s, e in rest:
+        st = ln.strip()
+        if _HEADER.match(st) or st == "---":
+            stopped = True
+        if not stopped and shape and st[:2] == shape:
+            cont.append((ln, s, e))
+        else:
+            other += 1
+    return cont, other
+
+
+def recover(prov: dict, idx: dict, session_msgs: List[dict], profile: Optional[dict] = None,
+            report: Optional[dict] = None) -> Tuple[List[dict], List[str]]:
+    """Return (mentions, gap_codes). idx holds store indexes built by derive.
+    profile/report: version flags; when profile['completeness'], per-section completeness is written to report."""
+    profile = profile or {}
+    complete_mode = profile.get("completeness")
     comp = prov.get("components") or {}
     am = prov.get("assembled_messages") or []
     sysp = (am[0].get("content") or "") if am and am[0].get("role") == "system" else (comp.get("system_prompt") or "")
-    field = "assembled_messages[0].content"
+    field = "assembled_messages[0].content" if am and am[0].get("role") == "system" else "components.system_prompt"
+    if not complete_mode:
+        field = "assembled_messages[0].content"
     mentions, gaps, n = [], [], 0
+    sec_report: Dict[str, dict] = {}
 
     def nid():
         nonlocal n
         n += 1
         return f"m{n}"
+
+    def note(typ, **kw):
+        r = sec_report.setdefault(typ, {"status": "complete", "unresolved_n": 0})
+        for k, v in kw.items():
+            r[k] = r.get(k, 0) + v
+        if r["unresolved_n"] or r.get("missing_field_state"):
+            r["status"] = "partial"
 
     for typ, s0, e0 in sections(sysp):
         if typ == "seed":
@@ -109,10 +143,20 @@ def recover(prov: dict, idx: dict, session_msgs: List[dict]) -> Tuple[List[dict]
                                              extra={"render_matches_current_record": False}))
             if not got:
                 gaps.append("segmentation-failed:seed")
+                if complete_mode:
+                    note("seed", missing_field_state=1)
+            elif complete_mode:
+                note("seed")
         elif typ == "mra":
             for ln, s, e in _lines(sysp, s0, e0):
                 mm = _MRA_LINE.match(ln.strip())
                 if not mm:
+                    if complete_mode and ln.strip()[:1] in ("★", "◆"):
+                        mentions.append(_mention(nid(), "mra", field, s, e, ln, "UNRESOLVED",
+                                                 extra={"reason": "malformed-bullet", "render_matches_current_record": "n/a"}))
+                        note("mra", unresolved_n=1)
+                    elif complete_mode and not ln.lstrip().startswith("## What has stayed with you"):
+                        note("mra", non_bullet_lines_n=1)
                     continue
                 key = (norm(mm.group(1)), norm(mm.group(2)))
                 ids = idx["mra_by_pair"].get(key, [])
@@ -126,17 +170,42 @@ def recover(prov: dict, idx: dict, session_msgs: List[dict]) -> Tuple[List[dict]
                 else:
                     mentions.append(_mention(nid(), "mra", field, s, e, ln, "UNRESOLVED",
                                              extra={"render_matches_current_record": False}))
+                    if complete_mode:
+                        note("mra", unresolved_n=1)
+            if complete_mode:
+                note("mra")
         else:
-            for ln, s, e in _text_block_lines(sysp, s0, e0):
+            kept = _text_block_lines(sysp, s0, e0)
+            for ln, s, e in kept:
                 mentions.append(_mention(nid(), typ, field, s, e, ln, "TEXT_ONLY",
                                          extra={"render_matches_current_record": "n/a"}))
+            if complete_mode:
+                cont, other = _after_terminator(sysp, s0, e0, kept)
+                for ln, s, e in cont:
+                    mentions.append(_mention(nid(), typ, field, s, e, ln, "UNRESOLVED",
+                                             extra={"reason": "after-terminator-same-shape",
+                                                    "render_matches_current_record": "n/a"}))
+                note(typ, unresolved_n=len(cont), unattributed_lines_n=other)
 
+    if complete_mode:
+        found = {t for t, _, _ in sections(sysp)}
+        for t, _ in ANCHORS:
+            if t not in found:
+                sec_report[t] = {"status": "absent", "unresolved_n": 0}
+        for t, r in sec_report.items():
+            if r["status"] == "partial":
+                gaps.append(f"partial-section:{t}:{r['unresolved_n']}")
+
+    pres = (prov.get("presence") or "").lower()
     sel = comp.get("codon_selection") or {}
     for k, c in enumerate(sel.get("codons") or []):
         name = c.get("name")
         recs = idx["codon_by_name"].get(name, [])
         f = f"components.codon_selection.codons[{k}]"
         frag = json.dumps(c, ensure_ascii=False, sort_keys=True, default=str)
+        if profile.get("codon_scope"):
+            mentions.append(_codon_scoped(nid(), f, frag, c, recs, pres))
+            continue
         if len(recs) == 1:
             r = recs[0]
             mentions.append(_mention(nid(), "codon", f, None, None, frag, "VERIFIED", element=f"codon:{r['id']}",
@@ -171,15 +240,40 @@ def recover(prov: dict, idx: dict, session_msgs: List[dict]) -> Tuple[List[dict]
             mentions.append(_mention(nid(), "history", f, None, None, frag, "UNRESOLVED"))
             if "history-hash-mismatch" not in gaps:
                 gaps.append("history-hash-mismatch")
+    if report is not None and complete_mode:
+        report["completeness"] = {t: sec_report[t] for t in sorted(sec_report)}
+        report["complete"] = not any(r["status"] == "partial" for r in sec_report.values())
     return mentions, gaps
+
+
+def _codon_scoped(mid, f, frag, c, recs, pres):
+    """C3': identity within the loader's selection scope (record presence in {rendering presence, 'field'}).
+    The current angle is only a declared, mutable secondary basis."""
+    scoped = [r for r in recs if r.get("presence") in (pres, "field")]
+    if len(scoped) == 1:
+        r = scoped[0]
+        return _mention(mid, "codon", f, None, None, frag, "VERIFIED", element=f"codon:{r['id']}",
+                        extra={"record_fingerprint": r["fp"], "identity_basis": "name+loader-scope",
+                               "render_matches_current_record": r.get("target_angle") == c.get("target_angle")})
+    if scoped:
+        tie = [r for r in scoped if r.get("target_angle") == c.get("target_angle")]
+        if len(tie) == 1:
+            return _mention(mid, "codon", f, None, None, frag, "VERIFIED", element=f"codon:{tie[0]['id']}",
+                            extra={"record_fingerprint": tie[0]["fp"], "identity_basis": "mutable-angle",
+                                   "conditional": True, "render_matches_current_record": True})
+        return _mention(mid, "codon", f, None, None, frag, "CANDIDATES",
+                        candidates=[f"codon:{r['id']}" for r in (tie or scoped)])
+    return _mention(mid, "codon", f, None, None, frag, "UNRESOLVED",
+                    extra={"reason": "outside-loader-scope" if recs else "name-not-in-store"})
 
 
 def evidence_text(prov: dict, mention: dict) -> str:
     """Exact evidence for a mention, re-read live from the provenance record."""
     f = mention["field"]
     am = prov.get("assembled_messages") or []
-    if f == "assembled_messages[0].content":
-        txt = (am[0].get("content") or "") if am else ""
+    if f in ("assembled_messages[0].content", "components.system_prompt"):
+        txt = ((am[0].get("content") or "") if am else "") if f.startswith("assembled") else \
+            ((prov.get("components") or {}).get("system_prompt") or "")
         return txt[mention["start"]:mention["end"]]
     m = re.match(r"assembled_messages\[(\d+)\]", f)
     if m:

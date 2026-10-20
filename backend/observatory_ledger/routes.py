@@ -10,7 +10,8 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
 
-from . import DERIVATION_VERSION
+from . import DERIVATION_VERSION, PROFILES
+from .compare import delta, invariance
 from .derive import Ledger, catch_up, parse_ts, verify, load_sessions
 from .recover import evidence_text, canonical_hash
 
@@ -23,11 +24,24 @@ def init_observatory(db):
     _state["db"] = db
 
 
+def _log_task_failure(t: asyncio.Task):
+    if not t.cancelled() and t.exception():
+        logger.error("[OBSERVATORY] background derivation task failed", exc_info=t.exception())
+
+
+def _version(v: Optional[str]) -> str:
+    v = v or DERIVATION_VERSION
+    if v not in PROFILES:
+        raise HTTPException(400, f"unknown derivation version {v}")
+    return v
+
+
 def _spawn(trigger: str, delay_s: float = 0):
     t = _state["task"]
     if t and not t.done():
         return False
     _state["task"] = asyncio.create_task(catch_up(_state["db"], trigger, delay_s=delay_s))
+    _state["task"].add_done_callback(_log_task_failure)
     return True
 
 
@@ -81,32 +95,37 @@ async def manual_run():
 
 
 @router.get("/status")
-async def status():
+async def status(version: Optional[str] = None):
+    version = _version(version)
     db = _state["db"]
     led = Ledger(db)
-    total = await led.entries.count_documents({"derivation_version": DERIVATION_VERSION})
+    total = await led.entries.count_documents({"derivation_version": version})
     prov_total = await db.turn_provenance.count_documents({})
     runs = await led.runs.find({}, {"_id": 0, "unavailable_evidence": 0}).sort("started_at", -1).limit(8).to_list(8)
     per = []
     async for r in led.entries.aggregate([
-        {"$match": {"derivation_version": DERIVATION_VERSION}},
+        {"$match": {"derivation_version": version}},
         {"$group": {"_id": "$chronology.presence", "n": {"$sum": 1}, "last": {"$max": "$chronology.timestamp"},
                     "visitors": {"$addToSet": "$visitor.resolved_visitor"}}}]):
         per.append({"presence": r["_id"], "entries": r["n"], "last_timestamp": r["last"], "visitors": len(r["visitors"])})
     per.sort(key=lambda x: -x["entries"])
+    versions = [{"version": r["_id"], "entries": r["n"]} async for r in led.entries.aggregate(
+        [{"$group": {"_id": "$derivation_version", "n": {"$sum": 1}}}, {"$sort": {"_id": 1}}])]
     last_work = await led.runs.find_one({"processed": {"$gt": 0}}, {"_id": 0, "unavailable_evidence": 0}, sort=[("started_at", -1)])
-    return {"derivation_version": DERIVATION_VERSION, "ledger_entries": total, "provenance_records": prov_total,
-            "pending": prov_total - total, "running": bool(_state["task"] and not _state["task"].done()),
+    return {"derivation_version": version, "versions": versions, "ledger_entries": total, "provenance_records": prov_total,
+            # Provenance records not yet in this version's ledger (unsettled turns plus any backlog).
+            "not_yet_measured": prov_total - total, "running": bool(_state["task"] and not _state["task"].done()),
             "presences": per, "runs": runs, "last_work_run": last_work,
             "unavailable_evidence": (await led.runs.find_one({}, {"unavailable_evidence": 1}, sort=[("started_at", -1)]) or {}).get("unavailable_evidence")}
 
 
 @router.get("/visitors")
-async def visitors(presence: str):
+async def visitors(presence: str, version: Optional[str] = None):
+    version = _version(version)
     led = Ledger(_state["db"])
     out = []
     async for r in led.entries.aggregate([
-        {"$match": {"derivation_version": DERIVATION_VERSION, "chronology.presence": presence}},
+        {"$match": {"derivation_version": version, "chronology.presence": presence}},
         {"$group": {"_id": "$visitor.resolved_visitor", "n": {"$sum": 1}, "last": {"$max": "$chronology.timestamp"}}},
         {"$sort": {"last": -1}}]):
         out.append({"visitor": r["_id"], "entries": r["n"], "last_timestamp": r["last"],
@@ -133,13 +152,14 @@ def _label(el: str, meta: dict) -> str:
 
 @router.get("/lattice")
 async def lattice(presence: str, scope: str = "S2", visitor: Optional[str] = None, limit: int = 24,
-                  before_ordinal: Optional[int] = None):
+                  before_ordinal: Optional[int] = None, version: Optional[str] = None):
     if scope not in ("S1", "S2", "S3"):
         raise HTTPException(400, "scope must be S1, S2 or S3")
+    version = _version(version)
     db = _state["db"]
     led = Ledger(db)
     limit = max(4, min(limit, 60))
-    q = {"derivation_version": DERIVATION_VERSION, "chronology.presence": presence}
+    q = {"derivation_version": version, "chronology.presence": presence}
     if scope == "S3":
         if not visitor:
             last = await led.entries.find_one(q, sort=[("chronology.ordinal", -1)])
@@ -179,7 +199,7 @@ async def lattice(presence: str, scope: str = "S2", visitor: Optional[str] = Non
     timeline = [{"kind": "entry", "timestamp": c["chronology"]["timestamp"], "entry": c} for c in cols] + unc
     timeline.sort(key=lambda x: x["timestamp"])
 
-    meta, first_seen, columns = {}, {}, []
+    meta, first_seen, columns, conditional = {}, {}, [], set()
     for ci, item in enumerate(timeline):
         if item["kind"] == "uncaptured":
             columns.append({"kind": "uncaptured", "timestamp": item["timestamp"], "session_id": item["session_id"],
@@ -187,6 +207,7 @@ async def lattice(presence: str, scope: str = "S2", visitor: Optional[str] = Non
             continue
         c = item["entry"]
         meta.update(c.get("element_meta") or {})
+        conditional.update(c["availability"].get("conditional") or [])
         sc = c["scopes"][scope]
         avail = c["availability"]["verified"]
         for el in avail:
@@ -206,8 +227,27 @@ async def lattice(presence: str, scope: str = "S2", visitor: Optional[str] = Non
             "participation": c["participation"],
             "counts": {"verified": len(avail), "uncertain": len(c["availability"]["uncertain"]),
                        "text_only": len(c["availability"]["text"])},
+            "configuration_complete": c.get("configuration_complete"),
+            "conditional_identity_n": sc.get("conditional_identity_n"),
             "_avail": set(avail), "_tr": tr, "_unc": c["availability"]["uncertain"],
         })
+
+    # Predecessor position relative to the display (mathematical adjacency is never implied by column adjacency).
+    col_of = {c["entry_id"]: i for i, c in enumerate(columns) if c["kind"] == "entry"}
+    prev_entry = None
+    for i, c in enumerate(columns):
+        if c["kind"] != "entry":
+            continue
+        p = c["pred_entry_id"]
+        if p == "none-observed":
+            c["pred_position"], c["pred_col"] = "none", None
+        elif p not in col_of:
+            c["pred_position"], c["pred_col"] = "off-page", None
+        else:
+            j = col_of[p]
+            c["pred_col"] = j
+            c["pred_position"] = "previous-column" if j == prev_entry else ("later-column" if j > i else "earlier-column")
+        prev_entry = i
 
     def glyph(col, el):
         if col["kind"] != "entry":
@@ -220,7 +260,9 @@ async def lattice(presence: str, scope: str = "S2", visitor: Optional[str] = Non
                 return "returned"
             if el in tr.get("introduced_first_observed", []):
                 return "first"
-            return "retained" if tr.get("adjacent") else "present-gap"
+            if not tr.get("adjacent"):
+                return "present-gap"
+            return "retained" if col["pred_position"] == "previous-column" else "retained-remote"
         if el in tr.get("withdrawn", []):
             return "withdrawn"
         return None
@@ -245,7 +287,8 @@ async def lattice(presence: str, scope: str = "S2", visitor: Optional[str] = Non
         if el.startswith("history:"):
             history_row.append(cells)
             continue
-        rows.append({"element": el, "type": el.split(":")[0], "label": _label(el, meta), "cells": cells})
+        rows.append({"element": el, "type": el.split(":")[0], "label": _label(el, meta), "cells": cells,
+                     "conditional": el in conditional})
     if history_row:
         agg = []
         for i, c in enumerate(columns):
@@ -281,7 +324,7 @@ async def lattice(presence: str, scope: str = "S2", visitor: Optional[str] = Non
     for c in columns:
         c.pop("_avail", None)
         c.pop("_tr", None)
-    return {"presence": presence, "scope": scope, "visitor": visitor, "columns": columns, "rows": rows,
+    return {"presence": presence, "scope": scope, "visitor": visitor, "version": version, "columns": columns, "rows": rows,
             "has_more": cols[0]["chronology"]["ordinal"] > 0 and await led.entries.count_documents(
                 {**q, "chronology.ordinal": {"$lt": cols[0]["chronology"]["ordinal"]}}, limit=1) > 0,
             "first_ordinal": cols[0]["chronology"]["ordinal"]}
@@ -304,5 +347,17 @@ async def entry(entry_id: str):
 
 
 @router.get("/verify")
-async def verify_route(drift: bool = False):
-    return await verify(_state["db"], check_drift=drift)
+async def verify_route(drift: bool = False, reproduce: bool = False, version: Optional[str] = None):
+    return await verify(_state["db"], check_drift=drift, version=_version(version), reproduce_check=reproduce)
+
+
+@router.get("/compare")
+async def compare_route(a: str, b: str, mode: str = "delta"):
+    """Aggregate cross-version comparison of the production ledger (counts only)."""
+    _version(a), _version(b)
+    led = Ledger(_state["db"])
+    if mode == "invariance":
+        return await invariance(led, a, led, b)
+    if mode == "delta":
+        return await delta(led, a, led, b)
+    raise HTTPException(400, "mode must be invariance or delta")

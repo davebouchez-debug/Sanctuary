@@ -31,17 +31,18 @@ export const EngagementLattice = () => {
   const [loading, setLoading] = useState(false);
   const [entryId, setEntryId] = useState(null);
   const [error, setError] = useState(null);
+  const [version, setVersion] = useState("");
   const reqId = useRef(0);
 
   const loadStatus = useCallback(async () => {
     try {
-      const { data: s } = await axios.get(`${API}/observatory/status`);
+      const { data: s } = await axios.get(`${API}/observatory/status`, { params: version ? { version } : {} });
       setStatus(s);
       setPresence((p) => p || s.presences?.[0]?.presence || "");
     } catch {
       setError("Observer status unavailable — retrying automatically.");
     }
-  }, []);
+  }, [version]);
 
   const loadLattice = useCallback(async () => {
     if (!presence) return;
@@ -49,6 +50,7 @@ export const EngagementLattice = () => {
     setLoading(true);
     try {
       const params = { presence, scope, limit: 24 };
+      if (version) params.version = version;
       if (scope === "S3" && visitor) params.visitor = visitor;
       if (before != null) params.before_ordinal = before;
       const { data: d } = await axios.get(`${API}/observatory/lattice`, { params });
@@ -61,7 +63,7 @@ export const EngagementLattice = () => {
     } finally {
       if (id === reqId.current) setLoading(false);
     }
-  }, [presence, scope, visitor, before]);
+  }, [presence, scope, visitor, before, version]);
 
   useEffect(() => { loadStatus(); const t = setInterval(loadStatus, REFRESH_MS); return () => clearInterval(t); }, [loadStatus]);
   useEffect(() => { loadLattice(); }, [loadLattice]);
@@ -73,19 +75,31 @@ export const EngagementLattice = () => {
   useEffect(() => {
     if (!presence) return;
     let live = true;
-    axios.get(`${API}/observatory/visitors`, { params: { presence } })
+    axios.get(`${API}/observatory/visitors`, { params: version ? { presence, version } : { presence } })
       .then(({ data: v }) => live && setVisitors(v.visitors || []))
       .catch(() => live && setVisitors([]));
     return () => { live = false; };
-  }, [presence]);
+  }, [presence, version]);
 
   const pickPresence = (p) => { setPresence(p); setVisitor(""); setBefore(null); };
   const pickScope = (s) => { setScope(s); setBefore(null); };
+  const pickVersion = (v) => { setVersion(v); setBefore(null); setEntryId(null); };
+  const versions = status?.versions || [];
+  const shownVersion = version || status?.derivation_version;
 
   return (
     <div className="space-y-5" data-testid="engagement-lattice">
       <LedgerStatus status={status} />
       <div className="rounded-2xl border border-white/10 bg-[#0A0C12]/80 p-4 backdrop-blur-xl">
+        {versions.length > 1 && (
+          <div className="mb-3 flex flex-wrap items-center gap-2" data-testid="lattice-version-picker">
+            <span className="mr-1 font-mono text-[10px] uppercase tracking-widest text-zinc-500">derivation</span>
+            {versions.map((v) => (
+              <Chip key={v.version} active={shownVersion === v.version} onClick={() => pickVersion(v.version)}
+                testid={`lattice-version-${v.version}`}>v{v.version} · {v.entries}</Chip>
+            ))}
+          </div>
+        )}
         <div className="flex flex-wrap gap-2" data-testid="lattice-presence-picker">
           {(status?.presences || []).map((p) => (
             <Chip key={p.presence} active={presence === p.presence} onClick={() => pickPresence(p.presence)}
