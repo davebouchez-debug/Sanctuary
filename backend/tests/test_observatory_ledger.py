@@ -339,3 +339,16 @@ def test_lattice_gap_honesty(scope):
                 assert c["visitor"] == lat["visitor"]
             if c["uncertainty"] and not c["uncertainty"]["determined"]:
                 assert c["uncertainty"]["resolutions_n"] == "not-enumerated" or len(c["uncertainty"]["relation_set"]) > 1
+
+
+def test_lattice_shows_uncertain_identities_separately():
+    lat = requests.get(f"{API}/api/observatory/lattice", params={"presence": "ansel", "scope": "S2", "limit": 24}).json()
+    unc = [r for r in lat["rows"] if r.get("uncertain")]
+    ver = {r["element"] for r in lat["rows"] if not r.get("uncertain")}
+    assert unc, "CANDIDATES mentions must be displayed"
+    for r in unc:
+        assert len(r["candidates"]) >= 2 and not (set(r["candidates"]) & ver)
+        assert set(r["cells"]) <= {None, "uncertain"}
+        for i, c in enumerate(lat["columns"]):
+            if c["kind"] == "uncaptured":
+                assert r["cells"][i] is None and r["mult"][i] == 0

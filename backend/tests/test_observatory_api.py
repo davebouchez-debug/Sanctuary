@@ -13,7 +13,7 @@ load_dotenv(ROOT.parent / "frontend" / ".env")
 BASE_URL = os.environ.get("REACT_APP_BACKEND_URL").rstrip("/")
 OBS = f"{BASE_URL}/api/observatory"
 SECRET = os.environ.get("WEBHOOK_CRON_SECRET")
-GLYPHS = {"first", "returned", "retained", "present-gap", "withdrawn", None}
+GLYPHS = {"first", "returned", "retained", "present-gap", "withdrawn", None, "uncertain"}
 
 
 @pytest.fixture(scope="module")

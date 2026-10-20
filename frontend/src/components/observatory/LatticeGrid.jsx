@@ -8,6 +8,7 @@ const GLYPH = {
   retained: { ch: "━━━", cls: "text-zinc-300", title: "retained from the adjacent predecessor" },
   "present-gap": { ch: "· · ·", cls: "text-sky-200/70", title: "present at both observations — unobserved turns between" },
   withdrawn: { ch: "○", cls: "text-zinc-500", title: "withdrawn since predecessor" },
+  uncertain: { ch: "◇", cls: "text-amber-200/80", title: "present, identity uncertain (one of several stored records with identical text)" },
 };
 const TYPE_LABEL = { seed: "Continuity seeds", mra: "Breadcrumbs (permanent MRA)", codon: "Codons", history: "Conversation history" };
 const fmtGap = (s) => (s == null ? "" : s < 90 ? `${Math.round(s)}s` : s < 5400 ? `${Math.round(s / 60)}m` : s < 172800 ? `${Math.round(s / 3600)}h` : `${Math.round(s / 86400)}d`);
@@ -71,7 +72,8 @@ const partCell = (c) => {
 
 const ElementRow = ({ row, columns }) => (
   <div className="flex hover:bg-white/[0.02]" data-testid={`lattice-row-${row.element}`}>
-    <div className="sticky left-0 z-10 w-60 flex-shrink-0 truncate bg-[#0A0C12] px-2 py-0.5 font-mono text-[10px] text-zinc-400" title={row.element}>{row.label}</div>
+    <div className={`sticky left-0 z-10 w-60 flex-shrink-0 truncate bg-[#0A0C12] px-2 py-0.5 font-mono text-[10px] ${row.uncertain ? "italic text-amber-200/70" : "text-zinc-400"}`}
+      title={row.uncertain ? `candidates: ${row.candidates.join(", ")}` : row.element}>{row.label}</div>
     {row.cells.map((g, i) => {
       const unc = columns[i].kind === "uncaptured";
       const meta = !row.aggregate && g ? GLYPH[g] : null;
@@ -79,6 +81,7 @@ const ElementRow = ({ row, columns }) => (
         <div key={i} style={{ width: CELL, ...(unc ? hatch : {}) }} title={meta?.title}
           className={`flex-shrink-0 border-l border-white/[0.04] text-center font-mono text-[11px] leading-5 ${meta?.cls || ""}`}>
           {row.aggregate ? (g ? <span className="text-[9px] text-zinc-400" title={`present ${g.present} · new ${g.introduced} · withdrawn ${g.withdrawn}`}>{g.present}{g.introduced ? <span className="text-emerald-300">+{g.introduced}</span> : ""}</span> : null) : meta?.ch}
+          {row.uncertain && row.mult?.[i] > 1 && <span className="text-[8px] text-amber-200/70">×{row.mult[i]}</span>}
         </div>
       );
     })}
@@ -90,7 +93,8 @@ const Group = ({ type, rows, columns }) => {
   return (
     <div data-testid={`lattice-group-${type}`}>
       <button onClick={() => setOpen(!open)} className="sticky left-0 flex items-center gap-1 px-2 py-1 font-mono text-[10px] uppercase tracking-widest text-zinc-500 hover:text-zinc-300" data-testid={`lattice-group-toggle-${type}`}>
-        {open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}{TYPE_LABEL[type] || type} · {rows.length}
+        {open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}{TYPE_LABEL[type] || type} · {rows.filter((r) => !r.uncertain).length}
+        {rows.some((r) => r.uncertain) && <span className="normal-case tracking-normal text-amber-200/70"> + {rows.filter((r) => r.uncertain).length} uncertain</span>}
       </button>
       {open && rows.map((r) => <ElementRow key={r.element} row={r} columns={columns} />)}
     </div>
@@ -106,7 +110,7 @@ export const LatticeGrid = ({ data, loading, showText, onOpen, onOlder, onLatest
   }, [data]);
   if (!data) return <div className="font-mono text-xs text-zinc-500" data-testid="lattice-loading">{loading ? "measuring view…" : "no data"}</div>;
   return (
-    <div className="rounded-2xl border border-white/10 bg-[#0A0C12]/80 backdrop-blur-xl" data-testid="lattice-grid">
+    <div className="rounded-2xl border border-white/10 bg-[#0A0C12]" data-testid="lattice-grid">
       <div className="flex items-center justify-between px-4 py-3">
         <div className="font-mono text-[11px] text-zinc-400">
           <span className="font-cinzel text-base text-zinc-100">{data.presence}</span> · scope {data.scope}

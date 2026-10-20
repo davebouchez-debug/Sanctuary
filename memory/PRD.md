@@ -2309,3 +2309,4 @@ and the description is handed to the presence, which responds in its own voice.
 - Frontend: Observatory default tab "Engagement Lattice" (components/observatory/*); "Live Console" keeps original spiral gauge/trend/feed unchanged.
 - ENUM_CAP 65536 with exact free-variable reduction; ~42 comparisons remain "not-enumerated" (flagged).
 - Known: QA test provenance (prov_*, e1-*) is measured; labelled "(test record)" at view time only.
+- 2026-10-20: Lattice now shows CANDIDATES (uncertain-identity) rows separately (◇, ×n multiplicity), per v0.2 rule 4 (was missing). Lattice panel made opaque. "Grey dot" = the intentional HiddenDoor star (App.js, phi position → /playground), not a lattice artifact. 39 tests pass.

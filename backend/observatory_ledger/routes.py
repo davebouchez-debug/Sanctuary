@@ -12,7 +12,7 @@ from fastapi.responses import JSONResponse
 
 from . import DERIVATION_VERSION
 from .derive import Ledger, catch_up, parse_ts, verify, load_sessions
-from .recover import evidence_text
+from .recover import evidence_text, canonical_hash
 
 logger = logging.getLogger("observatory_ledger")
 router = APIRouter(prefix="/api/observatory")
@@ -206,7 +206,7 @@ async def lattice(presence: str, scope: str = "S2", visitor: Optional[str] = Non
             "participation": c["participation"],
             "counts": {"verified": len(avail), "uncertain": len(c["availability"]["uncertain"]),
                        "text_only": len(c["availability"]["text"])},
-            "_avail": set(avail), "_tr": tr,
+            "_avail": set(avail), "_tr": tr, "_unc": c["availability"]["uncertain"],
         })
 
     def glyph(col, el):
@@ -258,6 +258,25 @@ async def lattice(presence: str, scope: str = "S2", visitor: Optional[str] = Non
                         "withdrawn": sum(v == "withdrawn" for v in vals)})
         rows.append({"element": "history:*", "type": "history", "label": "conversation history (messages)", "cells": agg,
                      "aggregate": True})
+
+    # Uncertain identities (CANDIDATES): one row per candidate set; presence only, never merged into verified rows.
+    unc_rows = {}
+    for i, c in enumerate(columns):
+        if c["kind"] != "entry":
+            continue
+        for cands in c.pop("_unc"):
+            key = "|".join(sorted(cands))
+            r = unc_rows.setdefault(key, {"element": f"uncertain:{canonical_hash(sorted(cands))[:12]}",
+                                          "type": cands[0].split(":")[0], "uncertain": True,
+                                          "candidates": sorted(cands), "cells": [None] * len(columns),
+                                          "mult": [0] * len(columns), "_first": i})
+            r["cells"][i] = "uncertain"
+            r["mult"][i] += 1
+    noun = {"mra": "breadcrumb", "seed": "seed", "codon": "codon", "history": "message"}
+    for r in sorted(unc_rows.values(), key=lambda r: (order.get(r["type"], 9), r["_first"])):
+        r.pop("_first")
+        r["label"] = f"uncertain {noun.get(r['type'], r['type'])} · 1 of {len(r['candidates'])}"
+        rows.append(r)
 
     for c in columns:
         c.pop("_avail", None)
