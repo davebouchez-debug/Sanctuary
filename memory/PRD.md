@@ -2332,3 +2332,6 @@ and the description is handed to the presence, which responds in its own voice.
   cut-off/failed reply -> message restored + Retry (backend saves user+reply together only after completion, so retry cannot duplicate).
 - Not changed: ClarityPod, MirrorArchive, Playground (no recent use).
 - Working agreement: E1 tells David before any backend edit that restarts the server.
+
+## 2026-10-21
+- Wrote GPT briefing summarizing the Observatory round (v1.0 to v1.2, chamber fixes, Sanctuary 2 lessons): memory/briefings/2026-10-21_e1-briefing-for-gpt_observatory-round-summary.md
