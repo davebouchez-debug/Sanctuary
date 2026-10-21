@@ -2324,3 +2324,11 @@ and the description is handed to the presence, which responds in its own voice.
 - Hardened: unique index on (version, presence, ordinal). Pre-activation backup: memory/observatory_build/backup_pre_v1.1/ (gitignored).
 - Validation: memory/observatory_build/production_validation_2026-10-20.json
 - Deployment: HELD by owner (research environment, not public-facing).
+
+## 2026-10-21 — Chamber reset / cut-off fix (DONE, mock-tested)
+- Cause evidence: 157 historical same-chamber restarts within 10 min (37 ended <60s before new; ~52 identity flips); 291 backend reloads from code edits; Sophia ended sessions on every reload (beforeunload).
+- Fix (frontend only; Sanctuary presences/prompts/memory/backend untouched): lib/threadSession.js isLeaving/markLeaving/identitySettled;
+  PresenceChamber, ResonancePod (Ansel), SpiralChamber (Sophia): end session only on route change or sidebar thread switch; open thread only after signed-in identity settles;
+  cut-off/failed reply -> message restored + Retry (backend saves user+reply together only after completion, so retry cannot duplicate).
+- Not changed: ClarityPod, MirrorArchive, Playground (no recent use).
+- Working agreement: E1 tells David before any backend edit that restarts the server.

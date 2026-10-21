@@ -8,7 +8,8 @@ import { usePresenceVoice } from "../hooks/usePresenceVoice";
 import { useVoiceInput } from "../hooks/useVoiceInput";
 import { IdentityBadge } from "./IdentityBadge";
 import { useIdentity } from "../context/IdentityContext";
-import { threadStartFields, rememberThread, forgetThread } from "../lib/threadSession";
+import { threadStartFields, rememberThread, forgetThread, isLeaving, identitySettled } from "../lib/threadSession";
+import { useAuth } from "../context/AuthContext";
 
 /**
  * TerritoryMap — Kalahar's view from height. A radial aerial map: Kalahar at
@@ -164,6 +165,9 @@ export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
   const [startFields] = useState(() => threadStartFields(presenceKey, threadIntent));
   const navigate = useNavigate();
   const { userName, userId, ready: identityReady } = useIdentity();
+  const { user: authUser, loading: authLoading } = useAuth();
+  const settled = identityReady && identitySettled(authLoading, authUser, userId);
+  const mountPathRef = useRef(window.location.pathname);
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeRoomKey, setActiveRoomKey] = useState(null);
@@ -289,7 +293,7 @@ export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
   // single `message`. Identity comes from the global IdentityContext — any
   // change to the visitor re-runs this effect.
   useEffect(() => {
-    if (!config || !identityReady) return;
+    if (!config || !settled) return;
     let cancelled = false;
     const startChat = async () => {
       // Reset thread on identity change
@@ -319,17 +323,18 @@ export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
     };
     startChat();
     return () => { cancelled = true; };
-  }, [config, presenceKey, userName, userId, identityReady]);
+  }, [config, presenceKey, userName, userId, settled]);
 
   // Auto-scroll the message thread on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages.length]);
 
-  // End the session only on in-app navigation away. Reload / sleep / tab
-  // discard must NOT end it, so the open thread resumes on return.
+  // End the session only on a real departure (route change or sidebar thread switch).
+  // Reload / sleep / tab discard / in-place remount must NOT end it.
   useEffect(() => {
     return () => {
+      if (!isLeaving(presenceKey, mountPathRef.current)) return;
       forgetThread(presenceKey);
       const sid = sessionIdRef.current;
       if (sid) {
@@ -380,6 +385,7 @@ export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
         const decoder = new TextDecoder();
         let accumulated = "";
         let buffer = "";
+        let finished = false;
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
@@ -399,6 +405,7 @@ export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
                 );
                 if (voiceEnabled) speakStream(accumulated);
               } else if (event.type === "done") {
+                finished = true;
                 setMessages((prev) =>
                   prev.map((m) => (m.id === responseId ? { ...m, isStreaming: false } : m))
                 );
@@ -408,10 +415,9 @@ export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
             } catch { /* skip malformed */ }
           }
         }
+        if (!finished) throw new Error("The reply was cut off before it finished.");
       } catch (e) {
-        setChatError(e.message);
-        setMessages((prev) => prev.filter((m) => m.id !== userMsg.id && m.id !== responseId));
-        if (!hasOverride) setInput(text);
+        failSend(e, text, [userMsg.id, responseId]);
       } finally {
         setSending(false);
       }
@@ -432,13 +438,17 @@ export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
       const data = await resp.json();
       setMessages((prev) => [...prev, data.message]);
     } catch (e) {
-      setChatError(e.message);
-      // Roll back the optimistic user message so they can retry without dupes
-      setMessages((prev) => prev.filter((m) => m.id !== userMsg.id));
-      if (!hasOverride) setInput(text);
+      failSend(e, text, [userMsg.id]);
     } finally {
       setSending(false);
     }
+  };
+
+  // A failed or cut-off reply was never saved: put the message back and offer one-click resend.
+  const failSend = (e, text, dropIds) => {
+    setMessages((prev) => prev.filter((m) => !dropIds.includes(m.id)));
+    if (text) setInput(text);
+    setChatError(`${e.message} Your message is back in the box.`);
   };
 
   // Kalahar's membrane crossing — he leaves the lair, rises to full height,
@@ -955,6 +965,10 @@ export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
                 data-testid="chat-error"
               >
                 {chatError}
+                {input.trim() && sessionId && !sending && (
+                  <button onClick={() => sendMessageRef.current?.()} data-testid="chat-retry-btn"
+                    className="ml-2 underline underline-offset-2 hover:opacity-100">Retry</button>
+                )}
               </p>
             )}
 

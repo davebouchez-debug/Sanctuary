@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { stripStageDirections } from "../lib/sanitizeText";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -11,9 +11,14 @@ import { IdentityBadge } from "./IdentityBadge";
 import { useIdentity } from "../context/IdentityContext";
 import { usePresenceVoice } from "../hooks/usePresenceVoice";
 import { stopGlobalLegacyAudio } from "../lib/legacyAudio";
+import { isLeaving, identitySettled } from "../lib/threadSession";
+import { useAuth } from "../context/AuthContext";
 
 export const SpiralChamber = () => {
   const { userName, userId, ready: identityReady, setIdentity } = useIdentity();
+  const { user: authUser, loading: authLoading } = useAuth();
+  const settled = identityReady && identitySettled(authLoading, authUser, userId);
+  const mountPathRef = useRef(window.location.pathname);
   const [sessionId, setSessionId] = useState(null);
   const [resumed, setResumed] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -41,30 +46,18 @@ export const SpiralChamber = () => {
     localStorage.setItem("sanctuary_voice_enabled_sophia", voiceEnabled.toString());
   }, [voiceEnabled]);
 
-  const endSession = useCallback(async () => {
-    if (!sessionId) return;
-    try {
-      await fetch(`${API}/spiral/session/${sessionId}/end`, { method: "POST" });
-    } catch (error) {
-      console.error("[MRA] Failed to end spiral session:", error);
-    }
-  }, [sessionId]);
+  // End the session only on a real departure from the chamber. Reload, tab close,
+  // sleep or an in-place remount keep it open so the thread resumes.
+  const sessionIdRef = useRef(null);
+  useEffect(() => { sessionIdRef.current = sessionId; }, [sessionId]);
+  useEffect(() => () => {
+    if (!isLeaving("sophia", mountPathRef.current)) return;
+    const sid = sessionIdRef.current;
+    if (sid) fetch(`${API}/spiral/session/${sid}/end`, { method: "POST", keepalive: true }).catch(() => {});
+  }, []);
 
   useEffect(() => {
-    const handleBeforeUnload = () => {
-      if (sessionId) {
-        navigator.sendBeacon(`${API}/spiral/session/${sessionId}/end`);
-      }
-    };
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      if (sessionId) endSession();
-    };
-  }, [sessionId, endSession]);
-
-  useEffect(() => {
-    if (!identityReady) return;
+    if (!settled) return;
     if (hasInitializedRef.current) return;
     hasInitializedRef.current = true;
 
@@ -75,7 +68,7 @@ export const SpiralChamber = () => {
       initializeSession();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [identityReady]);
+  }, [settled]);
 
   const initializeSession = async () => {
     try {
@@ -191,6 +184,7 @@ export const SpiralChamber = () => {
       const decoder = new TextDecoder();
       let accumulatedText = "";
       let buffer = "";
+      let finished = false;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -215,6 +209,7 @@ export const SpiralChamber = () => {
               // Legacy xAI audio path — IGNORED. ElevenLabs sentence streaming
               // via speakStream is now the only voice path.
             } else if (event.type === "done") {
+              finished = true;
               setMessages((prev) =>
                 prev.map((m) => (m.id === responseId ? { ...m, isStreaming: false } : m))
               );
@@ -225,21 +220,23 @@ export const SpiralChamber = () => {
           }
         }
       }
+      if (!finished) throw new Error("cut off");
     } catch (error) {
       console.error("Error streaming spiral message:", error);
-      toast.error("The spiral closed unexpectedly. Try again.");
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === responseId
-            ? { ...m, content: "The spiral paused. The pattern is still here.", isStreaming: false }
-            : m
-        )
-      );
+      // The turn was never saved: drop it, put the words back, offer one-click resend.
+      setMessages((prev) => prev.filter((m) => m.id !== responseId && m.id !== userMessage.id));
+      setInputValue(text);
+      toast.error("The reply was cut off before it finished. Your message is back in the box.", {
+        action: { label: "Retry", onClick: () => sendRef.current?.() },
+        duration: 15000,
+      });
     } finally {
       setIsLoading(false);
       inputRef.current?.focus();
     }
   };
+  const sendRef = useRef(null);
+  sendRef.current = sendMessage;
 
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {

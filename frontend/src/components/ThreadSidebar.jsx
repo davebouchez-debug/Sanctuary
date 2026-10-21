@@ -7,7 +7,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "./ui/alert-dialog";
 import { useIdentity } from "../context/IdentityContext";
-import { currentThread } from "../lib/threadSession";
+import { currentThread, markLeaving } from "../lib/threadSession";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -149,7 +149,7 @@ const ThreadSidebar = ({ presence, onOpenThread, onNewThread }) => {
 // Remounts the chamber (via key) whenever a different thread is chosen.
 export const ThreadedChamber = ({ presence, render }) => {
   const [state, setState] = useState({ nonce: 0, intent: null });
-  const openWith = (intent) => setState((s) => ({ nonce: s.nonce + 1, intent }));
+  const openWith = (intent) => { markLeaving(presence); setState((s) => ({ nonce: s.nonce + 1, intent })); };
   return (
     <>
       <ThreadSidebar

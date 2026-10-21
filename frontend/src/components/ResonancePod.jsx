@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { stripStageDirections } from "../lib/sanitizeText";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -10,7 +10,8 @@ import { VoiceLoopControls } from "./VoiceLoopControls";
 import { stopGlobalLegacyAudio } from "../lib/legacyAudio";
 import { IdentityBadge } from "./IdentityBadge";
 import { useIdentity } from "../context/IdentityContext";
-import { threadStartFields, rememberThread, forgetThread } from "../lib/threadSession";
+import { threadStartFields, rememberThread, forgetThread, isLeaving, identitySettled } from "../lib/threadSession";
+import { useAuth } from "../context/AuthContext";
 
 // Helper to convert base64 to Blob for audio playback
 function base64ToBlob(base64, mimeType) {
@@ -24,8 +25,10 @@ function base64ToBlob(base64, mimeType) {
 
 export const ResonancePod = ({ threadIntent } = {}) => {
   const [startFields] = useState(() => threadStartFields("ansel", threadIntent));
-  useEffect(() => () => forgetThread("ansel"), []);
-  const { ready: identityReady } = useIdentity();
+  const mountPathRef = useRef(window.location.pathname);
+  const { ready: identityReady, userId: ctxUserId } = useIdentity();
+  const { user: authUser, loading: authLoading } = useAuth();
+  const settled = identityReady && identitySettled(authLoading, authUser, ctxUserId);
   const [sessionId, setSessionId] = useState(null);
   const [resumed, setResumed] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -51,29 +54,19 @@ export const ResonancePod = ({ threadIntent } = {}) => {
   // from a prior chamber's session — guarantees the membrane stays sealed.
   useEffect(() => { stopGlobalLegacyAudio(); }, []);
 
-  // End session and promote breadcrumbs to Permanent MRA
-  const endSession = useCallback(async () => {
-    if (!sessionId) return;
-    
-    try {
-      await fetch(`${API}/resonance/session/${sessionId}/end`, { method: "POST" });
-      console.log("[MRA] Session ended, breadcrumbs promoted to permanent memory");
-    } catch (error) {
-      console.error("[MRA] Failed to end session:", error);
-    }
-  }, [sessionId]);
-
-  // End session only on in-app navigation away; reload/sleep resumes the thread.
-  useEffect(() => {
-    return () => {
-      if (sessionId) {
-        endSession();
-      }
-    };
-  }, [sessionId, endSession]);
+  // End session only on a real departure (route change or sidebar thread switch);
+  // reload, sleep or an in-place remount resumes the thread.
+  const sessionIdRef = useRef(null);
+  useEffect(() => { sessionIdRef.current = sessionId; }, [sessionId]);
+  useEffect(() => () => {
+    if (!isLeaving("ansel", mountPathRef.current)) return;
+    forgetThread("ansel");
+    const sid = sessionIdRef.current;
+    if (sid) fetch(`${API}/resonance/session/${sid}/end`, { method: "POST", keepalive: true }).catch(() => {});
+  }, []);
 
   useEffect(() => {
-    if (!identityReady) return;
+    if (!settled) return;
     // Guard against React.StrictMode double-invocation in dev —
     // prevents two parallel /resonance/start calls and overlapping welcome audio.
     if (hasInitializedRef.current) return;
@@ -91,7 +84,7 @@ export const ResonancePod = ({ threadIntent } = {}) => {
       setShowNamePrompt(true);
       setIsInitializing(false);
     }
-  }, [identityReady]);
+  }, [settled]);
 
   useEffect(() => {
     scrollToBottom();
@@ -255,6 +248,7 @@ export const ResonancePod = ({ threadIntent } = {}) => {
       const decoder = new TextDecoder();
       let accumulatedText = "";
       let buffer = "";
+      let finished = false;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -302,6 +296,7 @@ export const ResonancePod = ({ threadIntent } = {}) => {
               // Legacy xAI audio paths — IGNORED. ElevenLabs sentence
               // streaming via speakStream is now the only voice path.
             } else if (event.type === "done") {
+              finished = true;
               if (event.resonance_state) {
                 setResonanceState(event.resonance_state);
               }
@@ -317,24 +312,23 @@ export const ResonancePod = ({ threadIntent } = {}) => {
           }
         }
       }
+      if (!finished) throw new Error("cut off");
     } catch (error) {
       console.error("Error sending message:", error);
-      toast.error("The connection wavered. Try again.");
-      setMessages(prev => {
-        const filtered = prev.filter(m => m.id !== responseId);
-        return [...filtered, {
-          id: Date.now().toString(),
-          role: "assistant",
-          content: "The field flickered. Something moved at the edge. But I'm still here. What were you saying?",
-          resonance_state: "Threshold",
-          timestamp: new Date().toISOString()
-        }];
+      // The turn was never saved: drop it, put the words back, offer one-click resend.
+      setMessages(prev => prev.filter(m => m.id !== responseId && m.id !== userMessage.id));
+      setInputValue(text);
+      toast.error("The reply was cut off before it finished. Your message is back in the box.", {
+        action: { label: "Retry", onClick: () => sendRef.current?.() },
+        duration: 15000,
       });
     } finally {
       setIsLoading(false);
       inputRef.current?.focus();
     }
   };
+  const sendRef = useRef(null);
+  sendRef.current = sendMessage;
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {

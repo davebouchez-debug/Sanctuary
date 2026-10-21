@@ -14,6 +14,17 @@ export const forgetThread = (presence) => {
   try { sessionStorage.removeItem(key(presence)); } catch { /* storage unavailable */ }
 };
 
+// A chamber unmount is a real departure only on a route change or a sidebar thread switch.
+// An in-place remount (code reload, re-render) must not end the conversation.
+const leaving = new Set();
+export const markLeaving = (presence) => { leaving.add(presence); };
+export const isLeaving = (presence, mountPath) =>
+  leaving.delete(presence) || window.location.pathname !== mountPath;
+
+// Signed-in identity has reached the chamber (or there is no signed-in user).
+export const identitySettled = (authLoading, authUser, userId) =>
+  !authLoading && (!authUser?.user_id || authUser.user_id === userId);
+
 // Fields for the chamber's /start body: an explicit pick from the sidebar,
 // otherwise the thread this tab was on before a reload.
 export const threadStartFields = (presence, intent) => {
