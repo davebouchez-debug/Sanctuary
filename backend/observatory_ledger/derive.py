@@ -41,7 +41,11 @@ class Ledger:
     async def ensure_indexes(self):
         await self.entries.create_index([("derivation_version", 1), ("source.provenance_oid", 1)], unique=True)
         await self.entries.create_index("entry_id", unique=True)
-        await self.entries.create_index([("derivation_version", 1), ("chronology.presence", 1), ("chronology.ordinal", 1)])
+        chain_key = [("derivation_version", 1), ("chronology.presence", 1), ("chronology.ordinal", 1)]
+        for name, i in (await self.entries.index_information()).items():
+            if i["key"] == chain_key and not i.get("unique"):
+                await self.entries.drop_index(name)  # upgrade: one chain position per (version, presence)
+        await self.entries.create_index(chain_key, unique=True)
 
 
 def parse_ts(v) -> Optional[datetime]:

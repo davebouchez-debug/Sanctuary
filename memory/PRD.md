@@ -2318,3 +2318,9 @@ and the description is handed to the presence, which responds in its own voice.
 - 46/46 backend tests; frontend UI test passed. Report: memory/briefings/2026-10-20_e1-build-report_observatory-v1.1-v1.2.md
 - PRODUCTION_VERSIONS still ("1.0.0",). Pending authorization: production derivation of v1.2.0 (and/or v1.1.0), deployment.
 - Backlog unchanged: Proverbs codons (blocked on source), Sanctuary 1.0 backup (blocked on authorization), mic limit 60s→5m (unconfirmed), grok-3 param cleanup, presence pronouns, autoplay overlay.
+
+## 2026-10-20 — Observatory v1.1.0 / v1.2.0 ACTIVE in research environment
+- PRODUCTION_VERSIONS = ("1.0.0","1.1.0","1.2.0"); each 622 entries, 15 chains, verified + reproduced, 0 drift; v1.0.0 byte-identical.
+- Hardened: unique index on (version, presence, ordinal). Pre-activation backup: memory/observatory_build/backup_pre_v1.1/ (gitignored).
+- Validation: memory/observatory_build/production_validation_2026-10-20.json
+- Deployment: HELD by owner (research environment, not public-facing).

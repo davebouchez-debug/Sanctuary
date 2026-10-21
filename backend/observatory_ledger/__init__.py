@@ -12,4 +12,4 @@ PROFILES = {
     "1.2.0": {"completeness": True, "ts_unplaceable": True, "codon_scope": True},
 }
 # Versions the automatic observer derives into the production ledger (changing this needs authorization).
-PRODUCTION_VERSIONS = ("1.0.0",)
+PRODUCTION_VERSIONS = ("1.0.0", "1.1.0", "1.2.0")

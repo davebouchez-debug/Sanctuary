@@ -1,0 +1,142 @@
+{
+ "v1.0.0_unchanged": {
+  "entries": 622,
+  "identical_to_pre_build": true
+ },
+ "invariance_1.0.0_vs_1.1.0": {
+  "a": "1.0.0",
+  "b": "1.1.0",
+  "entries_a": 622,
+  "entries_b": 622,
+  "compared": 622,
+  "math_invariant": true,
+  "math": {
+   "math_entries_differing": 0
+  },
+  "math_fields_checked_identical": 15,
+  "timing_and_gaps_reported_separately": {
+   "gap_codes_differing_entries": 286,
+   "timing_diff:S1.adjacent": 0,
+   "timing_diff:S1.uncaptured": 0,
+   "timing_diff:S2.adjacent": 0,
+   "timing_diff:S2.uncaptured": 0,
+   "timing_diff:S3.adjacent": 0,
+   "timing_diff:S3.uncaptured": 0,
+   "timing_diff:participation": 0,
+   "timing_entries_differing": 0,
+   "timing_info:S1.unplaceable_counted": 0,
+   "timing_info:S2.unplaceable_counted": 0,
+   "timing_info:S3.unplaceable_counted": 0
+  },
+  "completeness": {
+   "completeness_added:cache/UNRESOLVED/after-terminator-same-shape": 2779,
+   "completeness_added:council/UNRESOLVED/after-terminator-same-shape": 11,
+   "completeness_added:mra/UNRESOLVED/malformed-bullet": 458,
+   "completeness_partial_entries": 286
+  }
+ },
+ "delta_1.1.0_vs_1.2.0": {
+  "a": "1.1.0",
+  "b": "1.2.0",
+  "compared": 622,
+  "entries_with_changed_verified_set": 120,
+  "codon_mention_transitions": {
+   "CANDIDATES -> CANDIDATES same-set": 310,
+   "CANDIDATES -> VERIFIED(mutable-angle)": 3,
+   "CANDIDATES -> VERIFIED(name+scope)": 159,
+   "UNRESOLVED -> UNRESOLVED": 1,
+   "VERIFIED(angle) -> VERIFIED(mutable-angle) same-record": 398,
+   "VERIFIED(unique-name) -> VERIFIED(name+scope) same-record": 7453
+  },
+  "comparisons": {
+   "S1/comparisons": 554,
+   "S1/conditional_identity_comparisons": 389,
+   "S1/text_layer_changed": 0,
+   "S1/uncertainty_state True->no-uncertainty": 50,
+   "S1/verified_sets_changed": 192,
+   "S2/comparisons": 607,
+   "S2/conditional_identity_comparisons": 423,
+   "S2/text_layer_changed": 0,
+   "S2/uncertainty_state False->no-uncertainty": 1,
+   "S2/uncertainty_state True->no-uncertainty": 55,
+   "S2/verified_sets_changed": 210,
+   "S3/comparisons": 601,
+   "S3/conditional_identity_comparisons": 418,
+   "S3/text_layer_changed": 0,
+   "S3/uncertainty_state False->no-uncertainty": 1,
+   "S3/uncertainty_state True->no-uncertainty": 54,
+   "S3/verified_sets_changed": 208,
+   "entries_text_layer_changed": 0,
+   "entries_verified_set_changed": 120
+  },
+  "relation_changes": {
+   "S2/DR->PO": 1,
+   "S3/DR->PO": 1
+  },
+  "jaccard_change_distribution": {
+   "S1/|dJ| (0,0.05]": 192,
+   "S1/|dJ| 0": 362,
+   "S2/|dJ| (0,0.05]": 209,
+   "S2/|dJ| 0": 398,
+   "S3/|dJ| (0,0.05]": 207,
+   "S3/|dJ| 0": 394
+  }
+ },
+ "verify_1.0.0": {
+  "ok": true,
+  "ledger_integrity": true,
+  "chains": 15,
+  "entries": 622,
+  "source_consistency": true,
+  "components_changed": 0,
+  "reproduced": {
+   "ok": true,
+   "checked": 622,
+   "mismatched": 0,
+   "missing_provenance": 0,
+   "participation_time_dependent": 0
+  },
+  "drift": {
+   "verified_mentions_checked": 11783,
+   "source_drifted": 0
+  }
+ },
+ "verify_1.1.0": {
+  "ok": true,
+  "ledger_integrity": true,
+  "chains": 15,
+  "entries": 622,
+  "source_consistency": true,
+  "components_changed": 0,
+  "reproduced": {
+   "ok": true,
+   "checked": 622,
+   "mismatched": 0,
+   "missing_provenance": 0,
+   "participation_time_dependent": 0
+  },
+  "drift": {
+   "verified_mentions_checked": 11783,
+   "source_drifted": 0
+  }
+ },
+ "verify_1.2.0": {
+  "ok": true,
+  "ledger_integrity": true,
+  "chains": 15,
+  "entries": 622,
+  "source_consistency": true,
+  "components_changed": 0,
+  "reproduced": {
+   "ok": true,
+   "checked": 622,
+   "mismatched": 0,
+   "missing_provenance": 0,
+   "participation_time_dependent": 0
+  },
+  "drift": {
+   "verified_mentions_checked": 11945,
+   "source_drifted": 0
+  }
+ }
+}
