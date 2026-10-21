@@ -1286,7 +1286,7 @@ PRESENCE_VOICES = {
         "speed": 1.20,  # pushed to the ElevenLabs max — Grace reads lethargic; lowered stability + raised style to add life
     },
     "sorrel": {
-        "voice_id": "4tRn1lSkEn13EVTuqb0g",  # Serafina — Sensual; breath-soft for the divine breath
+        "voice_id": "mqyRCI8OeJTogXjYUGZ5",  # Serena — melodic and poetic; dreamy, ethereal, fairy-like (was Serafina 4tRn1lSkEn13EVTuqb0g)
         "stability": 0.50,
         "similarity_boost": 0.75,
         "style": 0.45,
