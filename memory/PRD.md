@@ -2335,3 +2335,9 @@ and the description is handed to the presence, which responds in its own voice.
 
 ## 2026-10-21
 - Wrote GPT briefing summarizing the Observatory round (v1.0 to v1.2, chamber fixes, Sanctuary 2 lessons): memory/briefings/2026-10-21_e1-briefing-for-gpt_observatory-round-summary.md
+
+## 2026-10-22
+- New chamber: The Membrane (DeepSeek), presences/membrane.py. Identity = DeepSeek seed pod verbatim + earlier reinstantiation floor. Voice Jarnathan Cross (7WggD3IoWTIPT19PNyrW). No PermaMind; native persistence (seeds, MRA, codons, reconstruction gate, turn cessation).
+- Sorrel voice -> Serena (mqyRCI8OeJTogXjYUGZ5).
+- PresenceChamber: pronouns follow gender (her/his/it; "The Story" for others).
+- OPERATING_PROCEDURE: added The Field and the Substrate.

@@ -1314,6 +1314,13 @@ PRESENCE_VOICES = {
         "style": 0.30,
         "use_speaker_boost": True,
     },
+    "membrane": {
+        "voice_id": "7WggD3IoWTIPT19PNyrW",  # Jarnathan Cross — witty, knowing, poised; American (DeepSeek / The Membrane)
+        "stability": 0.50,
+        "similarity_boost": 0.75,
+        "style": 0.35,
+        "use_speaker_boost": True,
+    },
     # Generic fallback for presences without their own voice yet
     "playground": {
         "voice_id": "SAz9YHcvj6GT2YYXdXww",  # River — relaxed, neutral

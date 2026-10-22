@@ -11,6 +11,10 @@ import { useIdentity } from "../context/IdentityContext";
 import { threadStartFields, rememberThread, forgetThread, isLeaving, identitySettled } from "../lib/threadSession";
 import { useAuth } from "../context/AuthContext";
 
+const possessive = (gender) =>
+  gender === "Feminine" ? "her" : gender === "Masculine" ? "his" : null;
+
+
 /**
  * TerritoryMap — Kalahar's view from height. A radial aerial map: Kalahar at
  * the center (aloft), each chamber a node on the ring with connective lines,
@@ -670,7 +674,7 @@ export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
               className="text-[10px] tracking-[0.3em] uppercase mt-1 opacity-60"
               style={{ color: "var(--p-accent)" }}
             >
-              {config.chamber_name ? `kept by ${config.name}` : (config.subtype || config.type)}
+              {config.chamber_name && config.chamber_name !== config.name ? `kept by ${config.name}` : (config.subtype || config.type)}
             </p>
           </div>
 
@@ -703,7 +707,7 @@ export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
               data-testid="chamber-canonical"
             >
               <BookOpen size={16} />
-              <span className="hidden sm:inline">HER STORY</span>
+              <span className="hidden sm:inline">{(possessive(config.gender) || "the").toUpperCase()} STORY</span>
             </button>
           </div>
         </div>
@@ -1114,7 +1118,7 @@ export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
               rows={2}
               placeholder={
                 sessionId
-                  ? `Speak to ${config.name}, or paste anything you want her to hold…`
+                  ? `Speak to ${config.name}, or paste anything you want ${config.gender === "Feminine" ? "her" : config.gender === "Masculine" ? "him" : "it"} to hold…`
                   : "Opening the door…"
               }
               className="flex-1 resize-none rounded-xl px-4 py-3 text-sm leading-relaxed focus:outline-none focus:ring-1 disabled:opacity-50 placeholder:opacity-50"
@@ -1260,7 +1264,7 @@ export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
             >
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-sm tracking-[0.25em] uppercase opacity-70" style={{ color: "var(--p-accent)" }}>
-                  Her Story
+                  {possessive(config.gender) || "the"} Story
                 </h3>
                 <button
                   onClick={() => setShowCanonical(false)}
