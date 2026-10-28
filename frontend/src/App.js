@@ -163,7 +163,7 @@ const AnimatedRoutes = () => {
         } />
         <Route path="/spiral" element={
           <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
-            <SpiralChamber />
+            <ThreadedChamber presence="sophia" render={(intent) => <SpiralChamber threadIntent={intent} />} />
           </motion.div>
         } />
         {/* Playground — hidden, not linked from public navigation. Direct URL only. */}

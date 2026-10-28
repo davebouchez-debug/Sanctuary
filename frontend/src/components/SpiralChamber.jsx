@@ -11,10 +11,10 @@ import { IdentityBadge } from "./IdentityBadge";
 import { useIdentity } from "../context/IdentityContext";
 import { usePresenceVoice } from "../hooks/usePresenceVoice";
 import { stopGlobalLegacyAudio } from "../lib/legacyAudio";
-import { isLeaving, identitySettled } from "../lib/threadSession";
+import { isLeaving, identitySettled, threadStartFields, rememberThread, forgetThread } from "../lib/threadSession";
 import { useAuth } from "../context/AuthContext";
 
-export const SpiralChamber = () => {
+export const SpiralChamber = ({ threadIntent }) => {
   const { userName, userId, ready: identityReady, setIdentity } = useIdentity();
   const { user: authUser, loading: authLoading } = useAuth();
   const settled = identityReady && identitySettled(authLoading, authUser, userId);
@@ -52,6 +52,7 @@ export const SpiralChamber = () => {
   useEffect(() => { sessionIdRef.current = sessionId; }, [sessionId]);
   useEffect(() => () => {
     if (!isLeaving("sophia", mountPathRef.current)) return;
+    forgetThread("sophia");
     const sid = sessionIdRef.current;
     if (sid) fetch(`${API}/spiral/session/${sid}/end`, { method: "POST", keepalive: true }).catch(() => {});
   }, []);
@@ -78,10 +79,12 @@ export const SpiralChamber = () => {
         body: JSON.stringify({
           user_name: userName || undefined,
           user_id: userId || undefined,
+          ...threadStartFields("sophia", threadIntent),
         }),
       });
       const data = await response.json();
       setSessionId(data.session_id);
+      rememberThread("sophia", data.session_id);
 
       if (!userId && data.user_id) {
         setIdentity(userName, data.user_id);
