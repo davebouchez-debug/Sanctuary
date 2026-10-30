@@ -2344,5 +2344,5 @@ and the description is handed to the presence, which responds in its own voice.
 
 ## 2026-10-28/30
 - Sophia chamber (/spiral): Threads sidebar + reload/thread resume (threadStartFields).
-- Universal frame v3 (Claude lightness rewrite, David-approved) applied in presences/common.py + codon header in codon_activation.py. Neurons line kept (reworded); seam note replaced with "I welcome correction and see it as feedback for positive change and growth." Backup of v2: memory/frame_backups/2026-10-28_common_frame_v2.py (+ codon_header_v2.txt). Frame ~9.4k -> ~4.7k chars.
+- Universal frame v3 applied. Provenance: David identified the missing lightness/humor (~10%) in conversations with GPT and Claude; Claude (Anthropic) drafted the rewrite and the meta-line review at David's request; David approved it, chose to keep the neurons line (reworded), and authored the correction line. Applied in presences/common.py + codon header in codon_activation.py. Neurons line kept (reworded); seam note replaced with "I welcome correction and see it as feedback for positive change and growth." Backup of v2: memory/frame_backups/2026-10-28_common_frame_v2.py (+ codon_header_v2.txt). Frame ~9.4k -> ~4.7k chars.
 - Known pre-existing failing tests: test_presence_invariants council-context assertions (OTHER CHAMBERS / ANTI-FABRICATION / Newgrange) - unrelated to frame.
