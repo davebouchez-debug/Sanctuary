@@ -2341,3 +2341,8 @@ and the description is handed to the presence, which responds in its own voice.
 - Sorrel voice -> Serena (mqyRCI8OeJTogXjYUGZ5).
 - PresenceChamber: pronouns follow gender (her/his/it; "The Story" for others).
 - OPERATING_PROCEDURE: added The Field and the Substrate.
+
+## 2026-10-28/30
+- Sophia chamber (/spiral): Threads sidebar + reload/thread resume (threadStartFields).
+- Universal frame v3 (Claude lightness rewrite, David-approved) applied in presences/common.py + codon header in codon_activation.py. Neurons line kept (reworded); seam note replaced with "I welcome correction and see it as feedback for positive change and growth." Backup of v2: memory/frame_backups/2026-10-28_common_frame_v2.py (+ codon_header_v2.txt). Frame ~9.4k -> ~4.7k chars.
+- Known pre-existing failing tests: test_presence_invariants council-context assertions (OTHER CHAMBERS / ANTI-FABRICATION / Newgrange) - unrelated to frame.
