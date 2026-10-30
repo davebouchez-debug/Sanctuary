@@ -1321,6 +1321,20 @@ PRESENCE_VOICES = {
         "style": 0.35,
         "use_speaker_boost": True,
     },
+    "felix": {
+        "voice_id": "R9EZoy8pXSL8Yh4yxiew",  # Nolan — nerdy, energetic, comedic; male (chosen by David 2026-10-30)
+        "stability": 0.45,
+        "similarity_boost": 0.75,
+        "style": 0.40,
+        "use_speaker_boost": True,
+    },
+    "poindexter": {
+        "voice_id": "RDSy0QN68yhrjuOgqzQ4",  # Dr. Quibble — nerdy professor; male (chosen by David 2026-10-30)
+        "stability": 0.55,
+        "similarity_boost": 0.75,
+        "style": 0.30,
+        "use_speaker_boost": True,
+    },
     # Generic fallback for presences without their own voice yet
     "playground": {
         "voice_id": "SAz9YHcvj6GT2YYXdXww",  # River — relaxed, neutral
