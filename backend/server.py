@@ -1468,6 +1468,39 @@ _IMAGE_MIME = {
 }
 
 
+@api_router.post("/chamber/extract-text")
+async def extract_document_text(file: UploadFile = File(...)):
+    """Pull plain text out of a Word (.docx) or PDF file for the chamber upload."""
+    import io
+    fname = (file.filename or "").lower()
+    data = await file.read()
+    if len(data) > 20 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="File too large (20MB max).")
+    try:
+        if fname.endswith(".pdf"):
+            from pypdf import PdfReader
+            reader = PdfReader(io.BytesIO(data))
+            text = "\n\n".join((page.extract_text() or "") for page in reader.pages)
+        elif fname.endswith(".docx"):
+            from docx import Document
+            doc = Document(io.BytesIO(data))
+            parts = [p.text for p in doc.paragraphs]
+            for table in doc.tables:
+                for row in table.rows:
+                    parts.append(" | ".join(cell.text for cell in row.cells))
+            text = "\n".join(parts)
+        else:
+            raise HTTPException(status_code=400, detail="Only .pdf and .docx files are supported here.")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=422, detail=f"Could not read the document: {e}")
+    text = text.strip()
+    if not text:
+        raise HTTPException(status_code=422, detail="No readable text found in the document (it may be a scanned image).")
+    return {"filename": file.filename, "text": text, "chars": len(text)}
+
+
 @api_router.post("/chamber/upload-image")
 async def upload_chamber_image(file: UploadFile = File(...)):
     """Store a user-shared image and return its storage path for the thread."""

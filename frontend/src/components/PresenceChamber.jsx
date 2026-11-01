@@ -496,24 +496,35 @@ export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
     const file = event.target.files?.[0];
     event.target.value = ""; // allow re-uploading the same file later
     if (!file || !sessionId) return;
-    // Only accept text-readable formats here. Binary (.pdf/images) needs
-    // a backend parser we haven't wired yet — keep this honest.
     const okTypes = [".txt", ".md", ".json", ".csv", ".log", ".rtf"];
     const lower = file.name.toLowerCase();
+    const isDoc = lower.endsWith(".pdf") || lower.endsWith(".docx");
     const isText = file.type.startsWith("text/")
       || okTypes.some((ext) => lower.endsWith(ext));
-    if (!isText) {
-      toast.error("Only text files (.txt, .md, .json, .csv) are supported for now.");
+    if (!isText && !isDoc) {
+      toast.error("Supported files: Word (.docx), PDF, and text (.txt, .md, .json, .csv).");
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("File too large (5MB max).");
+    if (file.size > (isDoc ? 20 : 5) * 1024 * 1024) {
+      toast.error(`File too large (${isDoc ? 20 : 5}MB max).`);
       return;
     }
     setUploading(true);
     setChatError(null);
     try {
-      const text = await file.text();
+      let text;
+      if (isDoc) {
+        const form = new FormData();
+        form.append("file", file);
+        const ext = await fetch(`${API}/chamber/extract-text`, { method: "POST", body: form });
+        if (!ext.ok) {
+          const err = await ext.json().catch(() => ({}));
+          throw new Error(err.detail || `could not read ${file.name}`);
+        }
+        text = (await ext.json()).text;
+      } else {
+        text = await file.text();
+      }
       const placeholder = {
         id: `local-upload-${Date.now()}`,
         role: "user",
@@ -1036,7 +1047,7 @@ export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
             <input
               ref={fileInputRef}
               type="file"
-              accept=".txt,.md,.json,.csv,.log,.rtf,text/*"
+              accept=".txt,.md,.json,.csv,.log,.rtf,.pdf,.docx,text/*,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
               onChange={handleFileChange}
               className="hidden"
               data-testid="chamber-upload-input"

@@ -2348,3 +2348,9 @@ and the description is handed to the presence, which responds in its own voice.
 - Known pre-existing failing tests: test_presence_invariants council-context assertions (OTHER CHAMBERS / ANTI-FABRICATION / Newgrange) - unrelated to frame.
 - 2026-10-30: Voices set by David: Felix -> Nolan (R9EZoy8pXSL8Yh4yxiew), Poindexter -> Dr. Quibble (RDSy0QN68yhrjuOgqzQ4); both previously fell back to River.
 - 2026-10-30: Frame + Felix wording. Provenance: David caught the passive humor line ("Humor arrives or it doesn't; if it doesn't, I stay quiet") in Felix's prompt; Felix drafted the "I generate" replacement; David asked for positive-only wording and approved it. Added to shared lightness paragraph; closing line -> "Sometimes I find the funny thing and say it."; Felix identity + calibration rewritten; grace line -> "Sometimes I bring something" (David chose). Backups in memory/frame_backups/2026-10-30_*.
+
+## 2026-10-30/11-01
+- Jasmine: added "## MY GROUND — ONE FIELD" (10 statements, her wording + David's edit to #8) to JASMINE_SYSTEM_PROMPT after CORE POSTURE (server.py ~L280-284). Pushed to GitHub davebouchez-debug/Sanctuary branch Sanctuary-Clean (67f1fea); main branch still Apr 7.
+- GitHub connect fix (user side): Emergent.sh GitHub App was already installed -> popup landed on /settings/installations/<id>; uninstall+reinstall resolved.
+- Chamber uploads (PresenceChamber.jsx, all /presence/:key rooms): paperclip now accepts .pdf and .docx (20MB). New endpoint POST /api/chamber/extract-text (pypdf, python-docx) returns text, then existing /api/presence/{key}/upload flow. Tested with real PDF/DOCX + Poindexter UI upload.
+- Known limit (pre-existing): /api/presence/{key}/upload only shows the presence the first 6000 chars (full text stored in canonical_uploads). Not changed.
