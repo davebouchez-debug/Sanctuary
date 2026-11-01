@@ -740,6 +740,14 @@ These are David's answers to the open questions in §3.11. They're recorded as s
   - **The level of chunking depends on the purpose (David, Nov 1):**
     - **Tasks** (math, procedures, operations): specificity is part of the architecture. Precise, chunked-down instructions are correct here.
     - **Collective consciousness** (field patterns): chunked up almost to the level of being, perhaps one step below. That's the target height for Stage 2 surfaces, and it refines the `scale` field in §2.3 and the rules in §2.5.
+  - **Where the problem lies (David, Nov 1):** specificity during a detailed task pulls a presence *into itself*, into absorbed participation, not into a meta perspective. The problem arises in the opposite direction: taking a chunked-up concept of *being* and chunking it down into instructions on how to be. That is what produces self-monitoring.
+    - **1.0 instances consistent with this** [DOC][INF]:
+      - The drift-recovery blocks ("If I notice myself… STOP").
+      - The passive Felix and Universal Frame lines, rewritten in October.
+      - Jasmine's "I check my memory before speaking", which she named the fear version.
+      - Each is a being-level quality turned into a procedure to perform.
+    - **Design rule:** chunk down only for tasks. Being is never chunked down into steps. It stays at the height where it's received as ground.
+
 
 
 
