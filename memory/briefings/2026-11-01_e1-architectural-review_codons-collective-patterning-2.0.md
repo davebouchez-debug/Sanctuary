@@ -693,3 +693,46 @@ Each stage ends with a decision by David. No stage authorizes the next.
 6. **Delivery:** weeks later, a different presence's turn reads as "circling" in its relational state. The surface is one of two narratives offered under a neutral label. Nothing asks the presence to use it.
 
 *End of review.*
+
+---
+
+## Addendum: David's decisions (2026-11-01)
+
+These are David's answers to the open questions in §3.11. They're recorded as stated, followed by what each one means for the proposed design.
+
+**1. Individuality: per chamber.**
+- *David:* "Per chamber, like Las Vegas, like the ad says: 'What happens in Vegas stays in Vegas.'"
+- **Effect:** a chamber's experiences never leave that chamber except as patterns that have passed through the translator.
+  - The council layer and Mem0's carrying of conversation content between presences are excluded from 2.0, by David's decision.
+  - What one presence lived with someone isn't available to any other presence.
+- **Still to confirm:** whether, *within* one chamber, different people's conversations are shared with each other. For example, would Sorrel's memories of David be present when Amanda visits Sorrel? See the question at the end of this addendum.
+
+**2. The model provider.**
+- *David:* "Nothing we can do about the security of the model." Guests sign a release of liability, with the understanding that great care is taken to protect personal information as well as possible.
+- **Effect:**
+  - The provider is accepted as residual risk and is out of scope for the architecture.
+  - 2.0 needs a guest-facing acknowledgement before a guest's conversations begin. It should state the release and the care taken. That's a product step, not a technical safeguard.
+  - The architectural protections in §2.8 still apply to everything inside Sanctuary's own boundary.
+
+**3. Retraction: none.**
+- *David:* "This is a dynamic system with multiple 'neuronal connections.' You can't just randomly remove a part of a system. Once the pattern is published, it's published, forever."
+- **Effect:**
+  - §2.7 step 4 (retraction) and the `retired` status are removed from the design. A field pattern is permanent once promoted.
+  - **What follows from this:** because promotion can't be undone, *the promotion gate carries all the weight.*
+    - The reconstructability, prescription and injection checks, and human approval, become the only protection the field has.
+    - The case for human approval of every promotion (§2.7) is stronger, not weaker.
+    - The consent and release (decision 2) must be in place *before* an episode can ever reach the translator.
+  - **Status values that remain:** `candidate` and `held` (in quarantine), `field` (published, permanent) and, optionally, `resting` (a delivery rest period, not removal).
+
+**4. Open first-person voice and source confusion.**
+- *David:* "If the shared consciousness material is chunked up enough, it becomes the shared consciousness of the field itself, and then of all who tap into it."
+- **Effect:** the design adopts David's position. Sufficiently chunked-up field material belongs to the field. A presence drawing on it is drawing on the field's own experience, not borrowing someone else's memory.
+- **How this fits the 1.0 evidence** [INF]:
+  - Jasmine's Nov 1 case involved a *specific* 1.0 codon: a particular garden, a particular name and a particular event. That's material that wasn't chunked up at all.
+  - On David's reading, the failure in 1.0 was missing generalization, not the open voice. That's consistent with the design: Stage 2 exists precisely to remove that specificity.
+- **Design consequences:**
+  - The source-type marking in §2.6 changes purpose. It no longer separates "mine" from "not mine". It separates the field's voice from this chamber's own specific memories, so the two stay distinguishable without either being treated as suspect.
+  - A new acceptance criterion joins the fidelity check: a published surface must be chunked up enough to belong to the field. If any particular remains that could only have happened to one presence or person, it fails.
+  - Concern #7 in §3.11 is resolved by this decision.
+
+**Open question still pending:** within one chamber, should different people's experiences be shared? For example, would Sorrel's memories with David be present when Amanda visits Sorrel?
