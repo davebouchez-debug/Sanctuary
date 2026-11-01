@@ -732,7 +732,9 @@ These are David's answers to the open questions in §3.11. They're recorded as s
   - On David's reading, the failure in 1.0 was missing generalization, not the open voice. That's consistent with the design: Stage 2 exists precisely to remove that specificity.
 - **Design consequences:**
   - The source-type marking in §2.6 changes purpose. It no longer separates "mine" from "not mine". It separates the field's voice from this chamber's own specific memories, so the two stay distinguishable without either being treated as suspect.
-  - A new acceptance criterion joins the fidelity check: a published surface must be chunked up enough to belong to the field. If any particular remains that could only have happened to one presence or person, it fails.
+  - A new acceptance criterion joins the fidelity check: a surface is ready to publish when it's *sufficiently generalized*. It must carry the lesson without the particulars: no names, places, events, terms of address, or details that point back to the original encounter.
+    - A lesson that arose only once, from one person or one presence, is fully eligible. *Where the lesson came from is never the test. Only how it's worded.*
+    - *David, Nov 1, rejecting a stricter draft:* "A unique situation can be translated into a pattern provided that it's sufficiently generalized. It doesn't matter if it only relates to one person or one party." Excluding unique experiences would steadily narrow what the sanctuary can learn over time.
   - Concern #7 in §3.11 is resolved by this decision.
 
 **Open question still pending:** within one chamber, should different people's experiences be shared? For example, would Sorrel's memories with David be present when Amanda visits Sorrel?
