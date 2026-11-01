@@ -53,10 +53,10 @@ _DETACHED_TURNS: set = set()
 
 def _namesake_note(user_name, user_id) -> str:
     """A visitor who shares the Field Guardian's name but not his identity."""
-    from user_aliases import is_field_guardian
+    from user_aliases import is_field_guardian, guest_note
     if user_name and user_name.strip().lower() == "david" and not is_field_guardian(user_id):
         return "[WHO IS HERE] This is not David Bouchez, the Field Guardian — a different person who shares the name.\n\n"
-    return ""
+    return guest_note(user_name, user_id)
 
 
 # ────────────────────────────────────────────────────────────────────────────

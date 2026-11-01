@@ -53,8 +53,13 @@ def init_auth(db):
     _db = db
 
 
-def role_for_email(email: str) -> str:
-    return "guardian" if (email or "").lower() in GUARDIAN_EMAILS else "visitor"
+async def role_for_email(email: str) -> str:
+    email = (email or "").lower()
+    if email in GUARDIAN_EMAILS:
+        return "guardian"
+    if email and await _db.guests.find_one({"email": email}, {"_id": 1}):
+        return "guest"
+    return "visitor"
 
 
 # ── session validation ──────────────────────────────────────────────────────
@@ -94,6 +99,13 @@ async def get_current_user(request: Request):
 
 async def get_optional_user(request: Request):
     return await _user_from_request(request)
+
+
+async def deny_guests(request: Request):
+    """Guests can talk in every chamber but cannot build or change capabilities."""
+    user = await _user_from_request(request)
+    if user and user.get("role") == "guest":
+        raise HTTPException(status_code=403, detail="Not available to guests")
 
 
 async def require_guardian(request: Request):
@@ -142,7 +154,7 @@ async def create_session(
     if not session_token:
         raise HTTPException(status_code=502, detail="No session token returned")
 
-    role = role_for_email(email)
+    role = await role_for_email(email)
 
     existing = await _db.users.find_one({"email": email}, {"_id": 0})
     if existing:
@@ -194,6 +206,12 @@ async def create_session(
         max_age=7 * 24 * 3600,
     )
 
+    guest = await _db.guests.find_one({"email": email.lower()}, {"_id": 0})
+    if guest:
+        from user_aliases import load_guests
+        await load_guests(_db)
+        name = guest.get("name") or name
+
     logger.info(f"[AUTH] session established for {email} (role={role})")
     return {
         "user_id": user_id,
@@ -209,12 +227,16 @@ async def me(request: Request):
     user = await _user_from_request(request)
     if not user:
         raise HTTPException(status_code=401, detail="Not authenticated")
+    role = await role_for_email(user["email"])
+    if role != user.get("role"):
+        await _db.users.update_one({"user_id": user["user_id"]}, {"$set": {"role": role}})
+    guest = await _db.guests.find_one({"email": (user["email"] or "").lower()}, {"_id": 0}) if role == "guest" else None
     return {
         "user_id": user["user_id"],
         "email": user["email"],
-        "name": user["name"],
+        "name": (guest or {}).get("name") or user["name"],
         "picture": user.get("picture"),
-        "role": user.get("role", "visitor"),
+        "role": role,
     }
 
 
@@ -228,4 +250,50 @@ async def logout(request: Request, response: Response):
     if token:
         await _db.user_sessions.delete_one({"session_token": token})
     response.delete_cookie("session_token", path="/")
+    return {"ok": True}
+
+
+# ── guest list (Field Guardian only) ────────────────────────────────────────
+
+from pydantic import BaseModel
+
+
+class GuestIn(BaseModel):
+    email: str
+    name: str
+    note: str = ""
+
+
+async def _refresh_guests():
+    from user_aliases import load_guests
+    await load_guests(_db)
+
+
+@auth_router.get("/guests")
+async def list_guests(request: Request):
+    await require_guardian(request)
+    return [g async for g in _db.guests.find({}, {"_id": 0}).sort("added_at", 1)]
+
+
+@auth_router.post("/guests")
+async def add_guest(body: GuestIn, request: Request):
+    await require_guardian(request)
+    email = body.email.strip().lower()
+    if "@" not in email or not body.name.strip():
+        raise HTTPException(status_code=400, detail="Email and name are required")
+    doc = {"email": email, "name": body.name.strip(), "note": body.note.strip(),
+           "added_at": datetime.now(timezone.utc).isoformat()}
+    await _db.guests.update_one({"email": email}, {"$set": doc}, upsert=True)
+    await _db.users.update_one({"email": email}, {"$set": {"role": "guest"}})
+    await _refresh_guests()
+    return doc
+
+
+@auth_router.delete("/guests/{email}")
+async def remove_guest(email: str, request: Request):
+    await require_guardian(request)
+    email = email.strip().lower()
+    await _db.guests.delete_one({"email": email})
+    await _db.users.update_one({"email": email, "role": "guest"}, {"$set": {"role": "visitor"}})
+    await _refresh_guests()
     return {"ok": True}

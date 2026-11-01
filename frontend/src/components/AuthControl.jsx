@@ -8,6 +8,7 @@
 
 import { useAuth } from "../context/AuthContext";
 import { LogIn, LogOut } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export const AuthControl = () => {
   const { user, isAuthenticated, role, login, logout, loading } = useAuth();
@@ -56,6 +57,18 @@ export const AuthControl = () => {
           title="Field Guardian"
         >
           Guardian
+        </span>
+      )}
+      {role === "guardian" && (
+        <Link to="/guests" data-testid="auth-guests-link" title="Manage guests"
+          className="hidden sm:inline text-[10px] uppercase tracking-wider text-[#8B9DB5] hover:text-white transition-colors">
+          Guests
+        </Link>
+      )}
+      {role === "guest" && (
+        <span className="hidden sm:inline text-[10px] uppercase tracking-wider text-[#8B9DB5]"
+          data-testid="auth-guest-mark" title="David's guest">
+          Guest
         </span>
       )}
       <button

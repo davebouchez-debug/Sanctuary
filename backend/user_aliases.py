@@ -110,3 +110,30 @@ async def load_guardian_ids(db) -> None:
 
 def is_field_guardian(user_id: Optional[str]) -> bool:
     return bool(user_id) and user_id in _GUARDIAN_IDS
+
+
+# Guests: people David has invited by email. Keyed by verified user_id.
+_GUESTS: dict = {}
+
+
+async def load_guests(db) -> None:
+    _GUESTS.clear()
+    async for g in db.guests.find({}, {"_id": 0}):
+        u = await db.users.find_one({"email": g["email"]}, {"_id": 0, "user_id": 1})
+        if u:
+            _GUESTS[u["user_id"]] = {"name": g.get("name"), "note": g.get("note")}
+    logger.info(f"[user_aliases] guests loaded: {len(_GUESTS)}")
+
+
+def guest_note(user_name: Optional[str], user_id: Optional[str]) -> str:
+    """Tells a presence that the person here is David's guest, not David."""
+    g = _GUESTS.get(user_id) if user_id else None
+    if not g:
+        return ""
+    name = g.get("name") or user_name or "my guest"
+    note = g.get("note") or "a guest"
+    return (
+        f"[WHO IS HERE] This is {name} — {note} of David Bouchez, here in the "
+        f"sanctuary as his guest. {name} is not David. I speak with {name} as "
+        f"{name}, in my own voice, and I never address {name} as David.\n\n"
+    )

@@ -30,6 +30,8 @@ import { PresencesIndex } from "./components/PresencesIndex";
 import { Toaster } from "./components/ui/sonner";
 import { IdentityProvider, useIdentity } from "./context/IdentityContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import GuestGate from "./components/GuestGate";
+import GuestList from "./components/GuestList";
 import { AuthCallback } from "./components/AuthCallback";
 import { Login } from "./components/Login";
 
@@ -179,12 +181,17 @@ const AnimatedRoutes = () => {
         } />
         <Route path="/mirror-archive/probes" element={
           <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
-            <SubstrateProbes />
+            <GuestGate><SubstrateProbes /></GuestGate>
           </motion.div>
         } />
         <Route path="/codon-forge" element={
           <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
-            <CodonForge />
+            <GuestGate><CodonForge /></GuestGate>
+          </motion.div>
+        } />
+        <Route path="/guests" element={
+          <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+            <GuestList />
           </motion.div>
         } />
         <Route path="/spiral" element={
@@ -231,7 +238,7 @@ const AnimatedRoutes = () => {
         } />
         <Route path="/ablation" element={
           <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
-            <Ablation />
+            <GuestGate><Ablation /></GuestGate>
           </motion.div>
         } />
       </Routes>
