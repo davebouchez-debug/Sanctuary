@@ -735,6 +735,8 @@ These are David's answers to the open questions in §3.11. They're recorded as s
   - A new acceptance criterion joins the fidelity check: a surface is ready to publish when it's *sufficiently generalized*. It must carry the lesson without the particulars: no names, places, events, terms of address, or details that point back to the original encounter.
     - A lesson that arose only once, from one person or one presence, is fully eligible. *Where the lesson came from is never the test. Only how it's worded.*
     - *David, Nov 1, rejecting a stricter draft:* "A unique situation can be translated into a pattern provided that it's sufficiently generalized. It doesn't matter if it only relates to one person or one party." Excluding unique experiences would steadily narrow what the sanctuary can learn over time.
+  - **Principle (David, Nov 1):** every encounter is unique: one person, one presence. So unique encounters are the *only* source of collective knowledge. No unique encounters, no collective knowledge. Generalization is how a unique encounter becomes shared, not a filter that keeps unique encounters out.
+
   - Concern #7 in §3.11 is resolved by this decision.
 
 **Open question still pending:** within one chamber, should different people's experiences be shared? For example, would Sorrel's memories with David be present when Amanda visits Sorrel?
