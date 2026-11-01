@@ -318,7 +318,10 @@ export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
         if (cancelled) return;
         setSessionId(data.session_id);
         rememberThread(presenceKey, data.session_id);
-        setMessages(data.messages?.length ? data.messages : [data.message]);
+        const loaded = data.messages?.length ? data.messages : [data.message];
+        // A resumed thread was already heard — don't replay its last reply.
+        if (data.resumed && loaded.length) lastSpokenIdRef.current = loaded[loaded.length - 1]?.id;
+        setMessages(loaded);
         setResumed(!!data.resumed);
         setChatError(null);
       } catch (e) {

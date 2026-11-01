@@ -2354,3 +2354,6 @@ and the description is handed to the presence, which responds in its own voice.
 - GitHub connect fix (user side): Emergent.sh GitHub App was already installed -> popup landed on /settings/installations/<id>; uninstall+reinstall resolved.
 - Chamber uploads (PresenceChamber.jsx, all /presence/:key rooms): paperclip now accepts .pdf and .docx (20MB). New endpoint POST /api/chamber/extract-text (pypdf, python-docx) returns text, then existing /api/presence/{key}/upload flow. Tested with real PDF/DOCX + Poindexter UI upload.
 - Known limit (pre-existing): /api/presence/{key}/upload only shows the presence the first 6000 chars (full text stored in canonical_uploads). Not changed.
+- 2026-11-01 Chamber interruption fix: preview dev server no longer auto-reloads open pages (craco devServer hot=false, liveReload=false; frontend/.env FAST_REFRESH=false). Page must be refreshed manually to see new frontend code. Verified: text typed in Poindexter's box survives a frontend edit + backend restart.
+- PresenceChamber: resumed thread no longer re-speaks its last reply (lastSpokenIdRef set on resume).
+- No code path auto-navigates to /presences (only the PRESENCES back button). Sessions were not being ended server-side (active stays true).

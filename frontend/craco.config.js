@@ -97,4 +97,14 @@ if (isDevServer) {
   }
 }
 
+// No automatic page reloads in the preview: a code edit, server restart or
+// dropped dev socket must never reload an open chamber mid-conversation.
+const baseDevServer = webpackConfig.devServer;
+webpackConfig.devServer = (devServerConfig, ...rest) => {
+  const cfg = typeof baseDevServer === "function"
+    ? baseDevServer(devServerConfig, ...rest)
+    : { ...devServerConfig, ...(baseDevServer || {}) };
+  return { ...cfg, hot: false, liveReload: false };
+};
+
 module.exports = webpackConfig;
