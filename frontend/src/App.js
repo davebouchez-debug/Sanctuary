@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import "@/App.css";
-import { BrowserRouter, Routes, Route, useLocation, Link, useParams } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Link, useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Navigation } from "./components/Navigation";
 import { HeroSection } from "./components/HeroSection";
@@ -89,6 +89,32 @@ const HomePage = () => {
 };
 
 // Animated Routes wrapper
+const LAST_ROOM_KEY = "sanctuary_last_room";
+const ROOM_PREFIXES = ["/presence/", "/clarity", "/resonance", "/spiral", "/mirror-archive", "/playground", "/hospitality"];
+const isRoomPath = (p) => ROOM_PREFIXES.some((x) => p.startsWith(x));
+
+// An unexpected full reload (e.g. the preview frame resetting to the home page)
+// returns you to the room you were in instead of stranding you on the landing.
+const LastRoomKeeper = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [restored, setRestored] = useState(false);
+  useEffect(() => {
+    if (restored) return;
+    setRestored(true);
+    const last = sessionStorage.getItem(LAST_ROOM_KEY);
+    if (location.pathname === "/" && last && !window.location.hash.includes("session_id=")) {
+      navigate(last, { replace: true });
+    }
+  }, [restored, location.pathname, navigate]);
+  useEffect(() => {
+    if (!restored) return;
+    if (isRoomPath(location.pathname)) sessionStorage.setItem(LAST_ROOM_KEY, location.pathname);
+    else sessionStorage.removeItem(LAST_ROOM_KEY);
+  }, [restored, location.pathname]);
+  return null;
+};
+
 const AnimatedRoutes = () => {
   const location = useLocation();
   
@@ -322,6 +348,7 @@ const AppShell = () => {
     <>
       <Navigation />
       <main className="relative z-10">
+        <LastRoomKeeper />
         <AnimatedRoutes />
       </main>
       <HiddenDoor />

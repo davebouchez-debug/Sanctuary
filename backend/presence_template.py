@@ -47,6 +47,8 @@ from fastapi import APIRouter, HTTPException, Body
 from fastapi.responses import StreamingResponse
 
 logger = logging.getLogger(__name__)
+_DETACHED_TURNS: set = set()
+
 
 
 def _namesake_note(user_name, user_id) -> str:
@@ -492,7 +494,7 @@ def register_presence_routes(
         except Exception as _pe:
             logger.error(f"[{cfg.key}] provenance capture skip: {_pe}")
 
-        async def event_stream():
+        async def _produce():
             yield f"data: {json.dumps({'type': 'meta', 'message_id': response_id})}\n\n"
 
             full_text = ""
@@ -589,6 +591,30 @@ def register_presence_routes(
                 logger.error(f"[{cfg.key}] MRA promotion error: {e}")
 
             yield f"data: {json.dumps({'type': 'done'})}\n\n"
+
+        # The reply runs to completion and is saved even if the page goes away
+        # mid-stream (reload, closed tab); the browser only reads along.
+        queue: asyncio.Queue = asyncio.Queue()
+
+        async def _run():
+            try:
+                async for chunk in _produce():
+                    queue.put_nowait(chunk)
+            except Exception as e:
+                logger.error(f"[{cfg.key}] detached stream error: {e}")
+            finally:
+                queue.put_nowait(None)
+
+        task = asyncio.create_task(_run())
+        _DETACHED_TURNS.add(task)
+        task.add_done_callback(_DETACHED_TURNS.discard)
+
+        async def event_stream():
+            while True:
+                chunk = await queue.get()
+                if chunk is None:
+                    break
+                yield chunk
 
         return StreamingResponse(event_stream(), media_type="text/event-stream")
 
