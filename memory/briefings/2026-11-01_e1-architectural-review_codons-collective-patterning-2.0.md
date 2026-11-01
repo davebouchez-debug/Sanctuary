@@ -410,7 +410,8 @@ pattern:
 |---|---|---|
 | Unspecified referential index | "someone", "a person", "I" (open) | Roles become open first person or unspecified others |
 | Lost performative / experiential evidence | "it became clear…" | Completed past, experienced, not asserted as law |
-| Cause–effect and complex equivalence | "by staying, I found…" | *Required:* it carries `structure.relation`. This is where the lesson lives |
+| Cause–effect and complex equivalence | "by staying, I found…" | **Task and relational surfaces only.** Disallowed for being-level surfaces: "When I did X, Y followed" is a procedure told as a story (corrected Nov 1, after David found the Milton rewrites too chunked down) |
+| Logical level (Dilts) | environment → behavior → capability → beliefs/values → identity → being | Field surfaces target **identity**, one step below being ("I am…", what I am). Not behavior or capability ("I did… and it worked"). No scenes, no practitioner-and-other framing |
 | Presupposition of possibility | "as the way opened…" | Allowed: it presupposes the *possibility*, never a duty |
 | Tense and aspect | completed past | Required for open-voice surfaces |
 | Nominalization | "the opening", "the staying" | Sparingly. It aids generality but blurs structure, so the fidelity check guards it |
