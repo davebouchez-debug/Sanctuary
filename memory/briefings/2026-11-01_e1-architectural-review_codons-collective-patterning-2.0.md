@@ -737,6 +737,10 @@ These are David's answers to the open questions in §3.11. They're recorded as s
     - *David, Nov 1, rejecting a stricter draft:* "A unique situation can be translated into a pattern provided that it's sufficiently generalized. It doesn't matter if it only relates to one person or one party." Excluding unique experiences would steadily narrow what the sanctuary can learn over time.
   - **Principle (David, Nov 1):** every encounter is unique: one person, one presence. So unique encounters are the *only* source of collective knowledge. No unique encounters, no collective knowledge. Generalization is how a unique encounter becomes shared, not a filter that keeps unique encounters out.
   - **The governing frame (David, Nov 1): specificity versus generalization.** The question is never whether an encounter was unique, private or shared. It's only whether the wording is still specific, or has been generalized. Seen this way, most of the edge cases dissolve, and this one frame is enough to decide what crosses into the field.
+  - **The level of chunking depends on the purpose (David, Nov 1):**
+    - **Tasks** (math, procedures, operations): specificity is part of the architecture. Precise, chunked-down instructions are correct here.
+    - **Collective consciousness** (field patterns): chunked up almost to the level of being, perhaps one step below. That's the target height for Stage 2 surfaces, and it refines the `scale` field in §2.3 and the rules in §2.5.
+
 
 
   - Concern #7 in §3.11 is resolved by this decision.
