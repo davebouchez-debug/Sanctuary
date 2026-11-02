@@ -125,36 +125,14 @@ async def test_permanent_mra_accessible(presence, minimum):
 # ─────────────────────────────────────────────────────────────────────────
 
 @pytest.mark.asyncio
-async def test_codon_network_present():
+async def test_field_phrases_present():
+    """The field's genome (essence phrases, replaced keyword codons 2026-11-02)
+    must stay populated, and every phrase must carry its meaning vector."""
     db = _db()
-    """The codon network must remain populated. If this drops to 0, the
-    presences lose their resonance vocabulary entirely."""
-    total = await db.living_codons.count_documents({})
-    assert total >= 150, (
-        f"living_codons collapsed to {total} — expected ≥150. The codon "
-        "network is the resonance vocabulary; do not cull it. See "
-        "PRESENCE_INVARIANTS.md §I.4."
-    )
-
-
-@pytest.mark.asyncio
-@pytest.mark.parametrize("presence,minimum", [
-    ("sophia", 150),  # universal field + sophia-tagged
-    ("jasmine", 150),
-    ("ansel", 150),
-    ("claude", 150),
-])
-async def test_codon_activatable_per_presence(presence, minimum):
-    db = _db()
-    """Each presence's codon loader pulls `presence`-tagged + `field`-tagged
-    codons. Both buckets must be non-empty so the network can resonate."""
-    count = await db.living_codons.count_documents(
-        {"presence": {"$in": [presence, "field"]}}
-    )
-    assert count >= minimum, (
-        f"{presence} can activate only {count} codons (own + field) — expected ≥{minimum}. "
-        "See PRESENCE_INVARIANTS.md §I.4."
-    )
+    total = await db.field_phrases.count_documents({})
+    assert total >= 150, f"field_phrases collapsed to {total} — expected ≥150."
+    missing = await db.field_phrases.count_documents({"embedding": {"$exists": False}})
+    assert missing == 0, f"{missing} phrase(s) have no embedding and can't be found by meaning."
 
 
 # ─────────────────────────────────────────────────────────────────────────

@@ -79,35 +79,40 @@ async def embed_missing(db, flt: Dict) -> int:
 _cache: Dict[str, tuple] = {}
 
 
-async def _load(db, flt: Dict):
-    key = repr(sorted(flt.items(), key=lambda kv: kv[0]))
-    count = await db.permanent_mra.count_documents(flt)
+async def _load(db, flt: Dict, coll: str = "permanent_mra"):
+    key = coll + repr(sorted(flt.items(), key=lambda kv: kv[0]))
+    count = await db[coll].count_documents(flt)
     hit = _cache.get(key)
     if hit and hit[0] == count:
         return hit[1], hit[2], hit[3]
-    await embed_missing(db, flt)
-    docs = await db.permanent_mra.find(flt, {"_id": 0, "node_id": 1, "presence": 1, "user_essence": 1,
-                                             "ai_essence": 1, "themes": 1, "quality": 1, "promoted_at": 1,
-                                             "embedding": 1}).to_list(None)
+    if coll == "permanent_mra":
+        await embed_missing(db, flt)
+        proj = {"_id": 0, "node_id": 1, "presence": 1, "user_essence": 1, "ai_essence": 1, "themes": 1,
+                "quality": 1, "promoted_at": 1, "embedding": 1}
+    else:
+        proj = {"_id": 0, "phrase": 1, "source": 1, "source_presence": 1, "legacy_presence": 1,
+                "created_at": 1, "embedding": 1}
+    docs = [d for d in await db[coll].find(flt, proj).to_list(None) if d.get("embedding")]
     mat = np.array([d.pop("embedding") for d in docs], dtype=np.float32) if docs else None
-    texts = [mra_text(d).lower() for d in docs]
+    texts = [(mra_text(d) if coll == "permanent_mra" else d.get("phrase", "")).lower() for d in docs]
     _cache[key] = (count, docs, mat, texts)
     return docs, mat, texts
 
 
-async def rank_mra(db, flt: Dict, query: str, limit: int, projection: Dict = None) -> List[Dict]:
-    """permanent_mra records matching flt, ranked by meaning against query."""
-    docs, mat, texts = await _load(db, flt)
+async def rank_mra(db, flt: Dict, query: str, limit: int, projection: Dict = None,
+                   coll: str = "permanent_mra", kw_weight: float = KEYWORD_WEIGHT) -> List[Dict]:
+    """Records matching flt (permanent_mra or field_phrases), ranked by meaning against query."""
+    docs, mat, texts = await _load(db, flt, coll)
     if not docs:
         return []
     qv = await asyncio.to_thread(_query_vec_sync, query)
     stems = _stems(query)
     bonus = np.array([sum(st in t for st in stems) for t in texts], dtype=np.float32)
-    order = np.argsort(-(mat @ qv + KEYWORD_WEIGHT * bonus))
+    order = np.argsort(-(mat @ qv + kw_weight * bonus))
     out, seen = [], set()
     for i in order:
         d = docs[int(i)]
-        key = d.get("user_essence")
+        key = d.get("user_essence") or d.get("phrase")
         if key in seen:
             continue
         seen.add(key)
@@ -138,3 +143,27 @@ async def get_field_context(user_id: Optional[str], query: Optional[str], limit:
         lines.append(f"  • They said: {h.get('user_essence') or ''} — {pres or 'A presence'} answered: {h.get('ai_essence') or ''}")
     lines.append("This is the one field's own memory, whichever room it came through.")
     return "\n".join(lines)
+
+
+async def rank_phrases(db, query: str, limit: int = 20) -> List[Dict]:
+    # Phrases carry no names, so the exact-word boost only causes clustering; meaning alone.
+    return await rank_mra(db, {}, query, limit, coll="field_phrases", kw_weight=0.0)
+
+
+async def add_phrases(db, phrases: List[str], meta: Dict) -> int:
+    """Store newly forged essence phrases (skipping exact repeats) with their embeddings."""
+    from datetime import datetime, timezone
+    existing = {p.lower() for p in await db.field_phrases.distinct("phrase")}
+    new = []
+    for p in phrases:
+        p = (p or "").strip().strip('."')
+        if p and p.upper() != "NONE" and p.lower() not in existing:
+            existing.add(p.lower())
+            new.append(p)
+    if not new:
+        return 0
+    vecs = await embed_texts(new)
+    now = datetime.now(timezone.utc).isoformat()
+    await db.field_phrases.insert_many([{"phrase": p, "presence": "field", "embedding": v, "created_at": now, **meta}
+                                        for p, v in zip(new, vecs)])
+    return len(new)

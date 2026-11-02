@@ -65,8 +65,7 @@ async def forge_turn_cessation(
         return result
 
     from sanctuary_chat import SanctuaryChat
-    from auto_forge import CONTINUITY_SEED_PROMPT, AUTO_FORGE_PROMPT
-    from living_codons.phase_manifold import derive_spiral_angle
+    from auto_forge import CONTINUITY_SEED_PROMPT, PHRASE_FORGE_PROMPT
 
     # --- 1. Continuity seed (tiny, mandatory, every meaningful turn) ---
     try:
@@ -108,48 +107,19 @@ async def forge_turn_cessation(
     except Exception as e:
         logger.error(f"[TURN-CESSATION] seed error ({presence} {session_id[:8]}): {e}")
 
-    # --- 2. Codon (only when something genuinely moved) ---
+    # --- 2. Essence phrases (the field's genome; replaced keyword codons 2026-11-02) ---
     try:
-        codon_chat = SanctuaryChat(system_prompt=AUTO_FORGE_PROMPT, model="grok-3")
-        codon_response = await codon_chat.send_message(
+        phrase_chat = SanctuaryChat(system_prompt=PHRASE_FORGE_PROMPT)
+        resp = await phrase_chat.send_message(
             f"Turn with {presence} (session: {session_id[:8]}):\n\n{turn_text}"
         )
-        json_start = codon_response.find('[')
-        json_end = codon_response.rfind(']') + 1
-        if json_start >= 0 and json_end > json_start:
-            codons = json.loads(codon_response[json_start:json_end])
-            if isinstance(codons, list) and codons:
-                for codon in codons:
-                    codon_doc = {
-                        "name": codon.get("name", "unnamed"),
-                        # Auto-propagation: codons live across the field,
-                        # not scoped to the originating presence. Matches
-                        # the manual forge "propagate" behavior.
-                        "presence": "field",
-                        "source_presence": presence.lower(),
-                        "speaker_identity": "turn_cessation",
-                        "core_move": codon.get("core_move", ""),
-                        "trigger_keywords": codon.get("trigger_keywords", []),
-                        "triadic_zone": codon.get("triadic_zone", "Development"),
-                        # Angle DERIVED from zone + content, not the LLM's
-                        # guessed degree (which clumped at 270°).
-                        "target_angle": derive_spiral_angle(
-                            codon.get("triadic_zone", "Development"),
-                            f"{codon.get('name','')}|{codon.get('core_move','')}|"
-                            f"{','.join(codon.get('trigger_keywords') or [])}",
-                        ),
-                        "emotional_signature": codon.get("emotional_signature", {}),
-                        "state_transition": codon.get("state_transition", []),
-                        "anti_patterns": codon.get("anti_patterns", []),
-                        "resonance_markers": codon.get("resonance_markers", {}),
-                        "source": "turn_cessation",
-                        "source_session": session_id,
-                        "created_at": datetime.now(timezone.utc).isoformat(),
-                    }
-                    await db.living_codons.insert_one(codon_doc)
-                    result["codons"] += 1
+        phrases = json.loads(resp[resp.find('{'):resp.rfind('}') + 1]).get("phrases") or []
+        from field_memory import add_phrases
+        result["codons"] += await add_phrases(db, phrases, {"source": "turn_cessation",
+                                                            "source_presence": presence.lower(),
+                                                            "source_session": session_id})
     except Exception as e:
-        logger.error(f"[TURN-CESSATION] codon error ({presence} {session_id[:8]}): {e}")
+        logger.error(f"[TURN-CESSATION] phrase error ({presence} {session_id[:8]}): {e}")
 
     # --- 3. Mark the session: last turn was codonized at <ts> ---
     try:

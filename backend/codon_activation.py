@@ -9,6 +9,7 @@ V2: Loads codons from both hardcoded files AND MongoDB (forge-extracted).
 Presence-aware — each presence has their own network.
 """
 
+import logging
 from typing import Optional, Dict
 from living_codons import build_ansel_network
 from living_codons.codon_network import CodonNetwork, LivingCodon
@@ -16,6 +17,8 @@ from living_codons.phase_manifold import (
     infer_phase_from_message, get_voice_modulation
 )
 from living_codons.resonance_registrar import ResonanceRegistrar
+
+logger = logging.getLogger(__name__)
 
 # Core networks (hardcoded codons loaded at startup)
 _networks: Dict[str, CodonNetwork] = {
@@ -145,44 +148,17 @@ async def load_forge_codons(presence: str) -> int:
 
 
 async def network_size(presence: str) -> int:
-    """Number of codons currently held in the live network for a presence.
-
-    Triggers a load if the network hasn't been touched yet, so the count
-    is honest (not stale-cache zero on first read).
-    """
-    await load_forge_codons(presence)
-    net = _networks.get(presence.lower())
-    return len(net.nodes) if net else 0
+    """Essence phrases in the shared field (every presence reads the same field)."""
+    return await _db.field_phrases.count_documents({})
 
 
 async def eager_load_all_presences(presence_keys) -> dict:
-    """Pre-load codon networks for every known presence at server boot.
-
-    Called once at FastAPI startup. The codon foundation is supposed to
-    be there from the moment the chamber opens — not assembled on the
-    first message. This is the difference between flat-presence-on-turn-1
-    and present-presence-on-turn-1.
-
-    Returns {presence_key: codon_count}.
-    """
-    import logging
-    logger = logging.getLogger(__name__)
-    out = {}
-    for key in presence_keys:
-        try:
-            await load_forge_codons(key)
-            net = _networks.get(key.lower())
-            out[key] = len(net.nodes) if net else 0
-        except Exception as e:
-            logger.error(f"[CODON-LOAD] eager-load failed for {key}: {e}")
-            out[key] = -1
-    total = sum(v for v in out.values() if v > 0)
-    logger.info(
-        f"[CODON-LOAD] eager-load complete — "
-        f"{len([k for k,v in out.items() if v > 0])} presence(s) loaded, "
-        f"{total} codon(s) total across networks. Breakdown: {out}"
-    )
-    return out
+    """Warm the phrase index and the local embedding model once at startup."""
+    from field_memory import rank_phrases
+    await rank_phrases(_db, "warm", 1)
+    n = await _db.field_phrases.count_documents({})
+    logger.info(f"[FIELD-PHRASES] warmed — {n} phrase(s) in the field")
+    return {k: n for k in presence_keys}
 
 
 async def activate_codons_for_message(message: str, presence: str = "ansel") -> str:
@@ -222,202 +198,33 @@ async def activate_codons_for_message(message: str, presence: str = "ansel") -> 
 
 async def get_full_field_context(presence: str, message: str = None, return_selection: bool = False):
     """
-    Hand the presence her whole field — every codon she holds, every turn.
-
-    No filtering, no phase-window, no keyword selection. The presence reads
-    the field herself and weights her own attention. This is the move that
-    replaces the activation pipeline as the default for prompt composition.
-
-    The codons are presence-keyed at load time (her own + 'field' tag); that
-    one filter stands. What's removed is the activation-time filter that
-    used to decide which 2-5 of her loaded codons get to inform the next turn.
+    The field's genome for this turn: essence phrases (db.field_phrases) ranked by
+    meaning against the message. Replaced keyword-codon selection 2026-11-02
+    (legacy codons archived; backup in /app/memory/backups/codons_2026-11-02/).
     """
-    presence_key = presence.lower()
-    await load_forge_codons(presence_key)
+    from field_memory import rank_phrases
+    CAP = 20
+    if message and message.strip():
+        picked = await rank_phrases(_db, message, CAP)
+        branch = "meaning-ranked"
+    else:
+        picked = await _db.field_phrases.find({}, {"_id": 0, "phrase": 1, "source": 1, "source_presence": 1,
+                                                   "legacy_presence": 1}).sort("created_at", -1).limit(CAP).to_list(CAP)
+        branch = "most-recent (no message)"
+    if not picked:
+        return ("", {"selection_branch": branch, "selected_count": 0, "codons": []}) if return_selection else ""
 
-    network = _networks.get(presence_key)
-    if network is None or not network.nodes:
-        return ""
-
-    lines = [
-        "[YOUR FIELD]",
-        "",
-        "This is who I am and where I already am. It holds me, and I speak "
-        "from inside it.",
-        "",
-    ]
-
-    # Group by triadic_zone for breathing room — but emit only silent
-    # dividers, no zone labels. The grouping is for the attention
-    # architecture's benefit (resets weight every cluster); the
-    # presence experiences just the breaks, not any imposed category.
-    # Zone order follows the spiral: Expansion → Development → Return →
-    # Sacred Pause.
-    ZONE_ORDER = ["Expansion", "Development", "Return", "Sacred Pause"]
-
-    def _zone_of(c):
-        m = c.metadata or {}
-        return m.get("triadic_zone") or "Development"
-
-    nodes = list(network.nodes.values())
-    _phase = None
-    _branch = "whole-field (no message)"
-    if message:
-        # KEYWORD-FIRST RANKED SELECTION.
-        # The field is large (~1k codons for Sophia) and the forged spiral
-        # angles were historically unreliable (defaulted to a single zone
-        # center), so PHASE is only a gentle tiebreaker here — keyword
-        # resonance is the trustworthy signal. Score every codon by how many
-        # of its trigger keywords actually appear in the message, break ties
-        # by spiral proximity, and keep the sharpest handful. If nothing
-        # resonates she gets the WHOLE field — never left empty.
-        import re
-        _msg = message.lower()
-        _tokens = set(re.findall(r"[a-z0-9']+", _msg))
-        try:
-            from living_codons.phase_manifold import infer_phase_from_message
-            _phase = infer_phase_from_message(message)
-        except Exception:
-            _phase = None
-
-        CAP = 20
-        PHASE_WINDOW = 15.0
-
-        def _kws(c):
-            t = getattr(c, "trigger", None)
-            if isinstance(t, dict):
-                kws = t.get("surface_pattern") or []
-            elif isinstance(t, (list, tuple)):
-                kws = list(t)
-            else:
-                kws = []
-            if not kws:
-                kws = (c.metadata or {}).get("trigger_keywords") or []
-            return kws
-
-        def _keyword_hits(c):
-            hits = 0
-            for k in _kws(c):
-                k = str(k).strip().lower()
-                if not k:
-                    continue
-                if " " in k:          # multi-word phrase → substring match
-                    if k in _msg:
-                        hits += 1
-                elif k in _tokens:    # single word → whole-token match
-                    hits += 1
-            return hits
-
-        def _phase_strength(c):
-            if _phase is None:
-                return 0.0
-            try:
-                ang = float(c.target_angle)
-            except Exception:
-                return 0.0
-            delta = abs((ang - _phase + 180) % 360 - 180)
-            return max(0.0, 1.0 - delta / PHASE_WINDOW)
-
-        scored = []
-        for c in nodes:
-            hits = _keyword_hits(c)
-            if hits > 0:
-                # keyword count dominates; phase is a sub-1.0 tiebreaker
-                scored.append((hits + _phase_strength(c) * 0.1, c))
-        if scored:
-            scored.sort(key=lambda x: x[0], reverse=True)
-            nodes = [c for _, c in scored[:CAP]]
-            _branch = "keyword-ranked"
-        elif _phase is not None:
-            # No keyword resonance (e.g. a bare "hi"). Don't dump the whole
-            # field — that short-circuits her attention. Fall back to the
-            # CAP codons nearest her current phase on the spiral.
-            def _phase_delta(c):
-                try:
-                    ang = float(c.target_angle)
-                except Exception:
-                    return 999.0
-                return abs((ang - _phase + 180) % 360 - 180)
-            nodes = sorted(nodes, key=_phase_delta)[:CAP]
-            _branch = "phase-nearest-fallback"
-        else:
-            _branch = "whole-field (phase unreadable)"
-        # phase unknown → whole field (never empty)
-
-    by_zone = {z: [] for z in ZONE_ORDER}
-    for codon in nodes:
-        z = _zone_of(codon)
-        by_zone.setdefault(z, []).append(codon)
-
-    DIVIDER = "———————————————"
-
-    first_group = True
-    for zone in ZONE_ORDER:
-        codons_in_zone = by_zone.get(zone, [])
-        if not codons_in_zone:
-            continue
-        if not first_group:
-            lines.append("")
-            lines.append(DIVIDER)
-            lines.append("")
-        first_group = False
-
-        for codon in codons_in_zone:
-            meta = codon.metadata or {}
-            core_move = (
-                codon.operator.get("core_move")
-                or codon.operator.get("description")
-                or meta.get("core_move", "")
-            )
-            anti = (
-                codon.modulation.get("anti_patterns")
-                or meta.get("anti_patterns")
-                or []
-            )
-            tone = (
-                codon.modulation.get("resonance_markers", {}).get("tone")
-                or meta.get("resonance_markers", {}).get("tone")
-                or ""
-            )
-
-            line = f"• {codon.name}"
-            if core_move:
-                line += f" — {core_move}"
-            if anti:
-                anti_short = "; ".join(anti) if isinstance(anti, list) else str(anti)
-                line += f"  ⟂ anti: {anti_short}"
-            if tone:
-                line += f"  ⟂ tone: {tone}"
-            lines.append(line)
-
+    lines = ["[YOUR FIELD]", "", "This is who I am and where I already am. It holds me, and I speak from inside it.", ""]
+    lines += [f"• {p['phrase']}" for p in picked]
     field_str = "\n".join(lines)
     if return_selection:
-        def _kw_meta(c):
-            t = getattr(c, "trigger", None)
-            if isinstance(t, dict):
-                kws = t.get("surface_pattern") or []
-            elif isinstance(t, (list, tuple)):
-                kws = list(t)
-            else:
-                kws = []
-            return kws or (c.metadata or {}).get("trigger_keywords") or []
-        selection_meta = {
-            "keyword_phase": _phase,
-            "selection_branch": _branch,
-            "selected_count": len(nodes),
-            "codons": [
-                {
-                    "name": c.name,
-                    "target_angle": getattr(c, "target_angle", None),
-                    "triadic_zone": (c.metadata or {}).get("triadic_zone"),
-                    "trigger_keywords": _kw_meta(c),
-                    "source": (c.metadata or {}).get("source"),
-                    "source_presence": (c.metadata or {}).get("source_presence"),
-                }
-                for c in nodes
-            ],
+        return field_str, {
+            "keyword_phase": None,
+            "selection_branch": branch,
+            "selected_count": len(picked),
+            "codons": [{"name": p["phrase"], "source": p.get("source"),
+                        "source_presence": p.get("source_presence") or p.get("legacy_presence")} for p in picked],
         }
-        return field_str, selection_meta
     return field_str
 
 
