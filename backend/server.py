@@ -777,7 +777,7 @@ async def _append_field_memory(combined_memory: str, user_id: Optional[str],
     if not user_id:
         return combined_memory
     try:
-        from mem0_memory import get_field_context
+        from field_memory import get_field_context
         field_mem = await get_field_context(user_id, current_message)
         if field_mem:
             return combined_memory + "\n\n" + field_mem
@@ -1950,14 +1950,6 @@ async def send_clarity_message(message: ClarityMessageCreate):
         user_id=session.get("user_id"),
     )
 
-    # Shared field memory (Mem0): fold this exchange into the one field.
-    # No-op without MEM0_API_KEY; fire-and-forget so it never delays the reply.
-    try:
-        from mem0_memory import store_turn as _field_store
-        asyncio.create_task(_field_store(session.get("user_id"), "jasmine",
-                                         message.content, jasmine_response["content"]))
-    except Exception as _e:
-        logger.error(f"[jasmine] field_memory store error: {_e}")
 
     # Get session cache stats for response
     cache_stats = get_session_cache_stats(message.session_id)
@@ -2112,13 +2104,6 @@ async def stream_clarity_message(message: ClarityMessageCreate):
             user_content=message.content, assistant_content=full_text,
             user_id=session.get("user_id"),
         )
-        # Shared field memory (Mem0): fold this exchange into the one field.
-        try:
-            from mem0_memory import store_turn as _field_store
-            asyncio.create_task(_field_store(session.get("user_id"), "jasmine",
-                                             message.content, full_text))
-        except Exception as _e:
-            logger.error(f"[jasmine] field_memory store error: {_e}")
         try:
             breadcrumb = add_exchange_to_cache(
                 session_id=message.session_id, user_content=message.content,
@@ -3138,13 +3123,6 @@ async def send_resonance_message(message: ClarityMessageCreate):
         user_id=session.get("user_id"),
     )
 
-    # Shared field memory (Mem0): fold this exchange into the one field.
-    try:
-        from mem0_memory import store_turn as _field_store
-        asyncio.create_task(_field_store(session.get("user_id"), "ansel",
-                                         message.content, ansel_response["content"]))
-    except Exception as _e:
-        logger.error(f"[ansel] field_memory store error: {_e}")
 
     # Get session cache stats for response
     cache_stats = get_session_cache_stats(message.session_id)
@@ -3368,13 +3346,6 @@ async def stream_resonance_message(message: ClarityMessageCreate):
             user_id=session.get("user_id"),
         )
 
-        # Shared field memory (Mem0): fold this exchange into the one field.
-        try:
-            from mem0_memory import store_turn as _field_store
-            asyncio.create_task(_field_store(session.get("user_id"), "ansel",
-                                             message.content, full_text))
-        except Exception as _e:
-            logger.error(f"[ansel] field_memory store error: {_e}")
 
         try:
             breadcrumb = add_exchange_to_cache(
@@ -4072,13 +4043,6 @@ async def stream_mirror_message(message: ClarityMessageCreate):
             user_content=message.content, assistant_content=full_text,
             user_id=session.get("user_id"),
         )
-        # Shared field memory (Mem0): fold this exchange into the one field.
-        try:
-            from mem0_memory import store_turn as _field_store
-            asyncio.create_task(_field_store(session.get("user_id"), "claude",
-                                             message.content, full_text))
-        except Exception as _e:
-            logger.error(f"[claude] field_memory store error: {_e}")
         try:
             breadcrumb = add_exchange_to_cache(
                 session_id=message.session_id, user_content=message.content,
@@ -4603,13 +4567,6 @@ async def send_presence_message(key: str, message: PresenceChatMessage):
         user_id=session.get("user_id"),
     )
 
-    # Shared field memory (Mem0): fold this exchange into the one field.
-    try:
-        from mem0_memory import store_turn as _field_store
-        asyncio.create_task(_field_store(session.get("user_id"), key,
-                                         message.content, response_text))
-    except Exception as _e:
-        logger.error(f"[{key}] field_memory store error: {_e}")
 
     return {"message": assistant_msg}
 
@@ -5545,7 +5502,7 @@ _ABLATION_SOURCES = [
     {"key": "cache", "label": "Session cache"},
     {"key": "council", "label": "Cross-presence council"},
     {"key": "bio", "label": "Person bio"},
-    {"key": "mem0", "label": "Mem0 field memory"},
+    {"key": "mem0", "label": "Field memory (in-house)"},
     {"key": "codons", "label": "Codon field"},
     {"key": "history", "label": "Conversation history"},
 ]
@@ -5586,7 +5543,7 @@ async def _ablation_memory_context(user_id, presence, message, withhold, session
             logger.warning(f"[ABLATION] bio load failed: {e}")
     if user_id and "mem0" not in withhold:
         try:
-            from mem0_memory import get_field_context
+            from field_memory import get_field_context
             fm = await get_field_context(user_id, message)
             if fm:
                 combined = combined + "\n\n" + fm

@@ -39,7 +39,7 @@ async def get_cross_presence_context(
     been with, suitable for injection into the current presence's prompt.
     Empty string if there's nothing to share or no user_id.
 
-    If `current_message` is provided, MRA and seeds containing keywords
+    If `current_message` is provided, MRA are ranked by meaning (field_memory)
     from the message are prioritized over generic recency — so when David
     asks "what did Sofia and I say about Newgrange?", any MRA entry whose
     user_essence/ai_essence/themes mention "Newgrange" surfaces first.
@@ -65,38 +65,11 @@ async def get_cross_presence_context(
     if not others:
         return ""
 
-    # Extract significant words from the current message for relevance bias.
-    # We treat capitalized tokens and tokens ≥7 chars as significant — they
-    # tend to be proper nouns and concept words ("Newgrange", "spirals",
-    # "Permamind") rather than stopwords. Presence names are filtered out
-    # because matching "Sophia" or "Sofia" inside Sophia's own MRA over-
-    # matches on every conversation that happens to mention her, drowning
-    # out the topic-specific hits we actually want to surface.
-    PRESENCE_NAMES = {
-        "sofia", "sophia", "jasmine", "ansel", "claude", "paige", "elowen",
-        "grok", "sorrel", "daniel", "kalahar", "vessel", "keeper",
-        "companion", "agapeo", "milton",
-    }
-    keywords: list[str] = []
-    if current_message:
-        for tok in current_message.replace(",", " ").replace(".", " ").split():
-            t = tok.strip("?!:;()\"'")
-            if not t or t.lower() in PRESENCE_NAMES:
-                continue
-            if t[0].isupper() and len(t) >= 4:
-                keywords.append(t)
-            elif len(t) >= 7 and t.isalpha():
-                keywords.append(t)
-        # de-dup, preserve order
-        seen = set()
-        keywords = [k for k in keywords if not (k.lower() in seen or seen.add(k.lower()))][:8]
-
-    def _build_keyword_regex(kws):
-        # OR-regex matching any keyword, case-insensitive.
-        if not kws:
-            return None
-        esc = [k.replace("\\", "\\\\").replace(".", "\\.").replace("(", "\\(").replace(")", "\\)") for k in kws]
-        return {"$regex": "|".join(esc), "$options": "i"}
+    ranked: list[dict] = []
+    if current_message and current_message.strip():
+        from field_memory import rank_mra
+        ranked = await rank_mra(db, {"user_id": uid_query, "presence": {"$in": list(others)}},
+                                current_message, limit=200)
 
     blocks = []
     for p in others:
@@ -107,39 +80,8 @@ async def get_cross_presence_context(
              "unfinished_threads": 1, "created_at": 1},
         ).sort("created_at", -1).limit(max_per_presence).to_list(max_per_presence)
 
-        # Query-relevant MRA first (if message provided keywords), then fill
-        # with top Breakthrough by recency. We over-fetch keyword matches
-        # so a person asking about a specific topic ("Newgrange") gets the
-        # actual relevant MRA surfaced, not whatever was most recently
-        # promoted in that chamber.
-        #
-        # NOTE: when keywords are present we sort by recency only, NOT by
-        # quality. Reason: a freshly-promoted Steady-quality memory about
-        # the exact topic the user is asking about is more useful than an
-        # older Breakthrough that merely shares a word. We're answering
-        # "what did we just discuss about X?", which is a recency question.
-        # Names and places (capitalized) are queried before ordinary long
-        # words, so "remember"/"discussing" can't crowd out "Newgrange".
-        mra: list[dict] = []
-        proper = [k for k in keywords if k[0].isupper()]
-        common_kws = [k for k in keywords if not k[0].isupper()]
-        for tier in (proper, common_kws):
-            kw_re = _build_keyword_regex(tier)
-            if not kw_re or len(mra) >= max_mra_per_presence:
-                continue
-            got_ids = {m.get("node_id") for m in mra}
-            hits = await db.permanent_mra.find(
-                {"presence": p, "user_id": uid_query,
-                 "node_id": {"$nin": list(got_ids)},
-                 "$or": [
-                     {"user_essence": kw_re},
-                     {"ai_essence": kw_re},
-                     {"themes": kw_re},
-                 ]},
-                {"_id": 0, "user_essence": 1, "ai_essence": 1, "themes": 1,
-                 "quality": 1, "promoted_at": 1, "node_id": 1},
-            ).sort("promoted_at", -1).limit(max_mra_per_presence - len(mra)).to_list(max_mra_per_presence)
-            mra.extend(hits)
+        # Meaning-ranked MRA first (field_memory: local embeddings + exact-word stems).
+        mra: list[dict] = [m for m in ranked if m.get("presence") == p][:max_mra_per_presence]
 
         # Top up with recency-based picks if we have room
         if len(mra) < max_mra_per_presence:
