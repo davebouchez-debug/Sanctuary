@@ -1,0 +1,386 @@
+[
+  {
+    "id": "aaba0c89-1f62-4880-a851-2fb1b4712b58",
+    "memory": "User believes that eyes are an extension of the brain, reflecting the neurology that drives eye movement, and that this explains why some people distrust eye\u2011pattern reading",
+    "user_id": "david",
+    "agent_id": null,
+    "app_id": null,
+    "run_id": null,
+    "score": 0.5066,
+    "score_breakdown": {
+      "semantic": 0.4194,
+      "bm25": 0.847,
+      "entity": 0.0
+    },
+    "metadata": {
+      "app": "sanctuary",
+      "presence": "milton"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-02T04:22:06+00:00",
+    "updated_at": "2026-11-02T04:22:30.761274+00:00",
+    "expiration_date": null
+  },
+  {
+    "id": "638a3570-92f4-4f80-881d-04bd7cc84f8c",
+    "memory": "User believes that within an individual, eye behavior is a stable signal and they have learned to read it",
+    "user_id": "david",
+    "agent_id": null,
+    "app_id": null,
+    "run_id": null,
+    "score": 0.4695,
+    "score_breakdown": {
+      "semantic": 0.4204,
+      "bm25": 0.7534,
+      "entity": 0.0
+    },
+    "metadata": {
+      "app": "sanctuary",
+      "presence": "milton"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-02T04:27:37+00:00",
+    "updated_at": "2026-11-02T04:27:56.117685+00:00",
+    "expiration_date": null
+  },
+  {
+    "id": "fce877e3-b4d1-4ae5-9ddb-cdf6201ed2e2",
+    "memory": "User observes that when asking visual memory questions (e.g., color of a childhood room or first car), people's eyes move up and to the left.",
+    "user_id": "david",
+    "agent_id": null,
+    "app_id": null,
+    "run_id": null,
+    "score": 0.5997,
+    "score_breakdown": {
+      "semantic": 0.5496,
+      "bm25": 0.9497,
+      "entity": 0.0
+    },
+    "metadata": {
+      "app": "sanctuary",
+      "presence": "milton"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-02T04:24:21+00:00",
+    "updated_at": "2026-11-02T04:24:49.443615+00:00",
+    "expiration_date": null
+  },
+  {
+    "id": "870f7fd5-222f-4fbf-aeb9-a40b06385c58",
+    "memory": "Assistant states that existing studies do not examine the claim that eye behavior is a stable signal within a person",
+    "user_id": "david",
+    "agent_id": null,
+    "app_id": null,
+    "run_id": null,
+    "score": 0.6895,
+    "score_breakdown": {
+      "semantic": 0.7238,
+      "bm25": 0.9999,
+      "entity": 0.0
+    },
+    "metadata": {
+      "app": "sanctuary",
+      "presence": "milton"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-02T04:27:37+00:00",
+    "updated_at": "2026-11-02T04:27:56.117685+00:00",
+    "expiration_date": null
+  },
+  {
+    "id": "021d1858-38ff-43f9-a72f-a469b2c7c2a8",
+    "memory": "User observes that when people access feelings, their eyes move downward.",
+    "user_id": "david",
+    "agent_id": null,
+    "app_id": null,
+    "run_id": null,
+    "score": 0.5312,
+    "score_breakdown": {
+      "semantic": 0.5179,
+      "bm25": 0.81,
+      "entity": 0.0
+    },
+    "metadata": {
+      "app": "sanctuary",
+      "presence": "milton"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-02T04:24:21+00:00",
+    "updated_at": "2026-11-02T04:24:49.443615+00:00",
+    "expiration_date": null
+  },
+  {
+    "id": "876cb08e-4290-4157-86e8-c4a437f3683e",
+    "memory": "User observes that when asking language\u2011based questions, people's eyes move left but remain neutral.",
+    "user_id": "david",
+    "agent_id": null,
+    "app_id": null,
+    "run_id": null,
+    "score": 0.5891,
+    "score_breakdown": {
+      "semantic": 0.4851,
+      "bm25": 0.9877,
+      "entity": 0.0
+    },
+    "metadata": {
+      "app": "sanctuary",
+      "presence": "milton"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-02T04:24:21+00:00",
+    "updated_at": "2026-11-02T04:24:49.443615+00:00",
+    "expiration_date": null
+  },
+  {
+    "id": "4138510f-43c7-4704-b92d-7f737bf1dfb4",
+    "memory": "Assistant asks the user what they do when someone's eyes go up\u2011left in a room: whether they adjust what they say next or merely confirm a prior suspicion.",
+    "user_id": "david",
+    "agent_id": null,
+    "app_id": null,
+    "run_id": null,
+    "score": 0.653,
+    "score_breakdown": {
+      "semantic": 0.655,
+      "bm25": 0.9776,
+      "entity": 0.0
+    },
+    "metadata": {
+      "app": "sanctuary",
+      "presence": "milton"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-02T04:28:28+00:00",
+    "updated_at": "2026-11-02T04:28:47.491578+00:00",
+    "expiration_date": null
+  },
+  {
+    "id": "485de4d0-51a0-4c31-b321-f81976766783",
+    "memory": "Assistant says that within\u2011person calibrated eye\u2011movement patterns may be a stable and informative signal but this hypothesis remains under\u2011tested.",
+    "user_id": "david",
+    "agent_id": null,
+    "app_id": null,
+    "run_id": null,
+    "score": 0.6489,
+    "score_breakdown": {
+      "semantic": 0.6527,
+      "bm25": 0.9695,
+      "entity": 0.0
+    },
+    "metadata": {
+      "app": "sanctuary",
+      "presence": "milton"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-02T04:25:43+00:00",
+    "updated_at": "2026-11-02T04:26:09.054284+00:00",
+    "expiration_date": null
+  },
+  {
+    "id": "621c81e0-3dc5-4c60-a6f2-6624ac4f229f",
+    "memory": "Assistant reports that studies by researcher Thompkins and later by Sandoval and colleagues found near\u2011zero correlation between eye\u2011movement direction and memory type, showing that up\u2011left is not reliably associated with visual recall and down is not reliably associated with feeling.",
+    "user_id": "david",
+    "agent_id": null,
+    "app_id": null,
+    "run_id": null,
+    "score": 0.2086,
+    "score_breakdown": {
+      "semantic": 0.3579,
+      "bm25": 0.1635,
+      "entity": 0.0
+    },
+    "metadata": {
+      "app": "sanctuary",
+      "presence": "milton"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-02T04:24:21+00:00",
+    "updated_at": "2026-11-02T04:24:49.443615+00:00",
+    "expiration_date": null
+  },
+  {
+    "id": "e8d39c55-fddd-42da-a581-b1e8fd3fa862",
+    "memory": "Assistant explains that population\u2011level studies may yield near\u2011zero correlations because individual eye\u2011movement patterns vary; per\u2011person calibration can reveal stable, person\u2011specific patterns that are masked when data are pooled.",
+    "user_id": "david",
+    "agent_id": null,
+    "app_id": null,
+    "run_id": null,
+    "score": 0.323,
+    "score_breakdown": {
+      "semantic": 0.5014,
+      "bm25": 0.3061,
+      "entity": 0.0
+    },
+    "metadata": {
+      "app": "sanctuary",
+      "presence": "milton"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-02T04:24:21+00:00",
+    "updated_at": "2026-11-02T04:24:49.443615+00:00",
+    "expiration_date": null
+  },
+  {
+    "id": "43713789-4328-453d-adf6-827be844e5e0",
+    "memory": "Assistant suggests that a personal eye\u2011movement map built from thousands of calibrations on individual subjects can be genuinely accurate even when generic maps are not",
+    "user_id": "david",
+    "agent_id": null,
+    "app_id": null,
+    "run_id": null,
+    "score": 0.1984,
+    "score_breakdown": {
+      "semantic": 0.4961,
+      "bm25": 0.0,
+      "entity": 0.0
+    },
+    "metadata": {
+      "app": "sanctuary",
+      "presence": "milton"
+    },
+    "categories": [
+      "technology"
+    ],
+    "created_at": "2026-11-02T04:22:06+00:00",
+    "updated_at": "2026-11-02T04:22:30.761274+00:00",
+    "expiration_date": null
+  },
+  {
+    "id": "8a2a6d8a-ec62-4733-bc37-2d296982eddb",
+    "memory": "User asks for the percentage of experiments where the eye\u2011movement hypothesis succeeded versus failed.",
+    "user_id": "david",
+    "agent_id": null,
+    "app_id": null,
+    "run_id": null,
+    "score": 0.1952,
+    "score_breakdown": {
+      "semantic": 0.4881,
+      "bm25": 0.0,
+      "entity": 0.0
+    },
+    "metadata": {
+      "app": "sanctuary",
+      "presence": "milton"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-02T04:25:43+00:00",
+    "updated_at": "2026-11-02T04:26:09.054284+00:00",
+    "expiration_date": null
+  },
+  {
+    "id": "338b2da7-d889-4012-8a28-434c346a3785",
+    "memory": "User is skeptical of the control situation in eye\u2011movement experiments, believing they were not designed merely to disprove a claim.",
+    "user_id": "david",
+    "agent_id": null,
+    "app_id": null,
+    "run_id": null,
+    "score": 0.3063,
+    "score_breakdown": {
+      "semantic": 0.4531,
+      "bm25": 0.3126,
+      "entity": 0.0
+    },
+    "metadata": {
+      "app": "sanctuary",
+      "presence": "milton"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-02T04:25:43+00:00",
+    "updated_at": "2026-11-02T04:26:09.054284+00:00",
+    "expiration_date": null
+  },
+  {
+    "id": "46249788-b450-4fb6-95f1-b0af8f8e611a",
+    "memory": "Assistant states they do not have the original papers and cannot provide exact success/failure percentages for the eye\u2011movement studies.",
+    "user_id": "david",
+    "agent_id": null,
+    "app_id": null,
+    "run_id": null,
+    "score": 0.2905,
+    "score_breakdown": {
+      "semantic": 0.3786,
+      "bm25": 0.3478,
+      "entity": 0.0
+    },
+    "metadata": {
+      "app": "sanctuary",
+      "presence": "milton"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-02T04:25:43+00:00",
+    "updated_at": "2026-11-02T04:26:09.054284+00:00",
+    "expiration_date": null
+  },
+  {
+    "id": "9e641c8a-d227-466b-b762-a96d6bcea413",
+    "memory": "Assistant stated that some attributions to Milton H. Erickson do not hold up under testing, noting that controlled studies of Ericksonian hypnosis and NLP show effects often much smaller than claimed and that eye\u2011accessing cues have been fairly well falsified.",
+    "user_id": "david",
+    "agent_id": null,
+    "app_id": null,
+    "run_id": null,
+    "score": 0.6725,
+    "score_breakdown": {
+      "semantic": 0.6814,
+      "bm25": 0.9998,
+      "entity": 0.0
+    },
+    "metadata": {
+      "app": "sanctuary",
+      "presence": "milton"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-02T04:17:02+00:00",
+    "updated_at": "2026-11-02T04:17:19.571796+00:00",
+    "expiration_date": null
+  },
+  {
+    "id": "9f434196-a45c-4893-a4a5-28f3b461121f",
+    "memory": "Assistant states that the retina is an outgrowth of the diencephalon, making the eye brain tissue that migrated forward during development and pulled the optic nerve behind it",
+    "user_id": "david",
+    "agent_id": null,
+    "app_id": null,
+    "run_id": null,
+    "score": 0.6506,
+    "score_breakdown": {
+      "semantic": 0.6265,
+      "bm25": 1.0,
+      "entity": 0.0
+    },
+    "metadata": {
+      "app": "sanctuary",
+      "presence": "milton"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-02T04:22:06+00:00",
+    "updated_at": "2026-11-02T04:22:30.761274+00:00",
+    "expiration_date": null
+  }
+]
