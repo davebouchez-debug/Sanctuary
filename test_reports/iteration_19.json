@@ -1,0 +1,29 @@
+{
+  "summary": "Read-only frontend testing of Codon Library, Codon Forge and Observatory engagement lattice after the move to field phrases. Logged in as the guardian by injecting the qa_david_tok cookie. Nothing was written: no forge extraction or save, no chat messages. Every requested check passed and the browser logged no console or page errors.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "LatticeGrid Group", "issue": "A group's open/closed state is keyed only by its type, so it carries over when you switch presence or version. Example: expand Legacy codons on sophia, then switch to ansel v1.2.0, and Legacy codons is already open. It is not collapsed by default as the spec intends.", "selector": "[data-testid=lattice-group-toggle-codon]", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/codon-library, /codon-forge", "issues": ["Known pre-existing issue: the page header (back button + title such as 'CODON FORGE') sits under the global nav bar and overlaps the SANCTUARY logo and user pill."]},
+      {"screen": "/codon-library", "issues": ["'field' is the largest presence (1799 of 1919 phrases) but has no entry in PRESENCE_COLORS, so it falls back to the default grey-blue. Fine, but you could give it a colour of its own."]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Optional: give LatticeGrid <Group> a key that includes presence and version (or reset its open state when data changes) so Field phrases and Legacy codons start collapsed on every switch.",
+    "Known: fix the library/forge page header sitting under the global nav (add top padding)."
+  ],
+  "critical_code_review_comments": [
+    "EngagementLattice.loadStatus only auto-selects the latest version when it differs from derivation_version. Correct; checked that 1.3.0 stays selected after a 60s status refresh.",
+    "CodonLibrary fetch has no error state: if /api/codon-library fails, the spinner shows forever (only console.error)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "skipped (frontend only)", "frontend": "100% of requested checks"},
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Verified: library-total=1919, legacy=1883, conversation=36, forge=0. 120 cards at first, 240 after show-more. Searching 'attention' gives 6. A nonsense search gives 0 plus the 'No phrases found.' message. The ansel filter gives 39 (no show-more). Forge: extract button reads 'Distill Phrases' and is disabled with no file; the lens toggle works. Observatory: tab observatory-tab-lattice; v1.3.0 is auto-selected; ansel groups are Seeds 25, MRA 73, Field phrases 281 (collapsed, expands to rows like “Attention as the thing itself”), Legacy codons 81, History 1. Sophia in v1.3.0 has no phrase group, only Legacy codons. v1.2.0 shows no Field phrases group. Statuses: versions 1.0.0 to 1.3.0, 918 entries each."
+}
