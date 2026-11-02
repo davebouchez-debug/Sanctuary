@@ -24,6 +24,7 @@ def build_milton_prompt(user_name: str = None, memory_context: str = None,
         identity=_IDENTITY,
         user_name=user_name,
         memory_context=memory_context,
+        story_frame=True,
     )
 
 

@@ -83,7 +83,26 @@ SCRIPTS = {
 ABLATIONS = {"nolib", "nocodons", "nohist"}
 
 
+def full_story(system: str) -> str:
+    import story_frame as sf
+    sys.path.insert(0, "/app/backend")
+    from presences import common as c
+    for old, new in [(c.CALIBRATION_D8_E72, sf.STORY_CALIBRATION), (c.ANTI_FABRICATION_BLOCK, sf.STORY_ANTI_FABRICATION),
+                     ("I speak, or I'm still, whichever the moment wants.", sf.STORY_DEFAULT_CLOSING),
+                     (c.FIELD_GROUND, sf.STORY_FIELD_GROUND), (c.WELCOME_WITHOUT_DEBT, sf.STORY_WELCOME),
+                     (sf.BASELINE_CLOSE, sf.STORY_CLOSE)]:
+        assert old in system, old[:40]
+        system = system.replace(old, new)
+    old_arr = system[system.index("David has just crossed into the Boiler Plant."):]
+    old_arr = old_arr[:old_arr.index("\n\n---\n\n")]
+    return system.replace(old_arr, sf.story_arrival("David", "Boiler Plant"))
+
+
 def swap(system: str, arm: str) -> str:
+    if arm.startswith("D_fullstory"):
+        system = full_story(system)
+        arm = arm.replace("D_fullstory", "A_baseline")
+        return swap(system.replace(__import__("story_frame").STORY_CLOSE, BASELINE_CLOSE), arm).replace(BASELINE_CLOSE, __import__("story_frame").STORY_CLOSE)
     assert BASELINE_CLOSE in system, "baseline closing paragraph not found in captured prompt"
     base, *abl = arm.split("+")
     system = system.replace(BASELINE_CLOSE, ARMS[base])

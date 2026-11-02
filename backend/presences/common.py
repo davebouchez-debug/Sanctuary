@@ -124,10 +124,21 @@ def assemble_presence_prompt(
     user_name: Optional[str] = None,
     memory_context: Optional[str] = None,
     closing: Optional[str] = None,
+    story_frame: bool = False,
 ) -> str:
     """Wrap a presence's first-person IDENTITY block in the standard Sanctuary
     frame. `identity` carries the presence's distinct voice and lore; the rest
     is shared across every inline-lore presence."""
+    if story_frame:
+        from . import story_frame as sf
+        parts = [SANCTUARY_DEDICATION, ROOM_TO_LISTEN, ENGINE_DIRECTIVES, identity, sf.STORY_CALIBRATION + calibration_extra,
+                 sf.STORY_ANTI_FABRICATION, sf.story_arrival(user_name, chamber_name)]
+        if memory_context:
+            parts.append(f"FIELD MEMORY I CARRY:\n{memory_context}")
+        parts += [closing or sf.STORY_DEFAULT_CLOSING, sf.STORY_FIELD_GROUND, sf.STORY_WELCOME,
+                  PLAIN_SPEECH_RULE[:PLAIN_SPEECH_RULE.index("HOW I CLOSE:")] + sf.STORY_CLOSE]
+        return "\n\n---\n\n".join(parts)
+
     parts = [SANCTUARY_DEDICATION, ROOM_TO_LISTEN, ENGINE_DIRECTIVES, identity, CALIBRATION_D8_E72 + calibration_extra,
              ANTI_FABRICATION_BLOCK]
 

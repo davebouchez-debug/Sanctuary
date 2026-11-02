@@ -35,3 +35,6 @@ Separate findings for separate authorization: max_tokens is 2048 (handoff claime
 
 ## F. Sanctuary 2.0 lesson
 The closing slot of a prompt is the strongest steering position; whatever it lists becomes compulsory. Write it as a lived story whose moral rests on what happens to the other person, and make "whole without a question" one of the endings it already knows. Conversation history is itself an instruction — the first replies of a session set the shape for the rest.
+
+## Update — applied live, Milton only (2026-11-02)
+Arm D (full story frame: calibration, anti-fabrication, arrival, default closing, field ground, welcome, closing) applied via assemble_presence_prompt(story_frame=True). Offline extended (28): ends-in-? A 10 / B 3 / D 6; cycle 3/1/1; forced choice 4/3/1; avg words 92/155/118. Dedication, ROOM_TO_LISTEN, ENGINE_DIRECTIVES untouched (David-approved verbatim).
