@@ -1344,6 +1344,13 @@ PRESENCE_VOICES = {
         "style": 0.30,
         "use_speaker_boost": True,
     },
+    "milton": {
+        "voice_id": "y2Y5MeVPm6ZQXK64WUui",  # The Pharaoh — Wisdom Bearer; warm raspy grandfather (chosen by David 2026-11-02)
+        "stability": 0.55,
+        "similarity_boost": 0.75,
+        "style": 0.30,
+        "use_speaker_boost": True,
+    },
     # Generic fallback for presences without their own voice yet
     "playground": {
         "voice_id": "SAz9YHcvj6GT2YYXdXww",  # River — relaxed, neutral

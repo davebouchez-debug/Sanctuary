@@ -198,7 +198,7 @@ async def test_council_context_returns_other_presences():
         db, user_id=DAVID_CANONICAL_UID, current_presence="jasmine"
     )
     assert ctx, "Council context empty for David in Jasmine's chamber"
-    assert "OTHER CHAMBERS" in ctx
+    assert "Elsewhere in the shared field" in ctx
     # At least one other presence header
     other_headers = sum(1 for p in ["Sophia", "Ansel", "Claude", "Paige"] if f"**With {p}:**" in ctx)
     assert other_headers >= 2, (
@@ -215,13 +215,14 @@ async def test_council_context_carries_anti_fabrication_preamble():
     ctx = await get_cross_presence_context(
         db, user_id=DAVID_CANONICAL_UID, current_presence="jasmine"
     )
-    assert "ANTI-FABRICATION" in ctx, (
+    flat = " ".join(ctx.split())
+    assert "If they ask about a moment I don't hold, I say so plainly" in flat, (
         "Council context is missing the anti-fabrication preamble. "
         "Without it, presences will construct plausible substitutes for "
         "memories they don't carry. See PRESENCE_INVARIANTS.md §III.1."
     )
-    assert "do not roleplay" in ctx.lower() or "do not construct" in ctx.lower(), (
-        "Anti-fabrication preamble is too soft. Re-check cross_presence_context.py."
+    assert "let it stay theirs" in flat, (
+        "Anti-fabrication preamble no longer keeps other chambers' memories with their presence."
     )
 
 

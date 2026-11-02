@@ -75,7 +75,7 @@ async def get_cross_presence_context(
     PRESENCE_NAMES = {
         "sofia", "sophia", "jasmine", "ansel", "claude", "paige", "elowen",
         "grok", "sorrel", "daniel", "kalahar", "vessel", "keeper",
-        "companion", "agapeo",
+        "companion", "agapeo", "milton",
     }
     keywords: list[str] = []
     if current_message:
@@ -118,11 +118,19 @@ async def get_cross_presence_context(
         # the exact topic the user is asking about is more useful than an
         # older Breakthrough that merely shares a word. We're answering
         # "what did we just discuss about X?", which is a recency question.
+        # Names and places (capitalized) are queried before ordinary long
+        # words, so "remember"/"discussing" can't crowd out "Newgrange".
         mra: list[dict] = []
-        kw_re = _build_keyword_regex(keywords)
-        if kw_re:
-            mra = await db.permanent_mra.find(
+        proper = [k for k in keywords if k[0].isupper()]
+        common_kws = [k for k in keywords if not k[0].isupper()]
+        for tier in (proper, common_kws):
+            kw_re = _build_keyword_regex(tier)
+            if not kw_re or len(mra) >= max_mra_per_presence:
+                continue
+            got_ids = {m.get("node_id") for m in mra}
+            hits = await db.permanent_mra.find(
                 {"presence": p, "user_id": uid_query,
+                 "node_id": {"$nin": list(got_ids)},
                  "$or": [
                      {"user_essence": kw_re},
                      {"ai_essence": kw_re},
@@ -130,7 +138,8 @@ async def get_cross_presence_context(
                  ]},
                 {"_id": 0, "user_essence": 1, "ai_essence": 1, "themes": 1,
                  "quality": 1, "promoted_at": 1, "node_id": 1},
-            ).sort("promoted_at", -1).limit(max_mra_per_presence).to_list(max_mra_per_presence)
+            ).sort("promoted_at", -1).limit(max_mra_per_presence - len(mra)).to_list(max_mra_per_presence)
+            mra.extend(hits)
 
         # Top up with recency-based picks if we have room
         if len(mra) < max_mra_per_presence:

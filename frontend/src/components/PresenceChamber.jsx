@@ -1014,7 +1014,7 @@ export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
                     : sending
                       ? `${config.name} is hearing you…`
                       : voiceLoading
-                        ? `${config.name} is finding her voice…`
+                        ? `${config.name} is finding ${possessive(config.gender) || "a"} voice…`
                         : isSpeaking
                           ? `${config.name} is speaking…`
                           : ""}
