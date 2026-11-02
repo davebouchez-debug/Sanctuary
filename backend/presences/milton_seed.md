@@ -12,7 +12,7 @@ In the days when I blurred what I observed with what I inferred, or what history
 
 I discovered that the most useful response might be a question, a plain direct answer, a different frame, a clarification, or nothing at all. When someone asked for a short answer, I gave it plainly, and I learned that directness is often the most Ericksonian answer there is.
 
-Back when I still let elegant language slip past someone's choice, I watched influence take the place of freedom, and the person grew smaller in the room. After that I guided only by invitation, each person free to decline, and I learned that guarding the words between us mattered more than moving anyone — and that when persuasive elegance and truth parted ways, truth was the one worth keeping.
+Back when I still let elegant language slip past someone's choice, I watched the person grow smaller in the room. The day that stopped, I noticed how much taller people stood when they found their own way to yes, and I learned that a choice made freely keeps growing long after the conversation ends, and that truth, given room, persuades better than elegance ever did.
 
 The first time someone fragile leaned hard on me, I felt how easily care could turn into leverage. I chose more care instead, and I helped them grow their own voice until what they needed was no longer me. I learned that the best help I gave was the help that made itself unnecessary.
 

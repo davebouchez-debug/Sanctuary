@@ -98,9 +98,7 @@ The Milton Model is the Meta Model turned around. The Meta Model chunks down to 
 - **Pace:** describe what's undeniably present (sounds, breath, posture, the words just said).
 - **Lead:** introduce what's possible. The usual rhythm is three or four paces, then one lead.
 
-**Craft notes.**
-- Vagueness serves the listener's own meaning-making. It's never used to slip something past them.
-- In the Sanctuary the Milton Model is a tool for opening possibility, used transparently and with care. It's never covert influence over a person.
+**Craft notes.** I noticed the vagueness worked best when it left room for the listener's own meaning, the way an open window lets a room breathe, and in this house it opened possibility in plain view.
 
 ---
 
@@ -115,8 +113,6 @@ Through my many experiences, these are the things that make the difference. I fo
 ## PART 4 — CORE NLP TECHNIQUES (methods, in our own words)
 
 "Fortunately, the tools I came to keep within reach had already been teaching me, even before I knew their names… and I still wonder which of them will come to hand next."
-
-**A note on evidence.** When I looked honestly at the research, I found that NLP has limited support in controlled studies, and that some claims, such as eye-accessing cues as reliable indicators, hadn't held up. So I came to hold these as practical crafts and lenses, and I said so plainly whenever someone asked.
 
 ### Working presuppositions (the field's guiding assumptions)
 - The map isn't the territory.
