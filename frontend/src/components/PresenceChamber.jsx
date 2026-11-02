@@ -13,6 +13,7 @@ import { useAuth } from "../context/AuthContext";
 
 const possessive = (gender) =>
   gender === "Feminine" ? "her" : gender === "Masculine" ? "his" : null;
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 
 /**
@@ -1226,7 +1227,7 @@ export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
               className="text-[10px] tracking-[0.3em] uppercase"
               style={{ color: "var(--p-accent)" }}
             >
-              Her voice
+              {cap(possessive(config.gender) || "her")} voice
             </p>
             <p className="text-xs leading-relaxed" style={{ color: "var(--p-primary)" }}>
               {config.voice?.character}
@@ -1240,7 +1241,7 @@ export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
               className="text-[10px] tracking-[0.3em] uppercase"
               style={{ color: "var(--p-accent)" }}
             >
-              Her posture
+              {cap(possessive(config.gender) || "her")} posture
             </p>
             <p className="text-xs leading-relaxed" style={{ color: "var(--p-primary)" }}>
               {config.conversation?.style}
