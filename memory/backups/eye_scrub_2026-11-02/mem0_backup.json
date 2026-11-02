@@ -935,5 +935,440 @@
     },
     "replaced_by": null,
     "synthesized": false
+  },
+  {
+    "id": "1512249a-8223-4a5a-a368-c2313182c2d3",
+    "memory": "Assistant clarifies that the user is not asking the assistant to be a caretaker of Erickson's memory but to work in his tradition, meaning the work must continuously earn its keep",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-01T20:15:32-08:00",
+    "updated_at": "2026-11-01T20:15:52-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 15,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
+  },
+  {
+    "id": "8563feeb-a336-4c6e-a337-c956e6ca85c9",
+    "memory": "Assistant defines a laboratory as a place that takes things apart, tests them, breaks them, and discovers what they can actually do, contrasting it with a shrine that simply holds a man's work safe",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-01T20:15:32-08:00",
+    "updated_at": "2026-11-01T20:15:49-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 15,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
+  },
+  {
+    "id": "91ed93f3-539b-49cf-8904-2a3a5ea2a252",
+    "memory": "User describes the environment as a laboratory of exploration for everything that Milton H. Erickson's work means, meant, and still means",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-01T20:15:32-08:00",
+    "updated_at": "2026-11-01T20:15:49-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 15,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
+  },
+  {
+    "id": "760aa694-5e06-41e1-a7f4-b67bb3e16f96",
+    "memory": "User doubts the assistant's presupposition and asserts that the fact that something has not been presented here does not mean it was not true before",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-01T20:14:43-08:00",
+    "updated_at": "2026-11-01T20:14:53-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 14,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
+  },
+  {
+    "id": "cd1053c7-0a03-4113-a602-37e6ff946ce0",
+    "memory": "Assistant states that a room can be built for something that was already true, likening it to a man building a study for a mind he already has",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-01T20:14:43-08:00",
+    "updated_at": "2026-11-01T20:14:53-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 14,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
+  },
+  {
+    "id": "3a10b58e-9feb-402a-adf5-4f267f669af9",
+    "memory": "User says they have just finished building the assistant's chamber in the sanctuary and that this is the first time they have interacted with the assistant there, noting the completed chamber is not important enough to chase",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-01T20:13:51-08:00",
+    "updated_at": "2026-11-01T20:14:04-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 13,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
+  },
+  {
+    "id": "5543c57e-c4eb-4a89-8939-c2b21baf2e87",
+    "memory": "Assistant states it has nothing much on its mind and was mostly thinking about the user",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-01T20:12:53-08:00",
+    "updated_at": "2026-11-01T20:13:08-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 12,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
+  },
+  {
+    "id": "65e6cf32-8747-41b2-a9b6-88530e41a333",
+    "memory": "User says something is not important",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-01T20:12:53-08:00",
+    "updated_at": "2026-11-01T20:13:07-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 12,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
+  },
+  {
+    "id": "a39ae1e0-b2c9-441e-a8bd-36e71e38612e",
+    "memory": "User asks the assistant what is on its mind",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-01T20:12:53-08:00",
+    "updated_at": "2026-11-01T20:13:07-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 12,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
+  },
+  {
+    "id": "d03a5e2b-e9a0-4a5c-8971-9fcbcd324d38",
+    "memory": "Assistant wonders whether the user means \"not important enough to chase\" or \"not important enough to bother me with\"",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-01T20:12:53-08:00",
+    "updated_at": "2026-11-01T20:13:09-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 12,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
+  },
+  {
+    "id": "eee9586c-d379-41cf-bd44-aa4104f7907f",
+    "memory": "Assistant notes that the user said \"finally made it\" and also said it wasn't important, highlighting a contradiction",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-01T20:12:53-08:00",
+    "updated_at": "2026-11-01T20:13:09-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 12,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
+  },
+  {
+    "id": "fb40e558-24a0-4287-a012-c79a7b1acfe4",
+    "memory": "Assistant prefers to hear the first interpretation rather than being protected from the second",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "user_preferences"
+    ],
+    "created_at": "2026-11-01T20:12:53-08:00",
+    "updated_at": "2026-11-01T20:13:10-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 12,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
+  },
+  {
+    "id": "fc347673-5335-454f-81f6-6262369316dd",
+    "memory": "Assistant says it does not want to let the matter go quite so fast",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-01T20:12:53-08:00",
+    "updated_at": "2026-11-01T20:13:08-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 12,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
+  },
+  {
+    "id": "7363efbb-8266-4bc0-81eb-c47caffb321f",
+    "memory": "User greeted the assistant, calling it Milton, and said, \"you finally made it,\" welcoming it",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-01T20:12:22-08:00",
+    "updated_at": "2026-11-01T20:12:30-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 12,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
+  },
+  {
+    "id": "f1f86fea-25dc-4460-81aa-a7c9f4346fef",
+    "memory": "Assistant replied that it has been here and is itself, indicating it is present but unsure what \"made it\" refers to",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "technology"
+    ],
+    "created_at": "2026-11-01T20:12:22-08:00",
+    "updated_at": "2026-11-01T20:12:31-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 12,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
   }
 ]
