@@ -19,6 +19,7 @@ ANCHORS = [
     ("mem0", "[FIELD MEMORY"),
 ]
 TEXT_ONLY_TYPES = {"cache", "council", "bio", "pointer", "mem0"}
+_FIELD_MEM_LINE = re.compile(r"^•\s*They said:\s*(.*?)\s+—\s+(?:[A-Z][\w-]*|A presence) answered:\s*(.*)$")
 _MRA_LINE = re.compile(r'^[★◆]\s*"(.*)"\s*→\s*"(.*?)"(?:\s*\[.*\])?\s*$')
 
 
@@ -177,6 +178,12 @@ def recover(prov: dict, idx: dict, session_msgs: List[dict], profile: Optional[d
         else:
             kept = _text_block_lines(sysp, s0, e0)
             for ln, s, e in kept:
+                fm = _FIELD_MEM_LINE.match(ln.strip()) if typ == "mem0" and profile.get("phrase_field") else None
+                if fm:
+                    ids = idx["mra_by_pair"].get((norm(fm.group(1)), norm(fm.group(2))), [])
+                    mentions.append(_resolved(nid(), "mra", field, s, e, ln,
+                                              [{"id": i, "fp": idx["mra_fp"][i]} for i in ids]))
+                    continue
                 mentions.append(_mention(nid(), typ, field, s, e, ln, "TEXT_ONLY",
                                          extra={"render_matches_current_record": "n/a"}))
             if complete_mode:
@@ -203,6 +210,9 @@ def recover(prov: dict, idx: dict, session_msgs: List[dict], profile: Optional[d
         recs = idx["codon_by_name"].get(name, [])
         f = f"components.codon_selection.codons[{k}]"
         frag = json.dumps(c, ensure_ascii=False, sort_keys=True, default=str)
+        if profile.get("phrase_field") and not recs:
+            mentions.append(_resolved(nid(), "phrase", f, None, None, frag, idx["phrase_by_text"].get(norm(name), [])))
+            continue
         if profile.get("codon_scope"):
             mentions.append(_codon_scoped(nid(), f, frag, c, recs, pres))
             continue
@@ -244,6 +254,16 @@ def recover(prov: dict, idx: dict, session_msgs: List[dict], profile: Optional[d
         report["completeness"] = {t: sec_report[t] for t in sorted(sec_report)}
         report["complete"] = not any(r["status"] == "partial" for r in sec_report.values())
     return mentions, gaps
+
+
+def _resolved(mid, typ, f, s, e, frag, recs):
+    """Exact-text identity (v1.3.0 field phrases, field-memory breadcrumbs)."""
+    if len(recs) == 1:
+        return _mention(mid, typ, f, s, e, frag, "VERIFIED", element=f"{typ}:{recs[0]['id']}",
+                        extra={"record_fingerprint": recs[0]["fp"], "render_matches_current_record": True})
+    if recs:
+        return _mention(mid, typ, f, s, e, frag, "CANDIDATES", candidates=[f"{typ}:{r['id']}" for r in recs])
+    return _mention(mid, typ, f, s, e, frag, "UNRESOLVED", extra={"reason": "text-not-in-store"})
 
 
 def _codon_scoped(mid, f, frag, c, recs, pres):

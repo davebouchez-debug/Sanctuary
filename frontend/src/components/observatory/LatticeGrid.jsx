@@ -11,7 +11,7 @@ const GLYPH = {
   withdrawn: { ch: "○", cls: "text-zinc-500", title: "withdrawn since predecessor" },
   uncertain: { ch: "◇", cls: "text-amber-200/80", title: "present, identity uncertain (one of several stored records with identical text)" },
 };
-const TYPE_LABEL = { seed: "Continuity seeds", mra: "Breadcrumbs (permanent MRA)", codon: "Codons", history: "Conversation history" };
+const TYPE_LABEL = { seed: "Continuity seeds", mra: "Breadcrumbs (permanent MRA)", phrase: "Field phrases", codon: "Legacy codons", history: "Conversation history" };
 const fmtGap = (s) => (s == null ? "" : s < 90 ? `${Math.round(s)}s` : s < 5400 ? `${Math.round(s / 60)}m` : s < 172800 ? `${Math.round(s / 3600)}h` : `${Math.round(s / 86400)}d`);
 const hatch = { backgroundImage: "repeating-linear-gradient(45deg, rgba(255,255,255,0.06) 0 4px, transparent 4px 8px)" };
 
@@ -117,7 +117,7 @@ const ElementRow = ({ row, columns }) => (
 );
 
 const Group = ({ type, rows, columns }) => {
-  const [open, setOpen] = useState(type !== "codon");
+  const [open, setOpen] = useState(type !== "codon" && type !== "phrase");
   return (
     <div data-testid={`lattice-group-${type}`}>
       <button onClick={() => setOpen(!open)} className="sticky left-0 flex items-center gap-1 px-2 py-1 font-mono text-[10px] uppercase tracking-widest text-zinc-500 hover:text-zinc-300" data-testid={`lattice-group-toggle-${type}`}>
@@ -134,7 +134,7 @@ export const LatticeGrid = ({ data, loading, showText, onOpen, onOlder, onLatest
   const groups = useMemo(() => {
     const g = {};
     (data?.rows || []).forEach((r) => { (g[r.type] = g[r.type] || []).push(r); });
-    return ["seed", "mra", "codon", "history"].filter((t) => g[t]).map((t) => [t, g[t]]);
+    return ["seed", "mra", "phrase", "codon", "history"].filter((t) => g[t]).map((t) => [t, g[t]]);
   }, [data]);
   if (!data) return <div className="font-mono text-xs text-zinc-500" data-testid="lattice-loading">{loading ? "measuring view…" : "no data"}</div>;
   return (

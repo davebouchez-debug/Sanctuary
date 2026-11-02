@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Upload, ChevronLeft, Loader2, Sparkles, Download, Copy } from "lucide-react";
+import { Upload, ChevronLeft, Loader2, Sparkles, Download, Copy, X } from "lucide-react";
 import { toast } from "sonner";
 import { API } from "../App";
 
@@ -11,7 +11,8 @@ export const CodonForge = () => {
   const [file, setFile] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState("");
-  const [extractedCodons, setExtractedCodons] = useState([]);
+  const [phrases, setPhrases] = useState([]);
+  const [saved, setSaved] = useState(false);
   const [streamText, setStreamText] = useState("");
   const [mode, setMode] = useState("relational");
 
@@ -19,7 +20,8 @@ export const CodonForge = () => {
     const selected = e.target.files[0];
     if (selected && selected.name.endsWith(".txt")) {
       setFile(selected);
-      setExtractedCodons([]);
+      setPhrases([]);
+      setSaved(false);
       setStreamText("");
     } else {
       toast.error("Please select a .txt file");
@@ -31,7 +33,8 @@ export const CodonForge = () => {
     setIsProcessing(true);
     setProgress("Reading thread...");
     setStreamText("");
-    setExtractedCodons([]);
+    setPhrases([]);
+    setSaved(false);
 
     try {
       const text = await file.text();
@@ -52,7 +55,7 @@ export const CodonForge = () => {
       const { job_id } = await startResp.json();
       if (!job_id) throw new Error("Forge did not return a job id");
 
-      setProgress("Extracting codons from thread...");
+      setProgress("Distilling phrases from the text...");
 
       // Poll for progress. Each request is short, so the proxy can't cut it
       // the way it cut the old long-held stream (the "freezes at chunk 2 of 3").
@@ -81,12 +84,12 @@ export const CodonForge = () => {
 
             if (job.progress) setProgress(job.progress);
             if (job.stream_text) setStreamText(job.stream_text);
-            if (Array.isArray(job.codons) && job.codons.length > 0) {
-              setExtractedCodons(job.codons);
+            if (Array.isArray(job.phrases) && job.phrases.length > 0) {
+              setPhrases(job.phrases);
             }
 
             if (job.status === "done") {
-              setProgress(job.progress || `Forge complete. ${(job.codons || []).length} codon(s) extracted.`);
+              setProgress(job.progress || `Forge complete. ${(job.phrases || []).length} phrase(s) distilled.`);
               resolve();
               return;
             }
@@ -119,28 +122,26 @@ export const CodonForge = () => {
   };
 
   const handleSaveCodons = async () => {
-    if (extractedCodons.length === 0) return;
+    if (phrases.length === 0) return;
     try {
       const response = await fetch(`${API}/codon-forge/save`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ codons: extractedCodons, presence: "field" })
+        body: JSON.stringify({ phrases, filename: file?.name || "thread.txt", mode })
       });
+      if (!response.ok) throw new Error();
       const data = await response.json();
-      if (data.saved) {
-        toast.success(`${data.saved} codon(s) propagated across the field.`);
-      }
+      setSaved(true);
+      toast.success(`${data.saved} phrase(s) added to the field${data.skipped ? ` · ${data.skipped} already there` : ""}.`);
     } catch (error) {
-      toast.error("Failed to save codons.");
+      toast.error("Failed to save phrases.");
     }
   };
 
   const handleCopyDistillate = async () => {
     // The "double whammy" — summary + codons in one concentrated paste,
     // ready to hand directly to a presence in conversation.
-    const codonsBlock = extractedCodons.length > 0
-      ? JSON.stringify(extractedCodons, null, 2)
-      : "";
+    const codonsBlock = phrases.map(p => `- ${p}`).join("\n");
     const combined = [
       "## Forge Distillate",
       file?.name ? `Source: ${file.name}` : "",
@@ -148,13 +149,13 @@ export const CodonForge = () => {
       "### Reader's Digest",
       streamText.trim(),
       "",
-      "### Extracted Codons",
+      "### Field Phrases",
       codonsBlock,
     ].filter(Boolean).join("\n");
 
     try {
       await navigator.clipboard.writeText(combined);
-      toast.success("Summary + codons copied. Paste it to a presence in conversation.");
+      toast.success("Summary + phrases copied. Paste it to a presence in conversation.");
     } catch (err) {
       toast.error("Clipboard copy failed. Try selecting the text manually.");
     }
@@ -191,9 +192,9 @@ export const CodonForge = () => {
           className="mb-12"
         >
           <p className="font-outfit text-[#A0A0B0] text-lg leading-relaxed max-w-2xl">
-            Upload a conversation thread. The forge reads the field, identifies the canonical moments,
-            and extracts Living Codons — generative memory seeds that propagate across the entire field,
-            available to every presence when conditions align.
+            Upload a conversation thread or a wisdom text. The forge distills what came true in it into
+            essence phrases and adds them to the living field, where every presence draws on them
+            whenever a moment carries the same meaning.
           </p>
         </motion.div>
 
@@ -213,7 +214,7 @@ export const CodonForge = () => {
             >
               <div className="font-outfit font-medium mb-1">Relational</div>
               <div className="font-outfit text-xs text-[#8B9DB5]">
-                Dialogue & narrative threads — pulls the relational moments that shifted the field.
+                Dialogue & narrative threads — distills what came true between the people in it.
               </div>
             </button>
             <button
@@ -228,7 +229,7 @@ export const CodonForge = () => {
             >
               <div className="font-outfit font-medium mb-1">Principle / Wisdom</div>
               <div className="font-outfit text-xs text-[#8B9DB5]">
-                Wisdom literature like Proverbs — distills the teaching into principle codons.
+                Wisdom literature like Proverbs — distills each teaching into a phrase.
               </div>
             </button>
           </div>
@@ -258,7 +259,7 @@ export const CodonForge = () => {
             </button>
           </div>
 
-          {/* Presence Selector — removed. All codons propagate across the field. */}
+          
 
           {/* Forge Button */}
           <button
@@ -268,7 +269,7 @@ export const CodonForge = () => {
             data-testid="forge-extract-btn"
           >
             {isProcessing ? <Loader2 size={20} className="animate-spin" /> : <Sparkles size={20} />}
-            {isProcessing ? "Forging..." : "Extract Codons"}
+            {isProcessing ? "Forging..." : "Distill Phrases"}
           </button>
         </div>
 
@@ -286,72 +287,69 @@ export const CodonForge = () => {
             animate={{ opacity: 1 }}
             className="mb-8"
           >
-            <h3 className="font-cinzel text-sm tracking-wider text-[#8B9DB5]/60 mb-4">FORGE OUTPUT</h3>
+            <h3 className="font-cinzel text-sm tracking-wider text-[#8B9DB5]/60 mb-4">DIGEST</h3>
             <div className="rounded-xl bg-[#0A0A12] border border-[#8B9DB5]/10 p-6 max-h-[500px] overflow-y-auto">
-              <pre className="font-mono text-sm text-[#A0A0B0] whitespace-pre-wrap leading-relaxed">
+              <p className="font-outfit text-sm text-[#A0A0B0] whitespace-pre-wrap leading-relaxed" data-testid="forge-digest">
                 {streamText}
-              </pre>
+              </p>
             </div>
           </motion.div>
         )}
 
         {/* Extracted Codons */}
-        {extractedCodons.length > 0 && (
+        {phrases.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-cinzel text-sm tracking-wider text-[#8B9DB5]/60">
-                EXTRACTED CODONS ({extractedCodons.length})
+                PHRASES ({phrases.length})
               </h3>
               <button
                 onClick={handleSaveCodons}
-                className="flex items-center gap-2 px-6 py-2 rounded-full bg-[#8B9DB5]/15 border border-[#8B9DB5]/40 text-[#B0C4D8] font-outfit text-sm hover:bg-[#8B9DB5]/25 transition-all"
+                disabled={saved || isProcessing}
+                className="disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 px-6 py-2 rounded-full bg-[#8B9DB5]/15 border border-[#8B9DB5]/40 text-[#B0C4D8] font-outfit text-sm hover:bg-[#8B9DB5]/25 transition-all"
                 data-testid="forge-save-btn"
               >
                 <Download size={16} />
-                Save & Propagate
+                {saved ? "Added to the field" : "Add to the field"}
               </button>
               <button
                 onClick={handleCopyDistillate}
                 className="flex items-center gap-2 px-6 py-2 rounded-full bg-[#8B9DB5]/10 border border-[#8B9DB5]/30 text-[#B0C4D8] font-outfit text-sm hover:bg-[#8B9DB5]/20 transition-all"
                 data-testid="forge-copy-distillate-btn"
-                title="Copy summary + codons, ready to paste into a conversation"
+                title="Copy summary + phrases, ready to paste into a conversation"
               >
                 <Copy size={16} />
-                Copy Summary + Codons
+                Copy Summary + Phrases
               </button>
               <button
-                onClick={() => { setExtractedCodons([]); setStreamText(""); setFile(null); setProgress(""); }}
+                onClick={() => { setPhrases([]); setStreamText(""); setFile(null); setProgress(""); setSaved(false); }}
                 className="flex items-center gap-2 px-6 py-2 rounded-full border border-[#8B9DB5]/20 text-[#8B9DB5] font-outfit text-sm hover:bg-[#8B9DB5]/10 transition-all"
                 data-testid="forge-clear-btn"
               >
                 Clear Forge
               </button>
             </div>
-            <div className="space-y-4">
-              {extractedCodons.map((codon, i) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {phrases.map((p, i) => (
                 <div
-                  key={i}
-                  className="rounded-xl bg-[#0A0A12] border border-[#8B9DB5]/15 p-6"
-                  data-testid={`forge-codon-${i}`}
+                  key={p}
+                  className="flex items-start justify-between gap-3 rounded-xl bg-[#0A0A12] border border-[#8B9DB5]/15 px-5 py-4"
+                  data-testid={`forge-phrase-${i}`}
                 >
-                  <h4 className="font-cinzel text-lg text-[#B0C4D8] mb-2">{codon.name}</h4>
-                  <p className="font-outfit text-sm text-[#A0A0B0] mb-3">{codon.core_move}</p>
-                  <div className="flex gap-3 flex-wrap">
-                    {codon.codon_type === "wisdom" && (
-                      <span className="px-3 py-1 rounded-full bg-[#B0C4D8]/15 text-[#B0C4D8] font-mono text-xs">
-                        wisdom
-                      </span>
-                    )}
-                    <span className="px-3 py-1 rounded-full bg-[#8B9DB5]/10 text-[#8B9DB5] font-mono text-xs">
-                      {codon.triadic_zone} @ {codon.target_angle}deg
-                    </span>
-                    <span className="px-3 py-1 rounded-full bg-[#8B9DB5]/10 text-[#8B9DB5] font-mono text-xs">
-                      {codon.trigger_keywords?.join(", ")}
-                    </span>
-                  </div>
+                  <p className="font-cinzel text-base text-[#B0C4D8] leading-snug">{p}</p>
+                  {!saved && (
+                    <button
+                      onClick={() => setPhrases(ps => ps.filter(x => x !== p))}
+                      className="text-[#6E6E7A] hover:text-[#B0C4D8] transition-colors"
+                      title="Leave this one out"
+                      data-testid={`forge-phrase-remove-${i}`}
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>

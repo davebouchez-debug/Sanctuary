@@ -39,6 +39,8 @@ export const EngagementLattice = () => {
       const { data: s } = await axios.get(`${API}/observatory/status`, { params: version ? { version } : {} });
       setStatus(s);
       setPresence((p) => p || s.presences?.[0]?.presence || "");
+      const latest = s.versions?.[s.versions.length - 1]?.version;
+      if (!version && latest && latest !== s.derivation_version) setVersion(latest);
     } catch {
       setError("Observer status unavailable — retrying automatically.");
     }

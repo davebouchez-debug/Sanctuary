@@ -10,7 +10,7 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
 
-from . import DERIVATION_VERSION, PROFILES
+from . import DERIVATION_VERSION, PROFILES, LEGACY_CODON_COLLECTIONS
 from .compare import delta, invariance
 from .derive import Ledger, catch_up, parse_ts, verify, load_sessions
 from .recover import evidence_text, canonical_hash
@@ -147,6 +147,8 @@ def _label(el: str, meta: dict) -> str:
         return f"crumb {k[:8]} · ← {str(m.get('source_session_id'))[:6]}"
     if t == "codon":
         return f"codon {meta.get(el, {}).get('name') or k[-6:]}"
+    if t == "phrase":
+        return f"“{meta.get(el, {}).get('name') or k[-6:]}”"
     return f"{t} · {k[:8]}"
 
 
@@ -268,7 +270,7 @@ async def lattice(presence: str, scope: str = "S2", visitor: Optional[str] = Non
         return None
 
     from bson import ObjectId
-    missing = [e for e in first_seen if e not in meta and e.split(":")[0] in ("seed", "mra", "codon")]
+    missing = [e for e in first_seen if e not in meta and e.split(":")[0] in ("seed", "mra", "codon", "phrase")]
     seed_ids = [ObjectId(e[5:]) for e in missing if e.startswith("seed:")]
     async for sd in db.continuity_seeds.find({"_id": {"$in": seed_ids}}, {"session_id": 1, "created_at": 1}):
         meta[f"seed:{sd['_id']}"] = {"source_session_id": sd.get("session_id"), "created_at": str(sd.get("created_at"))}
@@ -276,10 +278,14 @@ async def lattice(presence: str, scope: str = "S2", visitor: Optional[str] = Non
                                           {"node_id": 1, "source_session_id": 1, "promoted_at": 1}):
         meta[f"mra:{nd['node_id']}"] = {"source_session_id": nd.get("source_session_id"), "created_at": str(nd.get("promoted_at"))}
     codon_ids = [ObjectId(e[6:]) for e in first_seen if e.startswith("codon:")]
-    async for cd in db.living_codons.find({"_id": {"$in": codon_ids}}, {"name": 1}):
-        meta[f"codon:{cd['_id']}"] = {"name": cd.get("name")}
+    for coll in LEGACY_CODON_COLLECTIONS:
+        async for cd in db[coll].find({"_id": {"$in": codon_ids}}, {"name": 1}):
+            meta[f"codon:{cd['_id']}"] = {"name": cd.get("name")}
+    phrase_ids = [ObjectId(e[7:]) for e in missing if e.startswith("phrase:")]
+    async for pd in db.field_phrases.find({"_id": {"$in": phrase_ids}}, {"phrase": 1}):
+        meta[f"phrase:{pd['_id']}"] = {"name": pd.get("phrase")}
 
-    order = {"seed": 0, "mra": 1, "codon": 2, "history": 3}
+    order = {"seed": 0, "mra": 1, "phrase": 2, "codon": 3, "history": 4}
     elements = sorted(first_seen, key=lambda e: (order.get(e.split(":")[0], 9), first_seen[e], e))
     rows, history_row = [], []
     for el in elements:
@@ -315,7 +321,7 @@ async def lattice(presence: str, scope: str = "S2", visitor: Optional[str] = Non
                                           "mult": [0] * len(columns), "_first": i})
             r["cells"][i] = "uncertain"
             r["mult"][i] += 1
-    noun = {"mra": "breadcrumb", "seed": "seed", "codon": "codon", "history": "message"}
+    noun = {"mra": "breadcrumb", "seed": "seed", "phrase": "field phrase", "codon": "codon", "history": "message"}
     for r in sorted(unc_rows.values(), key=lambda r: (order.get(r["type"], 9), r["_first"])):
         r.pop("_first")
         r["label"] = f"uncertain {noun.get(r['type'], r['type'])} · 1 of {len(r['candidates'])}"

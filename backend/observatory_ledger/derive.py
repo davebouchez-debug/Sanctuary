@@ -13,7 +13,9 @@ from typing import Dict, List, Optional
 
 from pymongo.errors import DuplicateKeyError
 
-from . import DERIVATION_VERSION, NORM_VERSION, ENUM_CAP, PROFILES, PRODUCTION_VERSIONS
+from . import DERIVATION_VERSION, NORM_VERSION, ENUM_CAP, PROFILES, PRODUCTION_VERSIONS, LEGACY_CODON_COLLECTIONS
+
+PHRASE_FP_KEYS = ("phrase", "source", "created_at")
 from .measure import enumerate_resolutions, per_type, text_layer, transform
 from .recover import canonical_hash, h, norm, recover
 
@@ -88,12 +90,21 @@ async def build_indexes(db) -> dict:
         mra_fp[nid] = canonical_hash({k: m.get(k) for k in ("user_essence", "ai_essence", "quality", "promoted_at", "source_session_id")})
         mra_meta[nid] = {"source_session_id": m.get("source_session_id"), "created_at": str(m.get("promoted_at"))}
     codon_by = {}
-    async for c in db.living_codons.find({}, {"name": 1, "core_move": 1, "target_angle": 1, "triadic_zone": 1,
-                                              "angle_backfilled_at": 1, "presence": 1}):
-        codon_by.setdefault(c.get("name"), []).append({
-            "id": str(c["_id"]), "target_angle": c.get("target_angle"), "presence": c.get("presence"),
-            "fp": canonical_hash({k: c.get(k) for k in ("name", "core_move", "target_angle", "triadic_zone", "angle_backfilled_at")}),
-        })
+    for coll in LEGACY_CODON_COLLECTIONS:
+        async for c in db[coll].find({}, {"name": 1, "core_move": 1, "target_angle": 1, "triadic_zone": 1,
+                                          "angle_backfilled_at": 1, "presence": 1}):
+            codon_by.setdefault(c.get("name"), []).append({
+                "id": str(c["_id"]), "target_angle": c.get("target_angle"), "presence": c.get("presence"),
+                "fp": canonical_hash({k: c.get(k) for k in ("name", "core_move", "target_angle", "triadic_zone", "angle_backfilled_at")}),
+            })
+    phrase_by, phrase_meta = {}, {}
+    async for p in db.field_phrases.find({}, {"phrase": 1, "source": 1, "created_at": 1, "source_presence": 1,
+                                              "legacy_presence": 1}):
+        pid = str(p["_id"])
+        phrase_by.setdefault(norm(p.get("phrase")), []).append(
+            {"id": pid, "fp": canonical_hash({k: p.get(k) for k in PHRASE_FP_KEYS})})
+        phrase_meta[pid] = {"name": p.get("phrase"), "source": p.get("source"),
+                            "source_presence": p.get("source_presence") or p.get("legacy_presence")}
     aliases = {}
     async for a in db.user_aliases.find({}, {"canonical_id": 1, "aliases": 1}):
         for x in (a.get("aliases") or []) + [a.get("canonical_id")]:
@@ -101,7 +112,7 @@ async def build_indexes(db) -> dict:
                 aliases[x] = a["canonical_id"]
     return {"seed_by_field_state": seed_by, "seed_fp": seed_fp, "seed_meta": seed_meta,
             "mra_by_pair": mra_by, "mra_fp": mra_fp, "mra_meta": mra_meta,
-            "codon_by_name": codon_by, "aliases": aliases}
+            "codon_by_name": codon_by, "phrase_by_text": phrase_by, "phrase_meta": phrase_meta, "aliases": aliases}
 
 
 async def current_fingerprint(db, element: str) -> Optional[str]:
@@ -115,8 +126,15 @@ async def current_fingerprint(db, element: str) -> Optional[str]:
         return canonical_hash({k: m.get(k) for k in ("user_essence", "ai_essence", "quality", "promoted_at", "source_session_id")}) if m else None
     if typ == "codon":
         from bson import ObjectId
-        c = await db.living_codons.find_one({"_id": ObjectId(key)}, {"name": 1, "core_move": 1, "target_angle": 1, "triadic_zone": 1, "angle_backfilled_at": 1})
-        return canonical_hash({k: c.get(k) for k in ("name", "core_move", "target_angle", "triadic_zone", "angle_backfilled_at")}) if c else None
+        for coll in LEGACY_CODON_COLLECTIONS:
+            c = await db[coll].find_one({"_id": ObjectId(key)}, {"name": 1, "core_move": 1, "target_angle": 1, "triadic_zone": 1, "angle_backfilled_at": 1})
+            if c:
+                return canonical_hash({k: c.get(k) for k in ("name", "core_move", "target_angle", "triadic_zone", "angle_backfilled_at")})
+        return None
+    if typ == "phrase":
+        from bson import ObjectId
+        p = await db.field_phrases.find_one({"_id": ObjectId(key)}, {k: 1 for k in PHRASE_FP_KEYS})
+        return canonical_hash({k: p.get(k) for k in PHRASE_FP_KEYS}) if p else None
     return None
 
 
@@ -280,6 +298,8 @@ def build_entry(prov: dict, idx: dict, sess: Optional[dict], history: List[dict]
             meta[el] = idx["seed_meta"][k]
         elif t == "mra" and k in idx["mra_meta"]:
             meta[el] = idx["mra_meta"][k]
+        elif t == "phrase" and k in idx["phrase_meta"]:
+            meta[el] = idx["phrase_meta"][k]
     uid = prov.get("user_id")
     canon = idx["aliases"].get(uid)
     am = prov.get("assembled_messages") or []
