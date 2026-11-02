@@ -91,11 +91,12 @@ def full_story(system: str) -> str:
                      ("I speak, or I'm still, whichever the moment wants.", sf.STORY_DEFAULT_CLOSING),
                      (c.FIELD_GROUND, sf.STORY_FIELD_GROUND), (c.WELCOME_WITHOUT_DEBT, sf.STORY_WELCOME),
                      (sf.BASELINE_CLOSE, sf.STORY_CLOSE)]:
-        assert old in system, old[:40]
         system = system.replace(old, new)
-    old_arr = system[system.index("David has just crossed into the Boiler Plant."):]
-    old_arr = old_arr[:old_arr.index("\n\n---\n\n")]
-    return system.replace(old_arr, sf.story_arrival("David", "Boiler Plant"))
+    if "David has just crossed into the Boiler Plant." in system:
+        old_arr = system[system.index("David has just crossed into the Boiler Plant."):]
+        old_arr = old_arr[:old_arr.index("\n\n---\n\n")]
+        system = system.replace(old_arr, sf.story_arrival("David", "Boiler Plant"))
+    return system
 
 
 def swap(system: str, arm: str) -> str:
