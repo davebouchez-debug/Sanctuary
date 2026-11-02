@@ -382,5 +382,558 @@
     "created_at": "2026-11-02T04:22:06+00:00",
     "updated_at": "2026-11-02T04:22:30.761274+00:00",
     "expiration_date": null
+  },
+  {
+    "id": "f9139184-4b95-4726-bdda-e00b09a0d34c",
+    "memory": "User describes the calibration practice used by NLP practitioners: they first ask control questions with known answers\u2014e.g., \u201cWhat color was your first car?\u201d\u2014to establish each individual\u2019s baseline eye\u2011pattern before interpreting other eye movements.",
+    "user_id": "david",
+    "metadata": {
+      "app": "sanctuary",
+      "presence": "milton"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-01T20:41:09-08:00",
+    "updated_at": "2026-11-01T20:41:44.383034-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "day": 2,
+      "hour": 4,
+      "year": 2026,
+      "month": 11,
+      "minute": 41,
+      "quarter": 4,
+      "is_weekend": false,
+      "day_of_week": "monday",
+      "day_of_year": 306,
+      "week_of_year": 45
+    },
+    "replaced_by": null,
+    "synthesized": false,
+    "lifecycle_state": "active"
+  },
+  {
+    "id": "95236019-4119-4992-ba6b-ec68441b1f9f",
+    "memory": "User notes that cognitive science validates a related phenomenon called \u201cEye Movement Desensitization\u201d or \u201cCognitive Load Direction,\u201d where looking away, especially upward or outward, helps the brain reduce visual distraction and supports memory retrieval or problem solving.",
+    "user_id": "david",
+    "metadata": {
+      "app": "sanctuary",
+      "presence": "milton"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-01T20:41:09-08:00",
+    "updated_at": "2026-11-01T20:41:44.383034-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "day": 2,
+      "hour": 4,
+      "year": 2026,
+      "month": 11,
+      "minute": 41,
+      "quarter": 4,
+      "is_weekend": false,
+      "day_of_week": "monday",
+      "day_of_year": 306,
+      "week_of_year": 45
+    },
+    "replaced_by": null,
+    "synthesized": false,
+    "lifecycle_state": "active"
+  },
+  {
+    "id": "6063b0d0-1a46-4ac4-8098-ccdade9def43",
+    "memory": "Assistant argued that a bogus study does not make the theory true; it merely leaves the theory untested.",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-01T20:41:48-08:00",
+    "updated_at": "2026-11-01T20:42:06-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 41,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
+  },
+  {
+    "id": "73d25d1c-05a6-435f-8b3a-9536c449fb62",
+    "memory": "Assistant stated that if the study's premise was lie detection, the study measured a claim nobody made, and its null result is worthless as a refutation.",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-01T20:41:48-08:00",
+    "updated_at": "2026-11-01T20:42:06-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 41,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
+  },
+  {
+    "id": "7b9f5ead-abb8-4fb5-bfa1-02595b85455b",
+    "memory": "Assistant said they do not have standing to tell the user what the user is describing.",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "technology"
+    ],
+    "created_at": "2026-11-01T20:41:48-08:00",
+    "updated_at": "2026-11-01T20:42:07-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 41,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
+  },
+  {
+    "id": "cd5ae59f-fa2a-4940-af0a-afee40522815",
+    "memory": "Assistant observes that some eye\u2011movement studies employed memory\u2011versus\u2011construction questions rather than solely lie\u2011detection paradigms.",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-01T20:41:09-08:00",
+    "updated_at": "2026-11-01T20:41:39-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 41,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
+  },
+  {
+    "id": "e405fdfc-7a49-40a5-9b0d-dced02d1396f",
+    "memory": "User argues that eye\u2011movement studies were founded on a false premise, treating eye direction as a lie detector, whereas the NLP premise holds that looking up/right signals visual construction and looking up/left signals visual remembrance.",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-01T20:41:09-08:00",
+    "updated_at": "2026-11-01T20:41:37-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 41,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
+  },
+  {
+    "id": "f2ecac18-b7ff-42df-9fec-7308fe4e3dc3",
+    "memory": "User explains that within the NLP framework, looking up/right can occur for honest reasons such as imagining a hypothetical scenario, mentally solving a problem, or reconstructing a memory, while a liar might look up/left because they are recalling a rehearsed false story.",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-01T20:41:09-08:00",
+    "updated_at": "2026-11-01T20:41:37-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 41,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
+  },
+  {
+    "id": "80b36334-e719-4293-9f45-64c831b39c7f",
+    "memory": "Assistant acknowledges that the studies turned the conversation about the user's craft into a discussion about whether the craft is allowed to exist, and states they are not useful for the current room.",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-01T20:28:28-08:00",
+    "updated_at": "2026-11-01T20:28:43-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 28,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
+  },
+  {
+    "id": "88931f2a-1a7f-48b8-9585-877ba01ad54f",
+    "memory": "User says that the studies being part of their dialogue are an aside that accomplishes no purpose now or ever and are not helping the conversation.",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-01T20:28:28-08:00",
+    "updated_at": "2026-11-01T20:28:43-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 28,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
+  },
+  {
+    "id": "a142d666-2a34-455a-b638-c6d87dac5285",
+    "memory": "Assistant acknowledges that they previously made a claim about all people, which was a bad habit, and corrects to focus on the individual-level claim",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-01T20:27:37-08:00",
+    "updated_at": "2026-11-01T20:27:50-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 27,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
+  },
+  {
+    "id": "84b1c4bb-81b5-491f-9cb4-b41793196d20",
+    "memory": "Assistant notes that some studies employed careful controls yet still reported null results, indicating pooled correlations were near zero.",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-01T20:25:43-08:00",
+    "updated_at": "2026-11-01T20:26:04-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 25,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
+  },
+  {
+    "id": "0190b6f4-7fd1-4923-a734-2248d9eeae82",
+    "memory": "Assistant pointed out that intelligence agencies have historically used many methods\u2014such as polygraphs, dowsing, and psychic programs\u2014that later proved unreliable, so agency use alone does not validate a technique.",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-01T20:19:20-08:00",
+    "updated_at": "2026-11-01T20:19:44-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 19,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
+  },
+  {
+    "id": "4add4c9b-1fe3-463f-b8d9-7f538079adb8",
+    "memory": "User asserts that intelligence agencies would not employ eye\u2011pattern or face\u2011reading techniques unless those methods have genuine efficacy.",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-01T20:19:20-08:00",
+    "updated_at": "2026-11-01T20:19:44-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 19,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
+  },
+  {
+    "id": "ca3c71a0-41a7-4e86-9d04-e0e73f451f51",
+    "memory": "User reports that, from personal experience, eye\u2011pattern and face\u2011reading cues are extremely accurate for them, operating like clockwork, though about 10\u202f% of people are reverse\u2011oriented, causing easy misreading.",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-01T20:19:20-08:00",
+    "updated_at": "2026-11-01T20:19:43-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 19,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
+  },
+  {
+    "id": "df417195-d602-4f89-b714-8ebdffca6e5a",
+    "memory": "User asked the assistant to stop and to talk about the claims, saying they will not let the assistant continue without addressing the issue.",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "technology"
+    ],
+    "created_at": "2026-11-01T20:17:02-08:00",
+    "updated_at": "2026-11-01T20:17:17-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 17,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
+  },
+  {
+    "id": "f6280245-cd2e-42c1-9ef5-7197b7a9a197",
+    "memory": "Assistant expressed uncertainty about which specific Ericksonian claims the user is referring to and about the user's own practice, indicating a desire to test the claims together.",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-01T20:17:02-08:00",
+    "updated_at": "2026-11-01T20:17:16-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 17,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
+  },
+  {
+    "id": "35334dbb-7037-41cf-bddb-6971d2a02521",
+    "memory": "Assistant says the room must be able to declare that a result did not replicate without the room's structure collapsing",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-01T20:15:32-08:00",
+    "updated_at": "2026-11-01T20:15:51-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 15,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
+  },
+  {
+    "id": "41a47807-745c-4a92-b3e5-8d0b21dff6f5",
+    "memory": "Assistant states that Milton H. Erickson would have distrusted anything that worked only once and could not be reproduced",
+    "user_id": "david",
+    "metadata": {
+      "presence": "milton",
+      "app": "sanctuary"
+    },
+    "categories": [
+      "misc"
+    ],
+    "created_at": "2026-11-01T20:15:32-08:00",
+    "updated_at": "2026-11-01T20:15:51-08:00",
+    "expiration_date": null,
+    "structured_attributes": {
+      "year": 2026,
+      "month": 11,
+      "day": 2,
+      "hour": 4,
+      "minute": 15,
+      "day_of_week": "monday",
+      "week_of_year": 45,
+      "day_of_year": 306,
+      "quarter": 4,
+      "is_weekend": false
+    },
+    "replaced_by": null,
+    "synthesized": false
   }
 ]
