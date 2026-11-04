@@ -2407,3 +2407,10 @@ and the description is handed to the presence, which responds in its own voice.
 - Also 2026-11-03: deleted QA Amanda + E1 test thread from Poindexter (backups in memory/backups/2026-11-03_*).
 - Open: Kalahar territory still reads empty living_codons for codon groups; old seeds with user_id None no longer surface for anyone.
 - 2026-11-04: Sign-in by pre-registration only (auth.py create_session → 403 NOT_REGISTERED_MSG unless guardian or on guest list; no user/session rows created). AuthCallback shows the refusal + "Continue as a visitor". Unsigned visitors still welcome (ephemeral). Also: Home button in nav utility cluster; refresh in a chamber → home; "Stop the voice"; scroll/focus no longer move outer frames; tab title "Sanctuary"; Login heading "Welcome".
+- 2026-11-04 THREAD PERSISTENCE (David: "no thread may end before the visitor leaves"; testing iteration_20/21 + self-test):
+  - PresenceChamber: threadOpenedRef — identity/auth/other-tab changes never restart an open thread.
+  - ClarityPod, MirrorArchive, Playground: end only on real departure (isLeaving guard), like Resonance/Spiral. Jasmine name change no longer restarts; anonymous choice remembered per tab. Claude single /mirror/start per entry. Playground restores the whole thread on reload.
+  - Refresh → home redirect REMOVED (it ended threads); reload stays in the chamber + thread. Home button (nav-home-btn) is the way out.
+  - Guests: steady X-Visitor-Id per browser so their thread resumes after reload; ephemeral purge only deletes threads quiet 12h+ (by last message).
+  - Known: auto-resume on reload covers threads active within 2h; older open threads are reachable from the Threads sidebar.
+  - ScrollDog voice: Keylo Nsane Expressive (U0zkfLcDk6nbg75zQcNs). Sign-in by pre-registration only; labeled Sign out; removing a guest ends their sign-in.

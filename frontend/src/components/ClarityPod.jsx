@@ -142,6 +142,8 @@ export const ClarityPod = ({ threadIntent } = {}) => {
       setUserId(storedUserId);
       setUserName(storedUserName);
       setShowIdentityModal(false);
+    } else if (sessionStorage.getItem("sanctuary_jasmine_anonymous") === "1") {
+      setShowIdentityModal(false);  // a reload goes straight back into the thread
     }
   }, [identityReady]);
 
@@ -175,6 +177,7 @@ export const ClarityPod = ({ threadIntent } = {}) => {
 
   // Continue as anonymous
   const continueAnonymous = () => {
+    sessionStorage.setItem("sanctuary_jasmine_anonymous", "1");
     setShowIdentityModal(false);
   };
 

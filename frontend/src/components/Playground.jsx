@@ -82,6 +82,12 @@ export const Playground = () => {
         localStorage.setItem("sanctuary_user_id", data.user_id);
       }
 
+      if (data.resumed && data.messages?.length) {
+        setMessages(data.messages);  // reload: the whole open thread, no replayed voice
+        setIsInitializing(false);
+        return;
+      }
+
       if (data.message) {
         setMessages([data.message]);
         if (data.message.content && voiceEnabled) {

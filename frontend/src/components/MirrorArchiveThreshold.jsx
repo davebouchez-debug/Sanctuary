@@ -113,6 +113,7 @@ export const MirrorArchiveThreshold = () => {
         {isReady && !showEntry && (
           <motion.button
             onClick={handleEntry}
+            data-testid="mirror-archive-enter-btn"
             className="group flex items-center gap-3 mx-auto px-8 py-4 bg-cyan-500/10 border border-cyan-500/30 
                      rounded-full text-cyan-400 hover:bg-cyan-500/20 hover:border-cyan-400/50 transition-all"
             initial={{ opacity: 0, y: 10 }}

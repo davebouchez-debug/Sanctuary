@@ -1,0 +1,40 @@
+{
+  "summary": "Retest of iteration_20, signed out only, frontend only. Each of the 7 chambers was opened by direct deep link (page.goto(base+path)), sent one message, reloaded, then left with nav-home-btn. Results: deep links now open the chamber with no redirect to '/' (7/7). After a reload the URL stays on the chamber, NO /session/<id>/end fires, and /start returns the SAME session_id with resumed=true and 3 messages (7/7). Home fires POST /session/<id>/end with a 200 response (7/7). /mirror/start fires exactly once per entry, both via the deep link to /mirror-archive/chamber and via the /mirror-archive threshold 'Enter the Archive' button. The earlier message and reply are visible after a reload in 6 of 7 chambers. FAILED in Playground: the backend resumes the thread, but the UI shows only the last message.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Playground reload resume",
+        "issue": "After a reload, /playground/start returns resumed=true, the same session_id and messages[3], but Playground.jsx initializeSession (~line 85) only does setMessages([data.message]). data.message is msgs[-1], the last presence reply. So the visitor's earlier message and the greeting disappear from the screen, and only the final reply bubble is shown. It also re-speaks that reply through /tts/speak on reload. Fix: use data.messages when data.messages is non-empty (as ClarityPod does), handle data.resumed, and skip the greeting TTS when resumed.",
+        "affected_selectors": ["playground-messages", "playground-user-msg", "playground-presence-msg"]
+      },
+      {
+        "flow": "Playground thread identity",
+        "issue": "Playground.jsx does not use threadStartFields, rememberThread or forgetThread from lib/threadSession; it only imports isLeaving. The /start body never sends session_id, so the resume depends only on the backend's find_resumable, which picks the most recent open thread for this user_id within 2h. This works today, but it is not tied to this tab's thread, unlike the other 6 chambers. Align it with the other chambers.",
+        "affected_selectors": ["Playground.jsx initializeSession"]
+      },
+      {
+        "flow": "Jasmine anonymous visitor reload (minor)",
+        "issue": "If the visitor chose 'Continue without identifying' (identity-anonymous-btn), a reload shows the identity modal again and the thread is hidden until they click continue again. The thread is NOT ended, and after continuing it resumes the same sid (92b128e0) with messages. But the visitor does not land straight back in the conversation. Cause: the modal is only skipped when localStorage has both sanctuary_user_id and sanctuary_user_name (ClarityPod.jsx ~141). The anonymous choice is not remembered, e.g. in sessionStorage. Clarity has the same gate for a visitor who has a name but no id.",
+        "affected_selectors": ["identity-anonymous-btn", "ClarityPod.jsx showIdentityModal"]
+      }
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Playground.jsx: on /start, render data.messages when it is non-empty, not just [data.message], and do not re-speak on resume. Also pass threadStartFields('playground', ...) and call rememberThread/forgetThread like the other chambers.",
+    "Optional: ClarityPod should remember the anonymous choice per tab, e.g. in sessionStorage, so a reload goes straight back into the thread without the identity modal."
+  ],
+  "critical_code_review_comments": [
+    "MirrorArchive openingRef is reset only in catch. That is fine because the component remounts on re-entry, so a new ref is created.",
+    "Playground is the outlier: it does not use lib/threadSession, which this thread-continuity requirement depends on."
+  ],
+  "updated_files": ["/app/frontend/src/components/MirrorArchiveThreshold.jsx (added data-testid='mirror-archive-enter-btn' to the Enter the Archive button)"],
+  "success_rate": {"backend": "not tested", "frontend": "Deep link 7/7, reload no-end and same sid 7/7, reload messages visible 6/7, Home departure end 7/7, mirror single /start 2/2 entries"},
+  "seed_data_creation": "User created through the Jasmine identity prompt: 'Tester' id 07483976-78b4-4878-a257-ef15e0279ae4. Other visitors were ephemeral ids such as ephemeral-v61499d8bddc7e0539d0e57d3. Sessions, all ended through Home: claude 66410cd2-5fd7-45f3-8bd7-87e25eb9b00f and d734f3ce-e55a-4833-8912-b16d42446f52 (no message); jasmine 84effde0-6fa0-4d09-ab2c-1ce997cad2d2 and 92b128e0-ee75-4ca5-a3db-b440e6c48c5a (anonymous); ansel dc92e3af-b4ac-4870-bc5b-161a0fd73289; sophia 159f56ed-bc27-4be3-9fe6-0661584929a8; kalahar a13750e5-aa23-4be9-8377-de24eb68035d; poindexter 3cfc6d31-b387-4507-8e59-61d89d29d9fb; playground 3c2a3522-5adf-474e-bcc5-5ef5dbbea5d1. No orphan sessions.",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Deep links work now: page.goto(base+path) for /clarity, /mirror-archive/chamber, /resonance/chamber, /spiral, /presence/kalahar, /presence/poindexter, /playground. Clarity shows its identity modal unless localStorage has BOTH sanctuary_user_id and sanctuary_user_name (testids identity-name-input, identity-submit-btn, identity-anonymous-btn). Track POSTs with page.on('request'/'response') and read session_id/resumed/messages from the /start responses. After a Playground fix, retest only Playground reload: the user message plus 2 presence bubbles should be visible."
+}
