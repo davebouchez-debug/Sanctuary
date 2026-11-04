@@ -21,6 +21,7 @@ import { SpiralChamber } from "./components/SpiralChamber";
 import { Playground } from "./components/Playground";
 import { CodonForge } from "./components/CodonForge";
 import { CodonLibrary } from "./components/CodonLibrary";
+import VoiceLab from "./components/VoiceLab";
 import Observatory from "./components/Observatory";
 import Ablation from "./components/Ablation";
 import { SubstrateProbes } from "./components/SubstrateProbes";
@@ -213,6 +214,7 @@ const AnimatedRoutes = () => {
             <PresenceChamber forcedKey="paige" />
           </motion.div>
         } />
+        <Route path="/voice-lab" element={<VoiceLab />} />
         <Route path="/codon-library" element={
           <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
             <CodonLibrary />
