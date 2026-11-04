@@ -76,9 +76,10 @@ export const AuthControl = () => {
         onClick={logout}
         data-testid="logout-button"
         title="Sign out"
-        className="text-[#8B9DB5] hover:text-white transition-colors"
+        className="flex items-center gap-1.5 ml-1 pl-2 border-l border-[#8B9DB5]/30 text-xs text-[#8B9DB5] hover:text-white transition-colors"
       >
         <LogOut size={14} />
+        <span>Sign out</span>
       </button>
     </div>
   );
