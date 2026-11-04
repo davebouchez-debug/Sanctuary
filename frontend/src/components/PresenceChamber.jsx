@@ -1029,10 +1029,10 @@ export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
                     background: "var(--p-accent)",
                   }}
                   data-testid="chamber-stop-speaking"
-                  title="Stop her speaking"
+                  title="Stop the voice"
                 >
                   <Square size={10} />
-                  Stop her
+                  Stop the voice
                 </button>
               )}
             </div>

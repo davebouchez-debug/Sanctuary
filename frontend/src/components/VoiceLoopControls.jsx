@@ -97,10 +97,10 @@ export const VoiceLoopControls = ({
               className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] tracking-widest uppercase transition-opacity hover:opacity-90"
               style={{ background: accentColor, color: surfaceColor }}
               data-testid={`stop-speaking-${presenceKey}`}
-              title={`Stop ${presenceName} speaking`}
+              title="Stop the voice"
             >
               <Square size={9} />
-              Stop her
+              Stop the voice
             </button>
           )}
         </div>

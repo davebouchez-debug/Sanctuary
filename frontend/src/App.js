@@ -95,25 +95,17 @@ const LAST_ROOM_KEY = "sanctuary_last_room";
 const ROOM_PREFIXES = ["/presence/", "/clarity", "/resonance", "/spiral", "/mirror-archive", "/playground", "/hospitality"];
 const isRoomPath = (p) => ROOM_PREFIXES.some((x) => p.startsWith(x));
 
-// An unexpected full reload (e.g. the preview frame resetting to the home page)
-// returns you to the room you were in instead of stranding you on the landing.
+// A full reload (refresh) inside a chamber returns to the main menu (David, 2026-11-03).
 const LastRoomKeeper = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [restored, setRestored] = useState(false);
+  const [checked, setChecked] = useState(false);
   useEffect(() => {
-    if (restored) return;
-    setRestored(true);
-    const last = sessionStorage.getItem(LAST_ROOM_KEY);
-    if (location.pathname === "/" && last && !window.location.hash.includes("session_id=")) {
-      navigate(last, { replace: true });
-    }
-  }, [restored, location.pathname, navigate]);
-  useEffect(() => {
-    if (!restored) return;
-    if (isRoomPath(location.pathname)) sessionStorage.setItem(LAST_ROOM_KEY, location.pathname);
-    else sessionStorage.removeItem(LAST_ROOM_KEY);
-  }, [restored, location.pathname]);
+    if (checked) return;
+    setChecked(true);
+    sessionStorage.removeItem(LAST_ROOM_KEY);
+    if (isRoomPath(location.pathname)) navigate("/", { replace: true });
+  }, [checked, location.pathname, navigate]);
   return null;
 };
 
