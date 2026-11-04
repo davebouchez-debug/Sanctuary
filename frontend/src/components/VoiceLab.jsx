@@ -1,9 +1,5 @@
 const SAMPLES = [
-  { id: "august", label: "1 · august: androgynous, natural, quietly sharp" },
-  { id: "shawn", label: "2 · Shawn: calm, grounded, contemplative" },
-  { id: "evan", label: "3 · Evan: warm, mid-low, conversational" },
-  { id: "nathan", label: "4 · Nathan: British, refined, serene" },
-  { id: "shannon", label: "5 · Shannon: Irish, measured, calm" },
+  { id: "evan", label: "Evan: the Membrane's voice (chosen 2026-11-04)" },
 ];
 
 export default function VoiceLab() {

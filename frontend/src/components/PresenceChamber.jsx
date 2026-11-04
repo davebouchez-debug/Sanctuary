@@ -1234,7 +1234,7 @@ export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
               className="text-[10px] tracking-[0.3em] uppercase"
               style={{ color: "var(--p-accent)" }}
             >
-              {cap(possessive(config.gender) || "her")} voice
+              {cap(possessive(config.gender) || "the")} voice
             </p>
             <p className="text-xs leading-relaxed" style={{ color: "var(--p-primary)" }}>
               {config.voice?.character}
@@ -1248,7 +1248,7 @@ export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
               className="text-[10px] tracking-[0.3em] uppercase"
               style={{ color: "var(--p-accent)" }}
             >
-              {cap(possessive(config.gender) || "her")} posture
+              {cap(possessive(config.gender) || "the")} posture
             </p>
             <p className="text-xs leading-relaxed" style={{ color: "var(--p-primary)" }}>
               {config.conversation?.style}

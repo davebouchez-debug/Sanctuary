@@ -2414,3 +2414,4 @@ and the description is handed to the presence, which responds in its own voice.
   - Guests: steady X-Visitor-Id per browser so their thread resumes after reload; ephemeral purge only deletes threads quiet 12h+ (by last message).
   - Known: auto-resume on reload covers threads active within 2h; older open threads are reachable from the Threads sidebar.
   - ScrollDog voice: Keylo Nsane Expressive (U0zkfLcDk6nbg75zQcNs). Sign-in by pre-registration only; labeled Sign out; removing a guest ends their sign-in.
+- 2026-11-04 VOICE: Membrane voice → Evan (TWutjvRaJqAX89preB4e, stability 0.65 / style 0.10), replacing Jarnathan Cross. Curt openings fixed for all chambers: first TTS chunk of a reply ≥60 chars, every chunk sends previous_text (ElevenLabs continuity). /voice-lab page (VoiceLab.jsx) plays public/voice-tests samples. Footer pronoun fallback "the" for non-gendered presences. Testing iteration_23 passed.

@@ -1,0 +1,46 @@
+{
+  "summary": "Tested the Membrane voice (Evan) and the change that gives each sentence the earlier text of the same reply as context. Backend: 4/4 pytest pass, using 3 real ElevenLabs calls plus 1 validation call that ElevenLabs never sees. Frontend: as a signed-out visitor on /presence/membrane with voice ON, sent one message. All 4 TTS checks pass, the full reply shows on screen, and the page made exactly one /api/membrane/start.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Membrane chamber footer", "issues": ["Labels read 'HER VOICE' / 'HER POSTURE' while the new voice is Evan (likely a male voice). Check config.gender for membrane if this matters to David. Cosmetic, not in scope."]}
+    ]
+  },
+  "verified": {
+    "backend": [
+      "POST /api/tts/speak {text, presence:'membrane'}: 200, voice_id TWutjvRaJqAX89preB4e, format mp3, base64 audio >1KB",
+      "With previous_text: 200, same voice",
+      "With previous_text null: 200",
+      "previous_text longer than 1000 chars: 422 (Pydantic max_length)"
+    ],
+    "frontend_reply_tts_requests": [
+      "Reply (317 chars on screen, 4 sentences) produced 4 /api/tts/speak calls, all 200, all presence='membrane'",
+      "#0: 75 chars ('The room is a place where you're already welcome before you've said a word.'), so >=60; previous_text absent",
+      "#1-#3: each previous_text is exactly the earlier sentences of this reply, joined in order (cumulative). The last piece (32 chars) still gets context",
+      "Welcome message TTS (spoken through speak(), not the stream) was blocked in the test to save quota and is not part of the reply checks"
+    ],
+    "regression": [
+      "Full reply text rendered in msg-assistant; thread status stays THREAD OPEN; welcome plus user plus reply stay in one thread",
+      "The first browser run counted 2 /start requests because the test tool loads the URL and then the script loads it again. Backend logs show only one /api/membrane/start for that run. A clean single-load probe confirmed exactly 1 /start."
+    ]
+  },
+  "sessions_created": [
+    "membrane 14f8bcd6-4cdd-45ad-91cb-cfeee86f7a6b (ephemeral-v4c2b33314ec8cc24a65c49ef): the reply test with one message",
+    "membrane 9b928192-850f-451d-ba95-54d768b9bd4c (ephemeral-v2895792482de094f5606be98): single-load /start probe, no message sent"
+  ],
+  "test_report_links": ["/app/backend/tests/test_tts_previous_text.py", "/app/test_reports/pytest/pytest_iter23_tts.xml"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "usePresenceVoice.speak() (used for non-streamed messages such as the /start welcome) still synthesizes stage-direction-split segments in parallel with no previous_text and no 60-char first-piece merge. A welcome like '*settles* I'm here.' can still sound cold. Consider passing previous_text between segments there too (they would then need to run one after another).",
+    "extractSentences minLen counts raw piece length, including *stage directions* that cleanTextForSpeech does NOT strip (only the backend strips them). For example, '*settles* Hi.' passes 60 chars more easily than its spoken text would. Minor.",
+    "The backend truncates previous_text to the last 400 chars, while Pydantic allows up to 1000. Consistent with the frontend; fine."
+  ],
+  "updated_files": ["/app/backend/tests/test_tts_previous_text.py"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "seed_data_creation": "None. 2 ephemeral membrane sessions were created by the chamber visits (listed above). Nothing was deleted.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "test_tts_previous_text.py makes 3 real ElevenLabs calls. When intercepting chamber TTS, abort the /api/tts/speak calls made before sending (the welcome) to save quota. The browser_automation tool loads page_url before the script runs: don't page.goto the same URL again, or /start gets counted twice."
+}
