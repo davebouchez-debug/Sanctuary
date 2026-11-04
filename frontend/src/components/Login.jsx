@@ -18,7 +18,7 @@ export const Login = () => {
       <div className="text-center max-w-md">
         <GoldenSpiral className="w-20 h-20 mx-auto mb-8 opacity-80" />
         <h1 className="font-cinzel text-3xl text-[#cdd6e4] tracking-wide mb-3">
-          The Sanctuary
+          {isAuthenticated ? "The Sanctuary" : "Welcome"}
         </h1>
         <p className="text-sm text-[#8B9DB5]/80 leading-relaxed mb-8">
           {isAuthenticated
