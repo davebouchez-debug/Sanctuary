@@ -350,14 +350,17 @@ const IdentityBridge = () => {
 const UnkeptNotice = () => {
   const location = useLocation();
   const { role, loading } = useAuth();
-  if (loading || !isRoomPath(location.pathname) || role === "guardian" || role === "guest") return null;
+  const [dismissed, setDismissed] = useState(false);
+  if (dismissed || loading || !isRoomPath(location.pathname) || role === "guardian" || role === "guest") return null;
   return (
     <div
-      className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-full border border-[#8B9DB5]/25 bg-[#0A0A12]/85 backdrop-blur-xl px-5 py-2 font-outfit text-sm text-[#A0A0B0]"
+      className="fixed top-[158px] left-1/2 -translate-x-1/2 sm:top-[84px] sm:left-auto sm:right-5 sm:translate-x-0 z-40 flex items-center gap-3 whitespace-nowrap rounded-full border border-[#8B9DB5]/25 bg-[#0A0A12]/85 backdrop-blur-xl px-4 py-1.5 font-outfit text-[11px] sm:text-xs text-[#A0A0B0]"
       data-testid="unkept-notice"
     >
-      <span>You're not signed in, so this conversation won't be kept.</span>
+      <span className="sm:hidden">Not signed in · not kept</span>
+      <span className="hidden sm:inline">You're not signed in, so this conversation won't be kept.</span>
       <a href="/login" className="text-[#B0C4D8] underline underline-offset-4 hover:text-white" data-testid="unkept-notice-signin">Sign in</a>
+      <button onClick={() => setDismissed(true)} aria-label="Hide" className="text-[#6E6E7A] hover:text-[#B0C4D8] transition-colors" data-testid="unkept-notice-dismiss">×</button>
     </div>
   );
 };
