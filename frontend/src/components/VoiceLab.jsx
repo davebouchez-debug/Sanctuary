@@ -1,7 +1,9 @@
 const SAMPLES = [
-  { id: "a-current", label: "A · Current settings" },
-  { id: "b-steady", label: "B · Steadier, less drama, a touch slower" },
-  { id: "c-steady-rich", label: "C · Steadier, on the richer engine" },
+  { id: "august", label: "1 · august: androgynous, natural, quietly sharp" },
+  { id: "shawn", label: "2 · Shawn: calm, grounded, contemplative" },
+  { id: "evan", label: "3 · Evan: warm, mid-low, conversational" },
+  { id: "nathan", label: "4 · Nathan: British, refined, serene" },
+  { id: "shannon", label: "5 · Shannon: Irish, measured, calm" },
 ];
 
 export default function VoiceLab() {
@@ -10,7 +12,7 @@ export default function VoiceLab() {
       <div className="max-w-xl mx-auto">
         <h1 className="font-cinzel text-2xl tracking-wider text-[#B0C4D8] mb-2">Membrane · Voice Lab</h1>
         <p className="font-outfit text-sm text-[#A0A0B0] mb-10">
-          Jarnathan Cross reading the same line three ways.
+          Five voices reading the same line, with the same calm settings.
         </p>
         <div className="space-y-6">
           {SAMPLES.map((s) => (
