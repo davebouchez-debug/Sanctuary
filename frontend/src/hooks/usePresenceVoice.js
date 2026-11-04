@@ -167,6 +167,7 @@ export const usePresenceVoice = (presenceName = "jasmine") => {
   // Sentence-stream state — used by speakStream/flushStream for chunked TTS
   // while a chamber's response is still being typed token-by-token.
   const streamCursorRef = useRef(0);          // chars of accumulated text already spoken
+  const streamSpokenRef = useRef("");         // text already sent for this reply (TTS context)
   const streamPendingRef = useRef([]);        // pending TTS promises in order
   const streamPlayingRef = useRef(false);     // are we already pumping the queue?
   const streamSessionRef = useRef(0);         // bumped on stop, used to abort stale segments
@@ -192,6 +193,7 @@ export const usePresenceVoice = (presenceName = "jasmine") => {
     // Invalidate any in-flight sentence-stream segments
     streamSessionRef.current += 1;
     streamCursorRef.current = 0;
+    streamSpokenRef.current = "";
     streamPendingRef.current = [];
     streamPlayingRef.current = false;
     genTailRef.current = Promise.resolve();
@@ -255,13 +257,15 @@ export const usePresenceVoice = (presenceName = "jasmine") => {
   }, []);
 
   // Generate audio for a text segment
-  const generateAudio = useCallback(async (text, signal) => {
+  const generateAudio = useCallback(async (text, signal, previousText = "") => {
     const response = await fetch(`${API}/tts/speak`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         text: text.substring(0, 4096),
-        presence: presenceName
+        presence: presenceName,
+        // What was just said, so the voice carries its delivery across sentences.
+        previous_text: previousText ? previousText.slice(-400) : undefined,
       }),
       signal
     });
@@ -431,7 +435,10 @@ export const usePresenceVoice = (presenceName = "jasmine") => {
         let j = i + 1;
         while (j < text.length && /[.!?\s)"'\u201D\u2019]/.test(text[j])) j++;
         const piece = text.slice(chunkStart, j).trim();
-        if (piece.length >= 6) {
+        // A reply's first piece needs enough words to be read naturally; a lone
+        // "I'm here." read cold comes out curt, so short openers join the next sentence.
+        const minLen = chunkStart === 0 ? 60 : 6;
+        if (piece.length >= minLen) {
           out.push(piece);
           chunkStart = j;
         }
@@ -463,13 +470,15 @@ export const usePresenceVoice = (presenceName = "jasmine") => {
     const session = streamSessionRef.current;
     const controller = new AbortController();
     const prevTail = genTailRef.current;
+    const cleaned = cleanTextForSpeech(sentence);
+    const previousText = streamSpokenRef.current;
+    if (cleaned) streamSpokenRef.current = `${previousText} ${cleaned}`.trim();
     const promise = (async () => {
-      const cleaned = cleanTextForSpeech(sentence);
       if (!cleaned) return null;
       try { await prevTail; } catch { /* prior segment failed/aborted — proceed */ }
       // If a stop() happened while we waited, don't fire a stale request.
       if (session !== streamSessionRef.current) return null;
-      return await generateAudio(cleaned, controller.signal);
+      return await generateAudio(cleaned, controller.signal, previousText);
     })();
     genTailRef.current = promise.catch(() => {});
     streamPendingRef.current.push({ session, promise, controller });
@@ -500,6 +509,7 @@ export const usePresenceVoice = (presenceName = "jasmine") => {
     // Reset cursor for the next message; the pump will drain naturally.
     // Don't bump session here — that would cancel queued segments.
     streamCursorRef.current = 0;
+    streamSpokenRef.current = "";
   }, [isEnabled, enqueueSentence]);
 
   return {
