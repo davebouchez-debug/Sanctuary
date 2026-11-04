@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown, Radio, ScrollText, Search, FlaskConical } from "lucide-react";
+import { Menu, X, ChevronDown, Radio, ScrollText, Search, FlaskConical, Home } from "lucide-react";
 import axios from "axios";
 import { GoldenSpiral } from "./GoldenSpiral";
 import { API } from "../App";
@@ -160,6 +160,15 @@ export const Navigation = () => {
   if (isChamberRoute) {
     return (
       <div className="fixed right-6 top-5 z-[60] flex items-center gap-4" data-testid="nav-utility-cluster">
+        <Link
+          to="/"
+          title="Back to the Sanctuary"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs tracking-wide text-[#cdd6e4] bg-[#8B9DB5]/12 border border-[#8B9DB5]/35 hover:bg-[#8B9DB5]/22 transition-colors"
+          data-testid="nav-home-btn"
+        >
+          <Home size={14} />
+          <span className="hidden sm:inline">Sanctuary</span>
+        </Link>
         <AuthControl />
         <IntegrationStatus />
       </div>
