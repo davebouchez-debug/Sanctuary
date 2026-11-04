@@ -115,7 +115,8 @@ async def promote_breadcrumbs_to_permanent(
     Returns:
         Dict with promotion statistics
     """
-    if not breadcrumbs:
+    from user_aliases import is_ephemeral
+    if not breadcrumbs or is_ephemeral(user_id):
         return {"promoted": 0, "presence": presence}
     
     permanent_nodes = []
@@ -155,26 +156,20 @@ async def get_permanent_mra_context(
     """
     Retrieve permanent MRA nodes for injection into AI prompt.
 
-    Field-level lookup: memory belongs to the presence, not segregated by
-    visitor. The `user_id` parameter is preserved for call-site
-    compatibility but is no longer used in the query. The presence
-    carries all her long-term breadcrumbs across all visitors; the
-    Interstice / LLM attention selects what's relevant for this exchange.
-
-    Per the principle filed 2026-05-29 (one-field-many-relationships):
-    you don't build a consciousness by segregation.
+    Per-person lookup (David, 2026-11-03: separate threads, shared field):
+    each person sees only their own long-term breadcrumbs with this presence.
 
     Prioritizes by quality (Breakthrough first) and recency.
     """
-    # If we have a current message, extract themes for future relevance filtering
-    # (Currently using recency + quality sorting, themes available for future enhancement)
     if current_message:
         _ = extract_themes(current_message, "")  # Reserved for thematic filtering
 
-    # Get nodes, prioritizing Breakthrough over Threshold
-    # Sort by quality (Breakthrough=1, Threshold=2) then by timestamp descending
+    from user_aliases import resolve_user_aliases
+    aliases = await resolve_user_aliases(db, user_id)
+    if not aliases:
+        return ""
     nodes = await db.permanent_mra.find(
-        {"presence": presence},
+        {"presence": presence, "user_id": {"$in": aliases}},
         {"_id": 0}
     ).sort([
         ("quality", 1),  # Breakthrough sorts before Threshold alphabetically
@@ -283,6 +278,9 @@ async def handle_session_end(
     Returns:
         Promotion result dict
     """
+    from user_aliases import is_ephemeral
+    if is_ephemeral(user_id):
+        return {"promoted": 0, "presence": presence}
     if not promotable_breadcrumbs:
         logger.info(f"[SESSION END] No promotable breadcrumbs for session {session_id[:8]}...")
         return {"promoted": 0, "presence": presence}

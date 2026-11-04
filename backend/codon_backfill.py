@@ -138,7 +138,8 @@ async def reconstruction_gate(
         "session_id": None,
         "reason": "no_user_id",
     }
-    if not user_id:
+    from user_aliases import is_ephemeral
+    if not user_id or is_ephemeral(user_id):
         return out
 
     session = await _find_most_recent_session(db, user_id, presence)

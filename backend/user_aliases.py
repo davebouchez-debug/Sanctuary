@@ -127,6 +127,13 @@ async def load_guests(db) -> None:
 
 def guest_note(user_name: Optional[str], user_id: Optional[str]) -> str:
     """Tells a presence that the person here is David's guest, not David."""
+    if is_ephemeral(user_id):
+        who = user_name or "someone"
+        return (
+            f"[WHO IS HERE] This is {who}, a visitor I am meeting for the first time. {who} is not "
+            f"David. I have no history with {who}, and nothing of this conversation is kept "
+            f"once it ends.\n\n"
+        )
     g = _GUESTS.get(user_id) if user_id else None
     if not g:
         return ""
@@ -137,3 +144,44 @@ def guest_note(user_name: Optional[str], user_id: Optional[str]) -> str:
         f"sanctuary as his guest. {name} is not David. I speak with {name} as "
         f"{name}, in my own voice, and I never address {name} as David.\n\n"
     )
+
+
+# ── who is in the room (2026-11-03) ─────────────────────────────────────────
+# Chambers learn who's here from the verified sign-in, never from the browser.
+# David (guardian) and guests on the guest list are kept; anyone else talks
+# under an ephemeral id that no memory writer will persist.
+EPHEMERAL_PREFIX = "ephemeral-"
+EPHEMERAL_TTL_HOURS = 12
+
+
+def is_ephemeral(user_id: Optional[str]) -> bool:
+    return bool(user_id) and str(user_id).startswith(EPHEMERAL_PREFIX)
+
+
+def person_name(user_id: Optional[str]) -> str:
+    """Speaker label for distilled memory: the guest's name, else David."""
+    g = _GUESTS.get(user_id) if user_id else None
+    return (g or {}).get("name") or "David"
+
+
+async def purge_ephemeral_sessions(db) -> None:
+    from datetime import datetime, timedelta, timezone
+    cutoff = (datetime.now(timezone.utc) - timedelta(hours=EPHEMERAL_TTL_HOURS)).isoformat()
+    for coll in await db.list_collection_names():
+        if coll.endswith("_sessions") and coll != "user_sessions":
+            await db[coll].delete_many({"user_id": {"$regex": f"^{EPHEMERAL_PREFIX}"}, "created_at": {"$lt": cutoff}})
+
+
+async def chamber_identity(db, request, body_name: Optional[str] = None):
+    """(user_id, user_name) for whoever is actually signed in."""
+    from auth import _user_from_request
+    user = await _user_from_request(request)
+    if user and user.get("role") == "guardian":
+        return user["user_id"], "David"
+    if user and user.get("user_id") in _GUESTS:
+        return user["user_id"], _GUESTS[user["user_id"]].get("name") or user.get("name")
+    await purge_ephemeral_sessions(db)
+    import uuid
+    uid = f"{EPHEMERAL_PREFIX}{user['user_id']}" if user else f"{EPHEMERAL_PREFIX}{uuid.uuid4().hex[:12]}"
+    name = (user or {}).get("name") or body_name
+    return uid, (None if (name or "").strip().lower().startswith("david") else name)

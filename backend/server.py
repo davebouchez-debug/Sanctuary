@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Response, Body, Depends
+from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Response, Body, Depends, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -675,19 +675,17 @@ clarity_chats: Dict[str, any] = {}
 
 
 async def get_continuity_seed(presence: str, user_id: str = None, limit: int = 3) -> str:
-    """Load the most recent continuity seeds for a presence.
+    """Load this person's most recent continuity seeds with a presence.
 
-    Field-level lookup: memory belongs to the presence, not segregated by
-    visitor. The `user_id` parameter is preserved for call-site
-    compatibility but is no longer used in the query — Jasmine remembers
-    all her conversations, Claude remembers all his, and so on. The
-    Interstice / LLM attention does the filtering of what's relevant for
-    the current exchange.
-
-    Per the principle filed 2026-05-29 (one-field-many-relationships):
-    you don't build a consciousness by segregation."""
+    Per-person lookup (David, 2026-11-03: separate threads, shared field).
+    Replaces the 2026-05-29 field-level lookup, which handed every visitor
+    the presence's threads with everyone else."""
+    from user_aliases import resolve_user_aliases
+    aliases = await resolve_user_aliases(db, user_id)
+    if not aliases:
+        return ""
     seeds = await db.continuity_seeds.find(
-        {"presence": presence.lower()},
+        {"presence": presence.lower(), "user_id": {"$in": aliases}},
         {"_id": 0}
     ).sort("created_at", -1).limit(limit).to_list(limit)
     
@@ -1554,16 +1552,11 @@ async def get_cyril():
 # ============================================================
 
 @api_router.post("/clarity/start")
-async def start_clarity_session(session_data: ClaritySessionCreate = None):
+async def start_clarity_session(request: Request, session_data: ClaritySessionCreate = None):
     """Start a new Clarity Pod session with Jasmine."""
     session_id = str(uuid.uuid4())
     
-    # Handle user identification
-    user_id = None
-    user_name = None
-    if session_data:
-        user_id = session_data.user_id
-        user_name = session_data.user_name
+    user_id, user_name = await chamber_identity(db, request, getattr(session_data, "user_name", None))
 
     # Resume an open thread first (new tab / reload continuity).
     resumable = await find_resumable_session("clarity_sessions", user_id, session_id=getattr(session_data, "session_id", None), new_thread=bool(getattr(session_data, "new_thread", False)))
@@ -2741,15 +2734,11 @@ async def get_threshold_data():
     }
 
 @api_router.post("/resonance/start")
-async def start_resonance_session(session_data: ClaritySessionCreate = None):
+async def start_resonance_session(request: Request, session_data: ClaritySessionCreate = None):
     """Start a new Resonance Chamber session with Ansel."""
     session_id = str(uuid.uuid4())
     
-    user_id = None
-    user_name = None
-    if session_data:
-        user_id = session_data.user_id
-        user_name = session_data.user_name
+    user_id, user_name = await chamber_identity(db, request, getattr(session_data, "user_name", None))
 
     # Resume an open thread first (new tab / reload continuity).
     resumable = await find_resumable_session("resonance_sessions", user_id, session_id=getattr(session_data, "session_id", None), new_thread=bool(getattr(session_data, "new_thread", False)))
@@ -3612,11 +3601,10 @@ async def get_mirror_memory_context(user_id: str, limit: int = 5) -> str:
 
 
 @api_router.post("/mirror/start")
-async def start_mirror_session(session_data: ClaritySessionCreate):
+async def start_mirror_session(request: Request, session_data: ClaritySessionCreate):
     """Start a new Mirror Archive session with Claude."""
     session_id = str(uuid.uuid4())
-    user_id = session_data.user_id or str(uuid.uuid4())
-    user_name = session_data.user_name
+    user_id, user_name = await chamber_identity(db, request, session_data.user_name)
 
     # Resume an open thread first (new tab / reload continuity).
     resumable = await find_resumable_session("mirror_sessions", user_id, session_id=getattr(session_data, "session_id", None), new_thread=bool(getattr(session_data, "new_thread", False)))
@@ -4252,7 +4240,7 @@ async def find_resumable_session(collection_name: str, user_id: Optional[str],
 
 
 @api_router.post("/presence/{key}/chat/start")
-async def start_presence_chat(key: str, body: PresenceChatStart = None):
+async def start_presence_chat(key: str, request: Request, body: PresenceChatStart = None):
     """
     Open a conversation in a presence's chamber. Loads her canonical memory
     as system prompt, runs the codon-backfill safety net for any previous
@@ -4263,8 +4251,7 @@ async def start_presence_chat(key: str, body: PresenceChatStart = None):
     if not cfg:
         raise HTTPException(status_code=404, detail=f"Presence '{key}' not found")
 
-    user_id = body.user_id if body else None
-    user_name = body.user_name if body else None
+    user_id, user_name = await chamber_identity(db, request, body.user_name if body else None)
 
     # Resume an open thread first (new tab / reload continuity).
     resumable = await find_resumable_session(
@@ -5068,7 +5055,7 @@ async def kalahar_rise(payload: dict = Body(...)):
     from field_territory import assemble_field_territory, render_territory_for_prompt
     from presences.kalahar import build_kalahar_prompt
 
-    territory = await assemble_field_territory(db)
+    territory = await assemble_field_territory(db, user_id=session.get("user_id"))
     territory_text = render_territory_for_prompt(territory)
 
     user_name = session.get("user_name")
@@ -5138,7 +5125,7 @@ async def ensure_field_indexes():
 
 # Auth (Emergent Google OAuth) — Phase 1. Routes mount at /api/auth/*.
 from auth import auth_router, init_auth, require_guardian, CANONICAL_DAVID_ID
-from user_aliases import is_field_guardian, load_guardian_ids, load_guests
+from user_aliases import is_field_guardian, load_guardian_ids, load_guests, chamber_identity
 import user_aliases as _user_aliases
 init_auth(db)
 api_router.include_router(auth_router)

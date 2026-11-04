@@ -73,6 +73,9 @@ async def auto_forge_session(db, session_id: str, presence: str,
     from a completed conversation.
     Returns number of codons extracted and saved.
     """
+    from user_aliases import is_ephemeral, person_name
+    if is_ephemeral(user_id):
+        return 0
     # Forge each message once: a reopened thread only forges its new part.
     messages = await _claim_unforged(db, session_id, messages)
     if not messages:
@@ -84,7 +87,7 @@ async def auto_forge_session(db, session_id: str, presence: str,
         role = msg.get("role", "")
         content = msg.get("content", "")
         if role in ("user", "assistant") and content:
-            speaker = "David" if role == "user" else presence.capitalize()
+            speaker = person_name(user_id) if role == "user" else presence.capitalize()
             conversation.append(f"{speaker}: {content}")
 
     if len(conversation) < 2:

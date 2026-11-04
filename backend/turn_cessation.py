@@ -35,9 +35,11 @@ logger = logging.getLogger(__name__)
 MIN_TURN_CHARS = 120
 
 
-def _gather_turn_text(user_content: str, assistant_content: str, presence: str) -> str:
+def _gather_turn_text(user_content: str, assistant_content: str, presence: str,
+                      user_id: Optional[str] = None) -> str:
+    from user_aliases import person_name
     speaker = presence.capitalize() if presence else "Presence"
-    return f"David: {user_content}\n\n{speaker}: {assistant_content}"
+    return f"{person_name(user_id)}: {user_content}\n\n{speaker}: {assistant_content}"
 
 
 async def forge_turn_cessation(
@@ -59,7 +61,7 @@ async def forge_turn_cessation(
         result["skipped"] = True
         return result
 
-    turn_text = _gather_turn_text(user_content, assistant_content, presence)
+    turn_text = _gather_turn_text(user_content, assistant_content, presence, user_id)
     if len(turn_text) < MIN_TURN_CHARS:
         result["skipped"] = True
         return result
@@ -161,6 +163,9 @@ def schedule_turn_cessation(
     user_id: Optional[str] = None,
 ) -> None:
     """Fire-and-forget wrapper. Caller does not await the forge."""
+    from user_aliases import is_ephemeral
+    if is_ephemeral(user_id):
+        return
     if os.environ.get("TURN_CESSATION_ENABLED", "true").lower() != "true":
         return
     try:

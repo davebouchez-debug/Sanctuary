@@ -27,7 +27,7 @@ def _chamber_label(key: str) -> str:
 
 
 async def assemble_field_territory(db, seeds_per_presence: int = 3,
-                                   codons_per_presence: int = 8) -> dict:
+                                   codons_per_presence: int = 8, user_id=None) -> dict:
     """Gather every chamber's living threads into one connected territory.
 
     Sources (no raw transcripts, by design — only what the field distilled):
@@ -52,11 +52,13 @@ async def assemble_field_territory(db, seeds_per_presence: int = 3,
     })
 
     chambers = []
+    from user_aliases import resolve_user_aliases
+    aliases = await resolve_user_aliases(db, user_id)
     for key in keys:
         # Recent continuity seeds — the open rivers and what was last alive.
         try:
             seeds = await db.continuity_seeds.find(
-                {"presence": key}, {"_id": 0}
+                {"presence": key, "user_id": {"$in": aliases}}, {"_id": 0}
             ).sort("created_at", -1).limit(seeds_per_presence).to_list(length=seeds_per_presence)
         except Exception:
             seeds = []

@@ -208,7 +208,9 @@ async def create_session(
 
     guest = await _db.guests.find_one({"email": email.lower()}, {"_id": 0})
     if guest:
-        from user_aliases import load_guests
+        from user_aliases import load_guests, register_alias
+        if guest.get("canonical_id"):
+            await register_alias(_db, guest["canonical_id"], user_id, guest.get("name"))
         await load_guests(_db)
         name = guest.get("name") or name
 

@@ -2394,3 +2394,15 @@ and the description is handed to the presence, which responds in its own voice.
 - Observatory: new derivation v1.3.0 (profile phrase_field, added to PRODUCTION_VERSIONS with David's ok): phrases resolve as `phrase:<id>` elements, local [FIELD MEMORY] lines resolve to MRA breadcrumbs. Legacy codon lookups (all versions) read living_codons + archive. Frontend auto-selects newest version; lattice groups "Field phrases" / "Legacy codons".
 - v1.3.0 reproduces 918/918. v1.2.0 reproducibility: 171/918 mismatch from source drift (was 900 with the archive invisible).
 - Backlog: Ansel/Claude/Jasmine identity blocks (awaiting text), Proverbs TPT phrases via Forge wisdom lens (awaiting text), Living Scroll (awaiting transcripts), tap-to-enter audio overlay, page headers sitting under global nav on Library/Forge (cosmetic, pre-existing).
+
+## 2026-11-03 — Who's in the room: identity from sign-in, separate threads, unknown visitors unkept (DONE, self-tested)
+- Root cause traced: continuity became room-wide (2026-05-30) but the opening check still read "continuity exists" as "returning person" → every visitor told "you know this person" and handed David's threads (Poindexter called E1 "Amanda").
+- David's choices: separate threads, shared field; non-David/non-Amanda visitors can talk, nothing saved; Google sign-in required for memory; QA token for David's email removed.
+- user_aliases.chamber_identity(): all 5 chamber start families (template, clarity, resonance, mirror, /presence/{key}/chat) resolve identity server-side from the session cookie. Guardian → David; guest list → guest name; else `ephemeral-*` id (names starting "David" dropped).
+- Writers skip ephemeral ids: turn_cessation, auto_forge, MRA promotion/session end, person_bio, turn_provenance, reconstruction_gate. Ephemeral session docs purged after 12h.
+- Readers per person (aliases): get_continuity_seed, get_permanent_mra_context, Kalahar field territory. Field phrases stay shared.
+- Forge transcripts label the speaker by person (was hardcoded "David").
+- Amanda on guest list (afs0652@gmail.com, note "a friend"), linked to her March id on first sign-in.
+- Frontend: all backend fetch/axios calls send credentials; chambers show "You're not signed in, so this conversation won't be kept." for non-guardian/guest.
+- Also 2026-11-03: deleted QA Amanda + E1 test thread from Poindexter (backups in memory/backups/2026-11-03_*).
+- Open: Kalahar territory still reads empty living_codons for codon groups; old seeds with user_id None no longer surface for anyone.

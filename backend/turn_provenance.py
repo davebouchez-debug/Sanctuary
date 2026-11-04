@@ -68,7 +68,8 @@ async def record_turn(
     ordered input for later integrity verification (the hash asserts the
     snapshot is unchanged; it says nothing about the content itself).
     """
-    if not _enabled():
+    from user_aliases import is_ephemeral
+    if not _enabled() or is_ephemeral(user_id):
         return
     database = db if db is not None else _db
     if database is None:

@@ -58,7 +58,8 @@ async def update_person_bio_from_seed(
     Fire-and-forget safe: never raises into the caller. Called from
     turn_cessation after the seed is written, so it costs no extra LLM call.
     """
-    if _db is None or not user_id:
+    from user_aliases import is_ephemeral
+    if _db is None or not user_id or is_ephemeral(user_id):
         return
     try:
         presence = (presence or "").lower()

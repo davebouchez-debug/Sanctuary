@@ -43,7 +43,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Callable, Optional, Any
 
-from fastapi import APIRouter, HTTPException, Body
+from fastapi import APIRouter, HTTPException, Body, Request
 from fastapi.responses import StreamingResponse
 
 logger = logging.getLogger(__name__)
@@ -268,10 +268,10 @@ def register_presence_routes(
 
     # ────────────── START ──────────────
     @api_router.post(f"{base}/start", name=f"{cfg.key}_start")
-    async def start_session(session_data: Optional[dict] = Body(default=None)):
+    async def start_session(request: Request, session_data: Optional[dict] = Body(default=None)):
+        from user_aliases import chamber_identity
         session_id = str(uuid.uuid4())
-        user_id = (session_data or {}).get("user_id")
-        user_name = (session_data or {}).get("user_name")
+        user_id, user_name = await chamber_identity(deps.db, request, (session_data or {}).get("user_name"))
 
         # Reopen a chosen thread, or resume an open one after reload (<2h).
         if user_id:
