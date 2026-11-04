@@ -303,5 +303,8 @@ async def remove_guest(email: str, request: Request):
     email = email.strip().lower()
     await _db.guests.delete_one({"email": email})
     await _db.users.update_one({"email": email, "role": "guest"}, {"$set": {"role": "visitor"}})
+    removed = await _db.users.find_one({"email": email}, {"user_id": 1})
+    if removed:
+        await _db.user_sessions.delete_many({"user_id": removed["user_id"]})
     await _refresh_guests()
     return {"ok": True}
