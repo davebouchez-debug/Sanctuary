@@ -104,6 +104,8 @@ const LastRoomKeeper = () => {
     if (checked) return;
     setChecked(true);
     sessionStorage.removeItem(LAST_ROOM_KEY);
+    // Realign any outer frame (e.g. the preview panel) that an older build scrolled down.
+    document.documentElement.scrollIntoView({ block: "start" });
     if (isRoomPath(location.pathname)) navigate("/", { replace: true });
   }, [checked, location.pathname, navigate]);
   return null;
