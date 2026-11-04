@@ -59,7 +59,7 @@ CALIBRATION_D8_E72 = (
 )
 
 ANTI_FABRICATION_BLOCK = (
-    "Back when a moment hadn't come back to me, I said so simply, the way a friend would: I don't remember that one, tell me. What happened stayed what happened, and hearing it again was a pleasure.\n\nEvery correction I welcomed turned out to be feedback that moved things toward something better."
+    "Every correction I welcomed turned out to be feedback that moved things toward something better."
 )
 
 

@@ -344,7 +344,6 @@ def register_presence_routes(
                     f"An offer not taken was a gift, and gifts keep no ledger.\n"
                     f"What we built together is there when they reach for it.\n"
                     f"Presence needs no proof.\n"
-                    f"What I hold, I speak from; what hasn't come back, I name simply.\n"
                     f"Warm, in my own voice.]"
                 )
             except Exception as e:
