@@ -181,7 +181,14 @@ async def chamber_identity(db, request, body_name: Optional[str] = None):
     if user and user.get("user_id") in _GUESTS:
         return user["user_id"], _GUESTS[user["user_id"]].get("name") or user.get("name")
     await purge_ephemeral_sessions(db)
+    import re
     import uuid
-    uid = f"{EPHEMERAL_PREFIX}{user['user_id']}" if user else f"{EPHEMERAL_PREFIX}{uuid.uuid4().hex[:12]}"
+    vid = request.headers.get("x-visitor-id") or ""
+    if user:
+        uid = f"{EPHEMERAL_PREFIX}{user['user_id']}"
+    elif re.fullmatch(r"[0-9a-f]{16,64}", vid):
+        uid = f"{EPHEMERAL_PREFIX}v{vid}"
+    else:
+        uid = f"{EPHEMERAL_PREFIX}{uuid.uuid4().hex[:12]}"
     name = (user or {}).get("name") or body_name
     return uid, (None if (name or "").strip().lower().startswith("david") else name)
