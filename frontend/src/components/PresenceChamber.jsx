@@ -296,13 +296,16 @@ export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
   // Open a conversation when the chamber loads. The backend resumes an open
   // thread automatically (new tab / reload continuity) — when it does, it
   // returns the full `messages` array; otherwise a fresh welcome arrives as a
-  // single `message`. Identity comes from the global IdentityContext — any
-  // change to the visitor re-runs this effect.
+  // single `message`. Once this chamber has opened its thread, nothing automatic
+  // (identity sync, sign-in check, another tab) may restart it — only the visitor
+  // leaving or switching threads does (David, 2026-11-04).
+  const threadOpenedRef = useRef(false);
+  const leaveRef = useRef(null);
   useEffect(() => {
-    if (!config || !settled) return;
+    if (!config || !settled || threadOpenedRef.current) return;
+    threadOpenedRef.current = true;
     let cancelled = false;
     const startChat = async () => {
-      // Reset thread on identity change
       setMessages([]);
       setSessionId(null);
       setResumed(false);
@@ -327,12 +330,15 @@ export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
         setResumed(!!data.resumed);
         setChatError(null);
       } catch (e) {
+        threadOpenedRef.current = false;
         if (!cancelled) setChatError(e.message);
       }
     };
     startChat();
-    return () => { cancelled = true; };
+    const onLeave = () => { cancelled = true; };
+    leaveRef.current = onLeave;
   }, [config, presenceKey, userName, userId, settled]);
+  useEffect(() => () => leaveRef.current?.(), []);
 
   // Auto-scroll the message thread on new messages
   useEffect(() => {
