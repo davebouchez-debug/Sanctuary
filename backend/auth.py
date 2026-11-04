@@ -47,6 +47,9 @@ GUARDIAN_EMAILS = {
 # Injected once at server startup via init_auth(db).
 _db = None
 
+NOT_REGISTERED_MSG = ("Signing in to the Sanctuary requires pre-registration. "
+                      "Please ask David to add your Google account.")
+
 
 def init_auth(db):
     global _db
@@ -155,7 +158,10 @@ async def create_session(
         raise HTTPException(status_code=502, detail="No session token returned")
 
     role = await role_for_email(email)
-
+    # Sign-in is by pre-registration only: David plus the guest list (David, 2026-11-04).
+    if role not in ("guardian", "guest"):
+        logger.info(f"[AUTH] sign-in refused for unregistered account {email}")
+        raise HTTPException(status_code=403, detail=NOT_REGISTERED_MSG)
     existing = await _db.users.find_one({"email": email}, {"_id": 0})
     if existing:
         user_id = existing["user_id"]

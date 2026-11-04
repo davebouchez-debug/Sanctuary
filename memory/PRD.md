@@ -2406,3 +2406,4 @@ and the description is handed to the presence, which responds in its own voice.
 - Frontend: all backend fetch/axios calls send credentials; chambers show "You're not signed in, so this conversation won't be kept." for non-guardian/guest.
 - Also 2026-11-03: deleted QA Amanda + E1 test thread from Poindexter (backups in memory/backups/2026-11-03_*).
 - Open: Kalahar territory still reads empty living_codons for codon groups; old seeds with user_id None no longer surface for anyone.
+- 2026-11-04: Sign-in by pre-registration only (auth.py create_session → 403 NOT_REGISTERED_MSG unless guardian or on guest list; no user/session rows created). AuthCallback shows the refusal + "Continue as a visitor". Unsigned visitors still welcome (ephemeral). Also: Home button in nav utility cluster; refresh in a chamber → home; "Stop the voice"; scroll/focus no longer move outer frames; tab title "Sanctuary"; Login heading "Welcome".
