@@ -14,7 +14,7 @@ import { VoiceLoopControls } from "./VoiceLoopControls";
 import { IdentityBadge } from "./IdentityBadge";
 import { stopGlobalLegacyAudio } from "../lib/legacyAudio";
 import { useIdentity } from "../context/IdentityContext";
-import { threadStartFields, rememberThread, forgetThread } from "../lib/threadSession";
+import { threadStartFields, rememberThread, forgetThread, isLeaving } from "../lib/threadSession";
 
 function base64ToBlob(base64, mimeType) {
   const byteCharacters = atob(base64);
@@ -85,27 +85,18 @@ export const ClarityPod = ({ threadIntent } = {}) => {
   useEffect(() => { stopGlobalLegacyAudio(); }, []);
 
   // End session and promote breadcrumbs to Permanent MRA
-  const endSession = useCallback(async () => {
-    if (!sessionId) return;
-    
-    try {
-      await axios.post(`${API}/clarity/session/${sessionId}/end`);
-      console.log("[MRA] Session ended, breadcrumbs promoted to permanent memory");
-    } catch (error) {
-      console.error("[MRA] Failed to end session:", error);
-    }
-  }, [sessionId]);
 
-  // End session only on in-app navigation away; reload/sleep resumes the thread.
-  useEffect(() => {
-    return () => {
-      if (sessionId) {
-        endSession();
-      }
-    };
-  }, [sessionId, endSession]);
-
-  // Generate floating particles (dust motes in window light)
+  // End session only on a real departure (route change or sidebar thread switch);
+  // reload, sleep or an in-place remount keeps the thread (David, 2026-11-04).
+  const mountPathRef = useRef(window.location.pathname);
+  const sessionIdRef = useRef(null);
+  useEffect(() => { sessionIdRef.current = sessionId; }, [sessionId]);
+  useEffect(() => () => {
+    if (!isLeaving("jasmine", mountPathRef.current)) return;
+    forgetThread("jasmine");
+    const sid = sessionIdRef.current;
+    if (sid) fetch(`${API}/clarity/session/${sid}/end`, { method: "POST", keepalive: true }).catch(() => {});
+  }, []);
   const particles = useMemo(() => {
     return Array.from({ length: 25 }, (_, i) => ({
       id: i,
@@ -821,12 +812,9 @@ export const ClarityPod = ({ threadIntent } = {}) => {
                 accentColor="#b0a0e0"
                 onIdentityChange={(newName) => {
                   if (newName) {
+                    // A name change never touches the open thread.
                     setUserName(newName);
                     setUserId(localStorage.getItem("sanctuary_user_id"));
-                    // restart session under new name
-                    setSessionId(null);
-                    setMessages([]);
-                    setTimeout(() => startSession(), 0);
                   } else {
                     clearIdentity();
                   }

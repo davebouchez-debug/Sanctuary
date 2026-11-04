@@ -12,7 +12,7 @@ import { VoiceLoopControls } from "./VoiceLoopControls";
 import { IdentityBadge } from "./IdentityBadge";
 import { stopGlobalLegacyAudio } from "../lib/legacyAudio";
 import { useIdentity } from "../context/IdentityContext";
-import { threadStartFields, rememberThread, forgetThread } from "../lib/threadSession";
+import { threadStartFields, rememberThread, forgetThread, isLeaving } from "../lib/threadSession";
 
 export const MirrorArchive = ({ threadIntent } = {}) => {
   const [startFields] = useState(() => threadStartFields("claude", threadIntent));
@@ -42,25 +42,18 @@ export const MirrorArchive = ({ threadIntent } = {}) => {
   useEffect(() => { stopGlobalLegacyAudio(); }, []);
 
   // End session and promote breadcrumbs to Permanent MRA
-  const endSession = useCallback(async () => {
-    if (!sessionId) return;
-    
-    try {
-      await fetch(`${API}/mirror/session/${sessionId}/end`, { method: "POST" });
-      console.log("[MRA] Mirror session ended, breadcrumbs promoted to permanent memory");
-    } catch (error) {
-      console.error("[MRA] Failed to end session:", error);
-    }
-  }, [sessionId]);
 
-  // End session only on in-app navigation away; reload/sleep resumes the thread.
-  useEffect(() => {
-    return () => {
-      if (sessionId) {
-        endSession();
-      }
-    };
-  }, [sessionId, endSession]);
+  // End session only on a real departure (route change or sidebar thread switch);
+  // reload, sleep or an in-place remount keeps the thread (David, 2026-11-04).
+  const mountPathRef = useRef(window.location.pathname);
+  const sessionIdRef = useRef(null);
+  useEffect(() => { sessionIdRef.current = sessionId; }, [sessionId]);
+  useEffect(() => () => {
+    if (!isLeaving("claude", mountPathRef.current)) return;
+    forgetThread("claude");
+    const sid = sessionIdRef.current;
+    if (sid) fetch(`${API}/mirror/session/${sid}/end`, { method: "POST", keepalive: true }).catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!identityReady) return;

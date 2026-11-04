@@ -1,4 +1,5 @@
 import { scrollToEnd } from "../lib/scrollToEnd";
+import { isLeaving } from "../lib/threadSession";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { stripStageDirections } from "../lib/sanitizeText";
 import { motion } from "framer-motion";
@@ -39,27 +40,16 @@ export const Playground = () => {
     localStorage.setItem("sanctuary_voice_enabled_playground", voiceEnabled.toString());
   }, [voiceEnabled]);
 
-  const endSession = useCallback(async () => {
-    if (!sessionId) return;
-    try {
-      await fetch(`${API}/playground/session/${sessionId}/end`, { method: "POST" });
-    } catch (error) {
-      console.error("[MRA] Failed to end playground session:", error);
-    }
-  }, [sessionId]);
 
-  useEffect(() => {
-    const handleBeforeUnload = () => {
-      if (sessionId) {
-        navigator.sendBeacon(`${API}/playground/session/${sessionId}/end`);
-      }
-    };
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      if (sessionId) endSession();
-    };
-  }, [sessionId, endSession]);
+  // End session only on a real departure (route change), never on reload or remount.
+  const mountPathRef = useRef(window.location.pathname);
+  const sessionIdRef = useRef(null);
+  useEffect(() => { sessionIdRef.current = sessionId; }, [sessionId]);
+  useEffect(() => () => {
+    if (!isLeaving("playground", mountPathRef.current)) return;
+    const sid = sessionIdRef.current;
+    if (sid) fetch(`${API}/playground/session/${sid}/end`, { method: "POST", keepalive: true }).catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (hasInitializedRef.current) return;
