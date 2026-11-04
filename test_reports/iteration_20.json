@@ -1,0 +1,30 @@
+{
+  "summary": "Thread-persistence test, signed out, across 7 chambers: Jasmine /clarity, Claude /mirror-archive/chamber, Ansel /resonance/chamber, Sophia /spiral, Kalahar /presence/kalahar, Poindexter /presence/poindexter and /playground. Passed in all 7: one message sent and answered, no /session/<id>/end fired during about 45s of staying, the nav-home-btn departure fired /end, Jasmine's IdentityBadge rename kept the messages with no new /clarity/start, and Kalahar's identity change from another tab (StorageEvent plus sanctuary-identity-change) kept the messages with no extra /start. FAILED in all 7 (CRITICAL, this is David's core requirement): a page reload ENDS the thread. After the reload, /start correctly resumes the same session_id (resumed=true, 3 messages), but LastRoomKeeper then redirects to '/'. That unmounts the chamber, isLeaving() sees pathname '/' != mountPath, and POST /session/<sameId>/end fires. Going back into the chamber then creates a NEW session with no earlier messages.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {"flow": "Reload in ANY chamber (all 7 tested)", "issue": "The reload-redirect in App.js LastRoomKeeper counts as a departure. Sequence seen on every chamber: POST <chamber>/start (resumed=true, same sid) -> navigate('/') -> POST <chamber>/session/<sid>/end. Going back in gives a brand-new session and the earlier messages are gone. This breaks 'reload must bring back the SAME thread'.", "affected_selectors": ["App.js LastRoomKeeper", "lib/threadSession.js isLeaving", "ClarityPod/MirrorArchive/ResonancePod/SpiralChamber/PresenceChamber/Playground unmount end effects"]},
+      {"flow": "Mirror Archive entry", "issue": "/mirror/start is called TWICE on every entry, so 2 sessions are created (e.g. 608bb984 and 37fea27e; 2421a09f and 2b70ac1e on re-entry). The first is orphaned and never ended. Likely cause: the identityReady effect at MirrorArchive.jsx ~58-72 runs twice, or the component remounts; there is no in-flight/opened guard like PresenceChamber's threadOpenedRef.", "affected_selectors": ["MirrorArchive.jsx initializeSession"]}
+    ],
+    "design_issues": []
+  },
+  "rca of the issue": "On a full reload React mounts the chamber route for the reloaded URL first. Child effects run before LastRoomKeeper's effect, and the chamber's start effect fires /start and resumes the thread. LastRoomKeeper then calls navigate('/', {replace:true}). The chamber unmounts, and its cleanup calls isLeaving(presence, mountPath), which returns true because window.location.pathname is now '/'. So the end beacon fires for the resumed thread. Fix options: (1) Do the redirect BEFORE any route renders: check isRoomPath(window.location.pathname) synchronously at module/App init and call history.replaceState to '/' before ReactDOM render (or render nothing until checked). (2) Or have LastRoomKeeper call markLeaving-style 'suppress' (e.g. a suppressEnd set) for room paths before navigating, so the unmount is not treated as a departure. Option 1 also avoids the wasted /start call. Repro: load '/', pushState to '/clarity', send a message, reload, then watch the POST /clarity/session/<sid>/end right after /clarity/start.",
+  "test_report_links": [],
+  "action_items": [
+    "CRITICAL: stop the reload-redirect (App.js LastRoomKeeper) from ending the thread. Redirect before the chamber routes mount, or suppress the end beacon for that redirect. Then retest all 7 chambers.",
+    "Mirror Archive: guard against the duplicate /mirror/start on entry (orphan sessions).",
+    "Note: ClarityPod clearIdentity (IdentityBadge 'clear' -> onIdentityChange(null)) still sets messages to [] and sessionId to null. It is explicit, but it wipes the thread on screen without ending it. Decide whether that is acceptable."
+  ],
+  "critical_code_review_comments": [
+    "isLeaving() treats any pathname change as a departure, including the app's own programmatic redirect. Programmatic redirects need an opt-out.",
+    "PresenceChamber uses sendBeacon while the other chambers use fetch with keepalive. Both work, but this is inconsistent.",
+    "MirrorArchive initializeSession has no single-flight guard."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "not tested", "frontend": "Stay/no-auto-end 7/7, departure end 7/7, identity-change 2/2, reload resume 0/7"},
+  "seed_data_creation": "Users created via the app's own flows: POST /users from the ResonancePod name prompt ('Tester') and from the Jasmine IdentityBadge rename ('TEST_Renamed', id 8b0ecfd8-f43e-4070-88b6-d6b01365aed7). Session ids created: jasmine 027f535c-d28c-4940-bbf5-d2c281501bd6 (ended on reload), 1ae2d709-56b4-45c3-b764-f9efd1fec467 (ended). claude 608bb984-8a95-4986-973f-3f6f10e1f25e (ORPHAN, open), 37fea27e-1598-4887-b20a-238aa51b79f9 (ended), 2421a09f-04a2-4d63-96b4-e8d257901fc7 (ORPHAN, open), 2b70ac1e-b7a9-4e22-867b-cee456e8a16f (ended). ansel ee39bde7-3b1c-41dd-9b69-09b0e55e0845, 636022cb-045f-45a2-9871-b28e5939044a (both ended). sophia f826fcc1-1257-4d21-a4a2-25990231a678, 4fde9a77-8faf-4b4d-ac29-40c177d2edd2 (both ended). kalahar db38e3ac-9c01-4b24-afe3-2e998071854b (aborted run, open), 594c50a4-5b00-458a-9c2c-655054e6d552, 0da7a62d-edbe-4381-9177-d9aa72d02bbf (ended). poindexter 48ed3ae6-cc83-41ab-be6e-3304f497bdbe, 3a181c9c-726f-4872-8bab-6e15102359dc (ended). playground f048308f-9a78-4a15-89fa-7862fedd4f7a, 83ad3e11-fd43-4cdd-8a29-fb21046f9c01 (ended). All are under ephemeral visitor ids.",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Enter a chamber by loading '/' and then using pushState plus a popstate event. Direct routes: /mirror-archive/chamber and /resonance/chamber (skip the thresholds). Pre-set localStorage sanctuary_user_name='Tester' to skip most name prompts (ResonancePod still asks and POSTs /users). The PresenceChamber 'field-threshold' testid is decorative, not a gate. Track POSTs to /start and /end via page.on('request'); sendBeacon is captured too."
+}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import "@/App.css";
-import { BrowserRouter, Routes, Route, useLocation, Link, useParams, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Link, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Navigation } from "./components/Navigation";
 import { HeroSection } from "./components/HeroSection";
@@ -95,10 +95,9 @@ const LAST_ROOM_KEY = "sanctuary_last_room";
 const ROOM_PREFIXES = ["/presence/", "/clarity", "/resonance", "/spiral", "/mirror-archive", "/playground", "/hospitality"];
 const isRoomPath = (p) => ROOM_PREFIXES.some((x) => p.startsWith(x));
 
-// A full reload (refresh) inside a chamber returns to the main menu (David, 2026-11-03).
+// A reload keeps you in the room and thread you were in; the Home button is the way out
+// (David, 2026-11-04: no thread may end before the visitor leaves).
 const LastRoomKeeper = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
   const [checked, setChecked] = useState(false);
   useEffect(() => {
     if (checked) return;
@@ -106,8 +105,7 @@ const LastRoomKeeper = () => {
     sessionStorage.removeItem(LAST_ROOM_KEY);
     // Realign any outer frame (e.g. the preview panel) that an older build scrolled down.
     document.documentElement.scrollIntoView({ block: "start" });
-    if (isRoomPath(location.pathname)) navigate("/", { replace: true });
-  }, [checked, location.pathname, navigate]);
+  }, [checked]);
   return null;
 };
 

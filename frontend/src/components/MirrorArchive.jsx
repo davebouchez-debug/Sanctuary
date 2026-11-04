@@ -71,7 +71,10 @@ export const MirrorArchive = ({ threadIntent } = {}) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [identityReady]);
 
+  const openingRef = useRef(false);
   const initializeSession = async (nameArg, idArg) => {
+    if (openingRef.current) return;  // one thread per chamber visit
+    openingRef.current = true;
     const name = nameArg !== undefined ? nameArg : userName;
     const id = idArg !== undefined ? idArg : userId;
     try {
@@ -123,6 +126,7 @@ export const MirrorArchive = ({ threadIntent } = {}) => {
       setIsInitializing(false);
       setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 500);
     } catch (error) {
+      openingRef.current = false;
       console.error("Error initializing mirror session:", error);
       toast.error("Could not initialize the archive");
       setIsInitializing(false);
