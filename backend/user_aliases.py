@@ -165,11 +165,16 @@ def person_name(user_id: Optional[str]) -> str:
 
 
 async def purge_ephemeral_sessions(db) -> None:
+    """Wipe visitor threads that have been quiet for EPHEMERAL_TTL_HOURS (never a live one)."""
     from datetime import datetime, timedelta, timezone
     cutoff = (datetime.now(timezone.utc) - timedelta(hours=EPHEMERAL_TTL_HOURS)).isoformat()
     for coll in await db.list_collection_names():
         if coll.endswith("_sessions") and coll != "user_sessions":
-            await db[coll].delete_many({"user_id": {"$regex": f"^{EPHEMERAL_PREFIX}"}, "created_at": {"$lt": cutoff}})
+            q = {"user_id": {"$regex": f"^{EPHEMERAL_PREFIX}"}, "created_at": {"$lt": cutoff}}
+            async for s in db[coll].find(q, {"session_id": 1, "messages": {"$slice": -1}}):
+                last = ((s.get("messages") or [{}])[-1].get("timestamp")) or ""
+                if str(last) < cutoff:
+                    await db[coll].delete_one({"_id": s["_id"]})
 
 
 async def chamber_identity(db, request, body_name: Optional[str] = None):
