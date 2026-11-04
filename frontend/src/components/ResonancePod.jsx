@@ -1,3 +1,4 @@
+import { scrollToEnd } from "../lib/scrollToEnd";
 import { useState, useEffect, useRef } from "react";
 import { stripStageDirections } from "../lib/sanitizeText";
 import { motion, AnimatePresence } from "framer-motion";
@@ -91,7 +92,7 @@ export const ResonancePod = ({ threadIntent } = {}) => {
   }, [messages]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    scrollToEnd(messagesEndRef.current);
   };
 
   const initializeSession = async (name, id) => {
@@ -324,7 +325,7 @@ export const ResonancePod = ({ threadIntent } = {}) => {
       });
     } finally {
       setIsLoading(false);
-      inputRef.current?.focus();
+      inputRef.current?.focus({ preventScroll: true });
     }
   };
   const sendRef = useRef(null);

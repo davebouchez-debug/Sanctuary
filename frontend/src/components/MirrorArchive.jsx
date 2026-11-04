@@ -1,3 +1,4 @@
+import { scrollToEnd } from "../lib/scrollToEnd";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { stripStageDirections } from "../lib/sanitizeText";
 import { motion, AnimatePresence } from "framer-motion";
@@ -107,7 +108,7 @@ export const MirrorArchive = ({ threadIntent } = {}) => {
         setMessages(data.messages);
         setResumed(true);
         setIsInitializing(false);
-        setTimeout(() => inputRef.current?.focus(), 500);
+        setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 500);
         return;
       }
       
@@ -127,7 +128,7 @@ export const MirrorArchive = ({ threadIntent } = {}) => {
       }
       
       setIsInitializing(false);
-      setTimeout(() => inputRef.current?.focus(), 500);
+      setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 500);
     } catch (error) {
       console.error("Error initializing mirror session:", error);
       toast.error("Could not initialize the archive");
@@ -252,7 +253,7 @@ export const MirrorArchive = ({ threadIntent } = {}) => {
       ));
     } finally {
       setIsLoading(false);
-      inputRef.current?.focus();
+      inputRef.current?.focus({ preventScroll: true });
     }
   };
 
@@ -282,7 +283,7 @@ export const MirrorArchive = ({ threadIntent } = {}) => {
   };
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    scrollToEnd(messagesEndRef.current);
   }, [messages]);
 
   // Name prompt modal

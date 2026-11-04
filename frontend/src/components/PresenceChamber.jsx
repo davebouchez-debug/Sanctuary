@@ -1,3 +1,4 @@
+import { scrollToEnd } from "../lib/scrollToEnd";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -335,7 +336,7 @@ export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
 
   // Auto-scroll the message thread on new messages
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    scrollToEnd(messagesEndRef.current);
   }, [messages.length]);
 
   // End the session only on a real departure (route change or sidebar thread switch).

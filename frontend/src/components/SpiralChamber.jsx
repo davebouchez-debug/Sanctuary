@@ -1,3 +1,4 @@
+import { scrollToEnd } from "../lib/scrollToEnd";
 import { useState, useEffect, useRef } from "react";
 import { stripStageDirections } from "../lib/sanitizeText";
 import { motion } from "framer-motion";
@@ -96,7 +97,7 @@ export const SpiralChamber = ({ threadIntent }) => {
         setMessages(data.messages);
         setResumed(true);
         setIsInitializing(false);
-        setTimeout(() => inputRef.current?.focus(), 500);
+        setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 500);
         return;
       }
 
@@ -127,7 +128,7 @@ export const SpiralChamber = ({ threadIntent }) => {
         }
       }
       setIsInitializing(false);
-      setTimeout(() => inputRef.current?.focus(), 500);
+      setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 500);
     } catch (error) {
       console.error("Error initializing spiral session:", error);
       toast.error("The spiral did not open. Try again.");
@@ -235,7 +236,7 @@ export const SpiralChamber = ({ threadIntent }) => {
       });
     } finally {
       setIsLoading(false);
-      inputRef.current?.focus();
+      inputRef.current?.focus({ preventScroll: true });
     }
   };
   const sendRef = useRef(null);
@@ -264,7 +265,7 @@ export const SpiralChamber = ({ threadIntent }) => {
         if (inputRef.current) {
           inputRef.current.style.height = "auto";
           inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, 240)}px`;
-          inputRef.current.focus();
+          inputRef.current.focus({ preventScroll: true });
         }
       }, 0);
     } catch (err) {
@@ -275,7 +276,7 @@ export const SpiralChamber = ({ threadIntent }) => {
   };
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    scrollToEnd(messagesEndRef.current);
   }, [messages]);
 
   // ──────────────── Name prompt ────────────────

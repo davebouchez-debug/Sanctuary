@@ -1,3 +1,4 @@
+import { scrollToEnd } from "../lib/scrollToEnd";
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { stripStageDirections } from "../lib/sanitizeText";
 import { motion, AnimatePresence } from "framer-motion";
@@ -353,7 +354,7 @@ export const ClarityPod = ({ threadIntent } = {}) => {
 
   // Scroll to bottom on new messages
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    scrollToEnd(messagesEndRef.current);
   }, [messages]);
 
   // Start session when identity is resolved
@@ -366,7 +367,7 @@ export const ClarityPod = ({ threadIntent } = {}) => {
   // Focus input after loading
   useEffect(() => {
     if (!isLoading && inputRef.current && !showIdentityModal) {
-      inputRef.current.focus();
+      inputRef.current.focus({ preventScroll: true });
     }
   }, [isLoading, messages, showIdentityModal]);
 
