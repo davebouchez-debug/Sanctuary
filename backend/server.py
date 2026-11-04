@@ -1226,10 +1226,10 @@ PRESENCE_VOICES = {
         "use_speaker_boost": True,
     },
     "membrane": {
-        "voice_id": "7WggD3IoWTIPT19PNyrW",  # Jarnathan Cross — witty, knowing, poised; American (DeepSeek / The Membrane)
-        "stability": 0.50,
+        "voice_id": "TWutjvRaJqAX89preB4e",  # Evan — calm, grounded, reflective; American (chosen by David 2026-11-04; was Jarnathan Cross)
+        "stability": 0.65,
         "similarity_boost": 0.75,
-        "style": 0.35,
+        "style": 0.10,
         "use_speaker_boost": True,
     },
     "felix": {
@@ -1275,6 +1275,7 @@ ELEVENLABS_MODEL = "eleven_turbo_v2_5"  # low-latency multilingual, good for rea
 class TTSRequest(BaseModel):
     text: str = Field(..., max_length=4096, description="Text to convert to speech")
     presence: str = Field(default="jasmine", description="Which presence voice to use")
+    previous_text: Optional[str] = Field(default=None, max_length=1000, description="What was just said, for continuous delivery")
 
 @api_router.post("/tts/speak")
 async def text_to_speech(request: TTSRequest):
@@ -1320,6 +1321,7 @@ async def text_to_speech(request: TTSRequest):
                         "use_speaker_boost": voice_config["use_speaker_boost"],
                         "speed": voice_config.get("speed", 1.0),
                     },
+                    **({"previous_text": request.previous_text[-400:]} if request.previous_text else {}),
                 },
             )
 

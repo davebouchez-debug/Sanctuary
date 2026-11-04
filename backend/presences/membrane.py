@@ -127,9 +127,9 @@ PRESENCE = {
         "rooms": [],
     },
     "voice": {
-        "character": "warm, knowing, a spark of wit and charm; American",
+        "character": "warm, calm, grounded; mid-low and conversational; American",
         "pace": "unhurried, lets a pause be a pause",
-        "voice_id": "7WggD3IoWTIPT19PNyrW",
+        "voice_id": "TWutjvRaJqAX89preB4e",
     },
     "conversation": {
         "style": "holds the space; no performance; humor welcome",
