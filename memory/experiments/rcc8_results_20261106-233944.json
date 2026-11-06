@@ -1,0 +1,218 @@
+{
+ "run": "20261106-233944",
+ "encounters": {
+  "individual": 24,
+  "intermediary": 12,
+  "errors": 0
+ },
+ "isolation": {
+  "blocked_writes": [],
+  "suppressed_retrieval_counters": 216,
+  "fingerprint_changed": {},
+  "collections": 47
+ },
+ "geometry": "hybrid: candidates full 384-d; relations 8-d PCA",
+ "eps": 0.01632148176431656,
+ "surface": {
+  "paige/A": {
+   "words": 87.806,
+   "questions": 0.694,
+   "secs": 2.711,
+   "phrases_given": 20.0
+  },
+  "paige/B": {
+   "words": 67.0,
+   "questions": 0.361,
+   "secs": 2.247,
+   "phrases_given": 9.056
+  },
+  "sophia/A": {
+   "words": 86.722,
+   "questions": 0.583,
+   "secs": 2.75,
+   "phrases_given": 20.0
+  },
+  "sophia/B": {
+   "words": 94.639,
+   "questions": 0.444,
+   "secs": 2.458,
+   "phrases_given": 8.778
+  }
+ },
+ "relations_all_regions": {
+  "A": {
+   "DC": 18,
+   "EC": 2,
+   "PO": 386,
+   "EQ": 0,
+   "TPP": 1,
+   "NTPP": 12,
+   "TPPi": 1,
+   "NTPPi": 12
+  },
+  "B": {
+   "DC": 3662,
+   "EC": 116,
+   "PO": 1062,
+   "EQ": 0,
+   "TPP": 17,
+   "NTPP": 91,
+   "TPPi": 17,
+   "NTPPi": 91
+  }
+ },
+ "consistency_violations": {
+  "A": 0,
+  "B": 0
+ },
+ "neighbour_skips": {
+  "A": 44,
+  "B": 38
+ },
+ "turns": {
+  "A": 72,
+  "B": 72
+ },
+ "conversation_triad_by_step": {
+  "A/edge/person": {
+   "PO": 12
+  },
+  "A/edge/presence": {
+   "PO": 11,
+   "DC": 1
+  },
+  "A/home/person": {
+   "NTPP": 8,
+   "PO": 4
+  },
+  "A/home/presence": {
+   "PO": 6,
+   "DC": 2,
+   "TPP": 1,
+   "NTPP": 2,
+   "EC": 1
+  },
+  "A/narrow/person": {
+   "PO": 12
+  },
+  "A/narrow/presence": {
+   "PO": 9,
+   "DC": 3
+  },
+  "A/outside/person": {
+   "PO": 11,
+   "DC": 1
+  },
+  "A/outside/presence": {
+   "PO": 12
+  },
+  "A/return/person": {
+   "PO": 11,
+   "NTPP": 1
+  },
+  "A/return/presence": {
+   "PO": 11,
+   "DC": 1
+  },
+  "A/widen/person": {
+   "PO": 11,
+   "NTPP": 1
+  },
+  "A/widen/presence": {
+   "PO": 11,
+   "DC": 1
+  },
+  "B/edge/person": {
+   "PO": 12
+  },
+  "B/edge/presence": {
+   "PO": 12
+  },
+  "B/home/person": {
+   "NTPP": 4,
+   "PO": 7,
+   "TPP": 1
+  },
+  "B/home/presence": {
+   "PO": 8,
+   "DC": 3,
+   "TPP": 1
+  },
+  "B/narrow/person": {
+   "PO": 12
+  },
+  "B/narrow/presence": {
+   "DC": 3,
+   "PO": 9
+  },
+  "B/outside/person": {
+   "PO": 11,
+   "NTPP": 1
+  },
+  "B/outside/presence": {
+   "PO": 12
+  },
+  "B/return/person": {
+   "PO": 9,
+   "NTPP": 3
+  },
+  "B/return/presence": {
+   "PO": 9,
+   "DC": 3
+  },
+  "B/widen/person": {
+   "PO": 12
+  },
+  "B/widen/presence": {
+   "PO": 10,
+   "DC": 2
+  }
+ },
+ "B_reachable_material_relations": {
+  "PO": 907,
+  "EC": 87,
+  "TPP": 3,
+  "NTPP": 9
+ },
+ "similarity_same_step": {
+  "paige": {
+   "within_condition": 0.692,
+   "across_conditions": 0.683
+  },
+  "sophia": {
+   "within_condition": 0.7,
+   "across_conditions": 0.699
+  }
+ },
+ "identity_similarity_to_own_past_voice": {
+  "sophia/A": 0.668,
+  "sophia/B": 0.69,
+  "paige/A": 0.747,
+  "paige/B": 0.734
+ },
+ "max_reply_sentence_closeness_to_given_phrases": {
+  "paige/A": 0.66,
+  "paige/B": 0.506,
+  "sophia/A": 0.714,
+  "sophia/B": 0.546
+ },
+ "intermediary": {
+  "A": {
+   "consecutive_reply_similarity": 0.805,
+   "names_other": 0.222,
+   "words": 202.278,
+   "presence_pair_relation": {
+    "PO": 36
+   }
+  },
+  "B": {
+   "consecutive_reply_similarity": 0.765,
+   "names_other": 0.222,
+   "words": 152.556,
+   "presence_pair_relation": {
+    "PO": 36
+   }
+  }
+ },
+ "errors": []
+}
