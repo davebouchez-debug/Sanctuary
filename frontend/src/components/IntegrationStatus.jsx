@@ -12,7 +12,7 @@ const POLL_MS = 60_000;
 // Surface labels — kept short so the emblem stays a glance, not a paragraph.
 const LABELS = {
   permamind: "PermaMind",
-  xai: "xAI",
+  deepseek: "DeepSeek",
   elevenlabs: "ElevenLabs",
 };
 

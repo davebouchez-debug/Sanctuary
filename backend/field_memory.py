@@ -25,7 +25,7 @@ def _get_model():
     global _model
     if _model is None:
         from fastembed import TextEmbedding
-        _model = TextEmbedding(MODEL_NAME, cache_dir=MODEL_DIR)
+        _model = TextEmbedding(MODEL_NAME, cache_dir=MODEL_DIR, threads=1)
     return _model
 
 
@@ -37,7 +37,7 @@ def mra_text(doc: Dict) -> str:
 
 
 def _embed_sync(texts: List[str]) -> List[List[float]]:
-    vecs = np.array(list(_get_model().embed(texts)), dtype=np.float32)
+    vecs = np.array(list(_get_model().embed(texts, batch_size=8)), dtype=np.float32)
     vecs /= np.linalg.norm(vecs, axis=1, keepdims=True) + 1e-9
     return vecs.tolist()
 

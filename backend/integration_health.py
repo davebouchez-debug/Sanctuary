@@ -51,14 +51,14 @@ async def _check_thermomind(client: httpx.AsyncClient) -> dict:
         return {"status": "red", "detail": str(e)[:140]}
 
 
-async def _check_xai(client: httpx.AsyncClient) -> dict:
-    """Liveness check against xAI (cheap auth probe — /v1/models)."""
-    key = os.environ.get("XAI_API_KEY")
+async def _check_deepseek(client: httpx.AsyncClient) -> dict:
+    """Liveness check against DeepSeek, the presences' engine (cheap auth probe — /models)."""
+    key = os.environ.get("DEEPSEEK_API_KEY")
     if not key:
         return {"status": "unknown", "detail": "not configured"}
     try:
         r = await client.get(
-            "https://api.x.ai/v1/models",
+            "https://api.deepseek.com/models",
             headers={"Authorization": f"Bearer {key}"},
             timeout=4.0,
         )
@@ -97,7 +97,7 @@ async def _check_elevenlabs(client: httpx.AsyncClient) -> dict:
 
 _CHECKS = {
     "permamind": _check_thermomind,  # surfaced as "PermaMind" in the UI
-    "xai":       _check_xai,
+    "deepseek":  _check_deepseek,
     "elevenlabs": _check_elevenlabs,
 }
 
