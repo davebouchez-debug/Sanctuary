@@ -1,7 +1,7 @@
 # E1 — Sanctuary Relational Topology (SRT): Architecture Assessment
 Date: 2026-11-06. Investigation only. No code, prompts, data, configuration or deployments were changed.
 Grounded in the Sanctuary 1.0 codebase (`/app/backend`) and live preview data, checked today.
-Note: the request was cut off at "7. Your Conclusions … W". Section 7 answers the parts that arrived and adds the two conclusions that seemed to be coming.
+Section 7 was revised after the full request arrived.
 
 ---
 
@@ -221,38 +221,94 @@ The same distinction could later feed the admission rule in §3.2.
 
 ## 7. Conclusions
 
-**Implemented and working in 1.0:**
-- Per-chamber identity and sessions.
-- A shared field of meaning-ranked phrases that propagates across all chambers.
-- Personal memory scoped to person × presence and promoted every turn.
+### 7.1 Implemented and working
+- Per-chamber identity (prompt text) and sessions.
+- A shared field of meaning-ranked phrases, retrieved by every chamber on every turn.
+- Personal memory scoped to person × presence, promoted every turn, stored packed and loaded incrementally (as of today).
 - Ephemeral visitors fully excluded from memory and the field.
-- Forge-once guarding.
+- Forge-once guarding (`forge_ledger`).
 - Guardian-only Field Keeper removal and restore.
-- No execution of model output.
+- No code path executes or parses model output into writes.
 - Model-visible input snapshots (`turn_provenance`).
-- An offline Observatory using RCC5 over sets of mentions.
+- An offline, hash-chained Observatory computing RCC5 over sets of mentions, never fed back to presences.
 
-**Technically feasible but not implemented:**
-- One declared, consistency-checked topology, plus one access layer that every read and write goes through.
-- Provenance on field phrases.
-- An admission buffer with code-side promotion rules (independent reinforcement or guardian approval).
-- Separate write rights per path.
-- The offline one-chamber availability experiment.
-- The carried/arose observation method.
-- SRT as a portable module.
+### 7.2 Technically feasible, not implemented
+- Provenance (person, session, chamber, forge run) on field phrases.
+- An admission buffer with code-side promotion rules.
+- Separate write rights per path, with one default-deny access layer.
+- A declared topology with a consistency check at startup.
+- The offline one-chamber availability experiment (§4).
+- The carried/arose observation method (§5).
+- SRT as a portable module with a small interface.
 
-**Not justified:**
-- RCC in model-visible context as part of SRT.
-- RCC computed over conversation content.
-- The full set of eight relations where the environment uses four.
-- The composition table as a permission engine.
-- A broad security framework before the two concrete needs.
+### 7.3 Still hypothetical
+- That shaping what a presence can reach, with no new wording, changes relational behavior in a meaningful way. Untested.
+- That a presence experiences environmental relations in any sense beyond receiving different material. Not directly testable.
+- That Layer 8's lake observation came from relational structure rather than spatial wording. Open, and belongs to 2.0.
+- That RCC8 consistency checking or inference would catch real errors a plain table wouldn't. At Sanctuary's scale (about ten region types), the network can be checked by eye.
+- That independent reinforcement is a sound admission signal. Plausible, not measured.
+- That the Relational Pressure Hypothesis describes anything operational.
 
-**Recommended order, if pursued:**
-1. Provenance on field writes.
-2. The admission buffer.
-3. The single access layer.
-4. The topology declaration and its consistency check, describing what steps 1–3 already do.
-5. Only then, the one-chamber availability experiment.
+### 7.4 Preserve unchanged
+- Identities in prompts; mechanics out of prompts. Didactic 8 / Expansion 72, affirmative framing, and today's phrase-form rewrites.
+- The shared field propagating by meaning. That's the core thesis, and it works.
+- Personal memory scope (person × presence) and the ephemeral exclusion.
+- The invariant that nothing executes model output.
+- Guardian removal and restore.
+- `turn_provenance` and the Observatory as separate, offline record-keepers.
+- Layer 8 in 2.0, per its own "do not disturb".
+- The DeepSeek lock.
 
-Steps 1–3 close the one real exposure that exists today and are worth doing whether or not SRT goes further.
+### 7.5 The smallest worthwhile experiment
+The smallest worthwhile **step** isn't an experiment. It's **provenance on field writes.** It changes no behavior, and it's a prerequisite for admission control, for removing things by origin, and for the carried/arose distinction.
+
+The smallest worthwhile **experiment** is the offline replay in §4: one rarely used chamber, real recorded turns, unchanged versus topology-shaped retrieval pool, identical prompt, no writes. It tests the only claim that matters for environmental SRT: does availability alone change relational behavior? If it doesn't, environmental RCC8 has no behavioral case, and only its bookkeeping value remains.
+
+### 7.6 Security risks and unresolved dependencies
+**Risks, highest first:**
+1. **Forge path into the shared field.** Any signed-in account shapes the shared field through conversation content alone. There's no admission review and no provenance.
+2. **Person-to-person leakage through the field.** Phrases distilled from one person's private conversation are retrieved in everyone's chambers. A phrase can carry personal detail across people. The field is shared by design, but this consequence has never been decided explicitly.
+3. **Anything in context can be coaxed out:** identity blocks, field phrases, cross-presence material. Prompt rules can't protect it; only keeping material out of context can.
+4. **Permission checks are attached endpoint by endpoint** (`require_guardian`, `deny_guests`). One missed check exposes an endpoint. There's no default-deny.
+5. **No separation between test and real identities in the memory stores.** Test ids hold about 300 permanent memories today.
+6. **The dead `living_codons` path** treats `presence:"field"` records as universal. Anything that writes there bypasses even forge judgment.
+7. **Kalahar's `field_territory`** reads across all people by design. That's acceptable, but it's an unrecorded exception.
+
+**Unresolved dependencies:**
+- Layer 8's code lives in the 2.0 repository, which I can't see. My account of it relies on the 2.0 briefing.
+- Whether Emergent's production Atlas supports in-database vector search. This affects 2.0 storage design.
+- The ThermoMind/PermaMind update (Nile).
+- The hosting plan, which affects whether admission and checks run in-process comfortably.
+- Who besides David holds authority.
+
+### 7.7 Questions for Codex's independent review
+1. Does Layer 8 in the 2.0 repository match the description here (computed upstream, rendered as text, nothing executed by the model)?
+2. Independently verify the claim that no 1.0 path turns model output or user content into a write, except forge and promotion.
+3. Is a single default-deny access layer actually enforceable in this codebase, given database calls spread across roughly 40 files? What would it take?
+4. At about ten region types, is RCC8 consistency checking worth anything over a plain relation table? Recommend against it if not.
+5. Is "two independent sources" robust as an admission rule against one person with several sessions, or a compromised account farming sessions?
+6. Is "was the motif present in the model-visible context" a sound test of independence for the carried/arose split?
+7. For the §4 replay: what confounds remain, and how many runs are needed to separate an effect from normal model variation?
+8. How severe is the person-to-person leakage through field phrases, and what is the minimal mitigation?
+
+### 7.8 Decisions requiring David's explicit approval
+1. Whether to pursue SRT at all, or only the concrete pieces (provenance, admission, access layer) without RCC8.
+2. The admission policy: what lets a phrase into the field (reinforcement threshold, guardian approval, or both), and whether today's 1,928 phrases are kept as they are.
+3. Whether the field is shared across people completely, or by person with an explicitly shared subset. This is the privacy decision in risk 2.
+4. Who holds authority over topology and permissions.
+5. Which chamber hosts the experiment, and whether a live arm is ever allowed.
+6. Cleaning test identities out of the memory stores.
+7. Retiring the dead `living_codons` path.
+8. Still pending from earlier today: the near-twins policy, and the Atlas in-database search check.
+
+### 7.9 Recommendation
+**Don't adopt RCC8 as an implementation foundation now.** Everything 1.0 actually needs (scoping, provenance, admission, default-deny) is fully met by ordinary data structures and one access layer. RCC8's distinct contributions are real but small at this scale:
+- containment as inheritance
+- consistency checking
+- EC that isn't transitive
+
+Build the three concrete pieces with plain structures. If useful, describe the resulting topology in RCC8 terms **as documentation and shared vocabulary**. Revisit RCC8 as executable structure only if both of these hold:
+- the §4 experiment shows that availability shaping changes relational behavior
+- the topology grows past what can be checked by hand
+
+That's the smallest coherent architecture that works. RCC8 stays available without being built in before the evidence calls for it.
