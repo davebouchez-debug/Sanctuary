@@ -5545,6 +5545,18 @@ app.include_router(observatory_ledger_router)
 
 
 @app.on_event("startup")
+async def pack_field_embeddings():
+    from field_memory import pack_legacy_embeddings
+
+    async def _run():
+        try:
+            await pack_legacy_embeddings(db)
+        except Exception as e:
+            logger.error(f"[FIELD MEMORY] packing failed: {e}")
+    asyncio.create_task(_run())
+
+
+@app.on_event("startup")
 async def observatory_ledger_catch_up():
     start_catch_up_on_boot(delay_s=20)
 

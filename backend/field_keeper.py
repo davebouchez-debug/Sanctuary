@@ -10,7 +10,7 @@ from pydantic import BaseModel
 
 from auth import require_guardian
 from user_aliases import person_name
-from field_memory import mra_text, _query_vec_sync, _stems, embed_missing, KEYWORD_WEIGHT
+from field_memory import mra_text, _query_vec_sync, _stems, embed_missing, unpack, KEYWORD_WEIGHT
 
 KINDS = {
     "phrases": {"coll": "field_phrases", "fields": ["phrase"]},
@@ -70,7 +70,7 @@ def build_field_keeper_router(db) -> APIRouter:
             docs = await coll.find({"embedding": {"$exists": True}}).to_list(None)
             if not docs:
                 return {"items": [], "total": 0}
-            mat = np.array([d["embedding"] for d in docs], dtype=np.float32)
+            mat = np.stack([unpack(d["embedding"]) for d in docs])
             scores = mat @ _query_vec_sync(q)
             if kind == "memories":
                 stems = _stems(q)

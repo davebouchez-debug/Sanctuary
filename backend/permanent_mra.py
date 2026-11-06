@@ -133,8 +133,9 @@ async def promote_breadcrumbs_to_permanent(
     if permanent_nodes:
         from field_memory import embed_texts, mra_text
         vecs = await embed_texts([mra_text(n) for n in permanent_nodes])
+        from field_memory import _now
         for n, v in zip(permanent_nodes, vecs):
-            n["embedding"] = v
+            n["embedding"], n["embedded_at"] = v, _now()
         await db.permanent_mra.insert_many(permanent_nodes)
         logger.info(f"[PERMANENT MRA] Promoted {len(permanent_nodes)} breadcrumbs for {presence} (user: {user_id})")
     

@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 import numpy as np
+from bson import Binary
 
 logger = logging.getLogger(__name__)
 
@@ -36,13 +37,27 @@ def mra_text(doc: Dict) -> str:
     return f"{doc.get('user_essence') or ''}\n{doc.get('ai_essence') or ''}\n{themes}".strip()
 
 
-def _embed_sync(texts: List[str]) -> List[List[float]]:
+def pack(v) -> Binary:
+    """384 float32s in one strip (1.5 KB) instead of 384 loose BSON doubles."""
+    return Binary(np.asarray(v, dtype=np.float32).tobytes())
+
+
+def unpack(v) -> np.ndarray:
+    return np.frombuffer(v, dtype=np.float32) if isinstance(v, bytes) else np.asarray(v, dtype=np.float32)
+
+
+def _now() -> str:
+    from datetime import datetime, timezone
+    return datetime.now(timezone.utc).isoformat()
+
+
+def _embed_sync(texts: List[str]) -> List[Binary]:
     vecs = np.array(list(_get_model().embed(texts, batch_size=8)), dtype=np.float32)
     vecs /= np.linalg.norm(vecs, axis=1, keepdims=True) + 1e-9
-    return vecs.tolist()
+    return [pack(v) for v in vecs]
 
 
-async def embed_texts(texts: List[str]) -> List[List[float]]:
+async def embed_texts(texts: List[str]) -> List[Binary]:
     return await asyncio.to_thread(_embed_sync, texts)
 
 
@@ -72,48 +87,84 @@ async def embed_missing(db, flt: Dict) -> int:
         batch = docs[i:i + 256]
         vecs = await embed_texts([mra_text(d) for d in batch])
         for d, v in zip(batch, vecs):
-            await db.permanent_mra.update_one({"_id": d["_id"]}, {"$set": {"embedding": v}})
+            await db.permanent_mra.update_one({"_id": d["_id"]}, {"$set": {"embedding": v, "embedded_at": _now()}})
     return len(docs)
 
 
-_cache: Dict[str, tuple] = {}
+_cache: Dict[str, dict] = {}
+
+
+def _proj(coll: str) -> Dict:
+    if coll == "permanent_mra":
+        return {"node_id": 1, "presence": 1, "user_essence": 1, "ai_essence": 1, "themes": 1,
+                "quality": 1, "promoted_at": 1, "embedding": 1, "embedded_at": 1}
+    return {"phrase": 1, "source": 1, "source_presence": 1, "legacy_presence": 1,
+            "created_at": 1, "embedding": 1, "embedded_at": 1}
+
+
+def _ingest(coll: str, raw: List[Dict]):
+    ids, docs, vecs, texts, wm = [], [], [], [], ""
+    for d in raw:
+        ids.append(d.pop("_id"))
+        vecs.append(unpack(d.pop("embedding")))
+        wm = max(wm, d.pop("embedded_at", "") or "")
+        docs.append(d)
+        texts.append((mra_text(d) if coll == "permanent_mra" else d.get("phrase", "")).lower())
+    return ids, docs, vecs, texts, wm
 
 
 async def _load(db, flt: Dict, coll: str = "permanent_mra"):
+    """The field's working copy for flt: read whole once, then only what's added since."""
     key = coll + repr(sorted(flt.items(), key=lambda kv: kv[0]))
-    count = await db[coll].count_documents(flt)
-    hit = _cache.get(key)
-    if hit and hit[0] == count:
-        return hit[1], hit[2], hit[3]
     if coll == "permanent_mra":
         await embed_missing(db, flt)
-        proj = {"_id": 0, "node_id": 1, "presence": 1, "user_essence": 1, "ai_essence": 1, "themes": 1,
-                "quality": 1, "promoted_at": 1, "embedding": 1}
-    else:
-        proj = {"_id": 0, "phrase": 1, "source": 1, "source_presence": 1, "legacy_presence": 1,
-                "created_at": 1, "embedding": 1}
-    docs = [d for d in await db[coll].find(flt, proj).to_list(None) if d.get("embedding")]
-    mat = np.array([d.pop("embedding") for d in docs], dtype=np.float32) if docs else None
-    texts = [(mra_text(d) if coll == "permanent_mra" else d.get("phrase", "")).lower() for d in docs]
-    _cache[key] = (count, docs, mat, texts)
+    q = {**flt, "embedding": {"$exists": True}}
+    count = await db[coll].count_documents(q)
+    hit = _cache.get(key)
+    if hit and hit["count"] == count:
+        return hit["docs"], hit["mat"], hit["texts"]
+    if hit and count > hit["count"]:
+        raw = await db[coll].find({**q, "embedded_at": {"$gte": hit["wm"]}}, _proj(coll)).to_list(None)
+        raw = [d for d in raw if d["_id"] not in hit["idset"]]
+        if hit["count"] + len(raw) == count:
+            ids, docs, vecs, texts, wm = _ingest(coll, raw)
+            hit["ids"] += ids
+            hit["idset"].update(ids)
+            hit["docs"] += docs
+            hit["texts"] += texts
+            if vecs:
+                hit["mat"] = np.stack(vecs) if hit["mat"] is None else np.vstack([hit["mat"], np.stack(vecs)])
+            hit["wm"], hit["count"] = max(hit["wm"], wm), count
+            return hit["docs"], hit["mat"], hit["texts"]
+    # First read, or something was set aside / restored: read the whole field once.
+    ids, docs, vecs, texts, wm = _ingest(coll, await db[coll].find(q, _proj(coll)).to_list(None))
+    mat = np.stack(vecs) if vecs else None
+    _cache[key] = {"count": count, "ids": ids, "idset": set(ids), "docs": docs, "mat": mat, "texts": texts, "wm": wm}
     return docs, mat, texts
 
 
 async def rank_mra(db, flt: Dict, query: str, limit: int, projection: Dict = None,
                    coll: str = "permanent_mra", kw_weight: float = KEYWORD_WEIGHT) -> List[Dict]:
     """Records matching flt (permanent_mra or field_phrases), ranked by meaning against query."""
+    flt = dict(flt)
+    only = flt.pop("presence", None)
+    only = set(only["$in"]) if isinstance(only, dict) and "$in" in only else ({only} if only else None)
     docs, mat, texts = await _load(db, flt, coll)
     if not docs:
         return []
     qv = await asyncio.to_thread(_query_vec_sync, query)
     stems = _stems(query)
     bonus = np.array([sum(st in t for st in stems) for t in texts], dtype=np.float32)
-    order = np.argsort(-(mat @ qv + kw_weight * bonus))
+    scores = mat @ qv + kw_weight * bonus
+    if only is not None:
+        # One copy per person; other rooms are a mask, not a second copy.
+        scores = np.where([d.get("presence") in only for d in docs], scores, -np.inf)
+    order = np.argsort(-scores)
     out, seen = [], set()
     for i in order:
         d = docs[int(i)]
         key = d.get("user_essence") or d.get("phrase")
-        if key in seen:
+        if key in seen or not np.isfinite(scores[int(i)]):
             continue
         seen.add(key)
         out.append(dict(d))
@@ -164,6 +215,28 @@ async def add_phrases(db, phrases: List[str], meta: Dict) -> int:
         return 0
     vecs = await embed_texts(new)
     now = datetime.now(timezone.utc).isoformat()
-    await db.field_phrases.insert_many([{"phrase": p, "presence": "field", "embedding": v, "created_at": now, **meta}
+    await db.field_phrases.insert_many([{"phrase": p, "presence": "field", "embedding": v, "created_at": now,
+                                         "embedded_at": now, **meta}
                                         for p, v in zip(new, vecs)])
     return len(new)
+
+
+async def pack_legacy_embeddings(db) -> int:
+    """One-time, idempotent: convert loose-number embeddings to packed strips, in small batches."""
+    await db.field_phrases.create_index("embedded_at")
+    await db.permanent_mra.create_index([("user_id", 1), ("embedded_at", 1)])
+    n = 0
+    for coll in ("field_phrases", "permanent_mra"):
+        while True:
+            batch = await db[coll].find({"embedding": {"$type": "array"}}, {"_id": 1, "embedding": 1}).limit(100).to_list(100)
+            if not batch:
+                break
+            stamp = _now()
+            for d in batch:
+                await db[coll].update_one({"_id": d["_id"]}, {"$set": {"embedding": pack(d["embedding"]), "embedded_at": stamp}})
+            n += len(batch)
+            await asyncio.sleep(0.2)
+    if n:
+        _cache.clear()
+        logger.info(f"[FIELD MEMORY] packed {n} embeddings")
+    return n
