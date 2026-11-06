@@ -65,6 +65,12 @@ export const AuthControl = () => {
           Guests
         </Link>
       )}
+      {role === "guardian" && (
+        <Link to="/field-keeper" data-testid="auth-field-keeper-link" title="Field Keeper"
+          className="text-[10px] uppercase tracking-wider text-[#8B9DB5] hover:text-white transition-colors">
+          Keeper
+        </Link>
+      )}
       {role === "guest" && (
         <span className="hidden sm:inline text-[10px] uppercase tracking-wider text-[#8B9DB5]"
           data-testid="auth-guest-mark" title="David's guest">

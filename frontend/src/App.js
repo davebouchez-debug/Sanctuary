@@ -33,6 +33,7 @@ import { IdentityProvider, useIdentity } from "./context/IdentityContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import GuestGate from "./components/GuestGate";
 import GuestList from "./components/GuestList";
+import FieldKeeper from "./components/FieldKeeper";
 import { AuthCallback } from "./components/AuthCallback";
 import { Login } from "./components/Login";
 
@@ -180,6 +181,11 @@ const AnimatedRoutes = () => {
         <Route path="/codon-forge" element={
           <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
             <GuestGate><CodonForge /></GuestGate>
+          </motion.div>
+        } />
+        <Route path="/field-keeper" element={
+          <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+            <FieldKeeper />
           </motion.div>
         } />
         <Route path="/guests" element={
