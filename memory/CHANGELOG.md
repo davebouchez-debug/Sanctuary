@@ -332,3 +332,10 @@ and decide intended scope; (4) then read WHICH codons surface for real messages 
 relevance quality; (5) update the header line ("N codons you hold") to reflect the
 selected count. All reversible: revert `presence_template.py:454` to drop `message=`.
 
+
+## 2026-11-07 — RCC8 environment integrated (preview; OFF until David approves deploy)
+- Audit first (briefings/2026-11-07_e1-audit_rcc8-integration-sanctuary-1.0.md), David approved.
+- backend/rcc8_env/ (relations/regions identical to experiment; environment.py). Hooks: codon_activation.get_full_field_context, field_memory.get_field_context, set_conversation in every message handler. Active from the person's 2nd message; greeting + first exchange unchanged. Flag RCC8_ENVIRONMENT (on/off, redeploy to change).
+- Fidelity vs harness 60/60 identical; testing agent iteration_24 100%. Preview RAM +35MB peak with RCC8 on.
+- Guardian-only /api/field-keeper/export (+ Field Keeper "Download field backup") and scripts/restore_field_backup.py (verified round-trip). Guardian-only /api/health/memory.
+- Report: briefings/2026-11-07_e1-build-report_rcc8-integration.md

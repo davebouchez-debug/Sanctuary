@@ -139,6 +139,8 @@ async def _geometry(db, user_id):
     mr_docs, mr_mat, mr_texts = ([], None, [])
     if uid_query is not None:
         mr_docs, mr_mat, mr_texts = await _load(db, {"user_id": uid_query})
+    if mr_mat is None:
+        key = ""                      # no memories yet (e.g. visitors): one shared phrases-only geometry
     stamp = (len(ph_docs), len(mr_docs))
     g = _geo.get(key)
     if g and g["stamp"] == stamp:

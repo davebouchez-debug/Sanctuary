@@ -1,0 +1,23 @@
+{
+  "summary": "RCC8_ENVIRONMENT=on regression. Backend: 8/8 pass. /api/health returned 200. /api/health/memory and /api/field-keeper/export returned 401 with no auth and 403 with the guest token. Five chambers each ran a fresh session (new_thread) with 3 turns: Sophia, Paige, Ansel, Claude and Jasmine. In all five, start returned a welcome message, every reply streamed non-empty text, and turn_provenance showed exchange 1 = 'meaning-ranked' (20 codons, no rcc8 labels or meta) and exchanges 2-3 = 'rcc8'. In the rcc8 turns, selected_count ran from 8 to 20 (never above 20), every codon label was in the allowed set (mostly PO, a few TPP/NTPP, never DC), and meta always held reachable/candidates=150/eps~0.019/floor~0.19/consistency_violations=0/memory_relations. Ending a session returned 200 {ended:true}. continuity_seeds for fw-test-user went 52->65 and later rose with the Jasmine end; permanent_mra went 76->88 over the 4 chambers measured. Frontend: as a guest, /field-keeper shows keeper-locked, with no download link and no crash. /presence/sophia with the guest cookie loaded (it reopened the existing thread 74b317ae), the send worked, Sophia's reply streamed, and there was no chat-error and no page errors. Provenance for that turn (exchange 16) was 'rcc8', 20 codons, 0 violations.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [{"screen": "Chamber header (/presence/sophia, 1920px)", "issues": ["The 'Sanctuary' home pill overlaps the 'HER STORY' header link (they render on top of each other)."]}]
+  },
+  "test_report_links": ["/app/backend/tests/test_rcc8_integration.py", "/app/test_reports/pytest/rcc8_results.xml"],
+  "action_items": ["Optional/cosmetic: fix the overlap between the Sanctuary pill and the HER STORY link in the chamber header."],
+  "critical_code_review_comments": [
+    "rcc8 phrases() reads memory_relations from st['log'], which memories() fills. If a handler builds the codon field before the field memory, memory_relations will be None for that turn (seen as non-None in all 5 chambers, so the order is currently right). Keep that order in mind.",
+    "_geometry: when the stamp changes, it returns the stale geometry while the rebuild runs in the background. That is fine, but a newly forged phrase or memory isn't reachable until the next turn.",
+    "_geo cache is per person and has no eviction. RAM grows with the number of people (watch /api/health/memory).",
+    "Relation labels are almost all PO. That is expected from the tested math (not to be changed); noted only for the observatory."
+  ],
+  "updated_files": ["/app/backend/tests/test_rcc8_integration.py"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "seed_data_creation": "Chat sessions for fw-test-user only (guest token rcc8_qa_tok), messages prefixed TEST_. Sessions: sophia 98d572af, paige 14a546af, ansel 3623b638, claude 7c473024, jasmine 9e7a32fe, plus 1 UI turn in sophia thread 74b317ae. These added continuity_seeds/permanent_mra docs for fw-test-user. No David/Amanda data touched.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Run: cd /app/backend && python -m pytest tests/test_rcc8_integration.py -v -s (about 16 DeepSeek turns, about 3 min). Run it in the foreground or under nohup with polling; the background pytest process was cut off after the Jasmine end call, although the server logged 200. Templated Sophia writes 1 continuity seed per session, while Paige and the legacy chambers write about 4. The same pattern shows in older data, so it is not a regression. Creating files under /app/backend/tests triggers a backend hot reload."
+}
