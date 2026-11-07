@@ -430,6 +430,8 @@ def register_presence_routes(
             user_msg["image_url"] = image_url
             user_msg["image_path"] = image_path
 
+        from rcc8_env.environment import set_conversation
+        set_conversation(session, content_for_model)
         memory_context = await _build_memory_context(
             deps, cfg, user_id=user_id, session_id=session_id_in,
             current_message=content_for_model

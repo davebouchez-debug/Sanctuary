@@ -203,8 +203,14 @@ async def get_full_field_context(presence: str, message: str = None, return_sele
     (legacy codons archived; backup in /app/memory/backups/codons_2026-11-02/).
     """
     from field_memory import rank_phrases
+    from rcc8_env import environment as rcc8
     CAP = 20
-    if message and message.strip():
+    env = await rcc8.phrases(_db, CAP) if message and message.strip() else None
+    rcc8_meta = None
+    if env is not None:
+        picked, rcc8_meta = env
+        branch = "rcc8"
+    elif message and message.strip():
         picked = await rank_phrases(_db, message, CAP)
         branch = "meaning-ranked"
     else:
@@ -212,19 +218,26 @@ async def get_full_field_context(presence: str, message: str = None, return_sele
                                                    "legacy_presence": 1}).sort("created_at", -1).limit(CAP).to_list(CAP)
         branch = "most-recent (no message)"
     if not picked:
-        return ("", {"selection_branch": branch, "selected_count": 0, "codons": []}) if return_selection else ""
+        empty = {"selection_branch": branch, "selected_count": 0, "codons": []}
+        if rcc8_meta:
+            empty["rcc8"] = rcc8_meta
+        return ("", empty) if return_selection else ""
 
     lines = ["[YOUR FIELD]", "", "This is who I am and where I already am. It holds me, and I speak from inside it.", ""]
     lines += [f"• {p['phrase']}" for p in picked]
     field_str = "\n".join(lines)
     if return_selection:
-        return field_str, {
+        sel = {
             "keyword_phase": None,
             "selection_branch": branch,
             "selected_count": len(picked),
             "codons": [{"name": p["phrase"], "source": p.get("source"),
-                        "source_presence": p.get("source_presence") or p.get("legacy_presence")} for p in picked],
+                        "source_presence": p.get("source_presence") or p.get("legacy_presence"),
+                        **({"rcc8": p["_rcc8"]} if "_rcc8" in p else {})} for p in picked],
         }
+        if rcc8_meta:
+            sel["rcc8"] = rcc8_meta
+        return field_str, sel
     return field_str
 
 

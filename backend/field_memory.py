@@ -184,8 +184,11 @@ async def get_field_context(user_id: Optional[str], query: Optional[str], limit:
     aliases = await resolve_user_aliases(db, user_id)
     uid_query = {"$in": aliases} if len(aliases) > 1 else user_id
     q = (query or "").strip() or "what matters to this person"
-    hits = await rank_mra(db, {"user_id": uid_query}, q, limit,
-                          {"_id": 0, "presence": 1, "user_essence": 1, "ai_essence": 1})
+    from rcc8_env import environment as rcc8
+    hits = await rcc8.memories(db, user_id, q, limit, KEYWORD_WEIGHT)
+    if hits is None:
+        hits = await rank_mra(db, {"user_id": uid_query}, q, limit,
+                              {"_id": 0, "presence": 1, "user_essence": 1, "ai_essence": 1})
     if not hits:
         return ""
     lines = ["[FIELD MEMORY — what the shared field already holds with this person]"]

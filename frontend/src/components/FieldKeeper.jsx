@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Search, Undo2, Archive } from "lucide-react";
+import { Search, Undo2, Archive, Download } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api/field-keeper`;
@@ -97,6 +97,10 @@ export default function FieldKeeper() {
           <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#F4E4A6]/80">Field Guardian</p>
           <h1 className="text-3xl text-[#e6ecf3] mt-2">Field Keeper</h1>
           <p className="text-sm text-[#8B9DB5] mt-2">Find what the field holds, see where it came from, and set aside anything that doesn't belong. Nothing set aside is lost; it waits under Set aside.</p>
+          <a href={`${API}/export`} download data-testid="keeper-download-backup"
+            className="inline-flex items-center gap-1.5 mt-4 text-[11px] uppercase tracking-[0.2em] text-[#8B9DB5] hover:text-[#F4E4A6] transition-colors">
+            <Download size={14} /> Download field backup
+          </a>
         </div>
         <div className="flex flex-wrap gap-2" data-testid="keeper-tabs">
           {TABS.map((t) => (

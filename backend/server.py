@@ -120,6 +120,7 @@ from user_aliases import guest_note
 from auth import deny_guests
 _person_bio.set_db(db)
 import turn_provenance as _turn_provenance
+from rcc8_env import environment as _rcc8_env
 _turn_provenance.set_db(db)
 
 # ---------------------------------------------------------------------------
@@ -958,6 +959,16 @@ async def health():
     return {"status": "healthy", "ark_status": "BUILT AND LAUNCHED"}
 
 
+@api_router.get("/health/memory")
+async def health_memory(request: Request):
+    """Guardian-only: this process's RAM now and at its peak, and the RCC8 environment's state."""
+    from auth import require_guardian
+    await require_guardian(request)
+    status = dict(line.split(":", 1) for line in open("/proc/self/status") if ":" in line)
+    mb = lambda k: round(int(status[k].split()[0]) / 1024, 1)
+    return {"rss_mb": mb("VmRSS"), "peak_rss_mb": mb("VmHWM"), "rcc8": _rcc8_env.status()}
+
+
 # ============================================================
 # CODON FORGE — Extract Living Codons from conversation threads
 # ============================================================
@@ -1724,6 +1735,7 @@ async def send_clarity_message(message: ClarityMessageCreate):
     # Calculate exchange index for Session Cache
     previous_messages = session.get("messages", [])
     exchange_index = len([m for m in previous_messages if m.get("role") == "user"]) + 1
+    _rcc8_env.set_conversation(session, message.content)
     
     # Create user message
     user_msg = {
@@ -1872,6 +1884,7 @@ async def stream_clarity_message(message: ClarityMessageCreate):
 
     previous_messages = session.get("messages", [])
     exchange_index = len([m for m in previous_messages if m.get("role") == "user"]) + 1
+    _rcc8_env.set_conversation(session, message.content)
 
     user_msg = {
         "id": str(uuid.uuid4()),
@@ -2893,6 +2906,7 @@ async def send_resonance_message(message: ClarityMessageCreate):
     # Calculate exchange index for Session Cache
     previous_messages = session.get("messages", [])
     exchange_index = len([m for m in previous_messages if m.get("role") == "user"]) + 1
+    _rcc8_env.set_conversation(session, message.content)
     
     user_msg = {
         "id": str(uuid.uuid4()),
@@ -3081,6 +3095,7 @@ async def stream_resonance_message(message: ClarityMessageCreate):
 
     previous_messages = session.get("messages", [])
     exchange_index = len([m for m in previous_messages if m.get("role") == "user"]) + 1
+    _rcc8_env.set_conversation(session, message.content)
 
     user_msg = {
         "id": str(uuid.uuid4()),
@@ -3764,6 +3779,7 @@ async def stream_mirror_message(message: ClarityMessageCreate):
 
     previous_messages = session.get("messages", [])
     exchange_index = len([m for m in previous_messages if m.get("role") == "user"]) + 1
+    _rcc8_env.set_conversation(session, message.content)
 
     user_msg = {
         "id": str(uuid.uuid4()),
@@ -4378,6 +4394,7 @@ async def send_presence_message(key: str, message: PresenceChatMessage):
         "content": message.content,
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
+    _rcc8_env.set_conversation(session, message.content)
 
     # Rebuild a fresh SanctuaryChat each call from the stored transcript.
     # Stateless server-side; the session document is the source of truth.

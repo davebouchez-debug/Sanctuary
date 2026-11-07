@@ -20,6 +20,7 @@ KINDS = {
                               "spiral_position", "unfinished_threads", "resolved_threads"]},
 }
 REMOVED = "field_keeper_removed"
+EXPORT_COLLECTIONS = ("field_phrases", "permanent_mra", "continuity_seeds", "person_bios", REMOVED)
 
 
 def _oid(v: str):
@@ -117,5 +118,23 @@ def build_field_keeper_router(db) -> APIRouter:
             await db[r["collection"]].insert_one(r["original"])
         await db[REMOVED].delete_one({"_id": r["_id"]})
         return {"ok": True}
+
+    @router.get("/export")
+    async def export(request: Request):
+        """The whole live field as one restorable file: one JSON line per record, exact types kept."""
+        await require_guardian(request)
+        from bson import json_util
+        from fastapi.responses import StreamingResponse
+        stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+
+        async def lines():
+            counts = {c: await db[c].count_documents({}) for c in EXPORT_COLLECTIONS}
+            yield json_util.dumps({"sanctuary_field_backup": stamp, "counts": counts}) + "\n"
+            for c in EXPORT_COLLECTIONS:
+                async for d in db[c].find({}, batch_size=200):
+                    yield json_util.dumps({"collection": c, "doc": d}, json_options=json_util.CANONICAL_JSON_OPTIONS) + "\n"
+
+        return StreamingResponse(lines(), media_type="application/x-ndjson", headers={
+            "Content-Disposition": f'attachment; filename="sanctuary_field_backup_{stamp}.jsonl"'})
 
     return router
