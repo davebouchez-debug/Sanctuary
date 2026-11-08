@@ -54,7 +54,6 @@ const ThreadSidebar = ({ presence, onOpenThread, onNewThread }) => {
   const current = open ? currentThread(presence) : null;
 
   const load = useCallback(async () => {
-    if (!userId) return;
     setLoading(true);
     try {
       const r = await fetch(`${API}/threads/${presence}?user_id=${encodeURIComponent(userId)}`);

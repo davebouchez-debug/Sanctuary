@@ -2,9 +2,9 @@
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 
-from user_aliases import resolve_user_aliases
+from user_aliases import resolve_user_aliases, is_ephemeral
 
 LEGACY_COLLECTIONS = {
     "ansel": "resonance_sessions",
@@ -89,12 +89,24 @@ def _title(first_user: Optional[dict]) -> str:
     return " ".join(words[:8]) + ("…" if len(words) > 8 else "")
 
 
+async def _thread_owner(request: Request, user_id: Optional[str]) -> Optional[str]:
+    """Signed-in (guardian/guest): the server sign-in decides, never the browser's stored id.
+    Anonymous: only their own temporary visitor id is accepted."""
+    from auth import _user_from_request
+    from user_aliases import _GUESTS
+    user = await _user_from_request(request)
+    if user and (user.get("role") == "guardian" or user.get("user_id") in _GUESTS):
+        return user["user_id"]
+    return user_id if is_ephemeral(user_id) else None
+
+
 def build_threads_router(db) -> APIRouter:
     router = APIRouter()
 
     @router.get("/threads/{presence}")
-    async def list_threads(presence: str, user_id: str):
-        aliases = await resolve_user_aliases(db, user_id)
+    async def list_threads(presence: str, request: Request, user_id: Optional[str] = None):
+        owner = await _thread_owner(request, user_id)
+        aliases = await resolve_user_aliases(db, owner) if owner else []
         if not aliases:
             return {"threads": []}
         collection, extra = thread_source(presence)
@@ -124,8 +136,9 @@ def build_threads_router(db) -> APIRouter:
         return {"threads": threads}
 
     @router.delete("/threads/{presence}/{session_id}")
-    async def delete_thread(presence: str, session_id: str, user_id: str):
-        aliases = await resolve_user_aliases(db, user_id)
+    async def delete_thread(presence: str, session_id: str, request: Request, user_id: Optional[str] = None):
+        owner = await _thread_owner(request, user_id)
+        aliases = await resolve_user_aliases(db, owner) if owner else []
         collection, extra = thread_source(presence)
         res = await db[collection].update_one(
             {"session_id": session_id, "user_id": {"$in": aliases or []}, **extra},
