@@ -125,16 +125,24 @@ _SIGNED_IN = contextvars.ContextVar("signed_in_person", default=None)
 def set_signed_in(user_id: Optional[str], user_name: Optional[str]) -> None:
     """Remember, for this request, the name of a signed-in person (guardian/guest). Anonymous → None."""
     from user_aliases import is_ephemeral
-    _SIGNED_IN.set(user_name if user_id and user_name and not is_ephemeral(user_id) else None)
+    _SIGNED_IN.set((user_name, user_id) if user_id and user_name and not is_ephemeral(user_id) else None)
 
 
 def signed_in_name() -> Optional[str]:
-    return _SIGNED_IN.get()
+    v = _SIGNED_IN.get()
+    return v[0] if v else None
+
+
+def guardian_signed_in() -> bool:
+    """True only for David signed in (signed in, and not on the guest list)."""
+    from user_aliases import _GUESTS
+    v = _SIGNED_IN.get()
+    return bool(v) and v[1] not in _GUESTS
 
 
 def with_signed_in(prompt: str) -> str:
     """Put the plain fact of who is here at the top, right after the dedication."""
-    name = _SIGNED_IN.get()
+    name = signed_in_name()
     if not name:
         return prompt
     line = f"{name} is here, signed in."
