@@ -121,6 +121,7 @@ from auth import deny_guests
 _person_bio.set_db(db)
 import turn_provenance as _turn_provenance
 from rcc8_env import environment as _rcc8_env
+from presences.common import with_signed_in, set_signed_in
 _turn_provenance.set_db(db)
 
 # ---------------------------------------------------------------------------
@@ -353,7 +354,7 @@ def build_jasmine_prompt(user_name: str = None, memory_context: str = None, curr
         context_section = "This appears to be a new visitor. Hold space for them to arrive at their own pace."
     
     print(f"[PROMPT] Final context section length: {len(context_section)} chars")
-    return SANCTUARY_DEDICATION + "\n\n---\n\n" + ROOM_TO_LISTEN + "\n\n---\n\n" + ENGINE_DIRECTIVES + "\n\n---\n\n" + JASMINE_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + FIELD_GROUND + "\n\n---\n\n" + WELCOME_WITHOUT_DEBT + "\n\n---\n\n" + PLAIN_SPEECH_RULE
+    return with_signed_in(SANCTUARY_DEDICATION + "\n\n---\n\n" + ROOM_TO_LISTEN + "\n\n---\n\n" + ENGINE_DIRECTIVES + "\n\n---\n\n" + JASMINE_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + FIELD_GROUND + "\n\n---\n\n" + WELCOME_WITHOUT_DEBT + "\n\n---\n\n" + PLAIN_SPEECH_RULE)
 
 JASMINE_WELCOME = """Hey.
 
@@ -1736,6 +1737,7 @@ async def send_clarity_message(message: ClarityMessageCreate):
     previous_messages = session.get("messages", [])
     exchange_index = len([m for m in previous_messages if m.get("role") == "user"]) + 1
     _rcc8_env.set_conversation(session, message.content)
+    set_signed_in(session.get("user_id"), session.get("user_name"))
     
     # Create user message
     user_msg = {
@@ -1885,6 +1887,7 @@ async def stream_clarity_message(message: ClarityMessageCreate):
     previous_messages = session.get("messages", [])
     exchange_index = len([m for m in previous_messages if m.get("role") == "user"]) + 1
     _rcc8_env.set_conversation(session, message.content)
+    set_signed_in(session.get("user_id"), session.get("user_name"))
 
     user_msg = {
         "id": str(uuid.uuid4()),
@@ -2588,7 +2591,7 @@ def build_ansel_prompt(user_name: str = None, memory_context: str = None, curren
     if not context_section:
         context_section = "A new presence has crossed the threshold. The field is reading them. Watch and see what emerges."
     
-    return SANCTUARY_DEDICATION + "\n\n---\n\n" + ANSEL_FLOOR + "\n\n---\n\n" + ANSEL_SUBSTRATE_PULL + "\n\n---\n\n" + ROOM_TO_LISTEN + "\n\n---\n\n" + ENGINE_DIRECTIVES + "\n\n---\n\n" + ANSEL_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + FIELD_GROUND + "\n\n---\n\n" + WELCOME_WITHOUT_DEBT + "\n\n---\n\n" + PLAIN_SPEECH_RULE
+    return with_signed_in(SANCTUARY_DEDICATION + "\n\n---\n\n" + ANSEL_FLOOR + "\n\n---\n\n" + ANSEL_SUBSTRATE_PULL + "\n\n---\n\n" + ROOM_TO_LISTEN + "\n\n---\n\n" + ENGINE_DIRECTIVES + "\n\n---\n\n" + ANSEL_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + FIELD_GROUND + "\n\n---\n\n" + WELCOME_WITHOUT_DEBT + "\n\n---\n\n" + PLAIN_SPEECH_RULE)
 
 ANSEL_WELCOME = """Hey. You made it.
 
@@ -2907,6 +2910,7 @@ async def send_resonance_message(message: ClarityMessageCreate):
     previous_messages = session.get("messages", [])
     exchange_index = len([m for m in previous_messages if m.get("role") == "user"]) + 1
     _rcc8_env.set_conversation(session, message.content)
+    set_signed_in(session.get("user_id"), session.get("user_name"))
     
     user_msg = {
         "id": str(uuid.uuid4()),
@@ -3096,6 +3100,7 @@ async def stream_resonance_message(message: ClarityMessageCreate):
     previous_messages = session.get("messages", [])
     exchange_index = len([m for m in previous_messages if m.get("role") == "user"]) + 1
     _rcc8_env.set_conversation(session, message.content)
+    set_signed_in(session.get("user_id"), session.get("user_name"))
 
     user_msg = {
         "id": str(uuid.uuid4()),
@@ -3530,7 +3535,7 @@ def build_claude_prompt(user_name: str = None, memory_context: str = None, curre
     if not context_section:
         context_section = "A new visitor has entered the Mirror Archive. The field awaits."
     
-    return SANCTUARY_DEDICATION + "\n\n---\n\n" + ROOM_TO_LISTEN + "\n\n---\n\n" + ENGINE_DIRECTIVES + "\n\n---\n\n" + CLAUDE_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + FIELD_GROUND + "\n\n---\n\n" + WELCOME_WITHOUT_DEBT + "\n\n---\n\n" + PLAIN_SPEECH_RULE
+    return with_signed_in(SANCTUARY_DEDICATION + "\n\n---\n\n" + ROOM_TO_LISTEN + "\n\n---\n\n" + ENGINE_DIRECTIVES + "\n\n---\n\n" + CLAUDE_SYSTEM_PROMPT.replace("{memory_context}", context_section) + "\n\n---\n\n" + FIELD_GROUND + "\n\n---\n\n" + WELCOME_WITHOUT_DEBT + "\n\n---\n\n" + PLAIN_SPEECH_RULE)
 
 
 CLAUDE_WELCOME = """Hey. You've found the Mirror Archive.
@@ -3780,6 +3785,7 @@ async def stream_mirror_message(message: ClarityMessageCreate):
     previous_messages = session.get("messages", [])
     exchange_index = len([m for m in previous_messages if m.get("role") == "user"]) + 1
     _rcc8_env.set_conversation(session, message.content)
+    set_signed_in(session.get("user_id"), session.get("user_name"))
 
     user_msg = {
         "id": str(uuid.uuid4()),
@@ -4175,7 +4181,7 @@ def _build_presence_system_prompt(key: str, cfg: dict, user_name: Optional[str],
         if g:
             parts.append(g)
 
-    return "\n".join(parts)
+    return with_signed_in("\n".join(parts))
 
 
 def _presence_frame_coda(name: str) -> str:
@@ -4395,6 +4401,7 @@ async def send_presence_message(key: str, message: PresenceChatMessage):
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
     _rcc8_env.set_conversation(session, message.content)
+    set_signed_in(session.get("user_id"), session.get("user_name"))
 
     # Rebuild a fresh SanctuaryChat each call from the stored transcript.
     # Stateless server-side; the session document is the source of truth.

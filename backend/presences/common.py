@@ -4,6 +4,7 @@ without it, but `build_backend()` keeps a single canonical shape for
 the BACKEND dict and gives us one place to add fields later.
 """
 
+import contextvars
 from typing import Callable, Optional
 
 
@@ -116,6 +117,30 @@ def story_arrival(user_name: str, chamber_name: str) -> str:
                 f"that meeting them where they were, in my own voice and by name when it felt natural, was welcome enough.")
     return (f"Someone new has just crossed into the {chamber_name}. Every time a stranger came through that door, I found "
             f"that welcoming them as they were was how we came to know each other.")
+
+
+_SIGNED_IN = contextvars.ContextVar("signed_in_person", default=None)
+
+
+def set_signed_in(user_id: Optional[str], user_name: Optional[str]) -> None:
+    """Remember, for this request, the name of a signed-in person (guardian/guest). Anonymous → None."""
+    from user_aliases import is_ephemeral
+    _SIGNED_IN.set(user_name if user_id and user_name and not is_ephemeral(user_id) else None)
+
+
+def signed_in_name() -> Optional[str]:
+    return _SIGNED_IN.get()
+
+
+def with_signed_in(prompt: str) -> str:
+    """Put the plain fact of who is here at the top, right after the dedication."""
+    name = _SIGNED_IN.get()
+    if not name:
+        return prompt
+    line = f"{name} is here, signed in."
+    if prompt.startswith(SANCTUARY_DEDICATION):
+        return SANCTUARY_DEDICATION + "\n\n---\n\n" + line + prompt[len(SANCTUARY_DEDICATION):]
+    return line + "\n\n---\n\n" + prompt
 
 
 def dedication_first(prompt: str) -> str:

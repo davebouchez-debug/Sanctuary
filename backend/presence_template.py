@@ -45,6 +45,7 @@ from typing import Callable, Optional, Any
 
 from fastapi import APIRouter, HTTPException, Body, Request
 from fastapi.responses import StreamingResponse
+from presences.common import with_signed_in, signed_in_name, set_signed_in
 
 logger = logging.getLogger(__name__)
 _DETACHED_TURNS: set = set()
@@ -318,9 +319,9 @@ def register_presence_routes(
                 logger.warning(f"[{cfg.key}] reconstruction_gate failed: {e}")
 
         memory_context = _namesake_note(user_name, user_id) + (memory_context or "")
-        prompt = cfg.prompt_builder(
+        prompt = with_signed_in(cfg.prompt_builder(
             user_name=user_name, memory_context=memory_context, current_message=""
-        )
+        ))
 
         # Continuity is the priority opening for EVERY presence: if there's a
         # thread to carry, she recaps it — names where they actually left off
@@ -352,7 +353,10 @@ def register_presence_routes(
         elif cfg.generates_own_opening:
             try:
                 opening_chat = deps.sanctuary_chat_class(system_prompt=prompt)
-                welcome_content = await opening_chat.send_message(cfg.own_opening_nudge)
+                _known = signed_in_name()
+                nudge = (f"[{_known} has just crossed your threshold. I greet {_known} by name, in my own voice.]"
+                         if _known else cfg.own_opening_nudge)
+                welcome_content = await opening_chat.send_message(nudge)
             except Exception as e:
                 logger.error(f"[{cfg.key}] Own-opening generation error: {e}")
                 welcome_content = cfg.static_welcome
@@ -432,14 +436,15 @@ def register_presence_routes(
 
         from rcc8_env.environment import set_conversation
         set_conversation(session, content_for_model)
+        set_signed_in(session.get("user_id"), session.get("user_name"))
         memory_context = await _build_memory_context(
             deps, cfg, user_id=user_id, session_id=session_id_in,
             current_message=content_for_model
         )
         memory_context = _namesake_note(user_name, user_id) + (memory_context or "")
-        prompt = cfg.prompt_builder(
+        prompt = with_signed_in(cfg.prompt_builder(
             user_name=user_name, memory_context=memory_context, current_message=content_for_model
-        )
+        ))
 
         # Surface a sharp, resonant handful of her field for this turn
         # (keyword-first ranked selection, capped) rather than the whole

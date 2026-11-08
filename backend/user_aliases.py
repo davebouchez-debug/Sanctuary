@@ -180,11 +180,16 @@ async def purge_ephemeral_sessions(db) -> None:
 async def chamber_identity(db, request, body_name: Optional[str] = None):
     """(user_id, user_name) for whoever is actually signed in."""
     from auth import _user_from_request
+    from presences.common import set_signed_in
     user = await _user_from_request(request)
     if user and user.get("role") == "guardian":
+        set_signed_in(user["user_id"], "David")
         return user["user_id"], "David"
     if user and user.get("user_id") in _GUESTS:
-        return user["user_id"], _GUESTS[user["user_id"]].get("name") or user.get("name")
+        name = _GUESTS[user["user_id"]].get("name") or user.get("name")
+        set_signed_in(user["user_id"], name)
+        return user["user_id"], name
+    set_signed_in(None, None)
     await purge_ephemeral_sessions(db)
     import re
     import uuid
