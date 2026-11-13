@@ -1,0 +1,165 @@
+{
+ "source": "preview DB chamber_images -> Emergent object storage (preview key)",
+ "images": [
+  {
+   "storage_path_sha256": "5c16393d8d211bea",
+   "db_size": 6217,
+   "is_deleted": false,
+   "http": 200,
+   "file": "img_000.jpg",
+   "bytes": 6217,
+   "sha256": "d5680cfd218e1414ba5bfec0cee91cd4d7284fc14dd935362b7db605140c66ee",
+   "size_matches_db": true
+  },
+  {
+   "storage_path_sha256": "7a3303244816c626",
+   "db_size": 4294,
+   "is_deleted": false,
+   "http": 200,
+   "file": "img_001.png",
+   "bytes": 4294,
+   "sha256": "03edb8c0bd28a69b44a9f18f3483c8874031cf0980c988d1643f933a289985a1",
+   "size_matches_db": true
+  },
+  {
+   "storage_path_sha256": "2103d8f406e45c75",
+   "db_size": 4294,
+   "is_deleted": false,
+   "http": 200,
+   "file": "img_002.png",
+   "bytes": 4294,
+   "sha256": "03edb8c0bd28a69b44a9f18f3483c8874031cf0980c988d1643f933a289985a1",
+   "size_matches_db": true
+  },
+  {
+   "storage_path_sha256": "da94a4593e12453d",
+   "db_size": 4294,
+   "is_deleted": false,
+   "http": 200,
+   "file": "img_003.png",
+   "bytes": 4294,
+   "sha256": "03edb8c0bd28a69b44a9f18f3483c8874031cf0980c988d1643f933a289985a1",
+   "size_matches_db": true
+  },
+  {
+   "storage_path_sha256": "ee6d55132dcabac9",
+   "db_size": 4294,
+   "is_deleted": false,
+   "http": 200,
+   "file": "img_004.png",
+   "bytes": 4294,
+   "sha256": "03edb8c0bd28a69b44a9f18f3483c8874031cf0980c988d1643f933a289985a1",
+   "size_matches_db": true
+  },
+  {
+   "storage_path_sha256": "d227f3440d8b1dec",
+   "db_size": 4294,
+   "is_deleted": false,
+   "http": 200,
+   "file": "img_005.png",
+   "bytes": 4294,
+   "sha256": "03edb8c0bd28a69b44a9f18f3483c8874031cf0980c988d1643f933a289985a1",
+   "size_matches_db": true
+  },
+  {
+   "storage_path_sha256": "85d5caf3e8c67d73",
+   "db_size": 4294,
+   "is_deleted": false,
+   "http": 200,
+   "file": "img_006.png",
+   "bytes": 4294,
+   "sha256": "03edb8c0bd28a69b44a9f18f3483c8874031cf0980c988d1643f933a289985a1",
+   "size_matches_db": true
+  },
+  {
+   "storage_path_sha256": "15d50f9971338507",
+   "db_size": 4294,
+   "is_deleted": false,
+   "http": 200,
+   "file": "img_007.png",
+   "bytes": 4294,
+   "sha256": "03edb8c0bd28a69b44a9f18f3483c8874031cf0980c988d1643f933a289985a1",
+   "size_matches_db": true
+  },
+  {
+   "storage_path_sha256": "432321adbb71b9be",
+   "db_size": null,
+   "is_deleted": false,
+   "http": 200,
+   "file": "img_008.txt",
+   "bytes": 101910,
+   "sha256": "d57607fa61e9e766888b645860fb41641c4b63c49a165594e6f1f516388242b3",
+   "size_matches_db": false
+  },
+  {
+   "storage_path_sha256": "ff70a81a6fd17bfb",
+   "db_size": null,
+   "is_deleted": false,
+   "http": 200,
+   "file": "img_009.txt",
+   "bytes": 23507,
+   "sha256": "65fb77317befb448b70ab23b14a4f33581e5ad7c3bf0036fe633b41c1b43de93",
+   "size_matches_db": false
+  },
+  {
+   "storage_path_sha256": "d9507f07d46766ee",
+   "db_size": 301271,
+   "is_deleted": false,
+   "http": 200,
+   "file": "img_010.png",
+   "bytes": 301271,
+   "sha256": "f349ae9b9bb485dd6105ce4d2dce6fdb4ca93b3375d4265c5de2caf01a060b1a",
+   "size_matches_db": true
+  },
+  {
+   "storage_path_sha256": "ddd092d763973935",
+   "db_size": 154433,
+   "is_deleted": false,
+   "http": 200,
+   "file": "img_011.png",
+   "bytes": 154433,
+   "sha256": "719fab9a9c21bdafe908d72b4cd3992839efa741d4d4d55682ed478fef474362",
+   "size_matches_db": true
+  },
+  {
+   "storage_path_sha256": "6c27776f8ff5a8e0",
+   "db_size": 181463,
+   "is_deleted": false,
+   "http": 200,
+   "file": "img_012.png",
+   "bytes": 181463,
+   "sha256": "0d247548c763b1942c570848895721bda5d6615af67be37ba73ad733b166551b",
+   "size_matches_db": true
+  },
+  {
+   "storage_path_sha256": "461d114744e50c57",
+   "db_size": 172972,
+   "is_deleted": false,
+   "http": 200,
+   "file": "img_013.png",
+   "bytes": 172972,
+   "sha256": "4fa84f47ed6633e6971dfc34741c5bb9d43773d2dd81479958f04f70f9d98083",
+   "size_matches_db": true
+  },
+  {
+   "storage_path_sha256": "b1193b4d37f3f35d",
+   "db_size": 201026,
+   "is_deleted": false,
+   "http": 200,
+   "file": "img_014.png",
+   "bytes": 201026,
+   "sha256": "04f480053f1c1220f3aedca5ee74f3dedc2d65411009d09e2b2377085aa3a82e",
+   "size_matches_db": true
+  },
+  {
+   "storage_path_sha256": "77089b49d22f369a",
+   "db_size": 224178,
+   "is_deleted": false,
+   "http": 200,
+   "file": "img_015.png",
+   "bytes": 224178,
+   "sha256": "a5435868250afb6cb30c85f700a25e153b0ca1bb5691e1682debab1966b574c6",
+   "size_matches_db": true
+  }
+ ]
+}

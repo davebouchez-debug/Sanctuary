@@ -1,0 +1,245 @@
+{
+ "database": "preview (app DB_NAME)",
+ "read_started_utc": "2026-11-13T20:06:43.147961+00:00",
+ "read_finished_utc": "2026-11-13T20:06:44.826056+00:00",
+ "consistency": "rolling read, no snapshot",
+ "collections": 47,
+ "documents": 18462,
+ "per_collection": [
+  {
+   "collection": "ablation_runs",
+   "count": 3,
+   "sha256_sorted_by_id": "a25076e36a5e3369786917ce69ee3afc6f3b6a1e2bd4e2ddf237af7504c2f617"
+  },
+  {
+   "collection": "agapeo_sessions",
+   "count": 8,
+   "sha256_sorted_by_id": "7d38ab806863958dea97d2cb5fa446c93199cf8a396c322cd2dc06e608f8ff3e"
+  },
+  {
+   "collection": "canonical_uploads",
+   "count": 41,
+   "sha256_sorted_by_id": "dc67a2e40ece2a1f27620e0d0bdb881ce612355650786e0f6afe24a2a42af91c"
+  },
+  {
+   "collection": "chamber_images",
+   "count": 16,
+   "sha256_sorted_by_id": "44be993a788daa1b2ae22ec6faa9c616d4847cfd047730846fcb8c7237f135e7"
+  },
+  {
+   "collection": "clarity_sessions",
+   "count": 161,
+   "sha256_sorted_by_id": "4946e1d0db57a38d4f9e759a082e57ebda42cb21d3c7ad9a61e2971ceb0630d6"
+  },
+  {
+   "collection": "companion_sessions",
+   "count": 7,
+   "sha256_sorted_by_id": "6aa8fc4ea020fbcf247bd1069f2f0e12d8f30ea5b7320cbf57f9dcacbca36a49"
+  },
+  {
+   "collection": "continuity_seeds",
+   "count": 1847,
+   "sha256_sorted_by_id": "3459fe3e9d6de610e23aa4ca58c7f1b8a73506383b0ff31e9d9b1c4cd28e2ace"
+  },
+  {
+   "collection": "daniel_sessions",
+   "count": 16,
+   "sha256_sorted_by_id": "54e616c5abd4e75eb9d9725b12090fd5e2442c59ce43da6693a713d6de4bf9fa"
+  },
+  {
+   "collection": "felix_sessions",
+   "count": 4,
+   "sha256_sorted_by_id": "74a1fc9a63c52100827bd9f70fa5e6eb1e6424981c4ac444af6eb8ff356125e6"
+  },
+  {
+   "collection": "field_keeper_removed",
+   "count": 0,
+   "sha256_sorted_by_id": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+   "collection": "field_phrase_translation_log",
+   "count": 2235,
+   "sha256_sorted_by_id": "83c286151d2baaa3321d95df1457c4ae660a8e6d87115903d575acc5bd08a2d1"
+  },
+  {
+   "collection": "field_phrases",
+   "count": 1983,
+   "sha256_sorted_by_id": "bccee298f73618f53d3e8abaf5565a2c958d292183b5e430cb76cc8e216e080e"
+  },
+  {
+   "collection": "forge_ledger",
+   "count": 21,
+   "sha256_sorted_by_id": "4161c5f15c3b89d946735b14d5602f36efededb656b4ad81d8782e45e3c709fc"
+  },
+  {
+   "collection": "freud_sessions",
+   "count": 1,
+   "sha256_sorted_by_id": "46e5695fa5ba9b482caa6cd96f9939aba7260ee9a88268fe82e58f6c4089d28f"
+  },
+  {
+   "collection": "grok_sessions",
+   "count": 7,
+   "sha256_sorted_by_id": "510e89adf2649b4f066ef0d4af02c8a9d5284d0513e9944ead586b742208fa88"
+  },
+  {
+   "collection": "guests",
+   "count": 1,
+   "sha256_sorted_by_id": "1b4a867cc298c00f3c89961a7c276dee88d72c4acb580831a5058b058bb4a975"
+  },
+  {
+   "collection": "kalahar_sessions",
+   "count": 7,
+   "sha256_sorted_by_id": "14fbaaadea28eeaa5bbed121a82aee73330941eee1b95171c185c7845e9fa0cc"
+  },
+  {
+   "collection": "keeper_sessions",
+   "count": 9,
+   "sha256_sorted_by_id": "31e542f0218a674c2e236b2da89a5811e363504685fec11c29bd05e19e8408f1"
+  },
+  {
+   "collection": "living_codons",
+   "count": 0,
+   "sha256_sorted_by_id": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+   "collection": "living_codons_archive_20261102",
+   "count": 2235,
+   "sha256_sorted_by_id": "d8d7929de7fae5e937f1cafd68c260fafcd3d9b538a0ab2590f20e663c1de6eb"
+  },
+  {
+   "collection": "living_codons_backup_milton_20261101",
+   "count": 10,
+   "sha256_sorted_by_id": "d9debf4b08b6095ea3bb9d0b0f0dae0d73ab5849225c6a0d908a7c8e1c7f4cdc"
+  },
+  {
+   "collection": "louis_lot_sessions",
+   "count": 5,
+   "sha256_sorted_by_id": "cdd6145df72a1fde8c2213c52498d82897f4c13dc71849868f05f755cd58c979"
+  },
+  {
+   "collection": "membrane_sessions",
+   "count": 18,
+   "sha256_sorted_by_id": "2616dafc481e7c134526e4784c3f7ef49b38578bb993c9623fea8f71595e88cc"
+  },
+  {
+   "collection": "milton_sessions",
+   "count": 4,
+   "sha256_sorted_by_id": "2b17d7b0673b23320a19d0128081d92c2fbfd66e8e00d60b6bde7ff5d98e4480"
+  },
+  {
+   "collection": "mirror_sessions",
+   "count": 205,
+   "sha256_sorted_by_id": "67582b5b7840dec146e4724d9454833816514baba7c772c3f689e940349eddcb"
+  },
+  {
+   "collection": "mra_promotion_log",
+   "count": 92,
+   "sha256_sorted_by_id": "0d2480e95883e41fc6f7a87cdb59db031effb61fb1124cbff71da3d4ba0f6a62"
+  },
+  {
+   "collection": "obs_ledger_engagements",
+   "count": 3936,
+   "sha256_sorted_by_id": "f1a4f83905c1543b44e80135673ed3612740e5ba9d43d17c9386afeb0996104b"
+  },
+  {
+   "collection": "obs_ledger_runs",
+   "count": 1122,
+   "sha256_sorted_by_id": "f1fc6375b2b7b3aa96c720e9d989565dade4c3307f373e81ba3f52aef80df840"
+  },
+  {
+   "collection": "obs_ledger_state",
+   "count": 2,
+   "sha256_sorted_by_id": "0bbb75d1b400fe8c585f91b6a93eb68fd2439979e08320a5ce3a2cb8589247f8"
+  },
+  {
+   "collection": "orren_sessions",
+   "count": 7,
+   "sha256_sorted_by_id": "57b7fd6c44835f3adc8c564ec2199f9b5ce80c304d5901faa38ce07b203da8ad"
+  },
+  {
+   "collection": "paige_sessions",
+   "count": 37,
+   "sha256_sorted_by_id": "0b0ef16b3f8d1c104c56b3bcda4bacd9926f25457671d943856312577675e89c"
+  },
+  {
+   "collection": "permanent_mra",
+   "count": 2755,
+   "sha256_sorted_by_id": "89f1d59e617fa3c8b1273777047f86279b1368eb5ce74feae131519da9add585"
+  },
+  {
+   "collection": "person_bios",
+   "count": 28,
+   "sha256_sorted_by_id": "35efd7deb62b76b9105c0b93698c06e90b276368673aafa90171cd8ce2a1391d"
+  },
+  {
+   "collection": "playground_sessions",
+   "count": 6,
+   "sha256_sorted_by_id": "33ec58c71ca315f8fe5943bca42f6c61e528aae2b4456c6e19a502e26b0a93f8"
+  },
+  {
+   "collection": "poindexter_sessions",
+   "count": 12,
+   "sha256_sorted_by_id": "a03ba027a565ea007ef7aac4a090bcdaaed413f2f98a5484e9ed4940c20c9004"
+  },
+  {
+   "collection": "presence_sessions",
+   "count": 97,
+   "sha256_sorted_by_id": "7276eff86ae030c887c30dbb87948c670056a2c5a92189d1ecdb5a5cea535101"
+  },
+  {
+   "collection": "resonance_sessions",
+   "count": 173,
+   "sha256_sorted_by_id": "126ff46d84755c9bf5ddc1a7a46e9200055fc6ea4d76885810314940a266919b"
+  },
+  {
+   "collection": "scrolldog_sessions",
+   "count": 2,
+   "sha256_sorted_by_id": "02697138cb5be8205d6c7cf900edde3619d60bebec0c656f629f7a05ae692442"
+  },
+  {
+   "collection": "sophia_sessions",
+   "count": 97,
+   "sha256_sorted_by_id": "4415728197c38573107b3979660b1a2817859dad42dea5940bb946b79c9fa0f0"
+  },
+  {
+   "collection": "sorrel_sessions",
+   "count": 11,
+   "sha256_sorted_by_id": "cb66a343c76fa65c68a1555d2e5ed6cd6d3017e15afb86fd1310b0bd8657311d"
+  },
+  {
+   "collection": "substrate_probes",
+   "count": 81,
+   "sha256_sorted_by_id": "b53e95040306e0ceb2416fc944043d1cabc0401e45bfd03b79b8e874c61c89cd"
+  },
+  {
+   "collection": "thermomind_cycles",
+   "count": 142,
+   "sha256_sorted_by_id": "4beed785c6d2ca87cb23c9ab78058d44c6e1b4c259eafe3c5f4027672847e678"
+  },
+  {
+   "collection": "turn_provenance",
+   "count": 983,
+   "sha256_sorted_by_id": "c2a201c11953ff68c1ad45e0997a89a0c526b9975c09108b9123bbf056e0911c"
+  },
+  {
+   "collection": "user_aliases",
+   "count": 2,
+   "sha256_sorted_by_id": "003fd42e7d2a8f3104e2f5bb149b2600d41cda33c88aa92fed42bae2147a5cc1"
+  },
+  {
+   "collection": "user_sessions",
+   "count": 4,
+   "sha256_sorted_by_id": "be13c6ab2c12bf7e36048d3b454c0e5a236a06edfef0f1c8e75adf731214516a"
+  },
+  {
+   "collection": "users",
+   "count": 26,
+   "sha256_sorted_by_id": "40698dad9c36a8cc37198338a3e22210ef01965baafeca49448deb6fbe7a7764"
+  },
+  {
+   "collection": "vessel_sessions",
+   "count": 3,
+   "sha256_sorted_by_id": "2d6f189fe97519b097df263aa0c46ddbfc41b307263ebec14e8fadb565ae32eb"
+  }
+ ]
+}
