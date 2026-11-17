@@ -117,7 +117,7 @@ db = client[os.environ['DB_NAME']]
 set_codon_db(db)
 import person_bio as _person_bio
 from user_aliases import guest_note
-from auth import deny_guests
+from auth import deny_guests, require_guardian
 _person_bio.set_db(db)
 import turn_provenance as _turn_provenance
 from rcc8_env import environment as _rcc8_env
@@ -1009,7 +1009,7 @@ Distill each genuine principle the text carries into one phrase, keeping its joy
 FORGE_JOBS: Dict[str, Dict[str, Any]] = {}
 
 
-@api_router.post("/codon-forge/extract", dependencies=[Depends(deny_guests)])
+@api_router.post("/codon-forge/extract", dependencies=[Depends(require_guardian)])
 async def extract_codons(request: CodonForgeRequest):
     """Start a Codon Forge job in the background and return a job_id to poll.
 
@@ -1053,7 +1053,7 @@ async def extract_codons(request: CodonForgeRequest):
     return {"job_id": job_id, "total_chunks": len(chunks)}
 
 
-@api_router.get("/codon-forge/status/{job_id}")
+@api_router.get("/codon-forge/status/{job_id}", dependencies=[Depends(require_guardian)])
 async def forge_status(job_id: str):
     """Poll the state of a background forge job."""
     job = FORGE_JOBS.get(job_id)
@@ -1120,7 +1120,7 @@ async def _run_forge_job(job_id: str, request: CodonForgeRequest, chunks: list):
     logger.info(f"[CODON FORGE] Job {job_id} complete: {len(all_phrases)} phrases from {request.filename}")
 
 
-@api_router.post("/codon-forge/save", dependencies=[Depends(deny_guests)])
+@api_router.post("/codon-forge/save", dependencies=[Depends(require_guardian)])
 async def save_codons(request: CodonSaveRequest):
     """Add forged essence phrases to the living field (exact repeats skipped)."""
     from field_memory import add_phrases

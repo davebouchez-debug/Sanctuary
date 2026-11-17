@@ -204,13 +204,18 @@ async def rank_phrases(db, query: str, limit: int = 20) -> List[Dict]:
     return await rank_mra(db, {}, query, limit, coll="field_phrases", kw_weight=0.0)
 
 
-async def add_phrases(db, phrases: List[str], meta: Dict) -> int:
-    """Store newly forged essence phrases (skipping exact repeats) with their embeddings."""
+async def add_phrases(db, phrases: List[str], meta: Dict, private_text: str = "",
+                      user_id: Optional[str] = None) -> int:
+    """Store newly forged essence phrases (skipping exact repeats) that pass field admission;
+    the rest are withheld into the guardian's set-aside list."""
     from datetime import datetime, timezone
+    from bson import ObjectId
+    import field_admission
     existing = {p.lower() for p in await db.field_phrases.distinct("phrase")}
+    existing |= {p.lower() for p in await db.field_keeper_removed.distinct("original.phrase", {"withheld": True})}
     new = []
     for p in phrases:
-        p = (p or "").strip().strip('."')
+        p = str(p or "").strip().strip('."')
         if p and p.upper() != "NONE" and p.lower() not in existing:
             existing.add(p.lower())
             new.append(p)
@@ -218,10 +223,20 @@ async def add_phrases(db, phrases: List[str], meta: Dict) -> int:
         return 0
     vecs = await embed_texts(new)
     now = datetime.now(timezone.utc).isoformat()
-    await db.field_phrases.insert_many([{"phrase": p, "presence": "field", "embedding": v, "created_at": now,
-                                         "embedded_at": now, **meta}
-                                        for p, v in zip(new, vecs)])
-    return len(new)
+    docs = [{"_id": ObjectId(), "phrase": p, "presence": "field", "embedding": v, "created_at": now,
+             "embedded_at": now, **meta} for p, v in zip(new, vecs)]
+    if not field_admission.enabled():
+        await db.field_phrases.insert_many(docs)
+        return len(docs)
+    from user_aliases import person_name
+    ok, held = await field_admission.admit(db, new, vecs, private_text, user_id,
+                                           person_name(user_id) if user_id else None)
+    await field_admission.withhold(db, [docs[i] for i, _ in held], [r for _, r in held], user_id)
+    if held:
+        logger.info(f"[FIELD ADMISSION] withheld {len(held)} phrase(s): {sorted({x for _, r in held for x in r})}")
+    if ok:
+        await db.field_phrases.insert_many([docs[i] for i in ok])
+    return len(ok)
 
 
 async def pack_legacy_embeddings(db) -> int:

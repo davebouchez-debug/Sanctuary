@@ -137,4 +137,19 @@ def build_field_keeper_router(db) -> APIRouter:
         return StreamingResponse(lines(), media_type="application/x-ndjson", headers={
             "Content-Disposition": f'attachment; filename="sanctuary_field_backup_{stamp}.jsonl"'})
 
+    @router.get("/admission-review")
+    async def admission_review(request: Request):
+        """Read-only: existing phrases the new admission rules would have held back (nothing is changed)."""
+        await require_guardian(request)
+        from field_admission import text_reasons
+        flagged, total = [], 0
+        async for d in db.field_phrases.find({}, {"phrase": 1, "source": 1, "created_at": 1}):
+            total += 1
+            reasons = text_reasons(d.get("phrase", ""))
+            if reasons:
+                flagged.append({"id": str(d["_id"]), "phrase": d.get("phrase"), "source": d.get("source"),
+                                "date": str(d.get("created_at") or "")[:10], "reasons": reasons})
+        return {"total": total, "flagged": len(flagged), "items": flagged}
+
+
     return router

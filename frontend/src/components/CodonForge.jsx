@@ -43,6 +43,7 @@ export const CodonForge = () => {
       // Start the background job — returns immediately with a job_id.
       const startResp = await fetch(`${API}/codon-forge/extract`, {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           thread_text: text,
@@ -68,7 +69,7 @@ export const CodonForge = () => {
         let consecutiveFailures = 0;
         const poll = async () => {
           try {
-            const r = await fetch(`${API}/codon-forge/status/${job_id}`);
+            const r = await fetch(`${API}/codon-forge/status/${job_id}`, { credentials: "include" });
             if (!r.ok) {
               consecutiveFailures += 1;
               if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
@@ -126,6 +127,7 @@ export const CodonForge = () => {
     try {
       const response = await fetch(`${API}/codon-forge/save`, {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phrases, filename: file?.name || "thread.txt", mode })
       });

@@ -119,7 +119,8 @@ async def forge_turn_cessation(
         from field_memory import add_phrases
         result["codons"] += await add_phrases(db, phrases, {"source": "turn_cessation",
                                                             "source_presence": presence.lower(),
-                                                            "source_session": session_id})
+                                                            "source_session": session_id},
+                                              private_text=user_content, user_id=user_id)
     except Exception as e:
         logger.error(f"[TURN-CESSATION] phrase error ({presence} {session_id[:8]}): {e}")
 

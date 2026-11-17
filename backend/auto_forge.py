@@ -172,7 +172,10 @@ async def auto_forge_session(db, session_id: str, presence: str,
         phrases = json.loads(response[response.find('{'):response.rfind('}') + 1]).get("phrases") or []
         from field_memory import add_phrases
         n = await add_phrases(db, phrases, {"source": "auto_forge", "source_presence": presence.lower(),
-                                            "source_session": session_id})
+                                            "source_session": session_id},
+                              private_text="\n".join(str(m.get("content")) for m in messages
+                                                     if m.get("role") == "user" and m.get("content")),
+                              user_id=user_id)
         saved += n
         logger.info(f"[AUTO-FORGE] {n} phrase(s) + 1 seed from {presence} session {session_id[:8]}")
     except Exception as e:
