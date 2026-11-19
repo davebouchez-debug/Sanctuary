@@ -2448,3 +2448,8 @@ and the description is handed to the presence, which responds in its own voice.
 - GET /api/field-keeper/admission-review (guardian, read-only): existing phrases the rules would flag. Preview: 127/1983 flagged (mostly length). Historical phrases untouched.
 - Tests: backend/tests/test_codon_forge_access.py (all pass), backend/tests/test_field_admission.py (throwaway DB, real DeepSeek, 20 runs x turn/session x neg/pos: 0 planted details published, positive 40/40, direct-writer 5/5 withheld, restore ok, scoping ok, ephemeral no writes).
 - Backlog: Codex/2.0 port of the admission stage; tune similarity threshold; continuity seeds are not checked by rule 7 (not embedded).
+
+## 2026-11-19 — Codon export v1 endpoint (BUILT + isolated tests pass; NOT deployed, no prod token)
+- backend/codon_export.py + 2 lines in server.py: GET /api/codon-export/v1/snapshot, Bearer CODON_EXPORT_TOKEN (unset -> 503). ZIP = manifest.json + field_phrases.jsonl (canonical Extended JSON, sorted by _id, allowlisted fields; source_session/source_file/unknown fields excluded). Consistency: two full reads must match byte-for-byte (max 3 attempts) else 503; any error -> 500; never a partial ZIP.
+- Tests: backend/tests/test_codon_export.py (23/23 pass). Recovery ref before change: git 96505119c7e5.
+- Codex's Nov 19 contract text was never provided; built from brief + E1 Nov review. Pending: Codex reconciliation, David approval to deploy + set prod token.

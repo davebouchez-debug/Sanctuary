@@ -5578,6 +5578,8 @@ from threads import build_threads_router
 api_router.include_router(build_threads_router(db))
 from field_keeper import build_field_keeper_router
 api_router.include_router(build_field_keeper_router(db))
+from codon_export import build_codon_export_router
+api_router.include_router(build_codon_export_router(db))
 app.include_router(api_router)
 
 # Observatory relational-history ledger: independent read-only observer.
