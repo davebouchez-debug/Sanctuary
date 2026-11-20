@@ -1,0 +1,6 @@
+content-disposition: attachment; filename="sanctuary1_codons_20261120T003130Z.zip"
+x-content-sha256: 12d1053b9224b7075b4b586fe35d48c63e7f05a7dd1a1ab6187cf176c476c27a
+x-manifest-sha256: 8903580d956a07ad278c204b5482e6f6c5d94bd1c06384b82c6736586ee93f32
+cache-control: no-store
+content-length: 4342
+content-type: application/zip

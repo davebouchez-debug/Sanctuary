@@ -1,0 +1,53 @@
+{
+ "collection": "field_phrases",
+ "complete": true,
+ "consistency": {
+  "attempts": 1,
+  "method": "two consecutive full reads compared byte-for-byte; ZIP issued only on match"
+ },
+ "embedding": {
+  "dim": 384,
+  "encoding": "BSON binary subtype 0: 384 x float32 little-endian (legacy records may hold a number array)",
+  "mode": "passage",
+  "model": "BAAI/bge-small-en-v1.5",
+  "normalized": true,
+  "onnx": "Qdrant/bge-small-en-v1.5-onnx-Q"
+ },
+ "encoding": "UTF-8 JSON Lines, MongoDB canonical Extended JSON v2, one record per line, sorted by _id",
+ "fields_excluded_by_policy": [
+  "source_session",
+  "source_file"
+ ],
+ "fields_included": [
+  "_id",
+  "phrase",
+  "presence",
+  "created_at",
+  "embedded_at",
+  "source",
+  "source_presence",
+  "legacy_name",
+  "legacy_presence",
+  "lens",
+  "embedding"
+ ],
+ "fields_not_exported": [
+  "source_session"
+ ],
+ "files": {
+  "field_phrases.jsonl": {
+   "bytes": 4748,
+   "records": 2,
+   "sha256": "22741b7aeb673ef6a133ea7a8421820afa8ec4ee63d0395bf0978d37c321b42b"
+  }
+ },
+ "ids_sha256": "740d76cd0c6c94aef88ac425dfff9873c1b367aa8fb5bbb68a66d69a50e3ca15",
+ "privacy": {
+  "admission_evidence": "not stored per record in 1.0; records written before 2026-11-17 never passed the admission check"
+ },
+ "read_started_at": "2026-11-20T00:31:30.876810+00:00",
+ "record_count": 2,
+ "schema": "sanctuary-codon-export/1",
+ "snapshot_verified_at": "2026-11-20T00:31:30.878605+00:00",
+ "source": "sanctuary-1.0"
+}
