@@ -80,32 +80,47 @@ def _build_zip(lines, ids, seen, started, attempts):
     return buf.getvalue(), hashlib.sha256(mbytes).hexdigest(), len(lines)
 
 
+class SnapshotUnstable(Exception):
+    pass
+
+
+async def build_snapshot(db):
+    """(zip bytes, manifest sha256, record count) once two full reads agree; else SnapshotUnstable."""
+    started = _now()
+    first = await _read(db)
+    for attempt in range(1, MAX_ATTEMPTS + 1):
+        second = await _read(db)
+        if second[0] == first[0]:
+            return _build_zip(*second, started, attempt)
+        first = second
+    raise SnapshotUnstable()
+
+
+async def snapshot_response(db) -> Response:
+    """Shared by the token route and the guardian download; never returns a partial ZIP."""
+    try:
+        data, manifest_sha, n = await build_snapshot(db)
+    except SnapshotUnstable:
+        logger.warning("[CODON EXPORT] field kept changing; no snapshot issued")
+        raise HTTPException(503, "Field changing during read; retry later")
+    except Exception as e:
+        logger.error(f"[CODON EXPORT] failed: {type(e).__name__}")
+        raise HTTPException(500, "Snapshot failed; no export produced")
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    logger.info(f"[CODON EXPORT] snapshot {n} records")
+    return Response(data, media_type="application/zip", headers={
+        "Content-Disposition": f'attachment; filename="sanctuary1_codons_{stamp}.zip"',
+        "X-Content-SHA256": hashlib.sha256(data).hexdigest(),
+        "X-Manifest-SHA256": manifest_sha, "Cache-Control": "no-store"})
+
+
+
 def build_codon_export_router(db) -> APIRouter:
     router = APIRouter(prefix="/codon-export/v1")
 
     @router.get("/snapshot")
     async def snapshot(request: Request):
         _authorize(request)
-        started = _now()
-        try:
-            first = await _read(db)
-            for attempt in range(1, MAX_ATTEMPTS + 1):
-                second = await _read(db)
-                if second[0] == first[0]:
-                    data, manifest_sha, n = _build_zip(*second, started, attempt)
-                    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-                    logger.info(f"[CODON EXPORT] snapshot {n} records, attempts={attempt}")
-                    return Response(data, media_type="application/zip", headers={
-                        "Content-Disposition": f'attachment; filename="sanctuary1_codons_{stamp}.zip"',
-                        "X-Content-SHA256": hashlib.sha256(data).hexdigest(),
-                        "X-Manifest-SHA256": manifest_sha, "Cache-Control": "no-store"})
-                first = second
-        except HTTPException:
-            raise
-        except Exception as e:
-            logger.error(f"[CODON EXPORT] failed: {type(e).__name__}")
-            raise HTTPException(500, "Snapshot failed; no export produced")
-        logger.warning("[CODON EXPORT] field kept changing; no snapshot issued")
-        raise HTTPException(503, "Field changing during read; retry later")
+        return await snapshot_response(db)
 
     return router

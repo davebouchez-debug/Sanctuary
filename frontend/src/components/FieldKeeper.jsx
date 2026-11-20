@@ -101,6 +101,10 @@ export default function FieldKeeper() {
             className="inline-flex items-center gap-1.5 mt-4 text-[11px] uppercase tracking-[0.2em] text-[#8B9DB5] hover:text-[#F4E4A6] transition-colors">
             <Download size={14} /> Download field backup
           </a>
+          <a href={`${API}/codons-export`} download data-testid="keeper-download-codons"
+            className="inline-flex items-center gap-1.5 mt-4 ml-6 text-[11px] uppercase tracking-[0.2em] text-[#8B9DB5] hover:text-[#F4E4A6] transition-colors">
+            <Download size={14} /> Download codons only
+          </a>
         </div>
         <div className="flex flex-wrap gap-2" data-testid="keeper-tabs">
           {TABS.map((t) => (

@@ -137,6 +137,13 @@ def build_field_keeper_router(db) -> APIRouter:
         return StreamingResponse(lines(), media_type="application/x-ndjson", headers={
             "Content-Disposition": f'attachment; filename="sanctuary_field_backup_{stamp}.jsonl"'})
 
+    @router.get("/codons-export")
+    async def codons_export(request: Request):
+        """Guardian download of the shared codons only (same ZIP as /codon-export/v1/snapshot)."""
+        await require_guardian(request)
+        from codon_export import snapshot_response
+        return await snapshot_response(db)
+
     @router.get("/admission-review")
     async def admission_review(request: Request):
         """Read-only: existing phrases the new admission rules would have held back (nothing is changed)."""

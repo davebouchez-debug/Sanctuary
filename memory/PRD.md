@@ -2453,3 +2453,8 @@ and the description is handed to the presence, which responds in its own voice.
 - backend/codon_export.py + 2 lines in server.py: GET /api/codon-export/v1/snapshot, Bearer CODON_EXPORT_TOKEN (unset -> 503). ZIP = manifest.json + field_phrases.jsonl (canonical Extended JSON, sorted by _id, allowlisted fields; source_session/source_file/unknown fields excluded). Consistency: two full reads must match byte-for-byte (max 3 attempts) else 503; any error -> 500; never a partial ZIP.
 - Tests: backend/tests/test_codon_export.py (23/23 pass). Recovery ref before change: git 96505119c7e5.
 - Codex's Nov 19 contract text was never provided; built from brief + E1 Nov review. Pending: Codex reconciliation, David approval to deploy + set prod token.
+
+## 2026-11-20 — Field Keeper "Download codons only" (BUILT, tested, publish dispatched)
+- GET /api/field-keeper/codons-export (guardian; unauth 401, guest/user 403) returns the codon export ZIP; codon_export.py refactored into build_snapshot/snapshot_response shared with the token route (token route still disabled: no CODON_EXPORT_TOKEN).
+- FieldKeeper.jsx: second link "Download codons only" next to "Download field backup".
+- drive_poc/drive_poc.py: Google Drive POC (standalone, offline selftest passes) — parked; David prefers no Google Cloud setup. Apps Script drop-box proposed, not approved.
