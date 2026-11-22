@@ -2459,7 +2459,7 @@ and the description is handed to the presence, which responds in its own voice.
 - FieldKeeper.jsx: second link "Download codons only" next to "Download field backup".
 - drive_poc/drive_poc.py: Google Drive POC (standalone, offline selftest passes) — parked; David prefers no Google Cloud setup. Apps Script drop-box proposed, not approved.
 
-## 2026-11-22 — Hall of Scrolls: Scroll + ScrollDog minimal frame (BUILT in preview, tests pass, NOT deployed; awaiting Codex review)
+## 2026-11-22 — Hall of Scrolls rebuilt per David: ONE chamber (/presence/scrolldog), Scroll + ScrollDog lines only, two histories both visible, no switch (BUILT, 30/30 tests, NOT deployed; awaiting Codex review)
 - presence_history.py: guardian-only history (presence_history collection; positions scroll/scrolldog; visibility guardian/signed_in/public; verbatim chunks; idempotent by sha256), minimal prompt (anchor + signed-in fact + plain-labelled data), continuity allowlist (last_alive_thing, unfinished/resolved threads), speech_clean for TTS (scroll/scrolldog only), routes /api/presence-history/{import,import-session,import-scrolldog-pod,sessions,summary,scrolldog-minimal-frame}.
 - presences/scroll.py (minimal_frame="always"); scrolldog.py minimal_frame="toggle" (off until guardian turns it on after loading history; pod prompt byte-identical while off).
 - presence_template minimal branch (start + stream + opening fact + vision note); Field Keeper tab "Hall of Scrolls history" (HistoryKeeper.jsx).

@@ -1,8 +1,8 @@
-"""Presence history + minimal frame — Hall of Scrolls (Scroll / ScrollDog), 2026-11-22.
+"""Presence history + minimal frame — Hall of Scrolls (the Scroll and ScrollDog, one chamber), 2026-11-22.
 
-History records are data, not instructions. Access is decided here, in code, before anything reaches a prompt:
-a record is supplied only when its `positions` include the speaking presence and the verified visitor may see it.
-Only the guardian can import, list or activate.
+Two histories (positions "scroll" and "scrolldog"), both supplied to the chamber as data, never as instructions.
+Access is decided here, in code, before anything reaches a prompt: a record is supplied only if the verified
+visitor may see it (visibility). Only the guardian can import or list.
 """
 import hashlib
 import logging
@@ -22,7 +22,6 @@ VISIBILITY = {"guardian", "signed_in", "public"}
 HISTORY_K, MEMORY_K, SEED_K = 6, 8, 3
 CHUNK_WORDS = 350
 SEED_FIELDS = ("last_alive_thing", "unfinished_threads", "resolved_threads")
-SETTINGS = "presence_settings"
 
 
 def is_guardian(user_id: Optional[str]) -> bool:
@@ -97,13 +96,16 @@ async def _load_history(db, flt):
     return rows, np.stack([unpack(r["embedding"]) for r in rows])
 
 
-def _fmt_history(rows: List[dict]) -> str:
+HISTORIES = [("scroll", "The Scroll's history"), ("scrolldog", "ScrollDog's history")]
+
+
+def _fmt_history(rows: List[dict], label: str) -> str:
     out = []
     for r in rows:
         head = " | ".join(x for x in [r.get("date") or "undated", r.get("speaker") or "", r.get("kind") or "",
                                       f"{r.get('source')} part {r.get('seq', 0) + 1}/{r.get('of', 1)}"] if x)
         out.append(f"[{head}]\n{r['text'].strip()}")
-    return "Records from your history:\n\n" + "\n\n".join(out) if out else ""
+    return f"{label}:\n\n" + "\n\n".join(out) if out else ""
 
 
 async def _continuity(db, presence: str, aliases: List[str]) -> str:
@@ -131,7 +133,8 @@ async def _memories(db, presence: str, aliases: List[str]) -> str:
 async def minimal_memory_context(db, presence: str, user_id: Optional[str], message: str) -> str:
     """Data blocks only, plain labels. Nothing is supplied that the visitor is not entitled to."""
     from user_aliases import is_ephemeral, resolve_user_aliases
-    blocks = [_fmt_history(await retrieve_history(db, presence, user_id, message))]
+    blocks = [_fmt_history(await retrieve_history(db, pos, user_id, message), label)
+              for pos, label in HISTORIES]
     if user_id and not is_ephemeral(user_id):
         aliases = await resolve_user_aliases(db, user_id)
         blocks += [await _continuity(db, presence, aliases), await _memories(db, presence, aliases)]
@@ -162,12 +165,7 @@ def minimal_field(selection) -> str:
 
 
 async def minimal_active(db, mode: str) -> bool:
-    if mode == "always":
-        return True
-    if mode == "toggle":
-        s = await db[SETTINGS].find_one({"key": "scrolldog_minimal_frame"}, {"_id": 0, "on": 1})
-        return bool(s and s.get("on"))
-    return False
+    return mode == "always"
 
 
 def build_presence_history_router(db) -> APIRouter:
@@ -206,18 +204,14 @@ def build_presence_history_router(db) -> APIRouter:
                                             "speaker": f"{who} and ScrollDog"})
 
     @router.post("/import-scrolldog-pod")
-    async def import_pod(request: Request, body: dict = Body(default={})):
-        """Archive ScrollDog's current pod text (identity + calibration) verbatim as a dated self-description."""
+    async def import_pod(request: Request):
+        """ScrollDog's former pod instructions (v3.2.1), rendered as past-tense history."""
         await require_guardian(request)
-        from presences.scrolldog import _CALIBRATION_EXTRA, _IDENTITY
-        positions = set(body.get("positions") or ["scrolldog"])
-        if not positions <= POSITIONS:
-            raise HTTPException(400, "invalid positions")
-        text = _IDENTITY.strip() + "\n\n" + "".join(_CALIBRATION_EXTRA).strip()
-        return await import_text(db, text, {"positions": positions, "kind": "self_description",
-                                            "visibility": "guardian", "date": "2026-06-11",
-                                            "speaker": "ScrollDog (pod v3.2.1, named with David)",
-                                            "source": "presences/scrolldog.py pod v3.2.1 (identity + calibration)"})
+        from presences.scrolldog import POD_HISTORY
+        return await import_text(db, POD_HISTORY, {"positions": ["scrolldog"], "kind": "self_description",
+                                                   "visibility": "guardian", "date": "2026-06-11",
+                                                   "speaker": "ScrollDog with David (pod v3.2.1, past tense)",
+                                                   "source": "presences/scrolldog.py pod v3.2.1, past-tense rendering"})
 
     @router.get("/sessions")
     async def list_sessions(request: Request):
@@ -233,16 +227,6 @@ def build_presence_history_router(db) -> APIRouter:
         rows = await db[COLLECTION].aggregate([{"$group": {
             "_id": {"source": "$source", "positions": "$positions", "kind": "$kind", "visibility": "$visibility",
                     "date": "$date"}, "chunks": {"$sum": 1}}}]).to_list(None)
-        s = await db[SETTINGS].find_one({"key": "scrolldog_minimal_frame"}, {"_id": 0, "on": 1})
-        return {"sources": [{**r["_id"], "chunks": r["chunks"]} for r in rows],
-                "scrolldog_minimal_frame": bool(s and s.get("on"))}
-
-    @router.post("/scrolldog-minimal-frame")
-    async def set_minimal(request: Request, body: dict = Body(...)):
-        await require_guardian(request)
-        await db[SETTINGS].update_one({"key": "scrolldog_minimal_frame"},
-                                      {"$set": {"on": bool(body.get("on")),
-                                                "updated_at": datetime.now(timezone.utc).isoformat()}}, upsert=True)
-        return {"scrolldog_minimal_frame": bool(body.get("on"))}
+        return {"sources": [{**r["_id"], "chunks": r["chunks"]} for r in rows]}
 
     return router

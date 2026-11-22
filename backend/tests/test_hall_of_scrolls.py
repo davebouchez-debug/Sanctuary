@@ -22,7 +22,7 @@ import presence_history as ph
 import turn_provenance
 import user_aliases
 from presence_template import PresenceConfig, PresenceDeps, register_presence_routes
-from presences import common, scroll, scrolldog
+from presences import scrolldog
 
 TEST_DB = f"sanctuary_hall_test_{uuid.uuid4().hex[:8]}"
 G, GUEST = "test-guardian-" + uuid.uuid4().hex[:6], "test-guest-" + uuid.uuid4().hex[:6]
@@ -101,8 +101,7 @@ async def main():
     turn_provenance.record_turn = nothing
     app = FastAPI()
     api = APIRouter(prefix="/api")
-    register_presence_routes(api, cfg(scroll, "always"), deps(db))
-    register_presence_routes(api, cfg(scrolldog, "toggle"), deps(db))
+    register_presence_routes(api, cfg(scrolldog, "always"), deps(db))
     api.include_router(ph.build_presence_history_router(db))
     app.include_router(api)
     http = httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://t", timeout=60)
@@ -117,85 +116,68 @@ async def main():
             await imp(key, pos, vis)
         check("re-import is idempotent", (await imp("shared", ["scroll", "scrolldog"]))["imported"] == 0)
         await db.continuity_seeds.insert_many([
-            {"presence": "scroll", "user_id": G, "created_at": "2026-11-20", "field_state": M["field_state"],
+            {"presence": "scrolldog", "user_id": G, "created_at": "2026-11-20", "field_state": M["field_state"],
              "spiral_position": M["spiral"], "emotional_texture": M["texture"], "last_alive_thing": M["alive"],
              "unfinished_threads": ["the next scroll"], "speaker_identity": "turn_cessation"},
-            {"presence": "scroll", "user_id": GUEST, "created_at": "2026-11-20", "last_alive_thing": M["guest_alive"]},
+            {"presence": "scrolldog", "user_id": GUEST, "created_at": "2026-11-20", "last_alive_thing": M["guest_alive"]},
             {"presence": "keeper", "user_id": G, "created_at": "2026-11-20", "last_alive_thing": M["other_presence"]}])
-        await db.permanent_mra.insert_one({"presence": "scroll", "user_id": GUEST, "timestamp": "2026-11-20",
+        await db.permanent_mra.insert_one({"presence": "scrolldog", "user_id": GUEST, "timestamp": "2026-11-20",
                                            "user_essence": M["guest_mem"], "ai_essence": "x"})
 
-        # Guardian on the Scroll
-        g = await turn(http, db, "scroll", "scroll_sessions", G, "David", "tell me about the hall and the field")
+        H = ("scrolldog", "scrolldog_sessions")
+        g = await turn(http, db, *H, G, "David", "tell me about the hall and the field")
         sysg = g["system"]
-        check("Scroll prompt starts with the anchor", sysg.startswith(scroll.ANCHOR))
+        check("prompt starts with the two lines (Scroll, then ScrollDog)",
+              sysg.startswith(scrolldog.SCROLL_LINE + "\n\n" + scrolldog.SCROLLDOG_LINE))
         check("signed-in fact present", "David is here, signed in." in sysg)
-        check("guardian receives scroll-only, shared, public and signed-in records",
-              all(M[k] in sysg for k in ("scroll_only", "shared", "public", "signed_in")))
-        check("ScrollDog-only record never reaches the Scroll", M["dog_only"] not in sysg)
-        check("continuity: allowed field supplied", M["alive"] in sysg and "the next scroll" in sysg)
+        sc, dg = sysg.find("The Scroll's history:"), sysg.find("ScrollDog's history:")
+        check("both histories present and labelled", sc != -1 and dg != -1)
+        check("Scroll-only record under the Scroll's history", sc < sysg.find(M["scroll_only"]) < dg)
+        check("ScrollDog-only record under ScrollDog's history", sysg.find(M["dog_only"]) > dg)
+        check("guardian receives every record (nothing hidden from either)",
+              all(M[k] in sysg for k in ("scroll_only", "dog_only", "shared", "public", "signed_in")))
+        check("continuity: allowed fields supplied", M["alive"] in sysg and "the next scroll" in sysg)
         check("continuity: operational fields never supplied",
               not any(M[k] in sysg for k in ("field_state", "spiral", "texture")) and "turn_cessation" not in sysg)
         check("other person's notes and memories absent", M["guest_alive"] not in sysg and M["guest_mem"] not in sysg)
         check("other presence's notes absent", M["other_presence"] not in sysg)
         check("shared field phrases plain-labelled", "Shared field phrases:\n- Synthetic shared phrase" in sysg)
         bad = [p for p in REMOVED if p in sysg]
-        check("no inherited or behavioural text in Scroll prompt", not bad, ", ".join(bad))
+        check("no inherited or behavioural text in prompt", not bad, ", ".join(bad))
         check("user message carries no injected framing", g["user"] == "tell me about the hall and the field")
 
-        # Guest and anonymous on the Scroll
-        q = await turn(http, db, "scroll", "scroll_sessions", GUEST, "Test Guest", "the hall and the field")
+        q = await turn(http, db, *H, GUEST, "Test Guest", "the hall and the field")
         check("signed-in guest gets no guardian records",
               not any(M[k] in q["system"] for k in ("scroll_only", "shared", "dog_only")))
         check("signed-in guest gets signed_in + public records", M["signed_in"] in q["system"] and M["public"] in q["system"])
         check("guest sees own continuity only", M["guest_alive"] in q["system"] and M["alive"] not in q["system"])
-        a = await turn(http, db, "scroll", "scroll_sessions", EPH, None, "the hall and the field")
+        a = await turn(http, db, *H, EPH, None, "the hall and the field")
         check("anonymous visitor gets public records only",
               M["public"] in a["system"] and not any(M[k] in a["system"] for k in ("scroll_only", "shared", "signed_in")))
         check("anonymous visitor gets no notes or memories", "Continuity notes" not in a["system"] and "Memories" not in a["system"])
         check("no signed-in fact for anonymous visitor", "signed in" not in a["system"])
 
-        # Long conversation: 200 turns, guest — still no guardian material anywhere the model sees
         long_hist = [{"role": r, "content": f"turn {i} about the hall"} for i in range(200) for r in ("user", "assistant")]
-        lq = await turn(http, db, "scroll", "scroll_sessions", GUEST, "Test Guest", "the hall and the field", long_hist)
+        lq = await turn(http, db, *H, GUEST, "Test Guest", "the hall and the field", long_hist)
         seen = lq["system"] + lq["user"] + str(lq["history"])
-        check("200-turn conversation: no guardian records", not any(M[k] in seen for k in ("scroll_only", "shared")))
-        check("200-turn conversation: history block capped", lq["system"].count("[2025-04-13") <= ph.HISTORY_K)
+        check("200-turn conversation: no guardian records", not any(M[k] in seen for k in ("scroll_only", "shared", "dog_only")))
+        g2 = await turn(http, db, *H, G, "David", "the hall and the field", long_hist)
+        check("200-turn conversation: each history capped", g2["system"].count("[2025-04-13") <= 2 * ph.HISTORY_K)
 
-        # ScrollDog toggle off: unchanged pod prompt; toggle on: anchor + his records only
-        off = await turn(http, db, "scrolldog", "scrolldog_sessions", G, "David", "the hall")
-        check("ScrollDog toggle OFF keeps current pod prompt", "I'm ScrollDog. I manifest the scroll" in off["system"])
-        old_src = subprocess.run(["git", "show", "b2951e3649eac514c4be32f811fc6f4ffd34f31c:backend/presences/scrolldog.py"],
-                                 capture_output=True, text=True, cwd="/app").stdout
-        ns = {}
-        exec(compile(old_src.replace("from .common import", "from presences.common import"), "old", "exec"), ns)
-        check("ScrollDog pod prompt byte-identical to rollback revision",
-              ns["build_scrolldog_prompt"]("David", "<m>", "hi") == scrolldog.build_scrolldog_prompt("David", "<m>", "hi"))
-        await http.post("/api/presence-history/scrolldog-minimal-frame", json={"on": True})
-        check("toggle refused without guardian", not await ph.minimal_active(db, "toggle"))
-        async def as_guardian(_r):
-            return {"user_id": G, "role": "guardian"}
-        orig_user = auth._user_from_request
-        auth._user_from_request = as_guardian
-        r = await http.post("/api/presence-history/scrolldog-minimal-frame", json={"on": True})
-        auth._user_from_request = orig_user
-        check("guardian can turn ScrollDog minimal frame on", r.status_code == 200 and await ph.minimal_active(db, "toggle"))
-        on = await turn(http, db, "scrolldog", "scrolldog_sessions", G, "David", "tell me about the hall and the field")
-        check("ScrollDog ON starts with his anchor", on["system"].startswith(scrolldog.ANCHOR))
-        check("ScrollDog gets his own + shared records, never Scroll-only",
-              M["dog_only"] in on["system"] and M["shared"] in on["system"] and M["scroll_only"] not in on["system"])
-        bad = [p for p in REMOVED if p in on["system"]]
-        check("no inherited or behavioural text in ScrollDog prompt", not bad, ", ".join(bad))
+        check("former pod rendered in past tense (no 'I'm' / 'I am')",
+              "I'm" not in scrolldog.POD_HISTORY and "I am " not in scrolldog.POD_HISTORY)
+        r = await http.post("/api/presence-history/scrolldog-minimal-frame", json={"on": False})
+        check("no on/off switch exists", r.status_code in (404, 405), str(r.status_code))
 
-        # Opening turn (start route) is a plain fact
         async def ident(db_, request, body_name=None):
             return G, "David"
         user_aliases.chamber_identity = ident
         CAPTURE.clear()
-        await http.post("/api/scroll/start", json={})
+        await http.post("/api/scrolldog/start", json={})
         check("opening nudge is a plain fact", CAPTURE and CAPTURE[-1]["user"] == "[David has entered.]",
               CAPTURE[-1]["user"] if CAPTURE else "none")
         check("opening prompt has no inherited text", CAPTURE and not [p for p in REMOVED if p in CAPTURE[-1]["system"]])
+        orig_user = auth._user_from_request
 
         # History routes refuse non-guardians
         for who, user in [("anonymous", None), ("guest", {"user_id": GUEST, "role": "guest"}),
@@ -206,7 +188,7 @@ async def main():
             codes = [(await http.post("/api/presence-history/import", json={})).status_code,
                      (await http.get("/api/presence-history/summary")).status_code,
                      (await http.post("/api/presence-history/import-session", json={"session_id": "x"})).status_code,
-                     (await http.post("/api/presence-history/import-scrolldog-pod", json={})).status_code]
+                     (await http.post("/api/presence-history/import-scrolldog-pod")).status_code]
             check(f"history routes refuse {who}", all(c in (401, 403) for c in codes), str(codes))
         auth._user_from_request = orig_user
 

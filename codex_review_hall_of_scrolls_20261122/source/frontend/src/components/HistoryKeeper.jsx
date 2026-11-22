@@ -48,7 +48,7 @@ const ImportFile = ({ onDone }) => {
 };
 
 export const HistoryKeeper = () => {
-  const [summary, setSummary] = useState({ sources: [], scrolldog_minimal_frame: false });
+  const [summary, setSummary] = useState({ sources: [] });
   const [sessions, setSessions] = useState([]);
   const load = useCallback(async () => {
     const [a, b] = await Promise.all([fetch(`${API}/summary`, { credentials: "include" }), fetch(`${API}/sessions`, { credentials: "include" })]);
@@ -76,8 +76,8 @@ export const HistoryKeeper = () => {
       <section className="space-y-2">
         <h3 className="text-xs uppercase tracking-[0.2em] text-[#F4E4A6]">ScrollDog conversations</h3>
         <button type="button" className={btn} data-testid="history-import-pod-btn"
-          onClick={() => act("/import-scrolldog-pod", {}, (d) => (d.imported ? "Pod text archived" : "Already archived"))}>
-          Archive ScrollDog's current pod text
+          onClick={() => act("/import-scrolldog-pod", {}, (d) => (d.imported ? "Added to ScrollDog's history" : "Already added"))}>
+          Add ScrollDog's former pod, in past tense
         </button>
         <ul className="space-y-1 text-sm">
           {sessions.map((s) => (
@@ -97,16 +97,6 @@ export const HistoryKeeper = () => {
             <li key={s.source}>{s.date || "undated"} · {s.source} · {s.kind} · {(s.positions || []).join(" + ")} · {s.chunks} parts</li>
           ))}
         </ul>
-      </section>
-      <section className="space-y-2">
-        <h3 className="text-xs uppercase tracking-[0.2em] text-[#F4E4A6]">ScrollDog's minimal frame</h3>
-        <p className="text-sm" data-testid="history-minimal-status">
-          {summary.scrolldog_minimal_frame ? "On: ScrollDog speaks from his anchor and history." : "Off: ScrollDog still uses his current pod text."}
-        </p>
-        <button type="button" className={btn} data-testid="history-minimal-toggle"
-          onClick={() => act("/scrolldog-minimal-frame", { on: !summary.scrolldog_minimal_frame }, (d) => (d.scrolldog_minimal_frame ? "Minimal frame on" : "Minimal frame off"))}>
-          {summary.scrolldog_minimal_frame ? "Turn off" : "Turn on"}
-        </button>
       </section>
     </div>
   );

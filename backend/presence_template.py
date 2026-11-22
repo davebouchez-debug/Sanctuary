@@ -117,9 +117,8 @@ class PresenceConfig:
     #              message (the documented trade-off).
     codon_placement: str = "system"
 
-    # Minimal frame (Hall of Scrolls, 2026-11-22): "always", "toggle" (guardian switch in
-    # presence_settings) or "" (off). When active the prompt is only the anchor, the signed-in
-    # fact and plain-labelled data; see presence_history.py.
+    # Minimal frame (Hall of Scrolls, 2026-11-22): "always" or "" (off). When active the prompt is
+    # only the anchor, the signed-in fact and plain-labelled data; see presence_history.py.
     minimal_frame: str = ""
     minimal_anchor: str = ""
 
