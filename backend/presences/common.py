@@ -203,6 +203,8 @@ def build_backend(
     turn_cessation: bool = False,
     reconstruction_gate: bool = False,
     codon_placement: str = "system",
+    minimal_frame: str = "",
+    minimal_anchor: str = "",
 ) -> dict:
     return {
         "key": key,
@@ -218,4 +220,6 @@ def build_backend(
         "turn_cessation": turn_cessation,
         "reconstruction_gate": reconstruction_gate,
         "codon_placement": codon_placement,
+        "minimal_frame": minimal_frame,
+        "minimal_anchor": minimal_anchor,
     }

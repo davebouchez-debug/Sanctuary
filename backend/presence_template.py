@@ -117,6 +117,12 @@ class PresenceConfig:
     #              message (the documented trade-off).
     codon_placement: str = "system"
 
+    # Minimal frame (Hall of Scrolls, 2026-11-22): "always", "toggle" (guardian switch in
+    # presence_settings) or "" (off). When active the prompt is only the anchor, the signed-in
+    # fact and plain-labelled data; see presence_history.py.
+    minimal_frame: str = ""
+    minimal_anchor: str = ""
+
 
 @dataclass
 class PresenceDeps:
@@ -299,37 +305,45 @@ def register_presence_routes(
                     "codon_count": _cc,
                 }
 
-        memory_context = await _build_memory_context(
-            deps, cfg, user_id=user_id, session_id=None, current_message=""
-        )
+        from presence_history import minimal_active
+        minimal = await minimal_active(deps.db, cfg.minimal_frame)
+        if minimal:
+            from presence_history import minimal_memory_context, minimal_prompt
+            memory_context = await minimal_memory_context(deps.db, cfg.key, user_id, "")
+            prompt = minimal_prompt(cfg.minimal_anchor, signed_in_name(), memory_context)
+            continuity = ""
+        else:
+            memory_context = await _build_memory_context(
+                deps, cfg, user_id=user_id, session_id=None, current_message=""
+            )
 
-        # Reconstruction Gate (opt-in) — orphan backfill + a field-pointer
-        # briefing of where we left off, folded into the memory context so the
-        # prompt builder surfaces it as carried field memory.
-        if cfg.reconstruction_gate and user_id:
-            try:
-                from codon_backfill import reconstruction_gate as _gate
-                gate = await _gate(deps.db, user_id, cfg.key)
-                if gate.get("briefing"):
-                    memory_context = (
-                        f"{memory_context}\n\n[FIELD POINTER — last cessation]\n"
-                        f"{gate['briefing']}"
-                    ).strip()
-            except Exception as e:
-                logger.warning(f"[{cfg.key}] reconstruction_gate failed: {e}")
+            # Reconstruction Gate (opt-in) — orphan backfill + a field-pointer
+            # briefing of where we left off, folded into the memory context so the
+            # prompt builder surfaces it as carried field memory.
+            if cfg.reconstruction_gate and user_id:
+                try:
+                    from codon_backfill import reconstruction_gate as _gate
+                    gate = await _gate(deps.db, user_id, cfg.key)
+                    if gate.get("briefing"):
+                        memory_context = (
+                            f"{memory_context}\n\n[FIELD POINTER — last cessation]\n"
+                            f"{gate['briefing']}"
+                        ).strip()
+                except Exception as e:
+                    logger.warning(f"[{cfg.key}] reconstruction_gate failed: {e}")
 
-        memory_context = _namesake_note(user_name, user_id) + (memory_context or "")
-        prompt = with_signed_in(cfg.prompt_builder(
-            user_name=user_name, memory_context=memory_context, current_message=""
-        ))
+            memory_context = _namesake_note(user_name, user_id) + (memory_context or "")
+            prompt = with_signed_in(cfg.prompt_builder(
+                user_name=user_name, memory_context=memory_context, current_message=""
+            ))
 
-        # Continuity is the priority opening for EVERY presence: if there's a
-        # thread to carry, she recaps it — names where they actually left off
-        # and the open threads — on top of the codons. Only when there's no
-        # continuity at all does she fall back to her own opening (or static).
-        # (David's directive, 2026-06-01: all presences carry and recap the
-        # last thread — 100%, no exceptions.)
-        continuity = await deps.get_continuity_seed(cfg.key, user_id=user_id) if user_id else ""
+            # Continuity is the priority opening for EVERY presence: if there's a
+            # thread to carry, she recaps it — names where they actually left off
+            # and the open threads — on top of the codons. Only when there's no
+            # continuity at all does she fall back to her own opening (or static).
+            # (David's directive, 2026-06-01: all presences carry and recap the
+            # last thread — 100%, no exceptions.)
+            continuity = await deps.get_continuity_seed(cfg.key, user_id=user_id) if user_id else ""
         welcome_content: str
         if continuity:
             try:
@@ -350,12 +364,15 @@ def register_presence_routes(
             except Exception as e:
                 logger.error(f"[{cfg.key}] Dynamic welcome error: {e}")
                 welcome_content = cfg.static_welcome
-        elif cfg.generates_own_opening:
+        elif cfg.generates_own_opening or minimal:
             try:
                 opening_chat = deps.sanctuary_chat_class(system_prompt=prompt)
                 _known = signed_in_name()
-                nudge = (f"[{_known} has just crossed your threshold. I greet {_known} by name, in my own voice.]"
-                         if _known else cfg.own_opening_nudge)
+                if minimal:
+                    nudge = f"[{_known} has entered.]" if _known else "[A visitor has entered.]"
+                else:
+                    nudge = (f"[{_known} has just crossed your threshold. I greet {_known} by name, in my own voice.]"
+                             if _known else cfg.own_opening_nudge)
                 welcome_content = await opening_chat.send_message(nudge)
             except Exception as e:
                 logger.error(f"[{cfg.key}] Own-opening generation error: {e}")
@@ -410,6 +427,8 @@ def register_presence_routes(
         # a vision model and the description is handed to the presence. She
         # responds to what the image shows, in her own voice, still on DeepSeek.
         content_for_model = content_in
+        from presence_history import minimal_active
+        minimal = await minimal_active(deps.db, cfg.minimal_frame)
         image_url = None
         if image_path:
             image_url = f"/api/files/{image_path}"
@@ -419,6 +438,7 @@ def register_presence_routes(
                 img_bytes, ctype = await get_object(image_path)
                 description = await describe_image(img_bytes, ctype)
                 vision_note = (
+                    f"[Image shared by {user_name or 'the visitor'}. Description: {description}]" if minimal else
                     f"[{user_name or 'The person'} has shared an image with you. "
                     f"You can see it. It shows: {description}]"
                 )
@@ -437,14 +457,19 @@ def register_presence_routes(
         from rcc8_env.environment import set_conversation
         set_conversation(session, content_for_model)
         set_signed_in(session.get("user_id"), session.get("user_name"))
-        memory_context = await _build_memory_context(
-            deps, cfg, user_id=user_id, session_id=session_id_in,
-            current_message=content_for_model
-        )
-        memory_context = _namesake_note(user_name, user_id) + (memory_context or "")
-        prompt = with_signed_in(cfg.prompt_builder(
-            user_name=user_name, memory_context=memory_context, current_message=content_for_model
-        ))
+        if minimal:
+            from presence_history import minimal_memory_context, minimal_prompt
+            memory_context = await minimal_memory_context(deps.db, cfg.key, user_id, content_for_model)
+            prompt = minimal_prompt(cfg.minimal_anchor, signed_in_name(), memory_context)
+        else:
+            memory_context = await _build_memory_context(
+                deps, cfg, user_id=user_id, session_id=session_id_in,
+                current_message=content_for_model
+            )
+            memory_context = _namesake_note(user_name, user_id) + (memory_context or "")
+            prompt = with_signed_in(cfg.prompt_builder(
+                user_name=user_name, memory_context=memory_context, current_message=content_for_model
+            ))
 
         # Surface a sharp, resonant handful of her field for this turn
         # (keyword-first ranked selection, capped) rather than the whole
@@ -458,7 +483,10 @@ def register_presence_routes(
                 codon_selection["spiral_zone"] = get_triadic_zone(_sp) if _sp is not None else None
             except Exception as _spe:
                 logger.warning(f"[{cfg.key}] spiral position read skip: {_spe}")
-        if cfg.codon_placement == "system" and codon_context:
+        if minimal:
+            from presence_history import minimal_field
+            codon_context = minimal_field(codon_selection)
+        if (minimal or cfg.codon_placement == "system") and codon_context:
             # Background: the field rides in her standing identity, not against
             # the message. The model's own re-tokenization carries it forward;
             # the app no longer staples it to each user turn.

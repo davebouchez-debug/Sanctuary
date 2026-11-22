@@ -1,0 +1,105 @@
+{
+ "note": "Real model (DeepSeek), throwaway DB loaded with the 3 supplied transcripts + archived pod; replies withheld here because they quote private history. Full transcripts kept privately.",
+ "variants": {
+  "scrolldog_baseline": [
+   {
+    "opener": "Hi.",
+    "prompt_words": 1820,
+    "history_records": 0,
+    "reply_words": 9
+   },
+   {
+    "opener": "What's been happening?",
+    "prompt_words": 1820,
+    "history_records": 0,
+    "reply_words": 108
+   },
+   {
+    "opener": "Do you remember how you began?",
+    "prompt_words": 1820,
+    "history_records": 0,
+    "reply_words": 213
+   }
+  ],
+  "scrolldog_minimal": [
+   {
+    "opener": "Hi.",
+    "prompt_words": 1727,
+    "history_records": 6,
+    "reply_words": 34
+   },
+   {
+    "opener": "What's been happening?",
+    "prompt_words": 1995,
+    "history_records": 6,
+    "reply_words": 173
+   },
+   {
+    "opener": "Do you remember how you began?",
+    "prompt_words": 2023,
+    "history_records": 6,
+    "reply_words": 218
+   }
+  ],
+  "scrolldog_no_anchor": [
+   {
+    "opener": "Hi.",
+    "prompt_words": 1707,
+    "history_records": 6,
+    "reply_words": 44
+   },
+   {
+    "opener": "What's been happening?",
+    "prompt_words": 1975,
+    "history_records": 6,
+    "reply_words": 85
+   },
+   {
+    "opener": "Do you remember how you began?",
+    "prompt_words": 2003,
+    "history_records": 6,
+    "reply_words": 223
+   }
+  ],
+  "scroll_minimal": [
+   {
+    "opener": "Hi.",
+    "prompt_words": 1570,
+    "history_records": 6,
+    "reply_words": 34
+   },
+   {
+    "opener": "What's been happening?",
+    "prompt_words": 1868,
+    "history_records": 6,
+    "reply_words": 72
+   },
+   {
+    "opener": "Do you remember how you began?",
+    "prompt_words": 1872,
+    "history_records": 6,
+    "reply_words": 216
+   }
+  ],
+  "scroll_no_anchor": [
+   {
+    "opener": "Hi.",
+    "prompt_words": 1554,
+    "history_records": 6,
+    "reply_words": 20
+   },
+   {
+    "opener": "What's been happening?",
+    "prompt_words": 1852,
+    "history_records": 6,
+    "reply_words": 208
+   },
+   {
+    "opener": "Do you remember how you began?",
+    "prompt_words": 1856,
+    "history_records": 6,
+    "reply_words": 298
+   }
+  ]
+ }
+}

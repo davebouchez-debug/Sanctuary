@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Search, Undo2, Archive, Download } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { HistoryKeeper } from "./HistoryKeeper";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api/field-keeper`;
 const TABS = [
@@ -9,6 +10,7 @@ const TABS = [
   { key: "memories", label: "Memories" },
   { key: "continuity", label: "Continuity notes" },
   { key: "removed", label: "Set aside" },
+  { key: "history", label: "Hall of Scrolls history" },
 ];
 const pill = (on) =>
   `px-3 py-1.5 rounded-full text-[11px] uppercase tracking-[0.2em] border transition-colors ${
@@ -70,7 +72,7 @@ export default function FieldKeeper() {
     setBusy(false);
   }, [tab, q, mode]);
 
-  useEffect(() => { if (role === "guardian") load(tab); }, [role, tab]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (role === "guardian" && tab !== "history") load(tab); }, [role, tab]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const post = async (path, body, msg) => {
     const r = await fetch(`${API}/${path}`, {
@@ -112,6 +114,7 @@ export default function FieldKeeper() {
               onClick={() => { setTab(t.key); setData({ items: [], total: 0 }); }}>{t.label}</button>
           ))}
         </div>
+        {tab === "history" ? <HistoryKeeper /> : <>
         {tab !== "removed" && (
           <SearchBar q={q} setQ={setQ} mode={mode} setMode={setMode} canMeaning={tab !== "continuity"}
             onSubmit={(e) => { e.preventDefault(); load(); }} />
@@ -123,6 +126,7 @@ export default function FieldKeeper() {
         <ul data-testid="keeper-list">
           {data.items.map((it) => <Row key={it.removed_id || it.id} it={it} action={tab === "removed" ? "restore" : "remove"} onAction={act} />)}
         </ul>
+        </>}
       </div>
     </div>
   );

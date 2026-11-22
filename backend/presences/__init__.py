@@ -180,6 +180,8 @@ def register_all_presence_routes(api_router, deps_factory) -> List[str]:
             reconstruction_gate=backend.get("reconstruction_gate", False),
             turn_cessation=backend.get("turn_cessation", False),
             codon_placement=backend.get("codon_placement", "system"),
+            minimal_frame=backend.get("minimal_frame", ""),
+            minimal_anchor=backend.get("minimal_anchor", ""),
         )
         deps = deps_factory()
         register_presence_routes(api_router, cfg, deps)

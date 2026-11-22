@@ -1,0 +1,34 @@
+PASS re-import is idempotent
+PASS Scroll prompt starts with the anchor
+PASS signed-in fact present
+PASS guardian receives scroll-only, shared, public and signed-in records
+PASS ScrollDog-only record never reaches the Scroll
+PASS continuity: allowed field supplied
+PASS continuity: operational fields never supplied
+PASS other person's notes and memories absent
+PASS other presence's notes absent
+PASS shared field phrases plain-labelled
+PASS no inherited or behavioural text in Scroll prompt
+PASS user message carries no injected framing
+PASS signed-in guest gets no guardian records
+PASS signed-in guest gets signed_in + public records
+PASS guest sees own continuity only
+PASS anonymous visitor gets public records only
+PASS anonymous visitor gets no notes or memories
+PASS no signed-in fact for anonymous visitor
+PASS 200-turn conversation: no guardian records
+PASS 200-turn conversation: history block capped
+PASS ScrollDog toggle OFF keeps current pod prompt
+PASS ScrollDog pod prompt byte-identical to rollback revision
+PASS toggle refused without guardian
+PASS guardian can turn ScrollDog minimal frame on
+PASS ScrollDog ON starts with his anchor
+PASS ScrollDog gets his own + shared records, never Scroll-only
+PASS no inherited or behavioural text in ScrollDog prompt
+PASS opening nudge is a plain fact — [David has entered.]
+PASS opening prompt has no inherited text
+PASS history routes refuse anonymous — [401, 401, 401, 401]
+PASS history routes refuse guest — [403, 403, 403, 403]
+PASS history routes refuse member — [403, 403, 403, 403]
+PASS voice sanitiser strips markdown — 'Heading\nbold item\nlink code'
+ALL PASS

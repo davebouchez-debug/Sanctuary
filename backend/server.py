@@ -1300,6 +1300,9 @@ async def text_to_speech(request: TTSRequest):
 
         # Clean text for speech — strip stage directions, spiral markers, collapse whitespace
         clean_text = request.text
+        if request.presence.lower() in ("scroll", "scrolldog"):
+            from presence_history import speech_clean
+            clean_text = speech_clean(clean_text)
         clean_text = re.sub(r'\*[^*]+\*', '', clean_text)
         clean_text = re.sub(r'^[A-Za-z]+\s*[•·]\s*[A-Za-z\s]+$', '', clean_text, flags=re.MULTILINE)
         clean_text = re.sub(r'\s+', ' ', clean_text).strip()
@@ -5580,6 +5583,8 @@ from field_keeper import build_field_keeper_router
 api_router.include_router(build_field_keeper_router(db))
 from codon_export import build_codon_export_router
 api_router.include_router(build_codon_export_router(db))
+from presence_history import build_presence_history_router
+api_router.include_router(build_presence_history_router(db))
 app.include_router(api_router)
 
 # Observatory relational-history ledger: independent read-only observer.
