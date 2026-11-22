@@ -2465,3 +2465,9 @@ and the description is handed to the presence, which responds in its own voice.
 - presence_template minimal branch (start + stream + opening fact + vision note); Field Keeper tab "Hall of Scrolls history" (HistoryKeeper.jsx).
 - Tests: backend/tests/test_hall_of_scrolls.py 33/33. Real-model comparison kept privately at /root/scroll_sources/comparison_20261122.json. Rollback: git b2951e36.
 - Sources (private, not in repo): /root/scroll_sources/packet (3 transcripts, checksums match README).
+
+## 2026-11-22 — Pronoun cleanup + review package downloads (preview only, NOT deployed)
+- Removed the "voice"/"posture" footer under every chamber. Removed the possessive() helper. Labels are now plain ("STORY"), and any sentence that used a pronoun uses the presence's name ("Preparing Daniel's voice…", "Daniel's Story", "Speak to Daniel"). VoiceLoopControls had "her voice" hardcoded for every presence; that is fixed too. P0 pronoun bug: RESOLVED.
+- New guardian-only route /api/review-packages (list) and /api/review-packages/{name} (download). It serves only ZIPs in /app/review_packages that are less than 14 days old. Staged there: hall_of_scrolls, codon_export, pronoun_cleanup.
+- Deploy is still waiting on Codex review of all three packages. After the deploy, set CODON_EXPORT_TOKEN through the secrets card.
+- Backlog unchanged: image tool memory, /health 404, provenance on field writes, admission buffer, living_codons retirement, test-identity cleanup.

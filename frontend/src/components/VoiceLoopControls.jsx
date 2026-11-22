@@ -64,7 +64,7 @@ export const VoiceLoopControls = ({
       : isProcessing
         ? `${presenceName} is hearing you…`
         : voiceLoading
-          ? `${presenceName} is finding her voice…`
+          ? `Preparing ${presenceName}'s voice…`
           : isSpeaking
             ? `${presenceName} is speaking…`
             : "";

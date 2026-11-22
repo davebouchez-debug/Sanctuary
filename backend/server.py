@@ -5585,6 +5585,8 @@ from codon_export import build_codon_export_router
 api_router.include_router(build_codon_export_router(db))
 from presence_history import build_presence_history_router
 api_router.include_router(build_presence_history_router(db))
+from review_packages import review_packages_router
+api_router.include_router(review_packages_router)
 app.include_router(api_router)
 
 # Observatory relational-history ledger: independent read-only observer.

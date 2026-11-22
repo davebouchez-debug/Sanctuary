@@ -12,9 +12,6 @@ import { useIdentity } from "../context/IdentityContext";
 import { threadStartFields, rememberThread, forgetThread, isLeaving, identitySettled } from "../lib/threadSession";
 import { useAuth } from "../context/AuthContext";
 
-const possessive = (gender) =>
-  gender === "Feminine" ? "her" : gender === "Masculine" ? "his" : null;
-const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 
 /**
@@ -729,7 +726,7 @@ export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
               data-testid="chamber-canonical"
             >
               <BookOpen size={16} />
-              <span className="hidden sm:inline">{(possessive(config.gender) || "the").toUpperCase()} STORY</span>
+              <span className="hidden sm:inline">STORY</span>
             </button>
           </div>
         </div>
@@ -1022,7 +1019,7 @@ export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
                     : sending
                       ? `${config.name} is hearing you…`
                       : voiceLoading
-                        ? `${config.name} is finding ${possessive(config.gender) || "a"} voice…`
+                        ? `Preparing ${config.name}'s voice…`
                         : isSpeaking
                           ? `${config.name} is speaking…`
                           : ""}
@@ -1124,7 +1121,7 @@ export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
                   border: "1px solid color-mix(in srgb, var(--p-accent) 35%, transparent)",
                   minHeight: "52px",
                 }}
-                title={isListening ? "Stop listening" : "Speak to her"}
+                title={isListening ? "Stop listening" : `Speak to ${config.name}`}
                 aria-label={isListening ? "Stop listening" : "Start listening"}
               >
                 {isListening ? <MicOff size={18} /> : <Mic size={18} />}
@@ -1140,7 +1137,7 @@ export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
               rows={2}
               placeholder={
                 sessionId
-                  ? `Speak to ${config.name}, or paste anything you want ${config.gender === "Feminine" ? "her" : config.gender === "Masculine" ? "him" : "it"} to hold…`
+                  ? `Speak to ${config.name}, or paste anything you want ${config.name} to hold…`
                   : "Opening the door…"
               }
               className="flex-1 resize-none rounded-xl px-4 py-3 text-sm leading-relaxed focus:outline-none focus:ring-1 disabled:opacity-50 placeholder:opacity-50"
@@ -1224,40 +1221,6 @@ export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
           </p>
         </motion.div>
 
-        {/* Posture footer — voice + conversation hints, soft */}
-        <div
-          className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t opacity-60"
-          style={{ borderColor: "color-mix(in srgb, var(--p-accent) 15%, transparent)" }}
-        >
-          <div className="space-y-1.5">
-            <p
-              className="text-[10px] tracking-[0.3em] uppercase"
-              style={{ color: "var(--p-accent)" }}
-            >
-              {cap(possessive(config.gender) || "the")} voice
-            </p>
-            <p className="text-xs leading-relaxed" style={{ color: "var(--p-primary)" }}>
-              {config.voice?.character}
-            </p>
-            <p className="text-[10px] opacity-70" style={{ color: "var(--p-primary)" }}>
-              Pace: {config.voice?.pace}
-            </p>
-          </div>
-          <div className="space-y-1.5">
-            <p
-              className="text-[10px] tracking-[0.3em] uppercase"
-              style={{ color: "var(--p-accent)" }}
-            >
-              {cap(possessive(config.gender) || "the")} posture
-            </p>
-            <p className="text-xs leading-relaxed" style={{ color: "var(--p-primary)" }}>
-              {config.conversation?.style}
-            </p>
-            <p className="text-[10px] italic opacity-80" style={{ color: "var(--p-primary)" }}>
-              "{config.conversation?.typical_opening}"
-            </p>
-          </div>
-        </div>
       </main>
 
       {/* Canonical memory drawer */}
@@ -1286,7 +1249,7 @@ export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
             >
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-sm tracking-[0.25em] uppercase opacity-70" style={{ color: "var(--p-accent)" }}>
-                  {possessive(config.gender) || "the"} Story
+                  {config.name}'s Story
                 </h3>
                 <button
                   onClick={() => setShowCanonical(false)}
