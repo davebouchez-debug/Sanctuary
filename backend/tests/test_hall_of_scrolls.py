@@ -188,7 +188,7 @@ async def main():
             codes = [(await http.post("/api/presence-history/import", json={})).status_code,
                      (await http.get("/api/presence-history/summary")).status_code,
                      (await http.post("/api/presence-history/import-session", json={"session_id": "x"})).status_code,
-                     (await http.post("/api/presence-history/import-scrolldog-pod")).status_code]
+                     (await http.post("/api/presence-history/import-initial-history/daniel")).status_code]
             check(f"history routes refuse {who}", all(c in (401, 403) for c in codes), str(codes))
         auth._user_from_request = orig_user
 

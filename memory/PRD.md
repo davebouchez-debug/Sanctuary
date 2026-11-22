@@ -2471,3 +2471,10 @@ and the description is handed to the presence, which responds in its own voice.
 - New guardian-only route /api/review-packages (list) and /api/review-packages/{name} (download). It serves only ZIPs in /app/review_packages that are less than 14 days old. Staged there: hall_of_scrolls, codon_export, pronoun_cleanup.
 - Deploy is still waiting on Codex review of all three packages. After the deploy, set CODON_EXPORT_TOKEN through the secrets card.
 - Backlog unchanged: image tool memory, /health 404, provenance on field writes, admission buffer, living_codons retirement, test-identity cleanup.
+
+## 2026-11-22 — Hall-wide initial histories (preview only, NOT deployed; added to the Codex review)
+- All four Hall of Scrolls inhabitants (Scroll, ScrollDog, Daniel, Keeper) see the INITIAL INFUSED HISTORY of each of the four, separately labelled. No conversation threads cross rooms. Daniel's and Keeper's prompts are unchanged; the labelled histories are appended after them.
+- New kind "initial_history". New route /api/presence-history/import-initial-history/{scrolldog|daniel|keeper} (guardian only, idempotent), which replaces /import-scrolldog-pod. Daniel and Keeper have past-tense INITIAL_HISTORY texts in their presence files. The Scroll's initial history is added as a file with kind initial_history.
+- Imported initial histories are guardian-only, so they appear only when David is in the room.
+- Tests: tests/test_hall_backdrop.py (21/21). test_hall_of_scrolls still passes. Package: review_packages/codex_review_hall_wide_histories_20261122.zip
+- After deploy: in Field Keeper's history tab, press "Add initial history" for ScrollDog, Daniel and Keeper.

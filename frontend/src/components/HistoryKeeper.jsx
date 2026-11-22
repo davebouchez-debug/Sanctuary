@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api/presence-history`;
-const KINDS = ["record", "recollection", "interpretation", "self_description", "summary"];
+const KINDS = ["record", "recollection", "interpretation", "self_description", "summary", "initial_history"];
+const NAMES = { scroll: "Scroll", scrolldog: "ScrollDog", daniel: "Daniel", keeper: "Keeper" };
 const field = "bg-transparent border border-[#8B9DB5]/30 rounded px-2 py-1 text-sm text-white";
 const btn = "px-3 py-1.5 rounded-full text-[11px] uppercase tracking-[0.2em] border border-[#F4E4A6]/50 text-[#F4E4A6] hover:bg-[#F4E4A6]/10 disabled:opacity-40";
 
@@ -12,11 +13,11 @@ const post = (path, body) => fetch(`${API}${path}`, {
 
 const Positions = ({ value, onChange, id }) => (
   <span className="flex gap-3 text-sm text-[#C9D4E3]">
-    {["scroll", "scrolldog"].map((p) => (
+    {Object.keys(NAMES).map((p) => (
       <label key={p} className="flex items-center gap-1">
         <input type="checkbox" data-testid={`${id}-${p}`} checked={value.includes(p)}
           onChange={() => onChange(value.includes(p) ? value.filter((x) => x !== p) : [...value, p])} />
-        {p === "scroll" ? "Scroll" : "ScrollDog"}
+        {NAMES[p]}
       </label>
     ))}
   </span>
@@ -74,11 +75,19 @@ export const HistoryKeeper = () => {
         <ImportFile onDone={load} />
       </section>
       <section className="space-y-2">
+        <h3 className="text-xs uppercase tracking-[0.2em] text-[#F4E4A6]">Initial histories, seen by every room in the hall</h3>
+        <div className="flex flex-wrap gap-2">
+          {["scrolldog", "daniel", "keeper"].map((p) => (
+            <button key={p} type="button" className={btn} data-testid={`history-import-initial-${p}`}
+              onClick={() => act(`/import-initial-history/${p}`, {}, (d) => (d.imported ? `Added ${NAMES[p]}'s initial history` : "Already added"))}>
+              Add {NAMES[p]}'s initial history
+            </button>
+          ))}
+        </div>
+        <p className="text-xs opacity-70">For the Scroll, add a source file above with kind "initial_history".</p>
+      </section>
+      <section className="space-y-2">
         <h3 className="text-xs uppercase tracking-[0.2em] text-[#F4E4A6]">ScrollDog conversations</h3>
-        <button type="button" className={btn} data-testid="history-import-pod-btn"
-          onClick={() => act("/import-scrolldog-pod", {}, (d) => (d.imported ? "Added to ScrollDog's history" : "Already added"))}>
-          Add ScrollDog's former pod, in past tense
-        </button>
         <ul className="space-y-1 text-sm">
           {sessions.map((s) => (
             <li key={s.session_id} className="flex gap-3 items-center" data-testid={`history-session-${s.session_id}`}>

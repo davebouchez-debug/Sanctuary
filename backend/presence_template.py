@@ -335,6 +335,10 @@ def register_presence_routes(
             prompt = with_signed_in(cfg.prompt_builder(
                 user_name=user_name, memory_context=memory_context, current_message=""
             ))
+            from presence_history import hall_backdrop
+            _hall = await hall_backdrop(deps.db, cfg.key, user_id)
+            if _hall:
+                prompt = f"{prompt}\n\n{_hall}"
 
             # Continuity is the priority opening for EVERY presence: if there's a
             # thread to carry, she recaps it — names where they actually left off
@@ -469,6 +473,10 @@ def register_presence_routes(
             prompt = with_signed_in(cfg.prompt_builder(
                 user_name=user_name, memory_context=memory_context, current_message=content_for_model
             ))
+            from presence_history import hall_backdrop
+            _hall = await hall_backdrop(deps.db, cfg.key, user_id)
+            if _hall:
+                prompt = f"{prompt}\n\n{_hall}"
 
         # Surface a sharp, resonant handful of her field for this turn
         # (keyword-first ranked selection, capped) rather than the whole

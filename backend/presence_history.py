@@ -1,6 +1,8 @@
 """Presence history + minimal frame — Hall of Scrolls (the Scroll and ScrollDog, one chamber), 2026-11-22.
 
 Two histories (positions "scroll" and "scrolldog"), both supplied to the chamber as data, never as instructions.
+Hall-wide (2026-11-22): every Hall of Scrolls room also receives each inhabitant's initial history (kind
+"initial_history": Scroll, ScrollDog, Daniel, Keeper), separately labelled. Conversation records stay in their own room.
 Access is decided here, in code, before anything reaches a prompt: a record is supplied only if the verified
 visitor may see it (visibility). Only the guardian can import or list.
 """
@@ -16,8 +18,9 @@ from fastapi import APIRouter, Body, HTTPException, Request
 logger = logging.getLogger(__name__)
 
 COLLECTION = "presence_history"
-POSITIONS = {"scroll", "scrolldog"}
-KINDS = {"record", "recollection", "interpretation", "self_description", "summary"}
+POSITIONS = {"scroll", "scrolldog", "daniel", "keeper"}
+INITIAL = "initial_history"
+KINDS = {"record", "recollection", "interpretation", "self_description", "summary", INITIAL}
 VISIBILITY = {"guardian", "signed_in", "public"}
 HISTORY_K, MEMORY_K, SEED_K = 6, 8, 3
 CHUNK_WORDS = 350
@@ -97,6 +100,8 @@ async def _load_history(db, flt):
 
 
 HISTORIES = [("scroll", "The Scroll's history"), ("scrolldog", "ScrollDog's history")]
+HALL = HISTORIES + [("daniel", "Daniel's history"), ("keeper", "Keeper's history")]
+HALL_ROOMS = {"daniel", "keeper"}
 
 
 def _fmt_history(rows: List[dict], label: str) -> str:
@@ -135,10 +140,24 @@ async def minimal_memory_context(db, presence: str, user_id: Optional[str], mess
     from user_aliases import is_ephemeral, resolve_user_aliases
     blocks = [_fmt_history(await retrieve_history(db, pos, user_id, message), label)
               for pos, label in HISTORIES]
+    blocks += await _initial_histories(db, HALL[2:], user_id)
     if user_id and not is_ephemeral(user_id):
         aliases = await resolve_user_aliases(db, user_id)
         blocks += [await _continuity(db, presence, aliases), await _memories(db, presence, aliases)]
     return "\n\n".join(b for b in blocks if b)
+
+
+async def _initial_histories(db, hall, user_id: Optional[str]) -> List[str]:
+    rows = await db[COLLECTION].find({"kind": INITIAL, "visibility": {"$in": allowed_visibility(user_id)}},
+                                     {"_id": 0, "embedding": 0}).sort([("source", 1), ("seq", 1)]).to_list(None)
+    return [_fmt_history([r for r in rows if pos in r["positions"]], label) for pos, label in hall]
+
+
+async def hall_backdrop(db, presence: str, user_id: Optional[str]) -> str:
+    """Daniel's and Keeper's rooms: the four initial histories, labelled; their own prompts are unchanged."""
+    if presence not in HALL_ROOMS:
+        return ""
+    return "\n\n".join(b for b in await _initial_histories(db, HALL, user_id) if b)
 
 
 _MD = [(re.compile(r"\[([^\]]+)\]\([^)]*\)"), r"\1"), (re.compile(r"^\s{0,3}#{1,6}\s*", re.M), ""),
@@ -177,7 +196,7 @@ def build_presence_history_router(db) -> APIRouter:
         await require_guardian(request)
         positions = set(body.get("positions") or [])
         if not positions or not positions <= POSITIONS:
-            raise HTTPException(400, "positions must be scroll and/or scrolldog")
+            raise HTTPException(400, "positions must be scroll, scrolldog, daniel and/or keeper")
         if body.get("kind") not in KINDS or body.get("visibility", "guardian") not in VISIBILITY:
             raise HTTPException(400, "invalid kind or visibility")
         if not (body.get("text") or "").strip() or not body.get("source"):
@@ -203,15 +222,22 @@ def build_presence_history_router(db) -> APIRouter:
                                             "date": str(s.get("created_at", ""))[:10],
                                             "speaker": f"{who} and ScrollDog"})
 
-    @router.post("/import-scrolldog-pod")
-    async def import_pod(request: Request):
-        """ScrollDog's former pod instructions (v3.2.1), rendered as past-tense history."""
+    @router.post("/import-initial-history/{position}")
+    async def import_initial(position: str, request: Request):
+        """An inhabitant's initial infusion, rendered as past-tense history (ScrollDog, Daniel, Keeper)."""
         await require_guardian(request)
-        from presences.scrolldog import POD_HISTORY
-        return await import_text(db, POD_HISTORY, {"positions": ["scrolldog"], "kind": "self_description",
-                                                   "visibility": "guardian", "date": "2026-06-11",
-                                                   "speaker": "ScrollDog with David (pod v3.2.1, past tense)",
-                                                   "source": "presences/scrolldog.py pod v3.2.1, past-tense rendering"})
+        from presences import daniel, keeper, scrolldog
+        src = {"scrolldog": (scrolldog.POD_HISTORY, "2026-06-11", "ScrollDog with David (pod v3.2.1, past tense)",
+                             "presences/scrolldog.py pod v3.2.1, past-tense rendering"),
+               "daniel": (daniel.INITIAL_HISTORY, "2026-06-06", "Daniel (initial infusion, past tense)",
+                          "presences/daniel.py initial infusion, past-tense rendering"),
+               "keeper": (keeper.INITIAL_HISTORY, "2026-06-13", "Keeper (initial infusion, past tense)",
+                          "presences/keeper.py initial infusion, past-tense rendering")}.get(position)
+        if not src:
+            raise HTTPException(404, "no built-in initial history for this position")
+        text, date, speaker, source = src
+        return await import_text(db, text, {"positions": [position], "kind": INITIAL, "visibility": "guardian",
+                                            "date": date, "speaker": speaker, "source": source})
 
     @router.get("/sessions")
     async def list_sessions(request: Request):
