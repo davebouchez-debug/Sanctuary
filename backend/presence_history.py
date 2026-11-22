@@ -263,7 +263,7 @@ def build_presence_history_router(db) -> APIRouter:
 
     @router.post("/import-scroll-packet")
     async def import_scroll_packet(request: Request):
-        """David's Scroll source packet (2026-11-22), verbatim, checksums verified before import."""
+        """David's Scroll source packet: conversations, so room records (retrieved per turn), never the background."""
         await require_guardian(request)
         from pathlib import Path
         base = Path(__file__).resolve().parent / "history_sources" / "scroll_packet_20261122"
@@ -272,7 +272,7 @@ def build_presence_history_router(db) -> APIRouter:
             raw = (base / name).read_bytes()
             if hashlib.sha256(raw).hexdigest() != sha:
                 raise HTTPException(500, f"checksum mismatch: {name}")
-            r = await import_text(db, raw.decode("utf-8"), {"positions": [pos], "kind": INITIAL, "visibility": "guardian",
+            r = await import_text(db, raw.decode("utf-8"), {"positions": [pos], "kind": "record", "visibility": "guardian",
                                                             "date": date, "speaker": speaker,
                                                             "source": f"Scroll source packet 2026-11-22: {name}"})
             out.append({"file": name, **r})

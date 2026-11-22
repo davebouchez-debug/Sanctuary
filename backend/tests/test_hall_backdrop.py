@@ -164,7 +164,7 @@ async def main():
 
         # Scroll source packet, verbatim with checksums
         r = await http.post("/api/presence-history/import-scroll-packet")
-        check("scroll packet imports 3 files", r.status_code == 200 and all(f["imported"] > 0 for f in r.json()["files"]), r.text[:300])
+        check("scroll packet imports 3 files as records", r.status_code == 200 and all(f["imported"] > 0 for f in r.json()["files"]), r.text[:300])
         r = await http.post("/api/presence-history/import-scroll-packet")
         check("scroll packet re-import is idempotent", all(f["imported"] == 0 for f in r.json()["files"]))
         rows = await db.presence_history.find({"source": {"$regex": "^Scroll source packet"}}, {"_id": 0, "embedding": 0}).sort([("source", 1), ("seq", 1)]).to_list(None)
@@ -174,14 +174,22 @@ async def main():
             joined = "".join(r["text"] for r in rows if r["source"].endswith(name))
             check(f"verbatim: {name}", joined == (base / name).read_bytes().decode("utf-8"))
             check(f"position {pos}: {name}", all(r["positions"] == [pos] for r in rows if r["source"].endswith(name)))
-        k2 = await turn(http, db, "keeper", "keeper_sessions", G, "David", "the hall")
-        check("Keeper's room carries the Scroll packet in full",
-              "laboratory and 2.0 the world" in k2 and "Shalom, David." in k2 and "The hall holds it with you." in k2)
-        s2 = await turn(http, db, "scrolldog", "scrolldog_sessions", G, "David", "laboratory and world")
-        check("Scroll room: initial histories appear once (not also retrieved per turn)",
-              s2.count("A laboratory and a world. That's a clean split") == 1)
-        q2 = await turn(http, db, "daniel", "daniel_sessions", GUEST, "Test Guest", "the hall")
-        check("guest never receives the packet", "laboratory and 2.0 the world" not in q2)
+        for room, coll in [("keeper", "keeper_sessions"), ("daniel", "daniel_sessions")]:
+            t = await turn(http, db, room, coll, G, "David", "laboratory and world")
+            check(f"{room}'s room never receives the conversations", "laboratory and 2.0 the world" not in t
+                  and "Shalom, David." not in t and "The hall holds it with you." not in t)
+        bd = (await db.keeper_sessions.find_one({"session_id": st.json()["session_id"]}))["hall_backdrop"]
+        fresh_bd = await ph.hall_backdrop(db, "keeper", G)
+        check("background holds no conversation text", "laboratory and 2.0 the world" not in fresh_bd)
+        check("background stays short (written histories only)", len(fresh_bd.split()) < 3000, str(len(fresh_bd.split())))
+        s2 = await turn(http, db, "scrolldog", "scrolldog_sessions", G, "David", "a laboratory and a world, 1.0 and 2.0")
+        check("Scroll room draws matching passages from the conversations", "laboratory" in s2)
+        packet_parts = sum(1 for r in rows)
+        got = sum(1 for r in rows if r["text"].strip()[:80] in s2)
+        check("Scroll room gets only a few passages, not the whole files", 0 < got <= 2 * ph.HISTORY_K and got < packet_parts,
+              f"{got}/{packet_parts}")
+        q2 = await turn(http, db, "scrolldog", "scrolldog_sessions", GUEST, "Test Guest", "a laboratory and a world")
+        check("guest never receives the conversations", "laboratory and 2.0 the world" not in q2)
     finally:
         auth._user_from_request = orig_user
         assert TEST_DB.startswith("sanctuary_hall_test_") and TEST_DB != os.environ.get("DB_NAME")
