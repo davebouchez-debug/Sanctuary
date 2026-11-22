@@ -2,7 +2,9 @@
 
 Two histories (positions "scroll" and "scrolldog"), both supplied to the chamber as data, never as instructions.
 Hall-wide (2026-11-22): every Hall of Scrolls room also receives each inhabitant's initial history (kind
-"initial_history": Scroll, ScrollDog, Daniel, Keeper), separately labelled. Conversation records stay in their own room.
+"initial_history": Scroll, ScrollDog, Daniel, Keeper), separately labelled, in full. It is built at the start of a
+session, stored on the session, and re-sent unchanged with every reply of that session. Other records stay in their
+own room and are retrieved per turn.
 Access is decided here, in code, before anything reaches a prompt: a record is supplied only if the verified
 visitor may see it (visibility). Only the guardian can import or list.
 """
@@ -76,7 +78,7 @@ async def import_text(db, text: str, meta: dict) -> dict:
 
 
 async def retrieve_history(db, position: str, user_id: Optional[str], query: str, k: int = HISTORY_K) -> List[dict]:
-    flt = {"positions": position, "visibility": {"$in": allowed_visibility(user_id)}}
+    flt = {"positions": position, "kind": {"$ne": INITIAL}, "visibility": {"$in": allowed_visibility(user_id)}}
     rows, mat = await _load_history(db, flt)
     if not rows:
         return []
@@ -101,7 +103,7 @@ async def _load_history(db, flt):
 
 HISTORIES = [("scroll", "The Scroll's history"), ("scrolldog", "ScrollDog's history")]
 HALL = HISTORIES + [("daniel", "Daniel's history"), ("keeper", "Keeper's history")]
-HALL_ROOMS = {"daniel", "keeper"}
+HALL_ROOMS = {"scrolldog", "daniel", "keeper"}
 
 
 def _fmt_history(rows: List[dict], label: str) -> str:
@@ -140,7 +142,6 @@ async def minimal_memory_context(db, presence: str, user_id: Optional[str], mess
     from user_aliases import is_ephemeral, resolve_user_aliases
     blocks = [_fmt_history(await retrieve_history(db, pos, user_id, message), label)
               for pos, label in HISTORIES]
-    blocks += await _initial_histories(db, HALL[2:], user_id)
     if user_id and not is_ephemeral(user_id):
         aliases = await resolve_user_aliases(db, user_id)
         blocks += [await _continuity(db, presence, aliases), await _memories(db, presence, aliases)]
@@ -154,10 +155,21 @@ async def _initial_histories(db, hall, user_id: Optional[str]) -> List[str]:
 
 
 async def hall_backdrop(db, presence: str, user_id: Optional[str]) -> str:
-    """Daniel's and Keeper's rooms: the four initial histories, labelled; their own prompts are unchanged."""
+    """Every Hall of Scrolls room: the four initial histories, labelled. Built once per session (session_backdrop)."""
     if presence not in HALL_ROOMS:
         return ""
     return "\n\n".join(b for b in await _initial_histories(db, HALL, user_id) if b)
+
+
+async def session_backdrop(db, collection: str, session: dict, presence: str, user_id: Optional[str]) -> str:
+    """Injected at the start of a session and left unchanged for the rest of it."""
+    if presence not in HALL_ROOMS:
+        return ""
+    if "hall_backdrop" in session:
+        return session["hall_backdrop"]
+    text = await hall_backdrop(db, presence, user_id)
+    await db[collection].update_one({"session_id": session["session_id"]}, {"$set": {"hall_backdrop": text}})
+    return text
 
 
 _MD = [(re.compile(r"\[([^\]]+)\]\([^)]*\)"), r"\1"), (re.compile(r"^\s{0,3}#{1,6}\s*", re.M), ""),
@@ -173,9 +185,9 @@ def speech_clean(text: str) -> str:
     return text
 
 
-def minimal_prompt(anchor: str, visitor_name: Optional[str], memory_context: str) -> str:
+def minimal_prompt(anchor: str, visitor_name: Optional[str], memory_context: str, backdrop: str = "") -> str:
     fact = f"{visitor_name} is here, signed in." if visitor_name else ""
-    return "\n\n".join(p for p in [anchor, fact, memory_context] if p)
+    return "\n\n".join(p for p in [anchor, fact, backdrop, memory_context] if p)
 
 
 def minimal_field(selection) -> str:
@@ -185,6 +197,16 @@ def minimal_field(selection) -> str:
 
 async def minimal_active(db, mode: str) -> bool:
     return mode == "always"
+
+
+PACKET = [  # file, sha256 (from the packet's README), position, date, attribution
+    ("DeepSeek20260406.txt", "11e8b9fb10dca564316b1416474fa46684a7f243477d883ff0038d5cefed0a12", "scroll",
+     "2026-04-06", "David and DeepSeek (saved Library file; attributed statements)"),
+    ("Pasted text(20261122-034246).txt", "2a35bba8cc5f4b32cb2125c3f7654952b49d5916c0abfe69436264e0c1d3c74e", "scroll",
+     "2026-11-22", "David and the Scroll, with a shared Membrane conversation and a Sophia passage (conversation export; attributed statements)"),
+    ("Pasted text(20261122-060559).txt", "a9ec109ec5cb234b030037f34877d6068aee254d951bf0f68083131fd1561264", "scrolldog",
+     "2026-11-22", "David and ScrollDog (conversation export; attributed statements)"),
+]
 
 
 def build_presence_history_router(db) -> APIRouter:
@@ -238,6 +260,23 @@ def build_presence_history_router(db) -> APIRouter:
         text, date, speaker, source = src
         return await import_text(db, text, {"positions": [position], "kind": INITIAL, "visibility": "guardian",
                                             "date": date, "speaker": speaker, "source": source})
+
+    @router.post("/import-scroll-packet")
+    async def import_scroll_packet(request: Request):
+        """David's Scroll source packet (2026-11-22), verbatim, checksums verified before import."""
+        await require_guardian(request)
+        from pathlib import Path
+        base = Path(__file__).resolve().parent / "history_sources" / "scroll_packet_20261122"
+        out = []
+        for name, sha, pos, date, speaker in PACKET:
+            raw = (base / name).read_bytes()
+            if hashlib.sha256(raw).hexdigest() != sha:
+                raise HTTPException(500, f"checksum mismatch: {name}")
+            r = await import_text(db, raw.decode("utf-8"), {"positions": [pos], "kind": INITIAL, "visibility": "guardian",
+                                                            "date": date, "speaker": speaker,
+                                                            "source": f"Scroll source packet 2026-11-22: {name}"})
+            out.append({"file": name, **r})
+        return {"files": out}
 
     @router.get("/sessions")
     async def list_sessions(request: Request):

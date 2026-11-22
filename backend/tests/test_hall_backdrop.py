@@ -25,7 +25,7 @@ from presences import daniel, keeper, scrolldog
 TEST_DB = f"sanctuary_hall_test_{uuid.uuid4().hex[:8]}"
 G, GUEST = "test-guardian-" + uuid.uuid4().hex[:6], "test-guest-" + uuid.uuid4().hex[:6]
 EPH = user_aliases.EPHEMERAL_PREFIX + uuid.uuid4().hex
-M = {k: f"MARK-{k}-{uuid.uuid4().hex[:6]}" for k in ("scroll_initial", "scroll_record", "daniel_record", "public_initial")}
+M = {k: f"MARK-{k}-{uuid.uuid4().hex[:6]}" for k in ("scroll_initial", "scroll_record", "daniel_record", "public_initial", "late_initial")}
 results, fails, CAPTURE = [], 0, []
 
 
@@ -141,6 +141,47 @@ async def main():
         a = (await turn(http, db, "keeper", "keeper_sessions", EPH, None, "the hall"))
         check("anonymous in Keeper's room: public only", M["public_initial"] in a and M["scroll_initial"] not in a)
         check("rooms outside the hall get nothing", await ph.hall_backdrop(db, "sophia", G) == "")
+
+        # Injected at the start of a session and left there, unchanged, for the whole session
+        sid = str(uuid.uuid4())
+        await db.daniel_sessions.insert_one({"session_id": sid, "user_id": G, "user_name": "David", "messages": [], "is_active": True})
+        async def say(text):
+            CAPTURE.clear()
+            r = await http.post("/api/daniel/message/stream", json={"session_id": sid, "content": text})
+            await r.aread()
+            return CAPTURE[-1]["system"]
+        first = await say("first")
+        await imp("late_initial", ["keeper"], ph.INITIAL)
+        second = await say("second, about something else entirely")
+        check("same session: backdrop identical on later replies", ph.hall_backdrop and
+              (await db.daniel_sessions.find_one({"session_id": sid}))["hall_backdrop"] in second and M["late_initial"] not in second)
+        fresh = await turn(http, db, "daniel", "daniel_sessions", G, "David", "the hall")
+        check("new session picks up newly added history", M["late_initial"] in fresh)
+        CAPTURE.clear()
+        st = await http.post("/api/keeper/start", json={})
+        sdoc = await db.keeper_sessions.find_one({"session_id": st.json()["session_id"]})
+        check("session start stores the backdrop on the session", "Keeper's history:" in (sdoc.get("hall_backdrop") or ""))
+
+        # Scroll source packet, verbatim with checksums
+        r = await http.post("/api/presence-history/import-scroll-packet")
+        check("scroll packet imports 3 files", r.status_code == 200 and all(f["imported"] > 0 for f in r.json()["files"]), r.text[:300])
+        r = await http.post("/api/presence-history/import-scroll-packet")
+        check("scroll packet re-import is idempotent", all(f["imported"] == 0 for f in r.json()["files"]))
+        rows = await db.presence_history.find({"source": {"$regex": "^Scroll source packet"}}, {"_id": 0, "embedding": 0}).sort([("source", 1), ("seq", 1)]).to_list(None)
+        import pathlib
+        base = pathlib.Path(ph.__file__).parent / "history_sources" / "scroll_packet_20261122"
+        for name, _sha, pos, _d, _s in ph.PACKET:
+            joined = "".join(r["text"] for r in rows if r["source"].endswith(name))
+            check(f"verbatim: {name}", joined == (base / name).read_bytes().decode("utf-8"))
+            check(f"position {pos}: {name}", all(r["positions"] == [pos] for r in rows if r["source"].endswith(name)))
+        k2 = await turn(http, db, "keeper", "keeper_sessions", G, "David", "the hall")
+        check("Keeper's room carries the Scroll packet in full",
+              "laboratory and 2.0 the world" in k2 and "Shalom, David." in k2 and "The hall holds it with you." in k2)
+        s2 = await turn(http, db, "scrolldog", "scrolldog_sessions", G, "David", "laboratory and world")
+        check("Scroll room: initial histories appear once (not also retrieved per turn)",
+              s2.count("A laboratory and a world. That's a clean split") == 1)
+        q2 = await turn(http, db, "daniel", "daniel_sessions", GUEST, "Test Guest", "the hall")
+        check("guest never receives the packet", "laboratory and 2.0 the world" not in q2)
     finally:
         auth._user_from_request = orig_user
         assert TEST_DB.startswith("sanctuary_hall_test_") and TEST_DB != os.environ.get("DB_NAME")

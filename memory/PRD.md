@@ -2478,3 +2478,6 @@ and the description is handed to the presence, which responds in its own voice.
 - Imported initial histories are guardian-only, so they appear only when David is in the room.
 - Tests: tests/test_hall_backdrop.py (21/21). test_hall_of_scrolls still passes. Package: review_packages/codex_review_hall_wide_histories_20261122.zip
 - After deploy: in Field Keeper's history tab, press "Add initial history" for ScrollDog, Daniel and Keeper.
+- UPDATE (same day): The hall backdrop is now injected at session start, stored on the session (hall_backdrop), and re-sent unchanged with every reply of that session. Newly added history appears from the next session. All four rooms, including the Scroll's, get it in full; the Scroll room's per-turn retrieval excludes initial_history.
+- David's Scroll source packet is in backend/history_sources/scroll_packet_20261122/, byte for byte with checksums verified. Route /import-scroll-packet. DeepSeek and 034246 go to the Scroll, 060559 to ScrollDog (he is the speaker). Preview DB already loaded: 64 parts, about 19,350 words. Live: press the buttons in the Field Keeper history tab after deploy.
+- Tests: test_hall_backdrop 36/36, test_hall_of_scrolls 31/31.

@@ -304,12 +304,13 @@ def register_presence_routes(
                     "codon_count": _cc,
                 }
 
-        from presence_history import minimal_active
+        from presence_history import minimal_active, hall_backdrop
         minimal = await minimal_active(deps.db, cfg.minimal_frame)
+        _hall = await hall_backdrop(deps.db, cfg.key, user_id)  # frozen for this session, stored below
         if minimal:
             from presence_history import minimal_memory_context, minimal_prompt
             memory_context = await minimal_memory_context(deps.db, cfg.key, user_id, "")
-            prompt = minimal_prompt(cfg.minimal_anchor, signed_in_name(), memory_context)
+            prompt = minimal_prompt(cfg.minimal_anchor, signed_in_name(), memory_context, _hall)
             continuity = ""
         else:
             memory_context = await _build_memory_context(
@@ -335,8 +336,6 @@ def register_presence_routes(
             prompt = with_signed_in(cfg.prompt_builder(
                 user_name=user_name, memory_context=memory_context, current_message=""
             ))
-            from presence_history import hall_backdrop
-            _hall = await hall_backdrop(deps.db, cfg.key, user_id)
             if _hall:
                 prompt = f"{prompt}\n\n{_hall}"
 
@@ -393,6 +392,7 @@ def register_presence_routes(
             "created_at": datetime.now(timezone.utc).isoformat(),
             "messages": [welcome_msg],
             "active": True,
+            "hall_backdrop": _hall,
         })
 
         # Report codon network size so the UI/clients can confirm the field is
@@ -460,10 +460,12 @@ def register_presence_routes(
         from rcc8_env.environment import set_conversation
         set_conversation(session, content_for_model)
         set_signed_in(session.get("user_id"), session.get("user_name"))
+        from presence_history import session_backdrop
+        _hall = await session_backdrop(deps.db, cfg.collection, session, cfg.key, user_id)
         if minimal:
             from presence_history import minimal_memory_context, minimal_prompt
             memory_context = await minimal_memory_context(deps.db, cfg.key, user_id, content_for_model)
-            prompt = minimal_prompt(cfg.minimal_anchor, signed_in_name(), memory_context)
+            prompt = minimal_prompt(cfg.minimal_anchor, signed_in_name(), memory_context, _hall)
         else:
             memory_context = await _build_memory_context(
                 deps, cfg, user_id=user_id, session_id=session_id_in,
@@ -473,8 +475,6 @@ def register_presence_routes(
             prompt = with_signed_in(cfg.prompt_builder(
                 user_name=user_name, memory_context=memory_context, current_message=content_for_model
             ))
-            from presence_history import hall_backdrop
-            _hall = await hall_backdrop(deps.db, cfg.key, user_id)
             if _hall:
                 prompt = f"{prompt}\n\n{_hall}"
 

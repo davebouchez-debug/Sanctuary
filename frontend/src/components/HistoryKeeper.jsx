@@ -84,7 +84,11 @@ export const HistoryKeeper = () => {
             </button>
           ))}
         </div>
-        <p className="text-xs opacity-70">For the Scroll, add a source file above with kind "initial_history".</p>
+        <button type="button" className={btn} data-testid="history-import-scroll-packet"
+          onClick={() => act("/import-scroll-packet", {}, (d) => `Scroll packet: ${d.files.map((f) => f.imported).reduce((a, b) => a + b, 0)} parts added`)}>
+          Add the Scroll source packet (3 files)
+        </button>
+        <p className="text-xs opacity-70">Each session takes these in full when it starts and keeps them unchanged until it ends.</p>
       </section>
       <section className="space-y-2">
         <h3 className="text-xs uppercase tracking-[0.2em] text-[#F4E4A6]">ScrollDog conversations</h3>
