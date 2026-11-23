@@ -239,7 +239,8 @@ async def minimal_memory_context(db, presence: str, user_id: Optional[str], mess
 
 
 async def _initial_histories(db, hall, user_id: Optional[str]) -> List[str]:
-    rows = await db[COLLECTION].find({"kind": INITIAL, "visibility": {"$in": allowed_visibility(user_id)}},
+    """Founding backgrounds go to every room with every visitor; personal material stays per-person."""
+    rows = await db[COLLECTION].find({"kind": INITIAL},
                                      {"_id": 0, "embedding": 0}).sort([("source", 1), ("seq", 1)]).to_list(None)
     return [_fmt_history([r for r in rows if pos in r["positions"]], label) for pos, label in hall]
 
@@ -349,7 +350,7 @@ def build_presence_history_router(db) -> APIRouter:
         if not src:
             raise HTTPException(404, "no built-in initial history for this position")
         text, date, speaker, source = src
-        return await import_text(db, text, {"positions": [position], "kind": INITIAL, "visibility": "guardian",
+        return await import_text(db, text, {"positions": [position], "kind": INITIAL, "visibility": "public",
                                             "date": date, "speaker": speaker, "source": source})
 
     @router.post("/import-scroll-packet")

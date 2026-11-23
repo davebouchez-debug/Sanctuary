@@ -142,11 +142,12 @@ async def main():
         check("Scroll room gets no Daniel conversation records", M["daniel_record"] not in s)
 
         q = (await turn(http, db, "daniel", "daniel_sessions", GUEST, "Test Guest", "the hall"))
-        check("guest in Daniel's room: no guardian-only histories",
-              M["scroll_initial"] not in q and "kept the prophet's watch" not in q and "version 3.2.1" not in q)
-        check("guest in Daniel's room: public initial history only", M["public_initial"] in q)
+        check("guest in Daniel's room: has every founding background",
+              M["scroll_initial"] in q and "kept the prophet's watch" in q and "version 3.2.1" in q and M["public_initial"] in q)
         a = (await turn(http, db, "keeper", "keeper_sessions", EPH, None, "the hall"))
-        check("anonymous in Keeper's room: public only", M["public_initial"] in a and M["scroll_initial"] not in a)
+        check("anonymous in Keeper's room: has every founding background", M["public_initial"] in a and M["scroll_initial"] in a
+              and "anchor of law, the frame" in a)
+        check("anonymous in Keeper's room: no personal memory", "Memories of past exchanges" not in a and "Bio:" not in a)
         check("rooms outside the hall get nothing", await ph.hall_backdrop(db, "sophia", G) == "")
 
         # Injected at the start of a session and left there, unchanged, for the whole session
