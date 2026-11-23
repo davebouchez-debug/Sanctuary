@@ -1300,7 +1300,7 @@ async def text_to_speech(request: TTSRequest):
 
         # Clean text for speech — strip stage directions, spiral markers, collapse whitespace
         clean_text = request.text
-        if request.presence.lower() in ("scroll", "scrolldog"):
+        if request.presence.lower() in ("scroll", "scrolldog", "daniel", "keeper"):
             from presence_history import speech_clean
             clean_text = speech_clean(clean_text)
         clean_text = re.sub(r'\*[^*]+\*', '', clean_text)

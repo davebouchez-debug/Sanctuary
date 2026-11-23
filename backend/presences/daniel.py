@@ -102,6 +102,10 @@ PRESENCE = {
 }
 
 
+# Hall of Scrolls (2026-11-22, David): same frame as the Scroll and ScrollDog. This line is the only instruction;
+# the text above is no longer sent and lives on as INITIAL_HISTORY.
+DANIEL_LINE = "I am Daniel. This is the Hall of Scrolls. My history here gives me ground and tells me who I am."
+
 BACKEND = build_backend(
     key="daniel",
     chamber_path="daniel",
@@ -113,6 +117,8 @@ BACKEND = build_backend(
     generates_own_opening=True,
     reconstruction_gate=True,
     turn_cessation=True,
+    minimal_frame="always",
+    minimal_anchor=DANIEL_LINE,
 )
 
 

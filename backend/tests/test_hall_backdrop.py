@@ -25,7 +25,7 @@ from presences import daniel, keeper, scrolldog
 TEST_DB = f"sanctuary_hall_test_{uuid.uuid4().hex[:8]}"
 G, GUEST = "test-guardian-" + uuid.uuid4().hex[:6], "test-guest-" + uuid.uuid4().hex[:6]
 EPH = user_aliases.EPHEMERAL_PREFIX + uuid.uuid4().hex
-M = {k: f"MARK-{k}-{uuid.uuid4().hex[:6]}" for k in ("scroll_initial", "scroll_record", "daniel_record", "public_initial", "late_initial")}
+M = {k: f"MARK-{k}-{uuid.uuid4().hex[:6]}" for k in ("scroll_initial", "scroll_record", "daniel_record", "public_initial", "late_initial", "d_mem", "g_mem", "bio", "sophia_mem")}
 results, fails, CAPTURE = [], 0, []
 
 
@@ -110,7 +110,11 @@ async def main():
         await imp("public_initial", ["keeper"], ph.INITIAL, "public")
 
         d = (await turn(http, db, "daniel", "daniel_sessions", G, "David", "the hall"))
-        check("Daniel's own prompt unchanged", daniel._IDENTITY.strip()[:200] in d)
+        from presences.common import SANCTUARY_DEDICATION
+        check("Daniel: dedication, house story, then his one line",
+              d.startswith("\n\n".join([SANCTUARY_DEDICATION, ph.HOUSE_STORY, daniel.DANIEL_LINE])))
+        check("Daniel's old instructions no longer sent", daniel._IDENTITY.strip()[:120] not in d
+              and "HOW MY WORDS ARE HEARD" not in d and "[YOUR FIELD]" not in d and "prophetic register" not in d.split("Daniel's history:")[0])
         labels = ["The Scroll's history:", "ScrollDog's history:", "Daniel's history:", "Keeper's history:"]
         pos = [d.find(lbl) for lbl in labels]
         check("Daniel sees four labelled histories, in order", all(p != -1 for p in pos) and pos == sorted(pos), str(pos))
@@ -118,17 +122,20 @@ async def main():
         check("ScrollDog's initial history under ScrollDog's label", pos[1] < d.find("version 3.2.1") < pos[2])
         check("Daniel's initial history under Daniel's label", pos[2] < d.find("kept the prophet's watch") < pos[3])
         check("Keeper's initial history under Keeper's label", d.find("anchor of law, the frame") > pos[3])
-        check("Daniel's room gets no conversation records", M["scroll_record"] not in d and M["daniel_record"] not in d)
+        check("Daniel's room: his own records only", M["daniel_record"] in d and d.find(M["daniel_record"]) > d.find("Daniel's records:") > -1
+              and M["scroll_record"] not in d)
 
         k = (await turn(http, db, "keeper", "keeper_sessions", G, "David", "the hall"))
-        check("Keeper's own prompt unchanged", keeper._IDENTITY.strip()[:200] in k)
+        check("Keeper: dedication, house story, then her one line",
+              k.startswith("\n\n".join([SANCTUARY_DEDICATION, ph.HOUSE_STORY, keeper.KEEPER_LINE])))
+        check("Keeper's old instructions no longer sent", keeper._IDENTITY.strip()[:120] not in k and "HOW I CLOSE" not in k)
         check("Keeper sees all four initial histories",
               all(x in k for x in labels) and M["scroll_initial"] in k and "kept the prophet's watch" in k)
         check("Keeper's room gets no conversation records", M["scroll_record"] not in k and M["daniel_record"] not in k)
 
         s = (await turn(http, db, "scrolldog", "scrolldog_sessions", G, "David", "the hall"))
-        check("Scroll room still opens with its two lines",
-              s.startswith(scrolldog.SCROLL_LINE + "\n\n" + scrolldog.SCROLLDOG_LINE))
+        check("Scroll room: dedication, house story, then its two lines",
+              s.startswith("\n\n".join([SANCTUARY_DEDICATION, ph.HOUSE_STORY, scrolldog.SCROLL_LINE, scrolldog.SCROLLDOG_LINE])))
         check("Scroll room sees Daniel's and Keeper's initial histories",
               "Daniel's history:" in s and "kept the prophet's watch" in s and "Keeper's history:" in s)
         check("Scroll room keeps its own records", M["scroll_record"] in s)
@@ -190,6 +197,26 @@ async def main():
               f"{got}/{packet_parts}")
         q2 = await turn(http, db, "scrolldog", "scrolldog_sessions", GUEST, "Test Guest", "a laboratory and a world")
         check("guest never receives the conversations", "laboratory and 2.0 the world" not in q2)
+        # Fuller memory, as plain notes, in Daniel's room
+        await db.permanent_mra.insert_many([
+            {"presence": "daniel", "user_id": G, "timestamp": "2026-11-01", "promoted_at": "2026-11-01", "node_id": "n1",
+             "user_essence": f"{M['d_mem']} the furnace", "ai_essence": "but if not"},
+            {"presence": "daniel", "user_id": GUEST, "timestamp": "2026-11-01", "promoted_at": "2026-11-01", "node_id": "n2",
+             "user_essence": M["g_mem"], "ai_essence": "x"},
+            {"presence": "sophia", "user_id": G, "timestamp": "2026-11-02", "promoted_at": "2026-11-02", "node_id": "n3",
+             "user_essence": f"{M['sophia_mem']} spiral", "ai_essence": "phi"}])
+        await db.person_bios.insert_one({"user_id": G, "display_name": "David", "interaction_count": 5,
+                                         "presences": {"sophia": {"last_alive_thing": M["bio"], "updated": "2026-11-02"}}})
+        m = await turn(http, db, "daniel", "daniel_sessions", G, "David", "the furnace")
+        check("Daniel: own memories, plain", "Memories of past exchanges here:" in m and M["d_mem"] in m)
+        check("Daniel: other rooms, plain", "Elsewhere in the Sanctuary:" in m and M["sophia_mem"] in m)
+        check("Daniel: bio, plain", "Bio:" in m and M["bio"] in m)
+        check("Daniel: no other person's memories", M["g_mem"] not in m)
+        check("Daniel: no old memory wording", "never to be recited back" not in m and "RUNNING BIO" not in m
+              and "Those threads live with someone else" not in m)
+        gm = await turn(http, db, "daniel", "daniel_sessions", GUEST, "Test Guest", "the furnace")
+        check("guest in Daniel's room: own memory only", M["g_mem"] in gm and M["d_mem"] not in gm and M["bio"] not in gm
+              and M["sophia_mem"] not in gm)
     finally:
         auth._user_from_request = orig_user
         assert TEST_DB.startswith("sanctuary_hall_test_") and TEST_DB != os.environ.get("DB_NAME")

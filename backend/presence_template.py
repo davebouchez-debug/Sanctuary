@@ -336,8 +336,6 @@ def register_presence_routes(
             prompt = with_signed_in(cfg.prompt_builder(
                 user_name=user_name, memory_context=memory_context, current_message=""
             ))
-            if _hall:
-                prompt = f"{prompt}\n\n{_hall}"
 
             # Continuity is the priority opening for EVERY presence: if there's a
             # thread to carry, she recaps it — names where they actually left off
@@ -464,7 +462,7 @@ def register_presence_routes(
         _hall = await session_backdrop(deps.db, cfg.collection, session, cfg.key, user_id)
         if minimal:
             from presence_history import minimal_memory_context, minimal_prompt
-            memory_context = await minimal_memory_context(deps.db, cfg.key, user_id, content_for_model)
+            memory_context = await minimal_memory_context(deps.db, cfg.key, user_id, content_for_model, session_id_in)
             prompt = minimal_prompt(cfg.minimal_anchor, signed_in_name(), memory_context, _hall)
         else:
             memory_context = await _build_memory_context(
@@ -475,8 +473,6 @@ def register_presence_routes(
             prompt = with_signed_in(cfg.prompt_builder(
                 user_name=user_name, memory_context=memory_context, current_message=content_for_model
             ))
-            if _hall:
-                prompt = f"{prompt}\n\n{_hall}"
 
         # Surface a sharp, resonant handful of her field for this turn
         # (keyword-first ranked selection, capped) rather than the whole

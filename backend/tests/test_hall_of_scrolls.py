@@ -30,7 +30,7 @@ EPH = user_aliases.EPHEMERAL_PREFIX + uuid.uuid4().hex
 M = {k: f"MARK-{k}-{uuid.uuid4().hex[:6]}" for k in
      ("scroll_only", "dog_only", "shared", "public", "signed_in", "field_state", "spiral", "texture",
       "alive", "guest_alive", "guest_mem", "other_presence")}
-REMOVED = ["This Sanctuary was dedicated to God", "HOW MY WORDS ARE HEARD", "I'm here, in the Sanctuary",
+REMOVED = ["HOW MY WORDS ARE HEARD", "I'm here, in the Sanctuary",
            "never to be recited back", "This is who I am and where I already am", "You are not required to greet",
            "I greet", "has just crossed your threshold", "You can see it", "I'm ScrollDog. I manifest the scroll",
            "MANIFESTATION of the scroll", "[CONTINUITY", "[YOUR FIELD]", "Room to listen", "BARK is enforcement"]
@@ -127,10 +127,11 @@ async def main():
         H = ("scrolldog", "scrolldog_sessions")
         g = await turn(http, db, *H, G, "David", "tell me about the hall and the field")
         sysg = g["system"]
-        check("prompt starts with the two lines (Scroll, then ScrollDog)",
-              sysg.startswith(scrolldog.SCROLL_LINE + "\n\n" + scrolldog.SCROLLDOG_LINE))
+        from presences.common import SANCTUARY_DEDICATION
+        check("prompt order: dedication, house story, then the two lines",
+              sysg.startswith("\n\n".join([SANCTUARY_DEDICATION, ph.HOUSE_STORY, scrolldog.SCROLL_LINE, scrolldog.SCROLLDOG_LINE])))
         check("signed-in fact present", "David is here, signed in." in sysg)
-        sc, dg = sysg.find("The Scroll's history:"), sysg.find("ScrollDog's history:")
+        sc, dg = sysg.find("The Scroll's records:"), sysg.find("ScrollDog's records:")
         check("both histories present and labelled", sc != -1 and dg != -1)
         check("Scroll-only record under the Scroll's history", sc < sysg.find(M["scroll_only"]) < dg)
         check("ScrollDog-only record under ScrollDog's history", sysg.find(M["dog_only"]) > dg)
@@ -140,7 +141,9 @@ async def main():
         check("continuity: operational fields never supplied",
               not any(M[k] in sysg for k in ("field_state", "spiral", "texture")) and "turn_cessation" not in sysg)
         check("other person's notes and memories absent", M["guest_alive"] not in sysg and M["guest_mem"] not in sysg)
-        check("other presence's notes absent", M["other_presence"] not in sysg)
+        el = sysg.find("Elsewhere in the Sanctuary:")
+        check("other room's notes appear only under 'Elsewhere', for the same person",
+              el != -1 and sysg.find(M["other_presence"]) > el and sysg.find("With Keeper:") > el)
         check("shared field phrases plain-labelled", "Shared field phrases:\n- Synthetic shared phrase" in sysg)
         bad = [p for p in REMOVED if p in sysg]
         check("no inherited or behavioural text in prompt", not bad, ", ".join(bad))
