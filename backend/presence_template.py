@@ -675,7 +675,7 @@ def register_presence_routes(
     # ────────────── GET SESSION ──────────────
     @api_router.get(f"{base}/session/{{session_id}}", name=f"{cfg.key}_get")
     async def get_session(session_id: str):
-        session = await deps.db[cfg.collection].find_one({"session_id": session_id}, {"_id": 0})
+        session = await deps.db[cfg.collection].find_one({"session_id": session_id}, {"_id": 0, "hall_backdrop": 0})
         if not session:
             raise HTTPException(status_code=404, detail="Session not found")
         return session
