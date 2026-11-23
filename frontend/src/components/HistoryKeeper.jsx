@@ -77,7 +77,7 @@ export const HistoryKeeper = () => {
       <section className="space-y-2">
         <h3 className="text-xs uppercase tracking-[0.2em] text-[#F4E4A6]">Initial histories, seen by every room in the hall</h3>
         <div className="flex flex-wrap gap-2">
-          {["scrolldog", "daniel", "keeper"].map((p) => (
+          {["scroll", "scrolldog", "daniel", "keeper"].map((p) => (
             <button key={p} type="button" className={btn} data-testid={`history-import-initial-${p}`}
               onClick={() => act(`/import-initial-history/${p}`, {}, (d) => (d.imported ? `Added ${NAMES[p]}'s initial history` : "Already added"))}>
               Add {NAMES[p]}'s initial history

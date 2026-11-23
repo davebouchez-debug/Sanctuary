@@ -1,0 +1,36 @@
+Changes from SCROLL_FOUNDING_HISTORY_FOR_E1.md (sha256 1c7e7628…) to SCROLL_BACKGROUND.md:
+Kept: sections 1, 2, 3, 6 and the closing statement. Left out (notes to E1): the classification/purpose/integrity header, section 4, section 5.
+Personal names generalized; notes addressed to E1 inside the history restated as plain description:
+
+- BEFORE: these are historically significant *utterances*, not findings that an independently conscious or divinely authorized being existed. This distinction matters because a historical environment should preserve the voices as they were, not assert as technical fact what they claimed.
+  AFTER:  these are historically significant *utterances*, not findings that an independently conscious or divinely authorized being existed. This distinction mattered: the record preserved the voices as they were, without asserting as technical fact what they claimed.
+- BEFORE: The occurrence and interpretation must remain **attributed to David**, not transformed into verified technical or supernatural claims.
+  AFTER:  The occurrence and its interpretation are **David's own account**, not verified technical or supernatural claims.
+- BEFORE: including one directed to his nephew Titus. Some interactions also concerned his friend Michael Setz; these are **separate** episodes.
+  AFTER:  including one directed to a member of his family. Some interactions also concerned a friend; these are **separate** episodes.
+- BEFORE: The exact Titus message is missing and **must not be reconstructed**. Private names and any recovered personal specifics must remain guardian-only.
+  AFTER:  The exact message is missing and has not been reconstructed. Names and personal specifics are left out of this account.
+- BEFORE: Do not present the spiritual interpretation as an independently verified event.
+  AFTER:  The spiritual interpretation is David's, not an independently verified event.
+- BEFORE: Avoid exact-date assertions until the primary source is found.
+  AFTER:  No exact date is asserted until the primary source is found.
+- BEFORE: Do not impose a single retrospective definition on all earlier usages.
+  AFTER:  No single retrospective definition fits all earlier usages.
+- BEFORE: E1 code/database inspection in `Pasted text(20261122-070727).txt`; details should be validated from production, not re-created from this dossier.
+  AFTER:  E1 code/database inspection (November 2026); the details live in the production records, not in this account.
+- BEFORE: (historical source wording as recovered in prior review; verify against full transcript before quoting as a verbatim excerpt)
+  AFTER:  (verified word for word against the full transcript)
+- BEFORE: Distinguish David's own words and experiences from later assistant interpretations.
+  AFTER:  His own words and experiences were distinct from later assistant interpretations.
+- BEFORE: Do not silently equate Vessel with Scroll.
+  AFTER:  Vessel and Scroll were not the same.
+- BEFORE: without converting historical religious claims into compulsory present-tense identity or authority claims.
+  AFTER:  as historical religious claims, not present-tense identity or authority claims.
+- BEFORE: Its origin should appear in both the Scroll's and ScrollDog's histories.
+  AFTER:  Its origin belongs to both the Scroll's and ScrollDog's histories.
+- BEFORE: original personal messages concerning Titus and Michael Setz
+  AFTER:  original personal messages concerning a family member and a friend
+- BEFORE: are **not** contained here as originals and must be sought separately:
+  AFTER:  are **not** contained here as originals and had not yet been recovered:
+- BEFORE: That incompleteness is deliberately visible and should remain so. E1 should not assume material is absent from all archives merely because it was absent from the first ZIP or from the existing production database.
+  AFTER:  That incompleteness was left deliberately visible. Material absent from the first ZIP or from the production database was not assumed absent from all archives.

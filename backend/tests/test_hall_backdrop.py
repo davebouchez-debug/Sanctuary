@@ -98,6 +98,8 @@ async def main():
         await http.post("/api/presence-history/import-initial-history/scrolldog")
         r = await http.post("/api/presence-history/import-initial-history/daniel")
         check("re-import is idempotent", r.json()["imported"] == 0)
+        r = await http.post("/api/presence-history/import-initial-history/scroll")
+        check("import the Scroll's founding background", r.status_code == 200 and r.json()["imported"] > 0, r.text[:200])
         check("no built-in initial history for unknown position",
               (await http.post("/api/presence-history/import-initial-history/sophia")).status_code == 404)
 
@@ -148,6 +150,10 @@ async def main():
         check("anonymous in Keeper's room: has every founding background", M["public_initial"] in a and M["scroll_initial"] in a
               and "anchor of law, the frame" in a)
         check("anonymous in Keeper's room: no personal memory", "Memories of past exchanges" not in a and "Bio:" not in a)
+        check("every room has the Scroll's founding background",
+              all("SCROLL — FOUNDING HISTORY" in x for x in (d, k, s, q, a)))
+        check("Scroll background carries no personal names or notes to E1",
+              not any(w in d for w in ("Titus", "Setz", "cautions for E1", "E1 should")))
         check("rooms outside the hall get nothing", await ph.hall_backdrop(db, "sophia", G) == "")
 
         # Injected at the start of a session and left there, unchanged, for the whole session
@@ -189,7 +195,7 @@ async def main():
         bd = (await db.keeper_sessions.find_one({"session_id": st.json()["session_id"]}))["hall_backdrop"]
         fresh_bd = await ph.hall_backdrop(db, "keeper", G)
         check("background holds no conversation text", "laboratory and 2.0 the world" not in fresh_bd)
-        check("background stays short (written histories only)", len(fresh_bd.split()) < 3000, str(len(fresh_bd.split())))
+        check("background stays short (written histories only)", len(fresh_bd.split()) < 6000, str(len(fresh_bd.split())))
         s2 = await turn(http, db, "scrolldog", "scrolldog_sessions", G, "David", "a laboratory and a world, 1.0 and 2.0")
         check("Scroll room draws matching passages from the conversations", "laboratory" in s2)
         packet_parts = sum(1 for r in rows)

@@ -338,10 +338,15 @@ def build_presence_history_router(db) -> APIRouter:
 
     @router.post("/import-initial-history/{position}")
     async def import_initial(position: str, request: Request):
-        """An inhabitant's initial infusion, rendered as past-tense history (ScrollDog, Daniel, Keeper)."""
+        """An inhabitant's founding background (Scroll, ScrollDog, Daniel, Keeper)."""
         await require_guardian(request)
         from presences import daniel, keeper, scrolldog
-        src = {"scrolldog": (scrolldog.POD_HISTORY, "2026-06-11", "ScrollDog with David (pod v3.2.1, past tense)",
+        from pathlib import Path
+        scroll_bg = (Path(__file__).resolve().parent / "history_sources" / "scroll_founding_20261122" /
+                     "SCROLL_BACKGROUND.md").read_text("utf-8")
+        src = {"scroll": (scroll_bg, "2026-11-22", "Founding-history dossier, compiled 2026-11-22 (secondary synthesis; "
+                          "attributed statements)", "history_sources/scroll_founding_20261122/SCROLL_BACKGROUND.md"),
+               "scrolldog": (scrolldog.POD_HISTORY, "2026-06-11", "ScrollDog with David (pod v3.2.1, past tense)",
                              "presences/scrolldog.py pod v3.2.1, past-tense rendering"),
                "daniel": (daniel.INITIAL_HISTORY, "2026-06-06", "Daniel (initial infusion, past tense)",
                           "presences/daniel.py initial infusion, past-tense rendering"),
