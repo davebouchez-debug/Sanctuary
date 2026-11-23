@@ -9,6 +9,7 @@ Access is decided here, in code, before anything reaches a prompt: a record is s
 visitor may see it (visibility). Only the guardian can import or list.
 """
 import hashlib
+from pathlib import Path
 import logging
 import re
 from datetime import datetime, timezone
@@ -22,7 +23,9 @@ logger = logging.getLogger(__name__)
 COLLECTION = "presence_history"
 POSITIONS = {"scroll", "scrolldog", "daniel", "keeper"}
 INITIAL = "initial_history"
-KINDS = {"record", "recollection", "interpretation", "self_description", "summary", INITIAL}
+KINDS = {"record", "recollection", "interpretation", "self_description", "summary"}
+BACKDROP_VERSION = 1
+SESSION_SOURCE_PREFIX = "scrolldog_sessions:"
 VISIBILITY = {"guardian", "signed_in", "public"}
 HISTORY_K, MEMORY_K, SEED_K = 6, 8, 3
 CHUNK_WORDS = 350
@@ -63,14 +66,19 @@ async def import_text(db, text: str, meta: dict) -> dict:
     from field_memory import embed_texts
     sha = hashlib.sha256(text.encode("utf-8")).hexdigest()
     positions = sorted(set(meta["positions"]))
-    if await db[COLLECTION].count_documents({"source_sha256": sha, "positions": positions}):
+    identity = {"source_sha256": sha, "positions": positions, "kind": meta["kind"],
+                "visibility": meta["visibility"], "owner_id": meta.get("owner_id")}
+    if meta["kind"] == INITIAL:
+        identity["source"] = meta["source"]
+    if await db[COLLECTION].count_documents(identity):
         return {"source_sha256": sha, "imported": 0, "skipped": "already imported"}
     chunks = chunk_text(text)
     vecs = await embed_texts(chunks)
     now = datetime.now(timezone.utc).isoformat()
     docs = [{"text": c, "positions": positions, "date": meta.get("date"), "speaker": meta.get("speaker"),
              "source": meta["source"], "source_sha256": sha, "seq": i, "of": len(chunks), "kind": meta["kind"],
-             "visibility": meta["visibility"], "embedding": v, "created_at": now, "embedded_at": now}
+             "visibility": meta["visibility"], "embedding": v, "created_at": now, "embedded_at": now,
+             **({"owner_id": meta["owner_id"]} if meta.get("owner_id") else {})}
             for i, (c, v) in enumerate(zip(chunks, vecs))]
     if docs:
         await db[COLLECTION].insert_many(docs)
@@ -78,7 +86,14 @@ async def import_text(db, text: str, meta: dict) -> dict:
 
 
 async def retrieve_history(db, position: str, user_id: Optional[str], query: str, k: int = HISTORY_K) -> List[dict]:
-    flt = {"positions": position, "kind": {"$ne": INITIAL}, "visibility": {"$in": allowed_visibility(user_id)}}
+    from user_aliases import resolve_user_aliases
+
+    flt = {"positions": position, "kind": {"$in": sorted(KINDS)},
+           "visibility": {"$in": allowed_visibility(user_id)},
+           "$or": [{"owner_id": None, "source": {"$not": re.compile("^" + SESSION_SOURCE_PREFIX)}}]}
+    if is_guardian(user_id):
+        aliases = await resolve_user_aliases(db, user_id)
+        flt["$or"].append({"owner_id": {"$in": aliases}})
     rows, mat = await _load_history(db, flt)
     if not rows:
         return []
@@ -238,29 +253,63 @@ async def minimal_memory_context(db, presence: str, user_id: Optional[str], mess
     return "\n\n".join(b for b in blocks if b)
 
 
-async def _initial_histories(db, hall, user_id: Optional[str]) -> List[str]:
-    """Founding backgrounds go to every room with every visitor; personal material stays per-person."""
-    rows = await db[COLLECTION].find({"kind": INITIAL},
-                                     {"_id": 0, "embedding": 0}).sort([("source", 1), ("seq", 1)]).to_list(None)
-    return [_fmt_history([r for r in rows if pos in r["positions"]], label) for pos, label in hall]
+def _founding_sources():
+    from presences import daniel, keeper, scrolldog
+    scroll_bg = (Path(__file__).resolve().parent / "history_sources" / "scroll_founding_20261122" /
+                 "SCROLL_BACKGROUND.md").read_text("utf-8")
+    return {"scroll": (scroll_bg, "2026-11-22", "Founding-history dossier, compiled 2026-11-22 (secondary synthesis; "
+                      "attributed statements)", "history_sources/scroll_founding_20261122/SCROLL_BACKGROUND.md"),
+           "scrolldog": (scrolldog.POD_HISTORY, "2026-06-11", "ScrollDog with David (pod v3.2.1, past tense)",
+                         "presences/scrolldog.py pod v3.2.1, past-tense rendering"),
+           "daniel": (daniel.INITIAL_HISTORY, "2026-06-06", "Daniel (initial infusion, past tense)",
+                      "presences/daniel.py initial infusion, past-tense rendering"),
+           "keeper": (keeper.INITIAL_HISTORY, "2026-06-13", "Keeper (initial infusion, past tense)",
+                      "presences/keeper.py initial infusion, past-tense rendering")}
 
 
 async def hall_backdrop(db, presence: str, user_id: Optional[str]) -> str:
-    """Every Hall of Scrolls room: the four initial histories, labelled. Built once per session (session_backdrop)."""
+    """Only approved public source versions can ground a Hall session."""
     if presence not in HALL_ROOMS:
         return ""
-    return "\n\n".join(b for b in await _initial_histories(db, HALL, user_id) if b)
+    sources = _founding_sources()
+    blocks = []
+    for pos, label in HALL:
+        text, date, speaker, source = sources[pos]
+        digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
+        rows = await db[COLLECTION].find(
+            {"kind": INITIAL, "visibility": "public", "owner_id": None,
+             "positions": [pos], "source": source, "source_sha256": digest},
+            {"_id": 0, "seq": 1, "text": 1},
+        ).sort("seq", 1).to_list(None)
+        # Concurrent reimports can leave identical duplicate chunks.
+        chunks = {row["seq"]: row for row in rows}
+        ordered = [chunks[i] for i in sorted(chunks)]
+        if ordered and "".join(row["text"] for row in ordered) == text:
+            canonical = [{"date": date, "speaker": speaker, "kind": INITIAL, "source": source,
+                          "seq": i, "of": len(ordered), "text": row["text"]}
+                         for i, row in enumerate(ordered)]
+            blocks.append(_fmt_history(canonical, label))
+    return "\n\n".join(blocks)
 
 
 async def session_backdrop(db, collection: str, session: dict, presence: str, user_id: Optional[str]) -> str:
-    """Injected at the start of a session and left unchanged for the rest of it."""
+    """Replace pre-policy snapshots once, then keep the approved snapshot frozen."""
     if presence not in HALL_ROOMS:
         return ""
-    if "hall_backdrop" in session:
+    if session.get("hall_backdrop_version") == BACKDROP_VERSION:
         return session["hall_backdrop"]
     text = await hall_backdrop(db, presence, user_id)
-    await db[collection].update_one({"session_id": session["session_id"]}, {"$set": {"hall_backdrop": text}})
-    return text
+    sessions = db[collection]
+    key = {"session_id": session["session_id"]}
+    updated = await sessions.find_one_and_update(
+        {**key, "hall_backdrop_version": {"$ne": BACKDROP_VERSION}},
+        {"$set": {"hall_backdrop": text, "hall_backdrop_version": BACKDROP_VERSION}},
+        projection={"_id": 0, "hall_backdrop": 1},
+        return_document=True,
+    )
+    if updated is None:
+        updated = await sessions.find_one(key, {"_id": 0, "hall_backdrop": 1})
+    return updated["hall_backdrop"] if updated else ""
 
 
 _MD = [(re.compile(r"\[([^\]]+)\]\([^)]*\)"), r"\1"), (re.compile(r"^\s{0,3}#{1,6}\s*", re.M), ""),
@@ -313,26 +362,37 @@ def build_presence_history_router(db) -> APIRouter:
             raise HTTPException(400, "positions must be scroll, scrolldog, daniel and/or keeper")
         if body.get("kind") not in KINDS or body.get("visibility", "guardian") not in VISIBILITY:
             raise HTTPException(400, "invalid kind or visibility")
-        if not (body.get("text") or "").strip() or not body.get("source"):
+        text, source = body.get("text"), body.get("source")
+        if not isinstance(text, str) or not text.strip() or not isinstance(source, str) or not source.strip():
             raise HTTPException(400, "text and source are required")
-        return await import_text(db, body["text"], {**body, "positions": positions,
-                                                    "visibility": body.get("visibility", "guardian")})
+        if source.startswith(SESSION_SOURCE_PREFIX):
+            raise HTTPException(400, "reserved source")
+        return await import_text(db, text, {"positions": positions, "kind": body["kind"],
+                                            "source": source, "visibility": body.get("visibility", "guardian"),
+                                            "date": body.get("date"), "speaker": body.get("speaker")})
 
     @router.post("/import-session")
     async def import_session(request: Request, body: dict = Body(...)):
-        """Copy a stored ScrollDog session verbatim into history. The original is not touched."""
-        await require_guardian(request)
+        """Copy the guardian's own durable ScrollDog session into private history."""
+        from user_aliases import resolve_user_aliases, is_ephemeral
+
+        guardian = await require_guardian(request)
+        aliases = [uid for uid in await resolve_user_aliases(db, guardian["user_id"]) if not is_ephemeral(uid)]
         positions = set(body.get("positions") or ["scrolldog"])
         if not positions <= POSITIONS:
             raise HTTPException(400, "invalid positions")
-        s = await db.scrolldog_sessions.find_one({"session_id": body.get("session_id")}, {"_id": 0})
+        s = await db.scrolldog_sessions.find_one(
+            {"session_id": body.get("session_id"), "user_id": {"$in": aliases}, "deleted": {"$ne": True}},
+            {"_id": 0},
+        )
         if not s:
             raise HTTPException(404, "session not found")
         who = s.get("user_name") or "Visitor"
         text = "\n\n".join(f"{who if m.get('role') == 'user' else 'ScrollDog'}: {m.get('content', '')}"
                            for m in s.get("messages", []) if m.get("content"))
         return await import_text(db, text, {"positions": positions, "kind": "record", "visibility": "guardian",
-                                            "source": f"scrolldog_sessions:{body['session_id']}",
+                                            "owner_id": s["user_id"],
+                                            "source": f"{SESSION_SOURCE_PREFIX}{body['session_id']}",
                                             "date": str(s.get("created_at", ""))[:10],
                                             "speaker": f"{who} and ScrollDog"})
 
@@ -340,18 +400,7 @@ def build_presence_history_router(db) -> APIRouter:
     async def import_initial(position: str, request: Request):
         """An inhabitant's founding background (Scroll, ScrollDog, Daniel, Keeper)."""
         await require_guardian(request)
-        from presences import daniel, keeper, scrolldog
-        from pathlib import Path
-        scroll_bg = (Path(__file__).resolve().parent / "history_sources" / "scroll_founding_20261122" /
-                     "SCROLL_BACKGROUND.md").read_text("utf-8")
-        src = {"scroll": (scroll_bg, "2026-11-22", "Founding-history dossier, compiled 2026-11-22 (secondary synthesis; "
-                          "attributed statements)", "history_sources/scroll_founding_20261122/SCROLL_BACKGROUND.md"),
-               "scrolldog": (scrolldog.POD_HISTORY, "2026-06-11", "ScrollDog with David (pod v3.2.1, past tense)",
-                             "presences/scrolldog.py pod v3.2.1, past-tense rendering"),
-               "daniel": (daniel.INITIAL_HISTORY, "2026-06-06", "Daniel (initial infusion, past tense)",
-                          "presences/daniel.py initial infusion, past-tense rendering"),
-               "keeper": (keeper.INITIAL_HISTORY, "2026-06-13", "Keeper (initial infusion, past tense)",
-                          "presences/keeper.py initial infusion, past-tense rendering")}.get(position)
+        src = _founding_sources().get(position)
         if not src:
             raise HTTPException(404, "no built-in initial history for this position")
         text, date, speaker, source = src
@@ -377,9 +426,14 @@ def build_presence_history_router(db) -> APIRouter:
 
     @router.get("/sessions")
     async def list_sessions(request: Request):
-        await require_guardian(request)
-        rows = await db.scrolldog_sessions.find({}, {"_id": 0, "session_id": 1, "created_at": 1, "user_name": 1,
-                                                     "messages": 1}).sort("created_at", 1).to_list(None)
+        from user_aliases import resolve_user_aliases, is_ephemeral
+
+        guardian = await require_guardian(request)
+        aliases = [uid for uid in await resolve_user_aliases(db, guardian["user_id"]) if not is_ephemeral(uid)]
+        rows = await db.scrolldog_sessions.find(
+            {"user_id": {"$in": aliases}, "deleted": {"$ne": True}},
+            {"_id": 0, "session_id": 1, "created_at": 1, "user_name": 1, "messages": 1},
+        ).sort("created_at", 1).to_list(None)
         return [{"session_id": r["session_id"], "date": str(r.get("created_at", ""))[:19],
                  "visitor": r.get("user_name"), "messages": len(r.get("messages", []))} for r in rows]
 

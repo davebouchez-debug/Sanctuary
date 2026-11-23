@@ -354,7 +354,12 @@ export const PresenceChamber = ({ forcedKey, threadIntent } = {}) => {
           const endUrl = templatePath
             ? `${API}/${templatePath}/session/${sid}/end`
             : `${API}/presence/${presenceKey}/chat/session/${sid}/end`;
-          navigator.sendBeacon(endUrl);
+          if (templatePath) {
+            // The shared fetch wrapper attaches the signed-out browser identity.
+            void fetch(endUrl, { method: "POST", keepalive: true }).catch(() => {});
+          } else {
+            navigator.sendBeacon(endUrl);
+          }
         } catch { /* best effort */ }
       }
     };

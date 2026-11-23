@@ -7,11 +7,13 @@ import re
 from datetime import datetime, timezone
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
 
 from . import DERIVATION_VERSION, PROFILES, LEGACY_CODON_COLLECTIONS
 from .compare import delta, invariance
+from auth import require_guardian
+
 from .derive import Ledger, catch_up, parse_ts, verify, load_sessions
 from .recover import evidence_text, canonical_hash
 
@@ -89,12 +91,12 @@ async def cron_tick(request: Request):
     return JSONResponse({"accepted": True, "started": started}, status_code=202)
 
 
-@router.post("/run")
+@router.post("/run", dependencies=[Depends(require_guardian)])
 async def manual_run():
     return JSONResponse({"accepted": True, "started": _spawn("manual")}, status_code=202)
 
 
-@router.get("/status")
+@router.get("/status", dependencies=[Depends(require_guardian)])
 async def status(version: Optional[str] = None):
     version = _version(version)
     db = _state["db"]
@@ -119,7 +121,7 @@ async def status(version: Optional[str] = None):
             "unavailable_evidence": (await led.runs.find_one({}, {"unavailable_evidence": 1}, sort=[("started_at", -1)]) or {}).get("unavailable_evidence")}
 
 
-@router.get("/visitors")
+@router.get("/visitors", dependencies=[Depends(require_guardian)])
 async def visitors(presence: str, version: Optional[str] = None):
     version = _version(version)
     led = Ledger(_state["db"])
@@ -152,7 +154,7 @@ def _label(el: str, meta: dict) -> str:
     return f"{t} · {k[:8]}"
 
 
-@router.get("/lattice")
+@router.get("/lattice", dependencies=[Depends(require_guardian)])
 async def lattice(presence: str, scope: str = "S2", visitor: Optional[str] = None, limit: int = 24,
                   before_ordinal: Optional[int] = None, version: Optional[str] = None):
     if scope not in ("S1", "S2", "S3"):
@@ -336,7 +338,7 @@ async def lattice(presence: str, scope: str = "S2", visitor: Optional[str] = Non
             "first_ordinal": cols[0]["chronology"]["ordinal"]}
 
 
-@router.get("/entry/{entry_id:path}")
+@router.get("/entry/{entry_id:path}", dependencies=[Depends(require_guardian)])
 async def entry(entry_id: str):
     db = _state["db"]
     led = Ledger(db)
@@ -352,12 +354,12 @@ async def entry(entry_id: str):
     return e
 
 
-@router.get("/verify")
+@router.get("/verify", dependencies=[Depends(require_guardian)])
 async def verify_route(drift: bool = False, reproduce: bool = False, version: Optional[str] = None):
     return await verify(_state["db"], check_drift=drift, version=_version(version), reproduce_check=reproduce)
 
 
-@router.get("/compare")
+@router.get("/compare", dependencies=[Depends(require_guardian)])
 async def compare_route(a: str, b: str, mode: str = "delta"):
     """Aggregate cross-version comparison of the production ledger (counts only)."""
     _version(a), _version(b)

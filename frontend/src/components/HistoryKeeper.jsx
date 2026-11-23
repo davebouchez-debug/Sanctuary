@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api/presence-history`;
-const KINDS = ["record", "recollection", "interpretation", "self_description", "summary", "initial_history"];
+const KINDS = ["record", "recollection", "interpretation", "self_description", "summary"];
 const NAMES = { scroll: "Scroll", scrolldog: "ScrollDog", daniel: "Daniel", keeper: "Keeper" };
 const field = "bg-transparent border border-[#8B9DB5]/30 rounded px-2 py-1 text-sm text-white";
 const btn = "px-3 py-1.5 rounded-full text-[11px] uppercase tracking-[0.2em] border border-[#F4E4A6]/50 text-[#F4E4A6] hover:bg-[#F4E4A6]/10 disabled:opacity-40";

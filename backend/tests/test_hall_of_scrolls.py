@@ -26,7 +26,23 @@ from presences import scrolldog
 
 TEST_DB = f"sanctuary_hall_test_{uuid.uuid4().hex[:8]}"
 G, GUEST = "test-guardian-" + uuid.uuid4().hex[:6], "test-guest-" + uuid.uuid4().hex[:6]
-EPH = user_aliases.EPHEMERAL_PREFIX + uuid.uuid4().hex
+VISITOR_ID = uuid.uuid4().hex
+EPH = user_aliases.EPHEMERAL_PREFIX + "v" + VISITOR_ID
+
+
+def visitor_headers(user_id):
+    if user_id == EPH:
+        return {"X-Visitor-Id": VISITOR_ID}
+    return {"X-Test-User": user_id}
+
+
+async def request_user(request):
+    uid = request.headers.get("X-Test-User")
+    if uid == G:
+        return {"user_id": G, "role": "guardian"}
+    if uid == GUEST:
+        return {"user_id": GUEST, "role": "guest"}
+    return None
 M = {k: f"MARK-{k}-{uuid.uuid4().hex[:6]}" for k in
      ("scroll_only", "dog_only", "shared", "public", "signed_in", "field_state", "spiral", "texture",
       "alive", "guest_alive", "guest_mem", "other_presence")}
@@ -88,7 +104,7 @@ async def turn(http, db, key, collection, user_id, name, content="hello", histor
     await db[collection].insert_one({"session_id": sid, "user_id": user_id, "user_name": name,
                                      "messages": history or [], "is_active": True})
     CAPTURE.clear()
-    r = await http.post(f"/api/{key}/message/stream", json={"session_id": sid, "content": content})
+    r = await http.post(f"/api/{key}/message/stream", json={"session_id": sid, "content": content}, headers=visitor_headers(user_id))
     await r.aread()
     return CAPTURE[-1] if CAPTURE else {"system": "", "user": "", "history": []}
 
@@ -105,6 +121,8 @@ async def main():
     api.include_router(ph.build_presence_history_router(db))
     app.include_router(api)
     http = httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://t", timeout=60)
+    original_request_user = auth._user_from_request
+    auth._user_from_request = request_user
     try:
         imp = lambda key, pos, vis="guardian": ph.import_text(db, f"Record text {M[key]} about the hall and the field.",
                                                                {"positions": pos, "kind": "record", "visibility": vis,
@@ -172,11 +190,8 @@ async def main():
         r = await http.post("/api/presence-history/scrolldog-minimal-frame", json={"on": False})
         check("no on/off switch exists", r.status_code in (404, 405), str(r.status_code))
 
-        async def ident(db_, request, body_name=None):
-            return G, "David"
-        user_aliases.chamber_identity = ident
         CAPTURE.clear()
-        await http.post("/api/scrolldog/start", json={})
+        await http.post("/api/scrolldog/start", json={}, headers=visitor_headers(G))
         check("opening nudge is a plain fact", CAPTURE and CAPTURE[-1]["user"] == "[David has entered.]",
               CAPTURE[-1]["user"] if CAPTURE else "none")
         check("opening prompt has no inherited text", CAPTURE and not [p for p in REMOVED if p in CAPTURE[-1]["system"]])
@@ -195,10 +210,66 @@ async def main():
             check(f"history routes refuse {who}", all(c in (401, 403) for c in codes), str(codes))
         auth._user_from_request = orig_user
 
+        # Real route authorization with synthetic callers, separate from the stored owner.
+        session_ids = {}
+        for owner in (G, GUEST, EPH):
+            sid = str(uuid.uuid4())
+            session_ids[owner] = sid
+            await db.scrolldog_sessions.insert_one({
+                "session_id": sid, "user_id": owner, "active": True,
+                "messages": [{"role": "user", "content": f"private fixture for {owner}",
+                              "timestamp": "9999-01-01"}],
+            })
+
+        for owner in (G, GUEST, EPH):
+            sid = session_ids[owner]
+            base = f"/api/scrolldog/session/{sid}"
+            for caller in (G, GUEST, EPH):
+                if caller == owner:
+                    continue
+                headers = visitor_headers(caller)
+                CAPTURE.clear()
+                read = await http.get(base, headers=headers)
+                reply = await http.post("/api/scrolldog/message/stream", headers=headers,
+                                        json={"session_id": sid, "content": "hello", "user_id": owner})
+                end = await http.post(f"{base}/end", headers=headers)
+                check("cross-owner read, reply, and end denied",
+                      [read.status_code, reply.status_code, end.status_code] == [404, 404, 404]
+                      and not CAPTURE)
+
+            owner_read = await http.get(base, headers=visitor_headers(owner))
+            check("owner can read an unchanged session",
+                  owner_read.status_code == 200 and owner_read.json().get("active") is True
+                  and len(owner_read.json().get("messages", [])) == 1)
+
+        listed = await http.get("/api/presence-history/sessions", headers=visitor_headers(G))
+        choices = {item["session_id"] for item in listed.json()}
+        check("session import listing excludes guest and ephemeral sessions",
+              session_ids[G] in choices and not {session_ids[GUEST], session_ids[EPH]} & choices)
+        for owner in (GUEST, EPH):
+            copied = await http.post("/api/presence-history/import-session", headers=visitor_headers(G),
+                                     json={"session_id": session_ids[owner]})
+            check("guardian cannot import another person's or an ephemeral session", copied.status_code == 404)
+        copied = await http.post("/api/presence-history/import-session", headers=visitor_headers(G),
+                                 json={"session_id": session_ids[G]})
+        check("guardian can import their own durable session",
+              copied.status_code == 200 and copied.json()["imported"] > 0)
+        own_record = await db.presence_history.find_one({"source": f"scrolldog_sessions:{session_ids[G]}"})
+        check("session copy keeps owner and guardian visibility",
+              own_record and own_record["owner_id"] == G and own_record["visibility"] == "guardian")
+        await ph.import_text(db, "Legacy private session copy", {
+            "kind": "record", "visibility": "guardian", "positions": ["scrolldog"],
+            "source": "scrolldog_sessions:legacy-ownerless",
+        })
+        records = await ph.retrieve_history(db, "scrolldog", G, "", k=100)
+        check("legacy session copy without ownership is excluded",
+              not any(row["source"] == "scrolldog_sessions:legacy-ownerless" for row in records))
+
         # Voice formatting in code
         cleaned = ph.speech_clean("# Heading\n- **bold** item\n1. [link](http://x) `code`")
         check("voice sanitiser strips markdown", not any(c in cleaned for c in "#*[]`") and "http" not in cleaned, repr(cleaned))
     finally:
+        auth._user_from_request = original_request_user
         assert TEST_DB.startswith("sanctuary_hall_test_") and TEST_DB != os.environ.get("DB_NAME")
         await client.drop_database(TEST_DB)  # throwaway test database created above, never the app's
         user_aliases._GUARDIAN_IDS.discard(G)

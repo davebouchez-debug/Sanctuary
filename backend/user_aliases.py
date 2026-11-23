@@ -177,7 +177,8 @@ async def purge_ephemeral_sessions(db) -> None:
                     await db[coll].delete_one({"_id": s["_id"]})
 
 
-async def chamber_identity(db, request, body_name: Optional[str] = None):
+async def chamber_identity(db, request, body_name: Optional[str] = None, *,
+                           purge_expired: bool = True):
     """(user_id, user_name) for whoever is actually signed in."""
     from auth import _user_from_request
     from presences.common import set_signed_in
@@ -190,7 +191,8 @@ async def chamber_identity(db, request, body_name: Optional[str] = None):
         set_signed_in(user["user_id"], name)
         return user["user_id"], name
     set_signed_in(None, None)
-    await purge_ephemeral_sessions(db)
+    if purge_expired:
+        await purge_ephemeral_sessions(db)
     import re
     import uuid
     vid = request.headers.get("x-visitor-id") or ""

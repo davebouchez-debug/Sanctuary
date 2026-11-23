@@ -272,6 +272,23 @@ def register_presence_routes(
 
     base = f"/{cfg.chamber_path}"
 
+    async def owned_session(request: Request, session_id: str, projection: dict):
+        from user_aliases import chamber_identity, is_ephemeral, resolve_user_aliases
+
+        caller_id, _ = await chamber_identity(deps.db, request, purge_expired=False)
+        if is_ephemeral(caller_id):
+            owners = [caller_id]
+        else:
+            owners = [uid for uid in await resolve_user_aliases(deps.db, caller_id)
+                      if not is_ephemeral(uid)]
+        session = await deps.db[cfg.collection].find_one(
+            {"session_id": session_id, "user_id": {"$in": owners}, "deleted": {"$ne": True}},
+            projection,
+        )
+        if not session:
+            raise HTTPException(status_code=404, detail="Session not found")
+        return session
+
     # ────────────── START ──────────────
     @api_router.post(f"{base}/start", name=f"{cfg.key}_start")
     async def start_session(request: Request, session_data: Optional[dict] = Body(default=None)):
@@ -304,7 +321,7 @@ def register_presence_routes(
                     "codon_count": _cc,
                 }
 
-        from presence_history import minimal_active, hall_backdrop
+        from presence_history import BACKDROP_VERSION, minimal_active, hall_backdrop
         minimal = await minimal_active(deps.db, cfg.minimal_frame)
         _hall = await hall_backdrop(deps.db, cfg.key, user_id)  # frozen for this session, stored below
         if minimal:
@@ -391,6 +408,7 @@ def register_presence_routes(
             "messages": [welcome_msg],
             "active": True,
             "hall_backdrop": _hall,
+            **({"hall_backdrop_version": BACKDROP_VERSION} if minimal else {}),
         })
 
         # Report codon network size so the UI/clients can confirm the field is
@@ -406,18 +424,14 @@ def register_presence_routes(
 
     # ────────────── STREAM MESSAGE ──────────────
     @api_router.post(f"{base}/message/stream", name=f"{cfg.key}_stream")
-    async def stream_message(message: dict = Body(...)):
+    async def stream_message(request: Request, message: dict = Body(...)):
         session_id_in = message.get("session_id")
         content_in = message.get("content", "")
         image_path = message.get("image_path")
         if not session_id_in or (not content_in and not image_path):
             raise HTTPException(status_code=422, detail="session_id and content (or image) are required")
 
-        session = await deps.db[cfg.collection].find_one(
-            {"session_id": session_id_in}, {"_id": 0}
-        )
-        if not session:
-            raise HTTPException(status_code=404, detail="Session not found")
+        session = await owned_session(request, session_id_in, {"_id": 0})
 
         previous_messages = session.get("messages", [])
         exchange_index = len([m for m in previous_messages if m.get("role") == "user"]) + 1
@@ -641,10 +655,8 @@ def register_presence_routes(
 
     # ────────────── END SESSION ──────────────
     @api_router.post(f"{base}/session/{{session_id}}/end", name=f"{cfg.key}_end")
-    async def end_session(session_id: str):
-        session = await deps.db[cfg.collection].find_one({"session_id": session_id}, {"_id": 0})
-        if not session:
-            raise HTTPException(status_code=404, detail="Session not found")
+    async def end_session(session_id: str, request: Request):
+        session = await owned_session(request, session_id, {"_id": 0})
 
         user_id = session.get("user_id")
         promotable = deps.end_session_and_get_promotable(session_id)
@@ -674,10 +686,9 @@ def register_presence_routes(
 
     # ────────────── GET SESSION ──────────────
     @api_router.get(f"{base}/session/{{session_id}}", name=f"{cfg.key}_get")
-    async def get_session(session_id: str):
-        session = await deps.db[cfg.collection].find_one({"session_id": session_id}, {"_id": 0, "hall_backdrop": 0})
-        if not session:
-            raise HTTPException(status_code=404, detail="Session not found")
-        return session
+    async def get_session(session_id: str, request: Request):
+        return await owned_session(
+            request, session_id, {"_id": 0, "hall_backdrop": 0, "hall_backdrop_version": 0}
+        )
 
     logger.info(f"[PRESENCE TEMPLATE] Registered {cfg.key} at /api{base}/*")

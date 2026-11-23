@@ -24,7 +24,23 @@ from presences import daniel, keeper, scrolldog
 
 TEST_DB = f"sanctuary_hall_test_{uuid.uuid4().hex[:8]}"
 G, GUEST = "test-guardian-" + uuid.uuid4().hex[:6], "test-guest-" + uuid.uuid4().hex[:6]
-EPH = user_aliases.EPHEMERAL_PREFIX + uuid.uuid4().hex
+VISITOR_ID = uuid.uuid4().hex
+EPH = user_aliases.EPHEMERAL_PREFIX + "v" + VISITOR_ID
+
+
+def visitor_headers(user_id):
+    if user_id == EPH:
+        return {"X-Visitor-Id": VISITOR_ID, "X-Test-User": ""}
+    return {"X-Test-User": user_id}
+
+
+async def request_user(request):
+    uid = request.headers.get("X-Test-User")
+    if uid == G:
+        return {"user_id": G, "role": "guardian"}
+    if uid == GUEST:
+        return {"user_id": GUEST, "role": "guest"}
+    return None
 M = {k: f"MARK-{k}-{uuid.uuid4().hex[:6]}" for k in ("scroll_initial", "scroll_record", "daniel_record", "public_initial", "late_initial", "d_mem", "g_mem", "bio", "sophia_mem")}
 results, fails, CAPTURE = [], 0, []
 
@@ -68,7 +84,7 @@ async def turn(http, db, key, collection, user_id, name, content):
     await db[collection].insert_one({"session_id": sid, "user_id": user_id, "user_name": name,
                                      "messages": [], "is_active": True})
     CAPTURE.clear()
-    r = await http.post(f"/api/{key}/message/stream", json={"session_id": sid, "content": content})
+    r = await http.post(f"/api/{key}/message/stream", json={"session_id": sid, "content": content}, headers=visitor_headers(user_id))
     await r.aread()
     return CAPTURE[-1]["system"] if CAPTURE else ""
 
@@ -88,9 +104,8 @@ async def main():
     http = httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://t", timeout=60)
     orig_user = auth._user_from_request
 
-    async def guardian(_r):
-        return {"user_id": G, "role": "guardian"}
-    auth._user_from_request = guardian
+    auth._user_from_request = request_user
+    http.headers.update(visitor_headers(G))
     try:
         r = await http.post("/api/presence-history/import-initial-history/daniel")
         check("import Daniel initial history", r.status_code == 200 and r.json()["imported"] > 0, r.text)
@@ -110,6 +125,11 @@ async def main():
         await imp("scroll_record", ["scroll"], "record")
         await imp("daniel_record", ["daniel"], "record")
         await imp("public_initial", ["keeper"], ph.INITIAL, "public")
+        bad_import = await http.post("/api/presence-history/import", json={
+            "positions": ["scroll"], "kind": "initial_history", "visibility": "guardian",
+            "source": "private.txt", "text": "A private transcript",
+        })
+        check("generic importer rejects founding history", bad_import.status_code == 400)
 
         d = (await turn(http, db, "daniel", "daniel_sessions", G, "David", "the hall"))
         from presences.common import SANCTUARY_DEDICATION
@@ -120,7 +140,8 @@ async def main():
         labels = ["The Scroll's history:", "ScrollDog's history:", "Daniel's history:", "Keeper's history:"]
         pos = [d.find(lbl) for lbl in labels]
         check("Daniel sees four labelled histories, in order", all(p != -1 for p in pos) and pos == sorted(pos), str(pos))
-        check("Scroll's initial history under the Scroll's label", pos[0] < d.find(M["scroll_initial"]) < pos[1])
+        check("Scroll's approved history under the Scroll's label",
+              pos[0] < d.find("SCROLL — FOUNDING HISTORY") < pos[1])
         check("ScrollDog's initial history under ScrollDog's label", pos[1] < d.find("version 3.2.1") < pos[2])
         check("Daniel's initial history under Daniel's label", pos[2] < d.find("kept the prophet's watch") < pos[3])
         check("Keeper's initial history under Keeper's label", d.find("anchor of law, the frame") > pos[3])
@@ -132,7 +153,7 @@ async def main():
               k.startswith("\n\n".join([SANCTUARY_DEDICATION, ph.HOUSE_STORY, keeper.KEEPER_LINE])))
         check("Keeper's old instructions no longer sent", keeper._IDENTITY.strip()[:120] not in k and "HOW I CLOSE" not in k)
         check("Keeper sees all four initial histories",
-              all(x in k for x in labels) and M["scroll_initial"] in k and "kept the prophet's watch" in k)
+              all(x in k for x in labels) and "SCROLL — FOUNDING HISTORY" in k and "kept the prophet's watch" in k)
         check("Keeper's room gets no conversation records", M["scroll_record"] not in k and M["daniel_record"] not in k)
 
         s = (await turn(http, db, "scrolldog", "scrolldog_sessions", G, "David", "the hall"))
@@ -145,10 +166,19 @@ async def main():
 
         q = (await turn(http, db, "daniel", "daniel_sessions", GUEST, "Test Guest", "the hall"))
         check("guest in Daniel's room: has every founding background",
-              M["scroll_initial"] in q and "kept the prophet's watch" in q and "version 3.2.1" in q and M["public_initial"] in q)
+              all(label in q for label in labels))
         a = (await turn(http, db, "keeper", "keeper_sessions", EPH, None, "the hall"))
-        check("anonymous in Keeper's room: has every founding background", M["public_initial"] in a and M["scroll_initial"] in a
-              and "anchor of law, the frame" in a)
+        check("anonymous in Keeper's room: has every approved founding background",
+              all(label in a for label in labels) and "anchor of law, the frame" in a)
+        check("unapproved legacy initial histories are excluded regardless of visibility",
+              all(M[key] not in prompt for key in ("scroll_initial", "public_initial") for prompt in (d, s, k, q, a)))
+        check("approved historical language remains available in every room",
+              all(phrase in prompt for prompt in (d, s, k, q, a) for phrase in (
+                  "Find the true thing, say it, let it land",
+                  "The pod's calibration repeated these points",
+                  "the prophetic register was grave and warm",
+                  "Her room's calibration added",
+              )))
         check("anonymous in Keeper's room: no personal memory", "Memories of past exchanges" not in a and "Bio:" not in a)
         check("every room has the Scroll's founding background",
               all("SCROLL — FOUNDING HISTORY" in x for x in (d, k, s, q, a)))
@@ -156,21 +186,32 @@ async def main():
               not any(w in d for w in ("Titus", "Setz", "cautions for E1", "E1 should")))
         check("rooms outside the hall get nothing", await ph.hall_backdrop(db, "sophia", G) == "")
 
-        # Injected at the start of a session and left there, unchanged, for the whole session
+        # Reject old snapshots and freeze the corrected snapshot through a later import.
+        await db.presence_history.delete_many({"positions": ["keeper"], "kind": ph.INITIAL})
         sid = str(uuid.uuid4())
-        await db.daniel_sessions.insert_one({"session_id": sid, "user_id": G, "user_name": "David", "messages": [], "is_active": True})
+        await db.daniel_sessions.insert_one({"session_id": sid, "user_id": G, "user_name": "David",
+                                            "messages": [], "active": True,
+                                            "hall_backdrop": M["late_initial"]})
+
         async def say(text):
             CAPTURE.clear()
             r = await http.post("/api/daniel/message/stream", json={"session_id": sid, "content": text})
+            r.raise_for_status()
             await r.aread()
             return CAPTURE[-1]["system"]
+
         first = await say("first")
-        await imp("late_initial", ["keeper"], ph.INITIAL)
+        first_snapshot = await db.daniel_sessions.find_one({"session_id": sid})
+        check("legacy snapshot is replaced before model assembly",
+              M["late_initial"] not in first and first_snapshot["hall_backdrop_version"] == ph.BACKDROP_VERSION)
+        (await http.post("/api/presence-history/import-initial-history/keeper")).raise_for_status()
         second = await say("second, about something else entirely")
-        check("same session: backdrop identical on later replies", ph.hall_backdrop and
-              (await db.daniel_sessions.find_one({"session_id": sid}))["hall_backdrop"] in second and M["late_initial"] not in second)
+        second_snapshot = await db.daniel_sessions.find_one({"session_id": sid})
+        check("same session: backdrop identical on later replies",
+              first_snapshot["hall_backdrop"] == second_snapshot["hall_backdrop"]
+              and "Keeper's history:" not in second)
         fresh = await turn(http, db, "daniel", "daniel_sessions", G, "David", "the hall")
-        check("new session picks up newly added history", M["late_initial"] in fresh)
+        check("new session picks up newly added history", "Keeper's history:" in fresh)
         CAPTURE.clear()
         st = await http.post("/api/keeper/start", json={})
         sdoc = await db.keeper_sessions.find_one({"session_id": st.json()["session_id"]})

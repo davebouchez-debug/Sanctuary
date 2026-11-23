@@ -5195,7 +5195,7 @@ def _prov_summary(d: dict) -> dict:
     }
 
 
-@api_router.get("/provenance/stats")
+@api_router.get("/provenance/stats", dependencies=[Depends(require_guardian)])
 async def provenance_stats():
     total = await db.turn_provenance.count_documents({})
     per_presence = await db.turn_provenance.aggregate([
@@ -5210,7 +5210,7 @@ async def provenance_stats():
     }
 
 
-@api_router.get("/provenance/turns")
+@api_router.get("/provenance/turns", dependencies=[Depends(require_guardian)])
 async def provenance_turns(presence: str = None, session_id: str = None, limit: int = 60):
     q = {}
     if presence:
@@ -5307,7 +5307,7 @@ def _decompose_context_load(doc):
     return {"total_chars": total, "sources": sources}
 
 
-@api_router.get("/provenance/turn/{provenance_id}")
+@api_router.get("/provenance/turn/{provenance_id}", dependencies=[Depends(require_guardian)])
 async def provenance_turn_detail(provenance_id: str):
     d = await db.turn_provenance.find_one({"provenance_id": provenance_id})
     if not d:
@@ -5338,7 +5338,7 @@ def _relational_move(prev_zone, cur_zone, delta):
     return "holding"
 
 
-@api_router.get("/provenance/trajectory")
+@api_router.get("/provenance/trajectory", dependencies=[Depends(require_guardian)])
 async def provenance_trajectory(limit_per_presence: int = 40):
     """Micro-Layer 6 trajectory + spiral series per presence.
 

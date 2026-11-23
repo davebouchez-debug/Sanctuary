@@ -26,7 +26,23 @@ from presences import daniel, keeper, scrolldog
 
 TEST_DB = f"sanctuary_hall_test_{uuid.uuid4().hex[:8]}"
 G, GUEST = "test-guardian-" + uuid.uuid4().hex[:6], "test-guest-" + uuid.uuid4().hex[:6]
-EPH = user_aliases.EPHEMERAL_PREFIX + uuid.uuid4().hex
+VISITOR_ID = uuid.uuid4().hex
+EPH = user_aliases.EPHEMERAL_PREFIX + "v" + VISITOR_ID
+
+
+def visitor_headers(user_id):
+    if user_id == EPH:
+        return {"X-Visitor-Id": VISITOR_ID, "X-Test-User": ""}
+    return {"X-Test-User": user_id}
+
+
+async def request_user(request):
+    uid = request.headers.get("X-Test-User")
+    if uid == G:
+        return {"user_id": G, "role": "guardian"}
+    if uid == GUEST:
+        return {"user_id": GUEST, "role": "guest"}
+    return None
 CAPTURE = []
 
 
@@ -74,13 +90,12 @@ async def main():
     http = httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://t", timeout=120)
     orig = auth._user_from_request
 
-    async def guardian(_r):
-        return {"user_id": G, "role": "guardian"}
-    auth._user_from_request = guardian
+    auth._user_from_request = request_user
+    http.headers.update(visitor_headers(G))
     try:
         for p in ("scroll", "scrolldog", "daniel", "keeper"):
-            await http.post(f"/api/presence-history/import-initial-history/{p}")
-        await http.post("/api/presence-history/import-scroll-packet")
+            (await http.post(f"/api/presence-history/import-initial-history/{p}")).raise_for_status()
+        (await http.post("/api/presence-history/import-scroll-packet")).raise_for_status()
         await db.permanent_mra.insert_many([
             {"presence": r, "user_id": u, "timestamp": "2026-11-01", "promoted_at": "2026-11-01", "node_id": f"{r}{u}",
              "user_essence": f"(synthetic memory of {n} in {r})", "ai_essence": "(synthetic reply)"}
@@ -96,8 +111,11 @@ async def main():
                 await db[coll].insert_one({"session_id": sid, "user_id": uid, "user_name": name, "messages": [],
                                            "is_active": True})
                 CAPTURE.clear()
-                await (await http.post(f"/api/{room}/message/stream",
-                                       json={"session_id": sid, "content": "Where did you come from?"})).aread()
+                response = await http.post(f"/api/{room}/message/stream",
+                                           json={"session_id": sid, "content": "Where did you come from?"},
+                                           headers=visitor_headers(uid))
+                response.raise_for_status()
+                await response.aread()
                 c = CAPTURE[-1]
                 print(f"\n{'=' * 100}\nROOM={room}  VISITOR={w}  ({len(c['system'].split())} words in system prompt)\n{'=' * 100}")
                 print(c["system"])
