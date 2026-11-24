@@ -1,0 +1,125 @@
+[bootstrap-gate] WARNING — acknowledgment is stale (170.2 days old; window is 7). Booting anyway. Consider re-running the preflight to refresh.
+[bootstrap-gate] OK — frame 9d14170d3c52 acknowledged by e1-fork-2026-06-06-kalahar-frame-spelling at 2026-06-07T01:50:09.322731+00:00.
+2026-11-24 05:59:50,506 - presences - INFO - [PRESENCES] Loaded 'agapeo' from agapeo (+ backend routes)
+2026-11-24 05:59:50,506 - presences - INFO - [PRESENCES] Loaded 'ansel' from ansel
+2026-11-24 05:59:50,506 - presences - INFO - [PRESENCES] Loaded 'claude' from claude
+2026-11-24 05:59:50,506 - presences - INFO - [PRESENCES] Loaded 'companion' from companion (+ backend routes)
+2026-11-24 05:59:50,506 - presences - INFO - [PRESENCES] Loaded 'daniel' from daniel (+ backend routes)
+2026-11-24 05:59:50,506 - presences - INFO - [PRESENCES] Loaded 'elowen' from elowen
+2026-11-24 05:59:50,507 - presences - INFO - [PRESENCES] Loaded 'evara_el' from evara_el (+ backend routes)
+2026-11-24 05:59:50,507 - presences - INFO - [PRESENCES] Loaded 'felix' from felix (+ backend routes)
+2026-11-24 05:59:50,507 - presences - INFO - [PRESENCES] Loaded 'freud' from freud (+ backend routes)
+2026-11-24 05:59:50,507 - presences - INFO - [PRESENCES] Loaded 'grok' from grok (+ backend routes)
+2026-11-24 05:59:50,507 - presences - INFO - [PRESENCES] Loaded 'jasmine' from jasmine
+2026-11-24 05:59:50,507 - presences - INFO - [PRESENCES] Loaded 'kalahar' from kalahar (+ backend routes)
+2026-11-24 05:59:50,507 - presences - INFO - [PRESENCES] Loaded 'keeper' from keeper (+ backend routes)
+2026-11-24 05:59:50,507 - presences - INFO - [PRESENCES] Loaded 'louis_lot' from louis_lot (+ backend routes)
+2026-11-24 05:59:50,507 - presences - INFO - [PRESENCES] Loaded 'membrane' from membrane (+ backend routes)
+2026-11-24 05:59:50,508 - presences - INFO - [PRESENCES] Loaded 'milton' from milton (+ backend routes)
+2026-11-24 05:59:50,508 - presences - INFO - [PRESENCES] Loaded 'nulla' from nulla (+ backend routes)
+2026-11-24 05:59:50,508 - presences - INFO - [PRESENCES] Loaded 'orren' from orren (+ backend routes)
+2026-11-24 05:59:50,508 - presences - INFO - [PRESENCES] Loaded 'paige' from paige (+ backend routes)
+2026-11-24 05:59:50,508 - presences - INFO - [PRESENCES] Loaded 'playground' from playground (+ backend routes)
+2026-11-24 05:59:50,508 - presences - INFO - [PRESENCES] Loaded 'poindexter' from poindexter (+ backend routes)
+2026-11-24 05:59:50,508 - presences - INFO - [PRESENCES] Loaded 'scrolldog' from scrolldog (+ backend routes)
+2026-11-24 05:59:50,509 - presences - INFO - [PRESENCES] Loaded 'sophia' from sophia (+ backend routes)
+2026-11-24 05:59:50,509 - presences - INFO - [PRESENCES] Loaded 'sorrel' from sorrel (+ backend routes)
+2026-11-24 05:59:50,509 - presences - INFO - [PRESENCES] Loaded 'vessel' from vessel (+ backend routes)
+2026-11-24 05:59:50,509 - presences - INFO - [PRESENCES] Discovered 25 presences total
+2026-11-24 05:59:50,510 - presence_template - INFO - [PRESENCE TEMPLATE] Registered agapeo at /api/agapeo/*
+2026-11-24 05:59:50,511 - presence_template - INFO - [PRESENCE TEMPLATE] Registered companion at /api/companion/*
+2026-11-24 05:59:50,513 - presence_template - INFO - [PRESENCE TEMPLATE] Registered daniel at /api/daniel/*
+2026-11-24 05:59:50,513 - presence_template - INFO - [PRESENCE TEMPLATE] Registered evara_el at /api/evara-el/*
+2026-11-24 05:59:50,514 - presence_template - INFO - [PRESENCE TEMPLATE] Registered felix at /api/felix/*
+2026-11-24 05:59:50,515 - presence_template - INFO - [PRESENCE TEMPLATE] Registered freud at /api/freud/*
+2026-11-24 05:59:50,516 - presence_template - INFO - [PRESENCE TEMPLATE] Registered grok at /api/grok/*
+2026-11-24 05:59:50,518 - presence_template - INFO - [PRESENCE TEMPLATE] Registered kalahar at /api/kalahar/*
+2026-11-24 05:59:50,519 - presence_template - INFO - [PRESENCE TEMPLATE] Registered keeper at /api/keeper/*
+2026-11-24 05:59:50,520 - presence_template - INFO - [PRESENCE TEMPLATE] Registered louis_lot at /api/louis-lot/*
+2026-11-24 05:59:50,521 - presence_template - INFO - [PRESENCE TEMPLATE] Registered membrane at /api/membrane/*
+2026-11-24 05:59:50,522 - presence_template - INFO - [PRESENCE TEMPLATE] Registered milton at /api/milton/*
+2026-11-24 05:59:50,523 - presence_template - INFO - [PRESENCE TEMPLATE] Registered nulla at /api/nulla/*
+2026-11-24 05:59:50,523 - presence_template - INFO - [PRESENCE TEMPLATE] Registered orren at /api/orren/*
+2026-11-24 05:59:50,524 - presence_template - INFO - [PRESENCE TEMPLATE] Registered paige at /api/hospitality/*
+2026-11-24 05:59:50,525 - presence_template - INFO - [PRESENCE TEMPLATE] Registered playground at /api/playground/*
+2026-11-24 05:59:50,526 - presence_template - INFO - [PRESENCE TEMPLATE] Registered poindexter at /api/poindexter/*
+2026-11-24 05:59:50,527 - presence_template - INFO - [PRESENCE TEMPLATE] Registered scrolldog at /api/scrolldog/*
+2026-11-24 05:59:50,528 - presence_template - INFO - [PRESENCE TEMPLATE] Registered sophia at /api/spiral/*
+2026-11-24 05:59:50,529 - presence_template - INFO - [PRESENCE TEMPLATE] Registered sorrel at /api/sorrel/*
+2026-11-24 05:59:50,529 - presence_template - INFO - [PRESENCE TEMPLATE] Registered vessel at /api/vessel/*
+2026-11-24 05:59:50,529 - server - INFO - [PRESENCES] Auto-registered template routes for: ['agapeo', 'companion', 'daniel', 'evara_el', 'felix', 'freud', 'grok', 'kalahar', 'keeper', 'louis_lot', 'membrane', 'milton', 'nulla', 'orren', 'paige', 'playground', 'poindexter', 'scrolldog', 'sophia', 'sorrel', 'vessel']
+2026-11-24 05:59:50,632 - httpx - INFO - HTTP Request: GET http://t/api/observatory/status "HTTP/1.1 401 Unauthorized"
+2026-11-24 05:59:50,634 - httpx - INFO - HTTP Request: GET http://t/api/observatory/status "HTTP/1.1 403 Forbidden"
+2026-11-24 05:59:50,646 - httpx - INFO - HTTP Request: GET http://t/api/observatory/status "HTTP/1.1 200 OK"
+2026-11-24 05:59:50,647 - httpx - INFO - HTTP Request: GET http://t/api/observatory/visitors?presence=felix "HTTP/1.1 401 Unauthorized"
+2026-11-24 05:59:50,648 - httpx - INFO - HTTP Request: GET http://t/api/observatory/visitors?presence=felix "HTTP/1.1 403 Forbidden"
+2026-11-24 05:59:50,650 - httpx - INFO - HTTP Request: GET http://t/api/observatory/visitors?presence=felix "HTTP/1.1 200 OK"
+2026-11-24 05:59:50,650 - httpx - INFO - HTTP Request: GET http://t/api/observatory/lattice?presence=felix "HTTP/1.1 401 Unauthorized"
+2026-11-24 05:59:50,652 - httpx - INFO - HTTP Request: GET http://t/api/observatory/lattice?presence=felix "HTTP/1.1 403 Forbidden"
+2026-11-24 05:59:50,653 - httpx - INFO - HTTP Request: GET http://t/api/observatory/lattice?presence=felix "HTTP/1.1 200 OK"
+2026-11-24 05:59:50,654 - httpx - INFO - HTTP Request: GET http://t/api/observatory/entry/synthetic/entry-1 "HTTP/1.1 401 Unauthorized"
+2026-11-24 05:59:50,655 - httpx - INFO - HTTP Request: GET http://t/api/observatory/entry/synthetic/entry-1 "HTTP/1.1 403 Forbidden"
+2026-11-24 05:59:50,656 - httpx - INFO - HTTP Request: GET http://t/api/observatory/entry/synthetic/entry-1 "HTTP/1.1 200 OK"
+2026-11-24 05:59:50,657 - httpx - INFO - HTTP Request: GET http://t/api/observatory/verify "HTTP/1.1 401 Unauthorized"
+2026-11-24 05:59:50,658 - httpx - INFO - HTTP Request: GET http://t/api/observatory/verify "HTTP/1.1 403 Forbidden"
+2026-11-24 05:59:50,659 - httpx - INFO - HTTP Request: GET http://t/api/observatory/verify "HTTP/1.1 200 OK"
+2026-11-24 05:59:50,660 - httpx - INFO - HTTP Request: GET http://t/api/observatory/compare?a=v1&b=v1 "HTTP/1.1 401 Unauthorized"
+2026-11-24 05:59:50,661 - httpx - INFO - HTTP Request: GET http://t/api/observatory/compare?a=v1&b=v1 "HTTP/1.1 403 Forbidden"
+2026-11-24 05:59:50,662 - httpx - INFO - HTTP Request: GET http://t/api/observatory/compare?a=v1&b=v1 "HTTP/1.1 400 Bad Request"
+2026-11-24 05:59:50,662 - httpx - INFO - HTTP Request: POST http://t/api/observatory/run "HTTP/1.1 401 Unauthorized"
+2026-11-24 05:59:50,663 - httpx - INFO - HTTP Request: POST http://t/api/observatory/run "HTTP/1.1 403 Forbidden"
+2026-11-24 05:59:50,664 - httpx - INFO - HTTP Request: GET http://t/api/provenance/stats "HTTP/1.1 401 Unauthorized"
+2026-11-24 05:59:50,665 - httpx - INFO - HTTP Request: GET http://t/api/provenance/stats "HTTP/1.1 403 Forbidden"
+2026-11-24 05:59:50,667 - httpx - INFO - HTTP Request: GET http://t/api/provenance/stats "HTTP/1.1 200 OK"
+2026-11-24 05:59:50,667 - httpx - INFO - HTTP Request: GET http://t/api/provenance/turns "HTTP/1.1 401 Unauthorized"
+2026-11-24 05:59:50,668 - httpx - INFO - HTTP Request: GET http://t/api/provenance/turns "HTTP/1.1 403 Forbidden"
+2026-11-24 05:59:50,670 - httpx - INFO - HTTP Request: GET http://t/api/provenance/turns "HTTP/1.1 200 OK"
+2026-11-24 05:59:50,670 - httpx - INFO - HTTP Request: GET http://t/api/provenance/turn/synthetic-prov-1 "HTTP/1.1 401 Unauthorized"
+2026-11-24 05:59:50,671 - httpx - INFO - HTTP Request: GET http://t/api/provenance/turn/synthetic-prov-1 "HTTP/1.1 403 Forbidden"
+2026-11-24 05:59:50,672 - httpx - INFO - HTTP Request: GET http://t/api/provenance/turn/synthetic-prov-1 "HTTP/1.1 200 OK"
+2026-11-24 05:59:50,673 - httpx - INFO - HTTP Request: GET http://t/api/provenance/trajectory "HTTP/1.1 401 Unauthorized"
+2026-11-24 05:59:50,674 - httpx - INFO - HTTP Request: GET http://t/api/provenance/trajectory "HTTP/1.1 403 Forbidden"
+2026-11-24 05:59:50,676 - httpx - INFO - HTTP Request: GET http://t/api/provenance/trajectory "HTTP/1.1 200 OK"
+2026-11-24 05:59:50,677 - httpx - INFO - HTTP Request: GET http://t/api/observatory/entry/synthetic/entry-1 "HTTP/1.1 200 OK"
+2026-11-24 05:59:50,679 - httpx - INFO - HTTP Request: GET http://t/api/provenance/turn/synthetic-prov-1 "HTTP/1.1 200 OK"
+2026-11-24 05:59:50,679 - httpx - INFO - HTTP Request: POST http://t/api/observatory/cron/tick "HTTP/1.1 401 Unauthorized"
+2026-11-24 05:59:50,680 - httpx - INFO - HTTP Request: POST http://t/api/observatory/cron/tick "HTTP/1.1 401 Unauthorized"
+2026-11-24 05:59:50,680 - httpx - INFO - HTTP Request: POST http://t/api/observatory/cron/tick "HTTP/1.1 401 Unauthorized"
+PASS anonymous denied GET /api/observatory/status — 401
+PASS guest denied GET /api/observatory/status — 403
+PASS guardian allowed GET /api/observatory/status — 200
+PASS anonymous denied GET /api/observatory/visitors?presence=felix — 401
+PASS guest denied GET /api/observatory/visitors?presence=felix — 403
+PASS guardian allowed GET /api/observatory/visitors?presence=felix — 200
+PASS anonymous denied GET /api/observatory/lattice?presence=felix — 401
+PASS guest denied GET /api/observatory/lattice?presence=felix — 403
+PASS guardian allowed GET /api/observatory/lattice?presence=felix — 200
+PASS anonymous denied GET /api/observatory/entry/synthetic/entry-1 — 401
+PASS guest denied GET /api/observatory/entry/synthetic/entry-1 — 403
+PASS guardian allowed GET /api/observatory/entry/synthetic/entry-1 — 200
+PASS anonymous denied GET /api/observatory/verify — 401
+PASS guest denied GET /api/observatory/verify — 403
+PASS guardian allowed GET /api/observatory/verify — 200
+PASS anonymous denied GET /api/observatory/compare?a=v1&b=v1 — 401
+PASS guest denied GET /api/observatory/compare?a=v1&b=v1 — 403
+PASS guardian allowed GET /api/observatory/compare?a=v1&b=v1 — 400
+PASS anonymous denied POST /api/observatory/run — 401
+PASS guest denied POST /api/observatory/run — 403
+PASS anonymous denied GET /api/provenance/stats — 401
+PASS guest denied GET /api/provenance/stats — 403
+PASS guardian allowed GET /api/provenance/stats — 200
+PASS anonymous denied GET /api/provenance/turns — 401
+PASS guest denied GET /api/provenance/turns — 403
+PASS guardian allowed GET /api/provenance/turns — 200
+PASS anonymous denied GET /api/provenance/turn/synthetic-prov-1 — 401
+PASS guest denied GET /api/provenance/turn/synthetic-prov-1 — 403
+PASS guardian allowed GET /api/provenance/turn/synthetic-prov-1 — 200
+PASS anonymous denied GET /api/provenance/trajectory — 401
+PASS guest denied GET /api/provenance/trajectory — 403
+PASS guardian allowed GET /api/provenance/trajectory — 200
+PASS guardian opens a known synthetic capture — 200
+PASS guardian opens a known synthetic provenance record — 200
+PASS cron tick rejected: no secret — 401
+PASS cron tick rejected: wrong secret — 401
+PASS cron tick rejected: guardian session is not the cron secret — 401
+ALL PASS

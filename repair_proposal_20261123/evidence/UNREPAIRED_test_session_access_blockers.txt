@@ -1,0 +1,26 @@
+FAIL stored anonymous id is derived, not the browser secret
+FAIL replaying the stored id as a header does not open the session — 200
+FAIL too-short visitor ids are not honoured as an identity — 200
+FAIL upload: another browser denied — 200
+FAIL upload: no visitor id denied — 200
+FAIL upload: the guest denied — 200
+FAIL upload denials wrote nothing and called no model
+FAIL upload: owner allowed, recorded under the session's owner — (200, {'user_id': 'spoofed'})
+PASS clarity: owner can reload — 200
+FAIL clarity: another browser cannot read, reply, upload or end — [200, 200, 200, 200, 200]
+FAIL clarity: no visitor id cannot read, reply, upload or end — [200, 200, 200, 200, 200]
+FAIL clarity: the guest cannot read, reply, upload or end — [200, 200, 200, 200, 200]
+FAIL clarity: denials changed nothing and called no model
+PASS resonance: owner can reload — 200
+FAIL resonance: another browser cannot read, reply, upload or end — [200, 200, 200, 200, 200]
+FAIL resonance: no visitor id cannot read, reply, upload or end — [200, 200, 200, 200, 200]
+FAIL resonance: the guest cannot read, reply, upload or end — [200, 200, 200, 200, 200]
+FAIL resonance: denials changed nothing and called no model
+PASS mirror: owner can reload — 200
+FAIL mirror: another browser cannot read, reply, upload or end — [200, 200, 200]
+FAIL mirror: no visitor id cannot read, reply, upload or end — [200, 200, 200]
+FAIL mirror: the guest cannot read, reply, upload or end — [200, 200, 200]
+FAIL mirror: denials changed nothing and called no model
+FAIL clarity session list: another browser denied — 200
+PASS clarity session list: owner allowed — 200
+21 FAILED

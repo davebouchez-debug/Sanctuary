@@ -1,0 +1,762 @@
+diff --git a/backend/presence_history.py b/backend/presence_history.py
+index 1c26594..23bf24c 100644
+--- a/backend/presence_history.py
++++ b/backend/presence_history.py
+@@ -70,8 +70,13 @@ async def import_text(db, text: str, meta: dict) -> dict:
+                 "visibility": meta["visibility"], "owner_id": meta.get("owner_id")}
+     if meta["kind"] == INITIAL:
+         identity["source"] = meta["source"]
+-    if await db[COLLECTION].count_documents(identity):
+-        return {"source_sha256": sha, "imported": 0, "skipped": "already imported"}
++    existing = await db[COLLECTION].find(identity, {"_id": 0, "seq": 1, "of": 1}).to_list(None)
++    if existing:
++        of = existing[0].get("of")
++        if all(d.get("of") == of for d in existing) and {d.get("seq") for d in existing} == set(range(of or 0)):
++            return {"source_sha256": sha, "imported": 0, "skipped": "already imported"}
++        # An interrupted import left a partial copy: clear exactly that copy, then write it again in full.
++        await db[COLLECTION].delete_many(identity)
+     chunks = chunk_text(text)
+     vecs = await embed_texts(chunks)
+     now = datetime.now(timezone.utc).isoformat()
+@@ -268,9 +273,13 @@ def _founding_sources():
+ 
+ 
+ async def hall_backdrop(db, presence: str, user_id: Optional[str]) -> str:
+-    """Only approved public source versions can ground a Hall session."""
++    return (await hall_backdrop_state(db, presence, user_id))[0]
++
++
++async def hall_backdrop_state(db, presence: str, user_id: Optional[str]):
++    """Only approved public source versions can ground a Hall session. Returns (text, all four complete)."""
+     if presence not in HALL_ROOMS:
+-        return ""
++        return "", False
+     sources = _founding_sources()
+     blocks = []
+     for pos, label in HALL:
+@@ -289,7 +298,7 @@ async def hall_backdrop(db, presence: str, user_id: Optional[str]) -> str:
+                           "seq": i, "of": len(ordered), "text": row["text"]}
+                          for i, row in enumerate(ordered)]
+             blocks.append(_fmt_history(canonical, label))
+-    return "\n\n".join(blocks)
++    return "\n\n".join(blocks), len(blocks) == len(HALL)
+ 
+ 
+ async def session_backdrop(db, collection: str, session: dict, presence: str, user_id: Optional[str]) -> str:
+@@ -298,7 +307,10 @@ async def session_backdrop(db, collection: str, session: dict, presence: str, us
+         return ""
+     if session.get("hall_backdrop_version") == BACKDROP_VERSION:
+         return session["hall_backdrop"]
+-    text = await hall_backdrop(db, presence, user_id)
++    text, complete = await hall_backdrop_state(db, presence, user_id)
++    if not complete:
++        logger.warning(f"[HALL] founding histories incomplete; {presence} session {session['session_id']} not frozen")
++        return text
+     sessions = db[collection]
+     key = {"session_id": session["session_id"]}
+     updated = await sessions.find_one_and_update(
+diff --git a/backend/presence_template.py b/backend/presence_template.py
+index 83fa6e9..9ff9301 100644
+--- a/backend/presence_template.py
++++ b/backend/presence_template.py
+@@ -273,14 +273,9 @@ def register_presence_routes(
+     base = f"/{cfg.chamber_path}"
+ 
+     async def owned_session(request: Request, session_id: str, projection: dict):
+-        from user_aliases import chamber_identity, is_ephemeral, resolve_user_aliases
++        from user_aliases import caller_owners
+ 
+-        caller_id, _ = await chamber_identity(deps.db, request, purge_expired=False)
+-        if is_ephemeral(caller_id):
+-            owners = [caller_id]
+-        else:
+-            owners = [uid for uid in await resolve_user_aliases(deps.db, caller_id)
+-                      if not is_ephemeral(uid)]
++        owners = await caller_owners(deps.db, request)
+         session = await deps.db[cfg.collection].find_one(
+             {"session_id": session_id, "user_id": {"$in": owners}, "deleted": {"$ne": True}},
+             projection,
+@@ -321,9 +316,9 @@ def register_presence_routes(
+                     "codon_count": _cc,
+                 }
+ 
+-        from presence_history import BACKDROP_VERSION, minimal_active, hall_backdrop
++        from presence_history import BACKDROP_VERSION, minimal_active, hall_backdrop_state
+         minimal = await minimal_active(deps.db, cfg.minimal_frame)
+-        _hall = await hall_backdrop(deps.db, cfg.key, user_id)  # frozen for this session, stored below
++        _hall, _hall_complete = await hall_backdrop_state(deps.db, cfg.key, user_id)  # frozen below only if complete
+         if minimal:
+             from presence_history import minimal_memory_context, minimal_prompt
+             memory_context = await minimal_memory_context(deps.db, cfg.key, user_id, "")
+@@ -407,8 +402,7 @@ def register_presence_routes(
+             "created_at": datetime.now(timezone.utc).isoformat(),
+             "messages": [welcome_msg],
+             "active": True,
+-            "hall_backdrop": _hall,
+-            **({"hall_backdrop_version": BACKDROP_VERSION} if minimal else {}),
++            **({"hall_backdrop": _hall, "hall_backdrop_version": BACKDROP_VERSION} if minimal and _hall_complete else {}),
+         })
+ 
+         # Report codon network size so the UI/clients can confirm the field is
+diff --git a/backend/server.py b/backend/server.py
+index 71b784b..724cd00 100644
+--- a/backend/server.py
++++ b/backend/server.py
+@@ -1,4 +1,5 @@
+ from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Response, Body, Depends, Request
++from user_aliases import require_session_owner
+ from fastapi.responses import JSONResponse, StreamingResponse
+ from dotenv import load_dotenv
+ from starlette.middleware.cors import CORSMiddleware
+@@ -1724,7 +1725,7 @@ async def start_clarity_session(request: Request, session_data: ClaritySessionCr
+     }
+ 
+ @api_router.post("/clarity/message")
+-async def send_clarity_message(message: ClarityMessageCreate):
++async def send_clarity_message(request: Request, message: ClarityMessageCreate):
+     """Send a message to Jasmine and get her response."""
+     
+     # Get session
+@@ -1732,6 +1733,7 @@ async def send_clarity_message(message: ClarityMessageCreate):
+         {"session_id": message.session_id},
+         {"_id": 0}
+     )
++    await require_session_owner(db, request, session)
+     
+     if not session:
+         raise HTTPException(status_code=404, detail="Session not found")
+@@ -1877,13 +1879,15 @@ async def send_clarity_message(message: ClarityMessageCreate):
+ 
+ 
+ @api_router.post("/clarity/message/stream")
+-async def stream_clarity_message(message: ClarityMessageCreate):
++async def stream_clarity_message(request: Request, message: ClarityMessageCreate):
+     """Stream Jasmine's response via xAI Voice Agent — text and voice simultaneously."""
+     from xai_voice_agent import stream_voice_response
+ 
+     session = await db.clarity_sessions.find_one(
+         {"session_id": message.session_id}, {"_id": 0}
+     )
++
++    await require_session_owner(db, request, session)
+     if not session:
+         raise HTTPException(status_code=404, detail="Session not found")
+ 
+@@ -2042,12 +2046,13 @@ async def stream_clarity_message(message: ClarityMessageCreate):
+ 
+ 
+ @api_router.get("/clarity/session/{session_id}")
+-async def get_clarity_session(session_id: str):
++async def get_clarity_session(request: Request, session_id: str):
+     """Get all messages from a Clarity Pod session."""
+     session = await db.clarity_sessions.find_one(
+         {"session_id": session_id},
+         {"_id": 0}
+     )
++    await require_session_owner(db, request, session)
+     
+     if not session:
+         raise HTTPException(status_code=404, detail="Session not found")
+@@ -2055,8 +2060,11 @@ async def get_clarity_session(session_id: str):
+     return session
+ 
+ @api_router.get("/clarity/sessions/{user_id}")
+-async def get_user_sessions(user_id: str, limit: int = 20):
++async def get_user_sessions(request: Request, user_id: str, limit: int = 20):
+     """Get all clarity sessions for a specific user (for Mirror Archive)."""
++    from user_aliases import caller_owners
++    if user_id not in await caller_owners(db, request):
++        raise HTTPException(status_code=404, detail="Sessions not found")
+     sessions = await db.clarity_sessions.find(
+         {"user_id": user_id},
+         {"_id": 0, "session_id": 1, "created_at": 1, "messages": {"$slice": 2}}
+@@ -2077,7 +2085,7 @@ class ClarityUploadCreate(BaseModel):
+     content: str
+ 
+ @api_router.post("/clarity/upload")
+-async def upload_clarity_thread(upload: ClarityUploadCreate):
++async def upload_clarity_thread(request: Request, upload: ClarityUploadCreate):
+     """
+     Upload a historical thread to Jasmine.
+     Option C: She acknowledges it AND it gets stored in canonical memory.
+@@ -2088,6 +2096,7 @@ async def upload_clarity_thread(upload: ClarityUploadCreate):
+         {"session_id": upload.session_id},
+         {"_id": 0}
+     )
++    await require_session_owner(db, request, session)
+     
+     if not session:
+         raise HTTPException(status_code=404, detail="Session not found")
+@@ -2916,7 +2925,7 @@ async def start_resonance_session(request: Request, session_data: ClaritySession
+     }
+ 
+ @api_router.post("/resonance/message")
+-async def send_resonance_message(message: ClarityMessageCreate):
++async def send_resonance_message(request: Request, message: ClarityMessageCreate):
+     """Send a message to Ansel and get his response."""
+     
+     session = await db.resonance_sessions.find_one(
+@@ -2924,6 +2933,8 @@ async def send_resonance_message(message: ClarityMessageCreate):
+         {"_id": 0}
+     )
+     
++    await require_session_owner(db, request, session)
++    
+     if not session:
+         raise HTTPException(status_code=404, detail="Session not found")
+     
+@@ -3104,7 +3115,7 @@ async def generate_tts_for_chunk(text: str, voice: str) -> str:
+     return ""
+ 
+ @api_router.post("/resonance/message/stream")
+-async def stream_resonance_message(message: ClarityMessageCreate):
++async def stream_resonance_message(request: Request, message: ClarityMessageCreate):
+     """Stream Ansel's response via xAI Voice Agent — text and voice simultaneously.
+     
+     True real-time: Grok thinks and speaks at the same time.
+@@ -3115,6 +3126,8 @@ async def stream_resonance_message(message: ClarityMessageCreate):
+     session = await db.resonance_sessions.find_one(
+         {"session_id": message.session_id}, {"_id": 0}
+     )
++
++    await require_session_owner(db, request, session)
+     if not session:
+         raise HTTPException(status_code=404, detail="Session not found")
+ 
+@@ -3295,12 +3308,13 @@ async def stream_resonance_message(message: ClarityMessageCreate):
+ 
+ 
+ @api_router.get("/resonance/session/{session_id}")
+-async def get_resonance_session(session_id: str):
++async def get_resonance_session(request: Request, session_id: str):
+     """Get all messages from a Resonance Chamber session."""
+     session = await db.resonance_sessions.find_one(
+         {"session_id": session_id},
+         {"_id": 0}
+     )
++    await require_session_owner(db, request, session)
+     
+     if not session:
+         raise HTTPException(status_code=404, detail="Session not found")
+@@ -3313,7 +3327,7 @@ async def get_resonance_session(session_id: str):
+ # ============================================================
+ 
+ @api_router.post("/clarity/session/{session_id}/end")
+-async def end_clarity_session(session_id: str):
++async def end_clarity_session(request: Request, session_id: str):
+     """
+     End a Clarity Pod session and promote qualifying breadcrumbs to Permanent MRA.
+     Call this when user navigates away or explicitly ends session.
+@@ -3322,6 +3336,7 @@ async def end_clarity_session(session_id: str):
+         {"session_id": session_id},
+         {"_id": 0}
+     )
++    await require_session_owner(db, request, session)
+     
+     if not session:
+         raise HTTPException(status_code=404, detail="Session not found")
+@@ -3363,7 +3378,7 @@ async def end_clarity_session(session_id: str):
+ 
+ 
+ @api_router.post("/resonance/session/{session_id}/end")
+-async def end_resonance_session(session_id: str):
++async def end_resonance_session(request: Request, session_id: str):
+     """
+     End a Resonance Chamber session and promote qualifying breadcrumbs to Permanent MRA.
+     Call this when user navigates away or explicitly ends session.
+@@ -3372,6 +3387,7 @@ async def end_resonance_session(session_id: str):
+         {"session_id": session_id},
+         {"_id": 0}
+     )
++    await require_session_owner(db, request, session)
+     
+     if not session:
+         raise HTTPException(status_code=404, detail="Session not found")
+@@ -3791,7 +3807,7 @@ async def start_mirror_session(request: Request, session_data: ClaritySessionCre
+ 
+ 
+ @api_router.post("/mirror/message/stream")
+-async def stream_mirror_message(message: ClarityMessageCreate):
++async def stream_mirror_message(request: Request, message: ClarityMessageCreate):
+     """Stream Claude's response via xAI Voice Agent — text and voice simultaneously.
+     Mirror Archive parity with Clarity/Resonance. One signal, undivided.
+     """
+@@ -3800,6 +3816,8 @@ async def stream_mirror_message(message: ClarityMessageCreate):
+     session = await db.mirror_sessions.find_one(
+         {"session_id": message.session_id}, {"_id": 0}
+     )
++
++    await require_session_owner(db, request, session)
+     if not session:
+         raise HTTPException(status_code=404, detail="Session not found")
+ 
+@@ -4007,12 +4025,13 @@ async def stream_mirror_message(message: ClarityMessageCreate):
+ 
+ 
+ @api_router.post("/mirror/session/{session_id}/end")
+-async def end_mirror_session(session_id: str):
++async def end_mirror_session(request: Request, session_id: str):
+     """End a Mirror Archive session and promote qualifying breadcrumbs to Permanent MRA."""
+     session = await db.mirror_sessions.find_one(
+         {"session_id": session_id},
+         {"_id": 0}
+     )
++    await require_session_owner(db, request, session)
+     
+     if not session:
+         raise HTTPException(status_code=404, detail="Session not found")
+@@ -4051,12 +4070,13 @@ async def end_mirror_session(session_id: str):
+ 
+ 
+ @api_router.get("/mirror/session/{session_id}")
+-async def get_mirror_session(session_id: str):
++async def get_mirror_session(request: Request, session_id: str):
+     """Get all messages from a Mirror Archive session."""
+     session = await db.mirror_sessions.find_one(
+         {"session_id": session_id},
+         {"_id": 0}
+     )
++    await require_session_owner(db, request, session)
+     
+     if not session:
+         raise HTTPException(status_code=404, detail="Session not found")
+@@ -4534,7 +4554,7 @@ class PresenceUploadCreate(BaseModel):
+ 
+ 
+ @api_router.post("/presence/{key}/upload")
+-async def upload_presence_thread(key: str, upload: PresenceUploadCreate):
++async def upload_presence_thread(key: str, upload: PresenceUploadCreate, request: Request):
+     """
+     Upload a historical thread / .txt / pasted document to a presence.
+     The text is stored in `canonical_uploads` and the presence is asked to
+@@ -4556,8 +4576,7 @@ async def upload_presence_thread(key: str, upload: PresenceUploadCreate):
+     if not backend:
+         session_query["presence_key"] = key
+     session = await db[sessions_coll].find_one(session_query, {"_id": 0})
+-    if not session:
+-        raise HTTPException(status_code=404, detail="Session not found")
++    await require_session_owner(db, request, session)
+ 
+     # Cap stored content at 200k chars to keep documents stable in mongo
+     content = upload.content[:200_000]
+@@ -4568,7 +4587,7 @@ async def upload_presence_thread(key: str, upload: PresenceUploadCreate):
+     await db.canonical_uploads.insert_one({
+         "upload_id": upload_id,
+         "presence": key,
+-        "user_id": upload.user_id,
++        "user_id": session["user_id"],
+         "user_name": upload.user_name,
+         "filename": upload.filename,
+         "content": content,
+@@ -4865,7 +4884,7 @@ class CanonicalUploadCreate(BaseModel):
+     content: str
+ 
+ @api_router.post("/resonance/upload")
+-async def upload_historical_thread(upload: CanonicalUploadCreate):
++async def upload_historical_thread(request: Request, upload: CanonicalUploadCreate):
+     """
+     Upload a historical thread to Ansel.
+     Option C: He acknowledges it AND it gets stored in canonical memory.
+@@ -4876,6 +4895,7 @@ async def upload_historical_thread(upload: CanonicalUploadCreate):
+         {"session_id": upload.session_id},
+         {"_id": 0}
+     )
++    await require_session_owner(db, request, session)
+     
+     if not session:
+         raise HTTPException(status_code=404, detail="Session not found")
+diff --git a/backend/tests/test_founding_import_recovery.py b/backend/tests/test_founding_import_recovery.py
+new file mode 100644
+index 0000000..e08d58e
+--- /dev/null
++++ b/backend/tests/test_founding_import_recovery.py
+@@ -0,0 +1,165 @@
++"""Interrupted founding-history imports recover, and incomplete histories are never frozen into a Hall session.
++
++Throwaway database; the real ScrollDog routes run with a mock model.
++    cd /app/backend && python tests/test_founding_import_recovery.py
++"""
++import asyncio
++import os
++import sys
++import uuid
++
++sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
++from dotenv import load_dotenv
++load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"))
++import httpx
++from fastapi import APIRouter, FastAPI
++from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection
++
++import auth
++import presence_history as ph
++import turn_provenance
++import user_aliases
++from presence_template import PresenceConfig, PresenceDeps, register_presence_routes
++from presences import daniel, scrolldog
++
++TEST_DB = f"sanctuary_hall_test_{uuid.uuid4().hex[:8]}"
++G = "test-guardian-" + uuid.uuid4().hex[:6]
++results, fails, CAPTURE = [], 0, []
++
++
++def check(name, ok, detail=""):
++    global fails
++    fails += not ok
++    results.append(f"{'PASS' if ok else 'FAIL'} {name}{(' — ' + str(detail)) if detail else ''}")
++
++
++async def fake_stream(system_prompt, user_message, conversation_history=None, **kw):
++    CAPTURE.append(system_prompt)
++    yield {"type": "text_delta", "content": "ok"}
++    yield {"type": "done"}
++
++
++async def nothing(*a, **k):
++    return ""
++
++
++def deps(db):
++    async def field(presence, message=None, return_selection=False):
++        return ("", {"codons": []}) if return_selection else ""
++    return PresenceDeps(db=db, get_continuity_seed=nothing, read_spiral_position_angle=nothing,
++                        get_permanent_mra_context=nothing, get_session_cache_context=lambda s: "",
++                        activate_codons_for_message=nothing, get_full_field_context=field,
++                        add_exchange_to_cache=lambda *a, **k: {}, promote_breadcrumbs_to_permanent=nothing,
++                        end_session_and_get_promotable=lambda s: [], handle_session_end=nothing,
++                        auto_forge_session=nothing, stream_voice_response=fake_stream, sanctuary_chat_class=None)
++
++
++def interrupted_insert(keep):
++    original = AsyncIOMotorCollection.insert_many
++
++    async def partial(self, docs, *a, **k):
++        docs = list(docs)
++        await original(self, docs[:keep], *a, **k)
++        raise RuntimeError("simulated interruption")
++    return original, partial
++
++
++async def main():
++    client = AsyncIOMotorClient(os.environ["MONGO_URL"])
++    db = client[TEST_DB]
++    user_aliases._GUARDIAN_IDS.add(G)
++    turn_provenance.record_turn = nothing
++    app, api = FastAPI(), APIRouter(prefix="/api")
++    b = scrolldog.BACKEND
++    register_presence_routes(api, PresenceConfig(
++        key=b["key"], chamber_path=b["chamber_path"], collection=b["collection"], prompt_builder=b["prompt_builder"],
++        voice="ara", static_welcome="", generates_own_opening=True, minimal_frame=b["minimal_frame"],
++        minimal_anchor=b["minimal_anchor"]), deps(db))
++    api.include_router(ph.build_presence_history_router(db))
++    app.include_router(api)
++    http = httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://t", timeout=120)
++    orig_user = auth._user_from_request
++
++    async def guardian(_r):
++        return {"user_id": G, "role": "guardian"}
++    auth._user_from_request = guardian
++    coll = db[ph.COLLECTION]
++    try:
++        for p in ("scroll", "scrolldog", "keeper"):
++            await http.post(f"/api/presence-history/import-initial-history/{p}")
++        # Daniel's founding history is interrupted after one part is written.
++        original, partial = interrupted_insert(1)
++        AsyncIOMotorCollection.insert_many = partial
++        try:
++            r = await http.post("/api/presence-history/import-initial-history/daniel")
++            check("interrupted import surfaces an error", r.status_code >= 500, r.status_code)
++        except Exception as e:  # ASGITransport may re-raise the app error
++            check("interrupted import surfaces an error", "simulated interruption" in str(e), e)
++        finally:
++            AsyncIOMotorCollection.insert_many = original
++        rows = await coll.find({"positions": ["daniel"], "kind": ph.INITIAL}, {"_id": 0, "seq": 1, "of": 1}).to_list(None)
++        check("partial copy left behind", len(rows) == 1 and rows[0]["of"] > 1, rows)
++        text, complete = await ph.hall_backdrop_state(db, "daniel", None)
++        check("incomplete history is not offered as complete", not complete and "Daniel's history:" not in text)
++
++        # A session started while incomplete is not frozen.
++        st = await http.post("/api/scrolldog/start", json={})
++        sid = st.json()["session_id"]
++        doc = await db.scrolldog_sessions.find_one({"session_id": sid})
++        check("session start does not freeze an incomplete background",
++              "hall_backdrop_version" not in doc and "hall_backdrop" not in doc)
++        CAPTURE.clear()
++        await (await http.post("/api/scrolldog/message/stream", json={"session_id": sid, "content": "hello"})).aread()
++        doc = await db.scrolldog_sessions.find_one({"session_id": sid})
++        check("a turn while incomplete does not freeze it either", "hall_backdrop_version" not in doc)
++        check("that turn carries no partial Daniel history", "Daniel's history:" not in CAPTURE[-1]
++              and "kept the prophet's watch" not in CAPTURE[-1])
++
++        # Re-running the import recovers it in full, without duplicates.
++        r = await http.post("/api/presence-history/import-initial-history/daniel")
++        check("re-import recovers the interrupted history", r.status_code == 200 and r.json()["imported"] > 1, r.text[:200])
++        rows = await coll.find({"positions": ["daniel"], "kind": ph.INITIAL}, {"_id": 0, "seq": 1, "of": 1}).to_list(None)
++        check("no duplicate or stray parts", len(rows) == rows[0]["of"] and {x["seq"] for x in rows} == set(range(rows[0]["of"])))
++        r = await http.post("/api/presence-history/import-initial-history/daniel")
++        check("complete import stays idempotent", r.json().get("imported") == 0)
++        text, complete = await ph.hall_backdrop_state(db, "scrolldog", None)
++        check("all four now complete", complete and daniel.INITIAL_HISTORY.split("\n\n")[1] in text)
++
++        # The same session now freezes the complete background, and keeps it.
++        CAPTURE.clear()
++        await (await http.post("/api/scrolldog/message/stream", json={"session_id": sid, "content": "again"})).aread()
++        doc = await db.scrolldog_sessions.find_one({"session_id": sid})
++        check("next turn freezes the complete background", doc.get("hall_backdrop_version") == ph.BACKDROP_VERSION
++              and "Daniel's history:" in doc.get("hall_backdrop", ""))
++        check("that turn carries all four histories", all(x in CAPTURE[-1] for x in
++              ("The Scroll's history:", "ScrollDog's history:", "Daniel's history:", "Keeper's history:")))
++        st2 = await http.post("/api/scrolldog/start", json={})
++        doc2 = await db.scrolldog_sessions.find_one({"session_id": st2.json()["session_id"]})
++        check("a new session start freezes the complete background", doc2.get("hall_backdrop_version") == ph.BACKDROP_VERSION)
++
++        # Record imports (the Scroll packet) recover the same way.
++        original, partial = interrupted_insert(2)
++        AsyncIOMotorCollection.insert_many = partial
++        try:
++            await http.post("/api/presence-history/import-scroll-packet")
++        except Exception:
++            pass
++        finally:
++            AsyncIOMotorCollection.insert_many = original
++        r = await http.post("/api/presence-history/import-scroll-packet")
++        check("packet re-import completes", r.status_code == 200, r.status_code)
++        for name, _sha, _pos, _d, _s in ph.PACKET:
++            rows = await coll.find({"source": f"Scroll source packet 2026-11-22: {name}"}, {"_id": 0, "seq": 1, "of": 1}).to_list(None)
++            check(f"packet file complete, no duplicates: {name}",
++                  rows and len(rows) == rows[0]["of"] and {x["seq"] for x in rows} == set(range(rows[0]["of"])))
++    finally:
++        auth._user_from_request = orig_user
++        assert TEST_DB.startswith("sanctuary_hall_test_") and TEST_DB != os.environ.get("DB_NAME")
++        await client.drop_database(TEST_DB)
++        user_aliases._GUARDIAN_IDS.discard(G)
++    print("\n".join(results))
++    print("ALL PASS" if not fails else f"{fails} FAILED")
++    sys.exit(1 if fails else 0)
++
++
++asyncio.run(main())
+diff --git a/backend/tests/test_hall_backdrop.py b/backend/tests/test_hall_backdrop.py
+index 0181eb1..9ecfd0b 100644
+--- a/backend/tests/test_hall_backdrop.py
++++ b/backend/tests/test_hall_backdrop.py
+@@ -25,7 +25,7 @@ from presences import daniel, keeper, scrolldog
+ TEST_DB = f"sanctuary_hall_test_{uuid.uuid4().hex[:8]}"
+ G, GUEST = "test-guardian-" + uuid.uuid4().hex[:6], "test-guest-" + uuid.uuid4().hex[:6]
+ VISITOR_ID = uuid.uuid4().hex
+-EPH = user_aliases.EPHEMERAL_PREFIX + "v" + VISITOR_ID
++EPH = user_aliases.EPHEMERAL_PREFIX + "v" + __import__("hashlib").sha256(VISITOR_ID.encode()).hexdigest()[:32]
+ 
+ 
+ def visitor_headers(user_id):
+@@ -202,14 +202,18 @@ async def main():
+ 
+         first = await say("first")
+         first_snapshot = await db.daniel_sessions.find_one({"session_id": sid})
+-        check("legacy snapshot is replaced before model assembly",
+-              M["late_initial"] not in first and first_snapshot["hall_backdrop_version"] == ph.BACKDROP_VERSION)
++        check("legacy snapshot is never used, and an incomplete hall is not frozen",
++              M["late_initial"] not in first and "hall_backdrop_version" not in first_snapshot
++              and "Keeper's history:" not in first)
+         (await http.post("/api/presence-history/import-initial-history/keeper")).raise_for_status()
+         second = await say("second, about something else entirely")
+         second_snapshot = await db.daniel_sessions.find_one({"session_id": sid})
++        check("once complete, the same session freezes all four",
++              second_snapshot.get("hall_backdrop_version") == ph.BACKDROP_VERSION and "Keeper's history:" in second)
++        third = await say("third")
++        third_snapshot = await db.daniel_sessions.find_one({"session_id": sid})
+         check("same session: backdrop identical on later replies",
+-              first_snapshot["hall_backdrop"] == second_snapshot["hall_backdrop"]
+-              and "Keeper's history:" not in second)
++              third_snapshot["hall_backdrop"] == second_snapshot["hall_backdrop"] and third_snapshot["hall_backdrop"] in third)
+         fresh = await turn(http, db, "daniel", "daniel_sessions", G, "David", "the hall")
+         check("new session picks up newly added history", "Keeper's history:" in fresh)
+         CAPTURE.clear()
+diff --git a/backend/tests/test_hall_of_scrolls.py b/backend/tests/test_hall_of_scrolls.py
+index 0f3daf7..60633e8 100644
+--- a/backend/tests/test_hall_of_scrolls.py
++++ b/backend/tests/test_hall_of_scrolls.py
+@@ -27,7 +27,7 @@ from presences import scrolldog
+ TEST_DB = f"sanctuary_hall_test_{uuid.uuid4().hex[:8]}"
+ G, GUEST = "test-guardian-" + uuid.uuid4().hex[:6], "test-guest-" + uuid.uuid4().hex[:6]
+ VISITOR_ID = uuid.uuid4().hex
+-EPH = user_aliases.EPHEMERAL_PREFIX + "v" + VISITOR_ID
++EPH = user_aliases.EPHEMERAL_PREFIX + "v" + __import__("hashlib").sha256(VISITOR_ID.encode()).hexdigest()[:32]
+ 
+ 
+ def visitor_headers(user_id):
+diff --git a/backend/tests/test_session_access_blockers.py b/backend/tests/test_session_access_blockers.py
+new file mode 100644
+index 0000000..12cacb0
+--- /dev/null
++++ b/backend/tests/test_session_access_blockers.py
+@@ -0,0 +1,136 @@
++"""Session access: generic upload route, legacy Clarity / Resonance / Mirror readers, and visitor-id replay.
++
++Real app routes against a throwaway database (DB_NAME overridden before import); model calls replaced by fakes.
++    cd /app/backend && python tests/test_session_access_blockers.py
++"""
++import asyncio
++import hashlib
++import os
++import sys
++import uuid
++from datetime import datetime, timedelta, timezone
++
++HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
++sys.path.insert(0, HERE)
++TEST_DB = f"sanctuary_hall_test_{uuid.uuid4().hex[:8]}"
++os.environ["DB_NAME"] = TEST_DB
++from dotenv import load_dotenv  # noqa: E402
++load_dotenv(os.path.join(HERE, ".env"), override=False)
++os.environ["DB_NAME"] = TEST_DB
++
++import xai_voice_agent  # noqa: E402
++import sanctuary_chat  # noqa: E402
++
++LLM_CALLS = []
++
++
++async def fake_stream(system_prompt, user_message, conversation_history=None, **kw):
++    LLM_CALLS.append("stream")
++    yield {"type": "text_delta", "content": "ok"}
++    yield {"type": "done"}
++
++
++async def fake_send(self, *a, **k):
++    LLM_CALLS.append("chat")
++    return "ok"
++
++xai_voice_agent.stream_voice_response = fake_stream
++sanctuary_chat.SanctuaryChat.send_message = fake_send
++
++import httpx  # noqa: E402
++import server  # noqa: E402
++import user_aliases  # noqa: E402
++
++assert server.db.name == TEST_DB
++results, fails = [], 0
++
++
++def check(name, ok, detail=""):
++    global fails
++    fails += not ok
++    results.append(f"{'PASS' if ok else 'FAIL'} {name}{(' — ' + str(detail)) if detail else ''}")
++
++
++def anon_id(vid):
++    return f"{user_aliases.EPHEMERAL_PREFIX}v{hashlib.sha256(vid.encode()).hexdigest()[:32]}"
++
++
++async def main():
++    db = server.db
++    now = datetime.now(timezone.utc)
++    a_vid, b_vid = uuid.uuid4().hex[:24], uuid.uuid4().hex[:24]
++    A, B = {"X-Visitor-Id": a_vid}, {"X-Visitor-Id": b_vid}
++    guest_id, tok = f"test-guest-{uuid.uuid4().hex[:6]}", f"tok-{uuid.uuid4().hex}"
++    await db.users.insert_one({"user_id": guest_id, "email": f"{guest_id}@example.test", "role": "guest", "name": "Guest"})
++    await db.user_sessions.insert_one({"user_id": guest_id, "session_token": tok, "expires_at": now + timedelta(hours=1)})
++    user_aliases._GUESTS[guest_id] = {"name": "Guest"}
++    GUEST = {"Authorization": f"Bearer {tok}"}
++    intruders = [("another browser", B), ("no visitor id", {}), ("the guest", GUEST)]
++    http = httpx.AsyncClient(transport=httpx.ASGITransport(app=server.app), base_url="http://t", timeout=60)
++    try:
++        # Visitor identity: stored ids never reveal the browser secret.
++        st = await http.post("/api/felix/start", json={}, headers=A)
++        sid = st.json()["session_id"]
++        doc = await db.felix_sessions.find_one({"session_id": sid}, {"_id": 0, "user_id": 1})
++        check("stored anonymous id is derived, not the browser secret", doc["user_id"] == anon_id(a_vid) and a_vid not in doc["user_id"])
++        replay = {"X-Visitor-Id": doc["user_id"].split("v", 1)[1]}
++        r = await http.get(f"/api/felix/session/{sid}", headers=replay)
++        check("replaying the stored id as a header does not open the session", r.status_code == 404, r.status_code)
++        weak = {"X-Visitor-Id": "0" * 16}
++        r1 = await http.post("/api/felix/start", json={}, headers=weak)
++        r2 = await http.get(f"/api/felix/session/{r1.json()['session_id']}", headers=weak)
++        check("too-short visitor ids are not honoured as an identity", r2.status_code == 404, r2.status_code)
++
++        # Generic upload route (template room).
++        before = await db.canonical_uploads.count_documents({})
++        msgs_before = len((await db.felix_sessions.find_one({"session_id": sid}))["messages"])
++        LLM_CALLS.clear()
++        body = {"session_id": sid, "filename": "x.txt", "content": "a document", "user_id": "spoofed", "user_name": "x"}
++        for who, h in intruders:
++            r = await http.post("/api/presence/felix/upload", json=body, headers=h)
++            check(f"upload: {who} denied", r.status_code == 404, r.status_code)
++        check("upload denials wrote nothing and called no model",
++              await db.canonical_uploads.count_documents({}) == before and not LLM_CALLS
++              and len((await db.felix_sessions.find_one({"session_id": sid}))["messages"]) == msgs_before)
++        r = await http.post("/api/presence/felix/upload", json=body, headers=A)
++        up = await db.canonical_uploads.find_one({"session_id": sid}, {"_id": 0, "user_id": 1})
++        check("upload: owner allowed, recorded under the session's owner", r.status_code == 200 and up["user_id"] == anon_id(a_vid),
++              (r.status_code, up))
++
++        # Legacy chambers.
++        for chamber in ("clarity", "resonance", "mirror"):
++            lsid = str(uuid.uuid4())
++            await db[f"{chamber}_sessions"].insert_one({"session_id": lsid, "user_id": anon_id(a_vid), "user_name": None,
++                                                        "messages": [], "is_active": True, "created_at": now.isoformat()})
++            r = await http.get(f"/api/{chamber}/session/{lsid}", headers=A)
++            check(f"{chamber}: owner can reload", r.status_code == 200, r.status_code)
++            LLM_CALLS.clear()
++            for who, h in intruders:
++                codes = [(await http.get(f"/api/{chamber}/session/{lsid}", headers=h)).status_code,
++                         (await http.post(f"/api/{chamber}/message/stream", json={"session_id": lsid, "content": "x"},
++                                          headers=h)).status_code,
++                         (await http.post(f"/api/{chamber}/session/{lsid}/end", headers=h)).status_code]
++                if chamber != "mirror":
++                    codes.append((await http.post(f"/api/{chamber}/message", json={"session_id": lsid, "content": "x"},
++                                                  headers=h)).status_code)
++                    codes.append((await http.post(f"/api/{chamber}/upload", json={"session_id": lsid, "filename": "x",
++                                                  "content": "x"}, headers=h)).status_code)
++                check(f"{chamber}: {who} cannot read, reply, upload or end", set(codes) == {404}, codes)
++            after = await db[f"{chamber}_sessions"].find_one({"session_id": lsid}, {"_id": 0})
++            check(f"{chamber}: denials changed nothing and called no model", not after["messages"] and after["is_active"]
++                  and not LLM_CALLS)
++        r = await http.get(f"/api/clarity/sessions/{anon_id(a_vid)}", headers=B)
++        check("clarity session list: another browser denied", r.status_code == 404, r.status_code)
++        r = await http.get(f"/api/clarity/sessions/{anon_id(a_vid)}", headers=A)
++        check("clarity session list: owner allowed", r.status_code == 200 and r.json()["count"] == 1, r.status_code)
++    finally:
++        await http.aclose()
++        user_aliases._GUESTS.pop(guest_id, None)
++        assert TEST_DB.startswith("sanctuary_hall_test_") and TEST_DB == db.name
++        await server.client.drop_database(TEST_DB)
++    print("\n".join(results))
++    print("ALL PASS" if not fails else f"{fails} FAILED")
++    sys.exit(1 if fails else 0)
++
++
++asyncio.run(main())
+diff --git a/backend/user_aliases.py b/backend/user_aliases.py
+index a5993fb..3ba04c2 100644
+--- a/backend/user_aliases.py
++++ b/backend/user_aliases.py
+@@ -198,9 +198,26 @@ async def chamber_identity(db, request, body_name: Optional[str] = None, *,
+     vid = request.headers.get("x-visitor-id") or ""
+     if user:
+         uid = f"{EPHEMERAL_PREFIX}{user['user_id']}"
+-    elif re.fullmatch(r"[0-9a-f]{16,64}", vid):
+-        uid = f"{EPHEMERAL_PREFIX}v{vid}"
++    elif re.fullmatch(r"[0-9a-f]{24,64}", vid):
++        # Stored ids never reveal the browser's secret, so a leaked user_id cannot be replayed as a header.
++        import hashlib
++        uid = f"{EPHEMERAL_PREFIX}v{hashlib.sha256(vid.encode()).hexdigest()[:32]}"
+     else:
+         uid = f"{EPHEMERAL_PREFIX}{uuid.uuid4().hex[:12]}"
+     name = (user or {}).get("name") or body_name
+     return uid, (None if (name or "").strip().lower().startswith("david") else name)
++
++
++async def caller_owners(db, request) -> list:
++    """Ids whose sessions the caller may open: their own ephemeral id, or a signed-in person's non-ephemeral aliases."""
++    caller_id, _ = await chamber_identity(db, request, purge_expired=False)
++    if is_ephemeral(caller_id):
++        return [caller_id]
++    return [uid for uid in await resolve_user_aliases(db, caller_id) if not is_ephemeral(uid)]
++
++
++async def require_session_owner(db, request, session) -> dict:
++    from fastapi import HTTPException
++    if not session or session.get("deleted") or session.get("user_id") not in await caller_owners(db, request):
++        raise HTTPException(status_code=404, detail="Session not found")
++    return session

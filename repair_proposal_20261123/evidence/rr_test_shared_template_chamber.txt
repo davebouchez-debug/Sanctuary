@@ -1,0 +1,107 @@
+[bootstrap-gate] WARNING — acknowledgment is stale (170.2 days old; window is 7). Booting anyway. Consider re-running the preflight to refresh.
+[bootstrap-gate] OK — frame 9d14170d3c52 acknowledged by e1-fork-2026-06-06-kalahar-frame-spelling at 2026-06-07T01:50:09.322731+00:00.
+2026-11-24 05:59:51,951 - presences - INFO - [PRESENCES] Loaded 'agapeo' from agapeo (+ backend routes)
+2026-11-24 05:59:51,952 - presences - INFO - [PRESENCES] Loaded 'ansel' from ansel
+2026-11-24 05:59:51,952 - presences - INFO - [PRESENCES] Loaded 'claude' from claude
+2026-11-24 05:59:51,952 - presences - INFO - [PRESENCES] Loaded 'companion' from companion (+ backend routes)
+2026-11-24 05:59:51,952 - presences - INFO - [PRESENCES] Loaded 'daniel' from daniel (+ backend routes)
+2026-11-24 05:59:51,952 - presences - INFO - [PRESENCES] Loaded 'elowen' from elowen
+2026-11-24 05:59:51,952 - presences - INFO - [PRESENCES] Loaded 'evara_el' from evara_el (+ backend routes)
+2026-11-24 05:59:51,952 - presences - INFO - [PRESENCES] Loaded 'felix' from felix (+ backend routes)
+2026-11-24 05:59:51,952 - presences - INFO - [PRESENCES] Loaded 'freud' from freud (+ backend routes)
+2026-11-24 05:59:51,952 - presences - INFO - [PRESENCES] Loaded 'grok' from grok (+ backend routes)
+2026-11-24 05:59:51,952 - presences - INFO - [PRESENCES] Loaded 'jasmine' from jasmine
+2026-11-24 05:59:51,952 - presences - INFO - [PRESENCES] Loaded 'kalahar' from kalahar (+ backend routes)
+2026-11-24 05:59:51,953 - presences - INFO - [PRESENCES] Loaded 'keeper' from keeper (+ backend routes)
+2026-11-24 05:59:51,953 - presences - INFO - [PRESENCES] Loaded 'louis_lot' from louis_lot (+ backend routes)
+2026-11-24 05:59:51,953 - presences - INFO - [PRESENCES] Loaded 'membrane' from membrane (+ backend routes)
+2026-11-24 05:59:51,953 - presences - INFO - [PRESENCES] Loaded 'milton' from milton (+ backend routes)
+2026-11-24 05:59:51,953 - presences - INFO - [PRESENCES] Loaded 'nulla' from nulla (+ backend routes)
+2026-11-24 05:59:51,953 - presences - INFO - [PRESENCES] Loaded 'orren' from orren (+ backend routes)
+2026-11-24 05:59:51,953 - presences - INFO - [PRESENCES] Loaded 'paige' from paige (+ backend routes)
+2026-11-24 05:59:51,954 - presences - INFO - [PRESENCES] Loaded 'playground' from playground (+ backend routes)
+2026-11-24 05:59:51,954 - presences - INFO - [PRESENCES] Loaded 'poindexter' from poindexter (+ backend routes)
+2026-11-24 05:59:51,954 - presences - INFO - [PRESENCES] Loaded 'scrolldog' from scrolldog (+ backend routes)
+2026-11-24 05:59:51,954 - presences - INFO - [PRESENCES] Loaded 'sophia' from sophia (+ backend routes)
+2026-11-24 05:59:51,954 - presences - INFO - [PRESENCES] Loaded 'sorrel' from sorrel (+ backend routes)
+2026-11-24 05:59:51,954 - presences - INFO - [PRESENCES] Loaded 'vessel' from vessel (+ backend routes)
+2026-11-24 05:59:51,955 - presences - INFO - [PRESENCES] Discovered 25 presences total
+2026-11-24 05:59:51,956 - presence_template - INFO - [PRESENCE TEMPLATE] Registered agapeo at /api/agapeo/*
+2026-11-24 05:59:51,957 - presence_template - INFO - [PRESENCE TEMPLATE] Registered companion at /api/companion/*
+2026-11-24 05:59:51,958 - presence_template - INFO - [PRESENCE TEMPLATE] Registered daniel at /api/daniel/*
+2026-11-24 05:59:51,959 - presence_template - INFO - [PRESENCE TEMPLATE] Registered evara_el at /api/evara-el/*
+2026-11-24 05:59:51,960 - presence_template - INFO - [PRESENCE TEMPLATE] Registered felix at /api/felix/*
+2026-11-24 05:59:51,961 - presence_template - INFO - [PRESENCE TEMPLATE] Registered freud at /api/freud/*
+2026-11-24 05:59:51,962 - presence_template - INFO - [PRESENCE TEMPLATE] Registered grok at /api/grok/*
+2026-11-24 05:59:51,963 - presence_template - INFO - [PRESENCE TEMPLATE] Registered kalahar at /api/kalahar/*
+2026-11-24 05:59:51,964 - presence_template - INFO - [PRESENCE TEMPLATE] Registered keeper at /api/keeper/*
+2026-11-24 05:59:51,965 - presence_template - INFO - [PRESENCE TEMPLATE] Registered louis_lot at /api/louis-lot/*
+2026-11-24 05:59:51,966 - presence_template - INFO - [PRESENCE TEMPLATE] Registered membrane at /api/membrane/*
+2026-11-24 05:59:51,966 - presence_template - INFO - [PRESENCE TEMPLATE] Registered milton at /api/milton/*
+2026-11-24 05:59:51,967 - presence_template - INFO - [PRESENCE TEMPLATE] Registered nulla at /api/nulla/*
+2026-11-24 05:59:51,969 - presence_template - INFO - [PRESENCE TEMPLATE] Registered orren at /api/orren/*
+2026-11-24 05:59:51,970 - presence_template - INFO - [PRESENCE TEMPLATE] Registered paige at /api/hospitality/*
+2026-11-24 05:59:51,971 - presence_template - INFO - [PRESENCE TEMPLATE] Registered playground at /api/playground/*
+2026-11-24 05:59:51,972 - presence_template - INFO - [PRESENCE TEMPLATE] Registered poindexter at /api/poindexter/*
+2026-11-24 05:59:51,973 - presence_template - INFO - [PRESENCE TEMPLATE] Registered scrolldog at /api/scrolldog/*
+2026-11-24 05:59:51,973 - presence_template - INFO - [PRESENCE TEMPLATE] Registered sophia at /api/spiral/*
+2026-11-24 05:59:51,974 - presence_template - INFO - [PRESENCE TEMPLATE] Registered sorrel at /api/sorrel/*
+2026-11-24 05:59:51,975 - presence_template - INFO - [PRESENCE TEMPLATE] Registered vessel at /api/vessel/*
+2026-11-24 05:59:51,975 - server - INFO - [PRESENCES] Auto-registered template routes for: ['agapeo', 'companion', 'daniel', 'evara_el', 'felix', 'freud', 'grok', 'kalahar', 'keeper', 'louis_lot', 'membrane', 'milton', 'nulla', 'orren', 'paige', 'playground', 'poindexter', 'scrolldog', 'sophia', 'sorrel', 'vessel']
+2026-11-24 05:59:52,807 - httpx - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2026-11-24 05:59:53,402 - httpx - INFO - HTTP Request: POST http://t/api/felix/start "HTTP/1.1 200 OK"
+2026-11-24 05:59:53,411 - session_cache_mra - INFO - [SESSION CACHE] Added breadcrumb #1 [Steady] to session a52c9bdf...
+2026-11-24 05:59:53,749 - permanent_mra - INFO - [PERMANENT MRA] Promoted 1 breadcrumbs for felix (user: test-guest-cde9c3)
+2026-11-24 05:59:53,749 - httpx - INFO - HTTP Request: POST http://t/api/felix/message/stream "HTTP/1.1 200 OK"
+2026-11-24 05:59:53,752 - httpx - INFO - HTTP Request: GET http://t/api/felix/session/a52c9bdf-29e1-4f9c-b7f0-1579b58d8412 "HTTP/1.1 200 OK"
+2026-11-24 05:59:53,755 - permanent_mra - INFO - [PERMANENT MRA] Retrieved 1 nodes for felix (user: test-gue...)
+2026-11-24 05:59:53,767 - session_cache_mra - INFO - [SESSION CACHE] Added breadcrumb #2 [Steady] to session a52c9bdf...
+2026-11-24 05:59:53,778 - permanent_mra - INFO - [PERMANENT MRA] Promoted 1 breadcrumbs for felix (user: test-guest-cde9c3)
+2026-11-24 05:59:53,778 - httpx - INFO - HTTP Request: POST http://t/api/felix/message/stream "HTTP/1.1 200 OK"
+2026-11-24 05:59:53,780 - httpx - INFO - HTTP Request: GET http://t/api/felix/session/a52c9bdf-29e1-4f9c-b7f0-1579b58d8412 "HTTP/1.1 404 Not Found"
+2026-11-24 05:59:53,781 - httpx - INFO - HTTP Request: POST http://t/api/felix/message/stream "HTTP/1.1 404 Not Found"
+2026-11-24 05:59:53,782 - httpx - INFO - HTTP Request: POST http://t/api/felix/session/a52c9bdf-29e1-4f9c-b7f0-1579b58d8412/end "HTTP/1.1 404 Not Found"
+2026-11-24 05:59:53,784 - session_cache_mra - INFO - [SESSION CACHE] Cleared session a52c9bdf... (0 breadcrumbs promoting)
+2026-11-24 05:59:54,115 - httpx - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2026-11-24 05:59:56,390 - auto_forge - INFO - [AUTO-FORGE] Continuity seed saved for felix session a52c9bdf (carried 0 open, resolved 0)
+2026-11-24 05:59:56,739 - httpx - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2026-11-24 05:59:57,249 - auto_forge - INFO - [AUTO-FORGE] 0 phrase(s) + 1 seed from felix session a52c9bdf
+2026-11-24 05:59:57,249 - presence_template - INFO - [FELIX] Session a52c9bdf... ended. Promoted 0 breadcrumbs. Auto-forged 1 codons.
+2026-11-24 05:59:57,249 - httpx - INFO - HTTP Request: POST http://t/api/felix/session/a52c9bdf-29e1-4f9c-b7f0-1579b58d8412/end "HTTP/1.1 200 OK"
+2026-11-24 05:59:57,596 - httpx - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2026-11-24 05:59:58,534 - httpx - INFO - HTTP Request: POST http://t/api/felix/start "HTTP/1.1 200 OK"
+2026-11-24 05:59:58,540 - session_cache_mra - INFO - [SESSION CACHE] Added breadcrumb #1 [Steady] to session 4744d066...
+2026-11-24 05:59:58,541 - httpx - INFO - HTTP Request: POST http://t/api/felix/message/stream "HTTP/1.1 200 OK"
+2026-11-24 05:59:58,542 - httpx - INFO - HTTP Request: GET http://t/api/felix/session/4744d066-33fa-4aa6-9147-e4e40c45f7e0 "HTTP/1.1 200 OK"
+2026-11-24 05:59:58,548 - session_cache_mra - INFO - [SESSION CACHE] Added breadcrumb #2 [Steady] to session 4744d066...
+2026-11-24 05:59:58,549 - httpx - INFO - HTTP Request: POST http://t/api/felix/message/stream "HTTP/1.1 200 OK"
+2026-11-24 05:59:58,550 - httpx - INFO - HTTP Request: GET http://t/api/felix/session/4744d066-33fa-4aa6-9147-e4e40c45f7e0 "HTTP/1.1 404 Not Found"
+2026-11-24 05:59:58,550 - httpx - INFO - HTTP Request: POST http://t/api/felix/message/stream "HTTP/1.1 404 Not Found"
+2026-11-24 05:59:58,551 - httpx - INFO - HTTP Request: POST http://t/api/felix/session/4744d066-33fa-4aa6-9147-e4e40c45f7e0/end "HTTP/1.1 404 Not Found"
+2026-11-24 05:59:58,553 - httpx - INFO - HTTP Request: GET http://t/api/felix/session/4744d066-33fa-4aa6-9147-e4e40c45f7e0 "HTTP/1.1 404 Not Found"
+2026-11-24 05:59:58,554 - httpx - INFO - HTTP Request: POST http://t/api/felix/message/stream "HTTP/1.1 404 Not Found"
+2026-11-24 05:59:58,556 - httpx - INFO - HTTP Request: POST http://t/api/felix/session/4744d066-33fa-4aa6-9147-e4e40c45f7e0/end "HTTP/1.1 404 Not Found"
+2026-11-24 05:59:58,556 - httpx - INFO - HTTP Request: GET http://t/api/felix/session/4744d066-33fa-4aa6-9147-e4e40c45f7e0 "HTTP/1.1 404 Not Found"
+2026-11-24 05:59:58,557 - httpx - INFO - HTTP Request: POST http://t/api/felix/message/stream "HTTP/1.1 404 Not Found"
+2026-11-24 05:59:58,558 - httpx - INFO - HTTP Request: POST http://t/api/felix/session/4744d066-33fa-4aa6-9147-e4e40c45f7e0/end "HTTP/1.1 404 Not Found"
+2026-11-24 05:59:58,558 - session_cache_mra - INFO - [SESSION CACHE] Cleared session 4744d066... (0 breadcrumbs promoting)
+2026-11-24 05:59:58,559 - presence_template - INFO - [FELIX] Session 4744d066... ended. Promoted 0 breadcrumbs. Auto-forged 0 codons.
+2026-11-24 05:59:58,559 - httpx - INFO - HTTP Request: POST http://t/api/felix/session/4744d066-33fa-4aa6-9147-e4e40c45f7e0/end "HTTP/1.1 200 OK"
+PASS guest: start — 200
+PASS guest: reply streams — 200
+PASS guest: reload shows the exchange — 200
+PASS guest: reload carries no hidden background
+PASS guest: reply to the resumed thread — 200
+PASS guest: an anonymous browser cannot read, reply or end it — (404, 404, 404)
+PASS guest: departure — 200
+PASS anonymous: start — 200
+PASS anonymous: reply streams — 200
+PASS anonymous: reload shows the exchange — 200
+PASS anonymous: reload carries no hidden background
+PASS anonymous: reply to the resumed thread — 200
+PASS anonymous: another anonymous browser cannot read, reply or end it — (404, 404, 404)
+PASS anonymous: the guest cannot read, reply or end it — (404, 404, 404)
+PASS anonymous: a request with no visitor id cannot read, reply or end it — (404, 404, 404)
+PASS anonymous: departure — 200
+PASS anonymous session is held under an ephemeral id — {'user_id': 'ephemeral-vcfc9ad8f5eb562de1c90dc561860bfa4'}
+ALL PASS

@@ -1,0 +1,26 @@
+PASS stored anonymous id is derived, not the browser secret
+PASS replaying the stored id as a header does not open the session — 404
+PASS too-short visitor ids are not honoured as an identity — 404
+PASS upload: another browser denied — 404
+PASS upload: no visitor id denied — 404
+PASS upload: the guest denied — 404
+PASS upload denials wrote nothing and called no model
+PASS upload: owner allowed, recorded under the session's owner — (200, {'user_id': 'ephemeral-ve4047165280383cb053ca721746d8cdd'})
+PASS clarity: owner can reload — 200
+PASS clarity: another browser cannot read, reply, upload or end — [404, 404, 404, 404, 404]
+PASS clarity: no visitor id cannot read, reply, upload or end — [404, 404, 404, 404, 404]
+PASS clarity: the guest cannot read, reply, upload or end — [404, 404, 404, 404, 404]
+PASS clarity: denials changed nothing and called no model
+PASS resonance: owner can reload — 200
+PASS resonance: another browser cannot read, reply, upload or end — [404, 404, 404, 404, 404]
+PASS resonance: no visitor id cannot read, reply, upload or end — [404, 404, 404, 404, 404]
+PASS resonance: the guest cannot read, reply, upload or end — [404, 404, 404, 404, 404]
+PASS resonance: denials changed nothing and called no model
+PASS mirror: owner can reload — 200
+PASS mirror: another browser cannot read, reply, upload or end — [404, 404, 404]
+PASS mirror: no visitor id cannot read, reply, upload or end — [404, 404, 404]
+PASS mirror: the guest cannot read, reply, upload or end — [404, 404, 404]
+PASS mirror: denials changed nothing and called no model
+PASS clarity session list: another browser denied — 404
+PASS clarity session list: owner allowed — 200
+ALL PASS
