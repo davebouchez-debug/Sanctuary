@@ -273,14 +273,9 @@ def register_presence_routes(
     base = f"/{cfg.chamber_path}"
 
     async def owned_session(request: Request, session_id: str, projection: dict):
-        from user_aliases import chamber_identity, is_ephemeral, resolve_user_aliases
+        from user_aliases import caller_owners
 
-        caller_id, _ = await chamber_identity(deps.db, request, purge_expired=False)
-        if is_ephemeral(caller_id):
-            owners = [caller_id]
-        else:
-            owners = [uid for uid in await resolve_user_aliases(deps.db, caller_id)
-                      if not is_ephemeral(uid)]
+        owners = await caller_owners(deps.db, request)
         session = await deps.db[cfg.collection].find_one(
             {"session_id": session_id, "user_id": {"$in": owners}, "deleted": {"$ne": True}},
             projection,
@@ -321,9 +316,9 @@ def register_presence_routes(
                     "codon_count": _cc,
                 }
 
-        from presence_history import BACKDROP_VERSION, minimal_active, hall_backdrop
+        from presence_history import BACKDROP_VERSION, minimal_active, hall_backdrop_state
         minimal = await minimal_active(deps.db, cfg.minimal_frame)
-        _hall = await hall_backdrop(deps.db, cfg.key, user_id)  # frozen for this session, stored below
+        _hall, _hall_complete = await hall_backdrop_state(deps.db, cfg.key, user_id)  # frozen below only if complete
         if minimal:
             from presence_history import minimal_memory_context, minimal_prompt
             memory_context = await minimal_memory_context(deps.db, cfg.key, user_id, "")
@@ -407,8 +402,7 @@ def register_presence_routes(
             "created_at": datetime.now(timezone.utc).isoformat(),
             "messages": [welcome_msg],
             "active": True,
-            "hall_backdrop": _hall,
-            **({"hall_backdrop_version": BACKDROP_VERSION} if minimal else {}),
+            **({"hall_backdrop": _hall, "hall_backdrop_version": BACKDROP_VERSION} if minimal and _hall_complete else {}),
         })
 
         # Report codon network size so the UI/clients can confirm the field is

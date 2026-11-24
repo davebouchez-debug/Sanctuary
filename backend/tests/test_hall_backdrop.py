@@ -25,7 +25,7 @@ from presences import daniel, keeper, scrolldog
 TEST_DB = f"sanctuary_hall_test_{uuid.uuid4().hex[:8]}"
 G, GUEST = "test-guardian-" + uuid.uuid4().hex[:6], "test-guest-" + uuid.uuid4().hex[:6]
 VISITOR_ID = uuid.uuid4().hex
-EPH = user_aliases.EPHEMERAL_PREFIX + "v" + VISITOR_ID
+EPH = user_aliases.EPHEMERAL_PREFIX + "v" + __import__("hashlib").sha256(VISITOR_ID.encode()).hexdigest()[:32]
 
 
 def visitor_headers(user_id):
@@ -202,14 +202,18 @@ async def main():
 
         first = await say("first")
         first_snapshot = await db.daniel_sessions.find_one({"session_id": sid})
-        check("legacy snapshot is replaced before model assembly",
-              M["late_initial"] not in first and first_snapshot["hall_backdrop_version"] == ph.BACKDROP_VERSION)
+        check("legacy snapshot is never used, and an incomplete hall is not frozen",
+              M["late_initial"] not in first and "hall_backdrop_version" not in first_snapshot
+              and "Keeper's history:" not in first)
         (await http.post("/api/presence-history/import-initial-history/keeper")).raise_for_status()
         second = await say("second, about something else entirely")
         second_snapshot = await db.daniel_sessions.find_one({"session_id": sid})
+        check("once complete, the same session freezes all four",
+              second_snapshot.get("hall_backdrop_version") == ph.BACKDROP_VERSION and "Keeper's history:" in second)
+        third = await say("third")
+        third_snapshot = await db.daniel_sessions.find_one({"session_id": sid})
         check("same session: backdrop identical on later replies",
-              first_snapshot["hall_backdrop"] == second_snapshot["hall_backdrop"]
-              and "Keeper's history:" not in second)
+              third_snapshot["hall_backdrop"] == second_snapshot["hall_backdrop"] and third_snapshot["hall_backdrop"] in third)
         fresh = await turn(http, db, "daniel", "daniel_sessions", G, "David", "the hall")
         check("new session picks up newly added history", "Keeper's history:" in fresh)
         CAPTURE.clear()

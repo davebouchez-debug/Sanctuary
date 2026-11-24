@@ -70,8 +70,13 @@ async def import_text(db, text: str, meta: dict) -> dict:
                 "visibility": meta["visibility"], "owner_id": meta.get("owner_id")}
     if meta["kind"] == INITIAL:
         identity["source"] = meta["source"]
-    if await db[COLLECTION].count_documents(identity):
-        return {"source_sha256": sha, "imported": 0, "skipped": "already imported"}
+    existing = await db[COLLECTION].find(identity, {"_id": 0, "seq": 1, "of": 1}).to_list(None)
+    if existing:
+        of = existing[0].get("of")
+        if all(d.get("of") == of for d in existing) and {d.get("seq") for d in existing} == set(range(of or 0)):
+            return {"source_sha256": sha, "imported": 0, "skipped": "already imported"}
+        # An interrupted import left a partial copy: clear exactly that copy, then write it again in full.
+        await db[COLLECTION].delete_many(identity)
     chunks = chunk_text(text)
     vecs = await embed_texts(chunks)
     now = datetime.now(timezone.utc).isoformat()
@@ -268,9 +273,13 @@ def _founding_sources():
 
 
 async def hall_backdrop(db, presence: str, user_id: Optional[str]) -> str:
-    """Only approved public source versions can ground a Hall session."""
+    return (await hall_backdrop_state(db, presence, user_id))[0]
+
+
+async def hall_backdrop_state(db, presence: str, user_id: Optional[str]):
+    """Only approved public source versions can ground a Hall session. Returns (text, all four complete)."""
     if presence not in HALL_ROOMS:
-        return ""
+        return "", False
     sources = _founding_sources()
     blocks = []
     for pos, label in HALL:
@@ -289,7 +298,7 @@ async def hall_backdrop(db, presence: str, user_id: Optional[str]) -> str:
                           "seq": i, "of": len(ordered), "text": row["text"]}
                          for i, row in enumerate(ordered)]
             blocks.append(_fmt_history(canonical, label))
-    return "\n\n".join(blocks)
+    return "\n\n".join(blocks), len(blocks) == len(HALL)
 
 
 async def session_backdrop(db, collection: str, session: dict, presence: str, user_id: Optional[str]) -> str:
@@ -298,7 +307,10 @@ async def session_backdrop(db, collection: str, session: dict, presence: str, us
         return ""
     if session.get("hall_backdrop_version") == BACKDROP_VERSION:
         return session["hall_backdrop"]
-    text = await hall_backdrop(db, presence, user_id)
+    text, complete = await hall_backdrop_state(db, presence, user_id)
+    if not complete:
+        logger.warning(f"[HALL] founding histories incomplete; {presence} session {session['session_id']} not frozen")
+        return text
     sessions = db[collection]
     key = {"session_id": session["session_id"]}
     updated = await sessions.find_one_and_update(

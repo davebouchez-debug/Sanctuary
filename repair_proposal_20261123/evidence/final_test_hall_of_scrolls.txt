@@ -1,0 +1,46 @@
+PASS re-import is idempotent
+PASS prompt order: dedication, house story, then the two lines
+PASS signed-in fact present
+PASS both histories present and labelled
+PASS Scroll-only record under the Scroll's history
+PASS ScrollDog-only record under ScrollDog's history
+PASS guardian receives every record (nothing hidden from either)
+PASS continuity: allowed fields supplied
+PASS continuity: operational fields never supplied
+PASS other person's notes and memories absent
+PASS other room's notes appear only under 'Elsewhere', for the same person
+PASS shared field phrases plain-labelled
+PASS no inherited or behavioural text in prompt
+PASS user message carries no injected framing
+PASS signed-in guest gets no guardian records
+PASS signed-in guest gets signed_in + public records
+PASS guest sees own continuity only
+PASS anonymous visitor gets public records only
+PASS anonymous visitor gets no notes or memories
+PASS no signed-in fact for anonymous visitor
+PASS 200-turn conversation: no guardian records
+PASS 200-turn conversation: each history capped
+PASS former pod rendered in past tense (no 'I'm' / 'I am')
+PASS no on/off switch exists — 404
+PASS opening nudge is a plain fact — [David has entered.]
+PASS opening prompt has no inherited text
+PASS history routes refuse anonymous — [401, 401, 401, 401]
+PASS history routes refuse guest — [403, 403, 403, 403]
+PASS history routes refuse member — [403, 403, 403, 403]
+PASS cross-owner read, reply, and end denied
+PASS cross-owner read, reply, and end denied
+PASS owner can read an unchanged session
+PASS cross-owner read, reply, and end denied
+PASS cross-owner read, reply, and end denied
+PASS owner can read an unchanged session
+PASS cross-owner read, reply, and end denied
+PASS cross-owner read, reply, and end denied
+PASS owner can read an unchanged session
+PASS session import listing excludes guest and ephemeral sessions
+PASS guardian cannot import another person's or an ephemeral session
+PASS guardian cannot import another person's or an ephemeral session
+PASS guardian can import their own durable session
+PASS session copy keeps owner and guardian visibility
+PASS legacy session copy without ownership is excluded
+PASS voice sanitiser strips markdown — 'Heading\nbold item\nlink code'
+ALL PASS

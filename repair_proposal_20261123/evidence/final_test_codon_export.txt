@@ -1,0 +1,26 @@
+[CODON EXPORT] field kept changing; no snapshot issued
+[CODON EXPORT] failed: RuntimeError
+PASS token not configured -> 503 — 503
+PASS no header -> 401 — 401
+PASS wrong token -> 401 — 401
+PASS token without Bearer -> 401 — 401
+PASS guardian cookie only -> 401 — 401
+PASS POST not allowed -> 405 — 405
+PASS valid token -> 200 zip
+PASS X-Content-SHA256 matches body
+PASS ZIP has exactly manifest.json + field_phrases.jsonl
+PASS X-Manifest-SHA256 matches manifest
+PASS manifest sha256/bytes match file
+PASS record_count matches lines and DB
+PASS sorted by _id, ids_sha256 matches
+PASS ids, text, timestamps, embeddings preserved byte-exact (BSON re-encode)
+PASS ObjectId / datetime / binary types kept
+PASS no private plant anywhere in ZIP
+PASS source_session / source_file / unknown fields not exported
+PASS manifest names withheld field names only
+PASS export wrote nothing
+PASS insert during read -> retried, new record included — 200 attempts=2
+PASS removal during read -> retried, removed record absent
+PASS never-stable field -> 503, no ZIP — 503
+PASS read failure -> 500, no ZIP — 500
+ALL PASS

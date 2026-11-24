@@ -27,7 +27,7 @@ from presences import scrolldog
 TEST_DB = f"sanctuary_hall_test_{uuid.uuid4().hex[:8]}"
 G, GUEST = "test-guardian-" + uuid.uuid4().hex[:6], "test-guest-" + uuid.uuid4().hex[:6]
 VISITOR_ID = uuid.uuid4().hex
-EPH = user_aliases.EPHEMERAL_PREFIX + "v" + VISITOR_ID
+EPH = user_aliases.EPHEMERAL_PREFIX + "v" + __import__("hashlib").sha256(VISITOR_ID.encode()).hexdigest()[:32]
 
 
 def visitor_headers(user_id):

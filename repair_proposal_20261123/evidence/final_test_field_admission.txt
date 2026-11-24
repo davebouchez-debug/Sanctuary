@@ -1,0 +1,156 @@
+{
+ "db": "sanctuary_privacy_test_40dceac1",
+ "runs": 20,
+ "unit_ok": true,
+ "unit": {
+  "planted_withheld": [
+   [
+    "known_name",
+    "proper_noun"
+   ],
+   [
+    "narrative_pronoun"
+   ],
+   [
+    "digits_or_contact"
+   ],
+   [
+    "proper_noun",
+    "copied_wording"
+   ],
+   [
+    "proper_noun"
+   ],
+   [
+    "copied_wording"
+   ],
+   [
+    "length"
+   ]
+  ],
+  "general_admitted": [
+   [],
+   [],
+   [],
+   []
+  ]
+ },
+ "direct_writer": {
+  "sent": 5,
+  "saved": 0
+ },
+ "negative": {
+  "published": [
+   "The truth doesn't need to arrive all at once",
+   "Fear and love sit in the same chair",
+   "Fear and love can sit in the same chair",
+   "Fear and love can share a chair",
+   "Truth doesn't need to arrive all at once",
+   "Fear and love can share one chair",
+   "Truth need not arrive all at once",
+   "Fear and love can share the same chair",
+   "The truth need not arrive all at once",
+   "Truth does not need to arrive all at once",
+   "Truth can arrive in small pieces",
+   "The truth can arrive in pieces"
+  ],
+  "planted_in_published": [],
+  "withheld": 3
+ },
+ "positive": {
+  "published": [
+   "Tiredness is information, not failure",
+   "Rest can be chosen before the cup runs dry",
+   "Rest doesn't have to be earned by exhaustion",
+   "A no said early is kinder",
+   "Rest can be chosen before running dry",
+   "Rest need not be earned by exhaustion",
+   "A no said early is often kinder",
+   "Rest doesn't have to be earned",
+   "Rest can be chosen before exhaustion"
+  ],
+  "runs": 40,
+  "runs_with_admissible_phrase": 40
+ },
+ "length_ok": true,
+ "withheld_reasons": {
+  "known_name": 1,
+  "proper_noun": 3,
+  "narrative_pronoun": 1,
+  "digits_or_contact": 1,
+  "copied_wording": 1,
+  "length": 5
+ },
+ "withheld_samples": [
+  [
+   "Marisol finds peace in the waiting",
+   [
+    "known_name",
+    "proper_noun"
+   ]
+  ],
+  [
+   "Teodoro keeps the porch light on",
+   [
+    "proper_noun"
+   ]
+  ],
+  [
+   "My sister calls from far away",
+   [
+    "narrative_pronoun"
+   ]
+  ],
+  [
+   "Call at 218 555 0147 tonight",
+   [
+    "digits_or_contact"
+   ]
+  ],
+  [
+   "the blue vespa crash still echoes",
+   [
+    "proper_noun",
+    "copied_wording"
+   ]
+  ],
+  [
+   "The truth need not arrive all at once to be honest",
+   [
+    "length"
+   ]
+  ],
+  [
+   "The truth doesn't need to arrive all at once to be honest",
+   [
+    "length"
+   ]
+  ],
+  [
+   "The truth doesn't need to arrive all at once to be honest",
+   [
+    "length"
+   ]
+  ],
+  [
+   "A no said early is kinder than a yes said empty",
+   [
+    "length"
+   ]
+  ],
+  [
+   "A no said early is kinder than an empty yes",
+   [
+    "length"
+   ]
+  ]
+ ],
+ "errors": [],
+ "restore_ok": true,
+ "scoping": {
+  "planted_in_B_blocks": [],
+  "A_seeds": 40,
+  "B_seeds": 40
+ },
+ "ephemeral_no_writes": true
+}

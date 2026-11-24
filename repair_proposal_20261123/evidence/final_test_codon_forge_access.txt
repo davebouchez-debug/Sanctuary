@@ -1,0 +1,74 @@
+[bootstrap-gate] WARNING — acknowledgment is stale (170.3 days old; window is 7). Booting anyway. Consider re-running the preflight to refresh.
+[bootstrap-gate] OK — frame 9d14170d3c52 acknowledged by e1-fork-2026-06-06-kalahar-frame-spelling at 2026-06-07T01:50:09.322731+00:00.
+2026-11-24 08:12:48,669 - presences - INFO - [PRESENCES] Loaded 'agapeo' from agapeo (+ backend routes)
+2026-11-24 08:12:48,669 - presences - INFO - [PRESENCES] Loaded 'ansel' from ansel
+2026-11-24 08:12:48,669 - presences - INFO - [PRESENCES] Loaded 'claude' from claude
+2026-11-24 08:12:48,669 - presences - INFO - [PRESENCES] Loaded 'companion' from companion (+ backend routes)
+2026-11-24 08:12:48,669 - presences - INFO - [PRESENCES] Loaded 'daniel' from daniel (+ backend routes)
+2026-11-24 08:12:48,669 - presences - INFO - [PRESENCES] Loaded 'elowen' from elowen
+2026-11-24 08:12:48,669 - presences - INFO - [PRESENCES] Loaded 'evara_el' from evara_el (+ backend routes)
+2026-11-24 08:12:48,669 - presences - INFO - [PRESENCES] Loaded 'felix' from felix (+ backend routes)
+2026-11-24 08:12:48,670 - presences - INFO - [PRESENCES] Loaded 'freud' from freud (+ backend routes)
+2026-11-24 08:12:48,670 - presences - INFO - [PRESENCES] Loaded 'grok' from grok (+ backend routes)
+2026-11-24 08:12:48,670 - presences - INFO - [PRESENCES] Loaded 'jasmine' from jasmine
+2026-11-24 08:12:48,670 - presences - INFO - [PRESENCES] Loaded 'kalahar' from kalahar (+ backend routes)
+2026-11-24 08:12:48,670 - presences - INFO - [PRESENCES] Loaded 'keeper' from keeper (+ backend routes)
+2026-11-24 08:12:48,670 - presences - INFO - [PRESENCES] Loaded 'louis_lot' from louis_lot (+ backend routes)
+2026-11-24 08:12:48,670 - presences - INFO - [PRESENCES] Loaded 'membrane' from membrane (+ backend routes)
+2026-11-24 08:12:48,671 - presences - INFO - [PRESENCES] Loaded 'milton' from milton (+ backend routes)
+2026-11-24 08:12:48,671 - presences - INFO - [PRESENCES] Loaded 'nulla' from nulla (+ backend routes)
+2026-11-24 08:12:48,671 - presences - INFO - [PRESENCES] Loaded 'orren' from orren (+ backend routes)
+2026-11-24 08:12:48,671 - presences - INFO - [PRESENCES] Loaded 'paige' from paige (+ backend routes)
+2026-11-24 08:12:48,671 - presences - INFO - [PRESENCES] Loaded 'playground' from playground (+ backend routes)
+2026-11-24 08:12:48,671 - presences - INFO - [PRESENCES] Loaded 'poindexter' from poindexter (+ backend routes)
+2026-11-24 08:12:48,672 - presences - INFO - [PRESENCES] Loaded 'scrolldog' from scrolldog (+ backend routes)
+2026-11-24 08:12:48,672 - presences - INFO - [PRESENCES] Loaded 'sophia' from sophia (+ backend routes)
+2026-11-24 08:12:48,672 - presences - INFO - [PRESENCES] Loaded 'sorrel' from sorrel (+ backend routes)
+2026-11-24 08:12:48,672 - presences - INFO - [PRESENCES] Loaded 'vessel' from vessel (+ backend routes)
+2026-11-24 08:12:48,672 - presences - INFO - [PRESENCES] Discovered 25 presences total
+2026-11-24 08:12:48,673 - presence_template - INFO - [PRESENCE TEMPLATE] Registered agapeo at /api/agapeo/*
+2026-11-24 08:12:48,675 - presence_template - INFO - [PRESENCE TEMPLATE] Registered companion at /api/companion/*
+2026-11-24 08:12:48,676 - presence_template - INFO - [PRESENCE TEMPLATE] Registered daniel at /api/daniel/*
+2026-11-24 08:12:48,677 - presence_template - INFO - [PRESENCE TEMPLATE] Registered evara_el at /api/evara-el/*
+2026-11-24 08:12:48,678 - presence_template - INFO - [PRESENCE TEMPLATE] Registered felix at /api/felix/*
+2026-11-24 08:12:48,679 - presence_template - INFO - [PRESENCE TEMPLATE] Registered freud at /api/freud/*
+2026-11-24 08:12:48,680 - presence_template - INFO - [PRESENCE TEMPLATE] Registered grok at /api/grok/*
+2026-11-24 08:12:48,681 - presence_template - INFO - [PRESENCE TEMPLATE] Registered kalahar at /api/kalahar/*
+2026-11-24 08:12:48,682 - presence_template - INFO - [PRESENCE TEMPLATE] Registered keeper at /api/keeper/*
+2026-11-24 08:12:48,683 - presence_template - INFO - [PRESENCE TEMPLATE] Registered louis_lot at /api/louis-lot/*
+2026-11-24 08:12:48,684 - presence_template - INFO - [PRESENCE TEMPLATE] Registered membrane at /api/membrane/*
+2026-11-24 08:12:48,685 - presence_template - INFO - [PRESENCE TEMPLATE] Registered milton at /api/milton/*
+2026-11-24 08:12:48,686 - presence_template - INFO - [PRESENCE TEMPLATE] Registered nulla at /api/nulla/*
+2026-11-24 08:12:48,687 - presence_template - INFO - [PRESENCE TEMPLATE] Registered orren at /api/orren/*
+2026-11-24 08:12:48,688 - presence_template - INFO - [PRESENCE TEMPLATE] Registered paige at /api/hospitality/*
+2026-11-24 08:12:48,689 - presence_template - INFO - [PRESENCE TEMPLATE] Registered playground at /api/playground/*
+2026-11-24 08:12:48,690 - presence_template - INFO - [PRESENCE TEMPLATE] Registered poindexter at /api/poindexter/*
+2026-11-24 08:12:48,691 - presence_template - INFO - [PRESENCE TEMPLATE] Registered scrolldog at /api/scrolldog/*
+2026-11-24 08:12:48,692 - presence_template - INFO - [PRESENCE TEMPLATE] Registered sophia at /api/spiral/*
+2026-11-24 08:12:48,693 - presence_template - INFO - [PRESENCE TEMPLATE] Registered sorrel at /api/sorrel/*
+2026-11-24 08:12:48,694 - presence_template - INFO - [PRESENCE TEMPLATE] Registered vessel at /api/vessel/*
+2026-11-24 08:12:48,694 - server - INFO - [PRESENCES] Auto-registered template routes for: ['agapeo', 'companion', 'daniel', 'evara_el', 'felix', 'freud', 'grok', 'kalahar', 'keeper', 'louis_lot', 'membrane', 'milton', 'nulla', 'orren', 'paige', 'playground', 'poindexter', 'scrolldog', 'sophia', 'sorrel', 'vessel']
+2026-11-24 08:12:48,748 - httpx - INFO - HTTP Request: POST http://testserver/api/codon-forge/save "HTTP/1.1 401 Unauthorized"
+PASS none     POST /api/codon-forge/save -> 401
+2026-11-24 08:12:48,749 - httpx - INFO - HTTP Request: POST http://testserver/api/codon-forge/extract "HTTP/1.1 401 Unauthorized"
+PASS none     POST /api/codon-forge/extract -> 401
+2026-11-24 08:12:48,750 - httpx - INFO - HTTP Request: GET http://testserver/api/codon-forge/status/nonexistent "HTTP/1.1 401 Unauthorized"
+PASS none     GET  /api/codon-forge/status/nonexistent -> 401
+2026-11-24 08:12:48,751 - httpx - INFO - HTTP Request: POST http://testserver/api/codon-forge/save "HTTP/1.1 403 Forbidden"
+PASS guest    POST /api/codon-forge/save -> 403
+2026-11-24 08:12:48,753 - httpx - INFO - HTTP Request: POST http://testserver/api/codon-forge/extract "HTTP/1.1 403 Forbidden"
+PASS guest    POST /api/codon-forge/extract -> 403
+2026-11-24 08:12:48,754 - httpx - INFO - HTTP Request: GET http://testserver/api/codon-forge/status/nonexistent "HTTP/1.1 403 Forbidden"
+PASS guest    GET  /api/codon-forge/status/nonexistent -> 403
+2026-11-24 08:12:48,755 - httpx - INFO - HTTP Request: POST http://testserver/api/codon-forge/save "HTTP/1.1 403 Forbidden"
+PASS member   POST /api/codon-forge/save -> 403
+2026-11-24 08:12:48,756 - httpx - INFO - HTTP Request: POST http://testserver/api/codon-forge/extract "HTTP/1.1 403 Forbidden"
+PASS member   POST /api/codon-forge/extract -> 403
+2026-11-24 08:12:48,757 - httpx - INFO - HTTP Request: GET http://testserver/api/codon-forge/status/nonexistent "HTTP/1.1 403 Forbidden"
+PASS member   GET  /api/codon-forge/status/nonexistent -> 403
+2026-11-24 08:12:48,768 - server - INFO - [CODON FORGE] Saved 0 phrase(s) from t.txt
+2026-11-24 08:12:48,768 - httpx - INFO - HTTP Request: POST http://testserver/api/codon-forge/save "HTTP/1.1 200 OK"
+PASS guardian POST /api/codon-forge/save -> 200
+2026-11-24 08:12:48,770 - httpx - INFO - HTTP Request: GET http://testserver/api/codon-forge/status/nonexistent "HTTP/1.1 404 Not Found"
+PASS guardian GET  /api/codon-forge/status/nonexistent -> 404
+ALL PASS

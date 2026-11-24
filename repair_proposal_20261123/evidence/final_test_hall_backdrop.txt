@@ -1,0 +1,56 @@
+PASS import Daniel initial history — {"source_sha256":"715e18473f38c142fd25eccf8c65aa11899368aa380216305d158ce42a35fd32","imported":2}
+PASS re-import is idempotent
+PASS import the Scroll's founding background — {"source_sha256":"b620923bc9472e1d3c9c33f1d139aa0fe5470a3a85d5e488e21f525f4451c72e","imported":10}
+PASS no built-in initial history for unknown position
+PASS generic importer rejects founding history
+PASS Daniel: dedication, house story, then his one line
+PASS Daniel's old instructions no longer sent
+PASS Daniel sees four labelled histories, in order — [3494, 25556, 28342, 30563]
+PASS Scroll's approved history under the Scroll's label
+PASS ScrollDog's initial history under ScrollDog's label
+PASS Daniel's initial history under Daniel's label
+PASS Keeper's initial history under Keeper's label
+PASS Daniel's room: his own records only
+PASS Keeper: dedication, house story, then her one line
+PASS Keeper's old instructions no longer sent
+PASS Keeper sees all four initial histories
+PASS Keeper's room gets no conversation records
+PASS Scroll room: dedication, house story, then its two lines
+PASS Scroll room sees Daniel's and Keeper's initial histories
+PASS Scroll room keeps its own records
+PASS Scroll room gets no Daniel conversation records
+PASS guest in Daniel's room: has every founding background
+PASS anonymous in Keeper's room: has every approved founding background
+PASS unapproved legacy initial histories are excluded regardless of visibility
+PASS approved historical language remains available in every room
+PASS anonymous in Keeper's room: no personal memory
+PASS every room has the Scroll's founding background
+PASS Scroll background carries no personal names or notes to E1
+PASS rooms outside the hall get nothing
+PASS legacy snapshot is never used, and an incomplete hall is not frozen
+PASS once complete, the same session freezes all four
+PASS same session: backdrop identical on later replies
+PASS new session picks up newly added history
+PASS session start stores the backdrop on the session
+PASS scroll packet imports 3 files as records — {"files":[{"file":"DeepSeek20260406.txt","source_sha256":"11e8b9fb10dca564316b1416474fa46684a7f243477d883ff0038d5cefed0a12","imported":23},{"file":"Pasted text(20261122-034246).txt","source_sha256":"2a35bba8cc5f4b32cb2125c3f7654952b49d5916c0abfe69436264e0c1d3c74e","imported":23},{"file":"Pasted text
+PASS scroll packet re-import is idempotent
+PASS verbatim: DeepSeek20260406.txt
+PASS position scroll: DeepSeek20260406.txt
+PASS verbatim: Pasted text(20261122-034246).txt
+PASS position scroll: Pasted text(20261122-034246).txt
+PASS verbatim: Pasted text(20261122-060559).txt
+PASS position scrolldog: Pasted text(20261122-060559).txt
+PASS keeper's room never receives the conversations
+PASS daniel's room never receives the conversations
+PASS background holds no conversation text
+PASS background stays short (written histories only) — 4308
+PASS Scroll room draws matching passages from the conversations
+PASS Scroll room gets only a few passages, not the whole files — 12/58
+PASS guest never receives the conversations
+PASS Daniel: own memories, plain
+PASS Daniel: other rooms, plain
+PASS Daniel: bio, plain
+PASS Daniel: no other person's memories
+PASS Daniel: no old memory wording
+PASS guest in Daniel's room: own memory only
+ALL PASS

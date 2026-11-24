@@ -1,0 +1,18 @@
+PASS guest: start — 200
+PASS guest: reply streams — 200
+PASS guest: reload shows the exchange — 200
+PASS guest: reload carries no hidden background
+PASS guest: reply to the resumed thread — 200
+PASS guest: an anonymous browser cannot read, reply or end it — (404, 404, 404)
+PASS guest: departure — 200
+PASS anonymous: start — 200
+PASS anonymous: reply streams — 200
+PASS anonymous: reload shows the exchange — 200
+PASS anonymous: reload carries no hidden background
+PASS anonymous: reply to the resumed thread — 200
+PASS anonymous: another anonymous browser cannot read, reply or end it — (404, 404, 404)
+PASS anonymous: the guest cannot read, reply or end it — (404, 404, 404)
+PASS anonymous: a request with no visitor id cannot read, reply or end it — (404, 404, 404)
+PASS anonymous: departure — 200
+PASS anonymous session is held under an ephemeral id — {'user_id': 'ephemeral-v847fb7ce29af9dedeeb88b86be78931a'}
+ALL PASS

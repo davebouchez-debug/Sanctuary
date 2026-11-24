@@ -1,0 +1,18 @@
+PASS interrupted import surfaces an error — simulated interruption
+PASS partial copy left behind — [{'seq': 0, 'of': 2}]
+PASS incomplete history is not offered as complete
+PASS session start does not freeze an incomplete background
+PASS a turn while incomplete does not freeze it either
+PASS that turn carries no partial Daniel history
+PASS re-import recovers the interrupted history — {"source_sha256":"715e18473f38c142fd25eccf8c65aa11899368aa380216305d158ce42a35fd32","imported":2}
+PASS no duplicate or stray parts
+PASS complete import stays idempotent
+PASS all four now complete
+PASS next turn freezes the complete background
+PASS that turn carries all four histories
+PASS a new session start freezes the complete background
+PASS packet re-import completes — 200
+PASS packet file complete, no duplicates: DeepSeek20260406.txt
+PASS packet file complete, no duplicates: Pasted text(20261122-034246).txt
+PASS packet file complete, no duplicates: Pasted text(20261122-060559).txt
+ALL PASS

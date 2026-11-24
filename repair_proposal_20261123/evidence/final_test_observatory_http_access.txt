@@ -1,0 +1,38 @@
+PASS anonymous denied GET /api/observatory/status — 401
+PASS guest denied GET /api/observatory/status — 403
+PASS guardian allowed GET /api/observatory/status — 200
+PASS anonymous denied GET /api/observatory/visitors?presence=felix — 401
+PASS guest denied GET /api/observatory/visitors?presence=felix — 403
+PASS guardian allowed GET /api/observatory/visitors?presence=felix — 200
+PASS anonymous denied GET /api/observatory/lattice?presence=felix — 401
+PASS guest denied GET /api/observatory/lattice?presence=felix — 403
+PASS guardian allowed GET /api/observatory/lattice?presence=felix — 200
+PASS anonymous denied GET /api/observatory/entry/synthetic/entry-1 — 401
+PASS guest denied GET /api/observatory/entry/synthetic/entry-1 — 403
+PASS guardian allowed GET /api/observatory/entry/synthetic/entry-1 — 200
+PASS anonymous denied GET /api/observatory/verify — 401
+PASS guest denied GET /api/observatory/verify — 403
+PASS guardian allowed GET /api/observatory/verify — 200
+PASS anonymous denied GET /api/observatory/compare?a=v1&b=v1 — 401
+PASS guest denied GET /api/observatory/compare?a=v1&b=v1 — 403
+PASS guardian allowed GET /api/observatory/compare?a=v1&b=v1 — 400
+PASS anonymous denied POST /api/observatory/run — 401
+PASS guest denied POST /api/observatory/run — 403
+PASS anonymous denied GET /api/provenance/stats — 401
+PASS guest denied GET /api/provenance/stats — 403
+PASS guardian allowed GET /api/provenance/stats — 200
+PASS anonymous denied GET /api/provenance/turns — 401
+PASS guest denied GET /api/provenance/turns — 403
+PASS guardian allowed GET /api/provenance/turns — 200
+PASS anonymous denied GET /api/provenance/turn/synthetic-prov-1 — 401
+PASS guest denied GET /api/provenance/turn/synthetic-prov-1 — 403
+PASS guardian allowed GET /api/provenance/turn/synthetic-prov-1 — 200
+PASS anonymous denied GET /api/provenance/trajectory — 401
+PASS guest denied GET /api/provenance/trajectory — 403
+PASS guardian allowed GET /api/provenance/trajectory — 200
+PASS guardian opens a known synthetic capture — 200
+PASS guardian opens a known synthetic provenance record — 200
+PASS cron tick rejected: no secret — 401
+PASS cron tick rejected: wrong secret — 401
+PASS cron tick rejected: guardian session is not the cron secret — 401
+ALL PASS

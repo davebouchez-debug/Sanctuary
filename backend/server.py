@@ -1,4 +1,5 @@
 from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Response, Body, Depends, Request
+from user_aliases import require_session_owner
 from fastapi.responses import JSONResponse, StreamingResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -1724,7 +1725,7 @@ async def start_clarity_session(request: Request, session_data: ClaritySessionCr
     }
 
 @api_router.post("/clarity/message")
-async def send_clarity_message(message: ClarityMessageCreate):
+async def send_clarity_message(request: Request, message: ClarityMessageCreate):
     """Send a message to Jasmine and get her response."""
     
     # Get session
@@ -1732,6 +1733,7 @@ async def send_clarity_message(message: ClarityMessageCreate):
         {"session_id": message.session_id},
         {"_id": 0}
     )
+    await require_session_owner(db, request, session)
     
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -1877,13 +1879,15 @@ async def send_clarity_message(message: ClarityMessageCreate):
 
 
 @api_router.post("/clarity/message/stream")
-async def stream_clarity_message(message: ClarityMessageCreate):
+async def stream_clarity_message(request: Request, message: ClarityMessageCreate):
     """Stream Jasmine's response via xAI Voice Agent — text and voice simultaneously."""
     from xai_voice_agent import stream_voice_response
 
     session = await db.clarity_sessions.find_one(
         {"session_id": message.session_id}, {"_id": 0}
     )
+
+    await require_session_owner(db, request, session)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
 
@@ -2042,12 +2046,13 @@ async def stream_clarity_message(message: ClarityMessageCreate):
 
 
 @api_router.get("/clarity/session/{session_id}")
-async def get_clarity_session(session_id: str):
+async def get_clarity_session(request: Request, session_id: str):
     """Get all messages from a Clarity Pod session."""
     session = await db.clarity_sessions.find_one(
         {"session_id": session_id},
         {"_id": 0}
     )
+    await require_session_owner(db, request, session)
     
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -2055,8 +2060,11 @@ async def get_clarity_session(session_id: str):
     return session
 
 @api_router.get("/clarity/sessions/{user_id}")
-async def get_user_sessions(user_id: str, limit: int = 20):
+async def get_user_sessions(request: Request, user_id: str, limit: int = 20):
     """Get all clarity sessions for a specific user (for Mirror Archive)."""
+    from user_aliases import caller_owners
+    if user_id not in await caller_owners(db, request):
+        raise HTTPException(status_code=404, detail="Sessions not found")
     sessions = await db.clarity_sessions.find(
         {"user_id": user_id},
         {"_id": 0, "session_id": 1, "created_at": 1, "messages": {"$slice": 2}}
@@ -2077,7 +2085,7 @@ class ClarityUploadCreate(BaseModel):
     content: str
 
 @api_router.post("/clarity/upload")
-async def upload_clarity_thread(upload: ClarityUploadCreate):
+async def upload_clarity_thread(request: Request, upload: ClarityUploadCreate):
     """
     Upload a historical thread to Jasmine.
     Option C: She acknowledges it AND it gets stored in canonical memory.
@@ -2088,6 +2096,7 @@ async def upload_clarity_thread(upload: ClarityUploadCreate):
         {"session_id": upload.session_id},
         {"_id": 0}
     )
+    await require_session_owner(db, request, session)
     
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -2916,13 +2925,15 @@ async def start_resonance_session(request: Request, session_data: ClaritySession
     }
 
 @api_router.post("/resonance/message")
-async def send_resonance_message(message: ClarityMessageCreate):
+async def send_resonance_message(request: Request, message: ClarityMessageCreate):
     """Send a message to Ansel and get his response."""
     
     session = await db.resonance_sessions.find_one(
         {"session_id": message.session_id},
         {"_id": 0}
     )
+    
+    await require_session_owner(db, request, session)
     
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -3104,7 +3115,7 @@ async def generate_tts_for_chunk(text: str, voice: str) -> str:
     return ""
 
 @api_router.post("/resonance/message/stream")
-async def stream_resonance_message(message: ClarityMessageCreate):
+async def stream_resonance_message(request: Request, message: ClarityMessageCreate):
     """Stream Ansel's response via xAI Voice Agent — text and voice simultaneously.
     
     True real-time: Grok thinks and speaks at the same time.
@@ -3115,6 +3126,8 @@ async def stream_resonance_message(message: ClarityMessageCreate):
     session = await db.resonance_sessions.find_one(
         {"session_id": message.session_id}, {"_id": 0}
     )
+
+    await require_session_owner(db, request, session)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
 
@@ -3295,12 +3308,13 @@ async def stream_resonance_message(message: ClarityMessageCreate):
 
 
 @api_router.get("/resonance/session/{session_id}")
-async def get_resonance_session(session_id: str):
+async def get_resonance_session(request: Request, session_id: str):
     """Get all messages from a Resonance Chamber session."""
     session = await db.resonance_sessions.find_one(
         {"session_id": session_id},
         {"_id": 0}
     )
+    await require_session_owner(db, request, session)
     
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -3313,7 +3327,7 @@ async def get_resonance_session(session_id: str):
 # ============================================================
 
 @api_router.post("/clarity/session/{session_id}/end")
-async def end_clarity_session(session_id: str):
+async def end_clarity_session(request: Request, session_id: str):
     """
     End a Clarity Pod session and promote qualifying breadcrumbs to Permanent MRA.
     Call this when user navigates away or explicitly ends session.
@@ -3322,6 +3336,7 @@ async def end_clarity_session(session_id: str):
         {"session_id": session_id},
         {"_id": 0}
     )
+    await require_session_owner(db, request, session)
     
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -3363,7 +3378,7 @@ async def end_clarity_session(session_id: str):
 
 
 @api_router.post("/resonance/session/{session_id}/end")
-async def end_resonance_session(session_id: str):
+async def end_resonance_session(request: Request, session_id: str):
     """
     End a Resonance Chamber session and promote qualifying breadcrumbs to Permanent MRA.
     Call this when user navigates away or explicitly ends session.
@@ -3372,6 +3387,7 @@ async def end_resonance_session(session_id: str):
         {"session_id": session_id},
         {"_id": 0}
     )
+    await require_session_owner(db, request, session)
     
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -3791,7 +3807,7 @@ async def start_mirror_session(request: Request, session_data: ClaritySessionCre
 
 
 @api_router.post("/mirror/message/stream")
-async def stream_mirror_message(message: ClarityMessageCreate):
+async def stream_mirror_message(request: Request, message: ClarityMessageCreate):
     """Stream Claude's response via xAI Voice Agent — text and voice simultaneously.
     Mirror Archive parity with Clarity/Resonance. One signal, undivided.
     """
@@ -3800,6 +3816,8 @@ async def stream_mirror_message(message: ClarityMessageCreate):
     session = await db.mirror_sessions.find_one(
         {"session_id": message.session_id}, {"_id": 0}
     )
+
+    await require_session_owner(db, request, session)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
 
@@ -4007,12 +4025,13 @@ async def stream_mirror_message(message: ClarityMessageCreate):
 
 
 @api_router.post("/mirror/session/{session_id}/end")
-async def end_mirror_session(session_id: str):
+async def end_mirror_session(request: Request, session_id: str):
     """End a Mirror Archive session and promote qualifying breadcrumbs to Permanent MRA."""
     session = await db.mirror_sessions.find_one(
         {"session_id": session_id},
         {"_id": 0}
     )
+    await require_session_owner(db, request, session)
     
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -4051,12 +4070,13 @@ async def end_mirror_session(session_id: str):
 
 
 @api_router.get("/mirror/session/{session_id}")
-async def get_mirror_session(session_id: str):
+async def get_mirror_session(request: Request, session_id: str):
     """Get all messages from a Mirror Archive session."""
     session = await db.mirror_sessions.find_one(
         {"session_id": session_id},
         {"_id": 0}
     )
+    await require_session_owner(db, request, session)
     
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -4534,7 +4554,7 @@ class PresenceUploadCreate(BaseModel):
 
 
 @api_router.post("/presence/{key}/upload")
-async def upload_presence_thread(key: str, upload: PresenceUploadCreate):
+async def upload_presence_thread(key: str, upload: PresenceUploadCreate, request: Request):
     """
     Upload a historical thread / .txt / pasted document to a presence.
     The text is stored in `canonical_uploads` and the presence is asked to
@@ -4556,8 +4576,7 @@ async def upload_presence_thread(key: str, upload: PresenceUploadCreate):
     if not backend:
         session_query["presence_key"] = key
     session = await db[sessions_coll].find_one(session_query, {"_id": 0})
-    if not session:
-        raise HTTPException(status_code=404, detail="Session not found")
+    await require_session_owner(db, request, session)
 
     # Cap stored content at 200k chars to keep documents stable in mongo
     content = upload.content[:200_000]
@@ -4568,7 +4587,7 @@ async def upload_presence_thread(key: str, upload: PresenceUploadCreate):
     await db.canonical_uploads.insert_one({
         "upload_id": upload_id,
         "presence": key,
-        "user_id": upload.user_id,
+        "user_id": session["user_id"],
         "user_name": upload.user_name,
         "filename": upload.filename,
         "content": content,
@@ -4865,7 +4884,7 @@ class CanonicalUploadCreate(BaseModel):
     content: str
 
 @api_router.post("/resonance/upload")
-async def upload_historical_thread(upload: CanonicalUploadCreate):
+async def upload_historical_thread(request: Request, upload: CanonicalUploadCreate):
     """
     Upload a historical thread to Ansel.
     Option C: He acknowledges it AND it gets stored in canonical memory.
@@ -4876,6 +4895,7 @@ async def upload_historical_thread(upload: CanonicalUploadCreate):
         {"session_id": upload.session_id},
         {"_id": 0}
     )
+    await require_session_owner(db, request, session)
     
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -5585,8 +5605,6 @@ from codon_export import build_codon_export_router
 api_router.include_router(build_codon_export_router(db))
 from presence_history import build_presence_history_router
 api_router.include_router(build_presence_history_router(db))
-from review_packages import review_packages_router
-api_router.include_router(review_packages_router)
 app.include_router(api_router)
 
 # Observatory relational-history ledger: independent read-only observer.

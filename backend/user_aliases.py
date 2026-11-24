@@ -198,9 +198,26 @@ async def chamber_identity(db, request, body_name: Optional[str] = None, *,
     vid = request.headers.get("x-visitor-id") or ""
     if user:
         uid = f"{EPHEMERAL_PREFIX}{user['user_id']}"
-    elif re.fullmatch(r"[0-9a-f]{16,64}", vid):
-        uid = f"{EPHEMERAL_PREFIX}v{vid}"
+    elif re.fullmatch(r"[0-9a-f]{24,64}", vid):
+        # Stored ids never reveal the browser's secret, so a leaked user_id cannot be replayed as a header.
+        import hashlib
+        uid = f"{EPHEMERAL_PREFIX}v{hashlib.sha256(vid.encode()).hexdigest()[:32]}"
     else:
         uid = f"{EPHEMERAL_PREFIX}{uuid.uuid4().hex[:12]}"
     name = (user or {}).get("name") or body_name
     return uid, (None if (name or "").strip().lower().startswith("david") else name)
+
+
+async def caller_owners(db, request) -> list:
+    """Ids whose sessions the caller may open: their own ephemeral id, or a signed-in person's non-ephemeral aliases."""
+    caller_id, _ = await chamber_identity(db, request, purge_expired=False)
+    if is_ephemeral(caller_id):
+        return [caller_id]
+    return [uid for uid in await resolve_user_aliases(db, caller_id) if not is_ephemeral(uid)]
+
+
+async def require_session_owner(db, request, session) -> dict:
+    from fastapi import HTTPException
+    if not session or session.get("deleted") or session.get("user_id") not in await caller_owners(db, request):
+        raise HTTPException(status_code=404, detail="Session not found")
+    return session
